@@ -47,11 +47,12 @@ Commit message cần rõ ràng và mô tả ngắn gọn về những thay đổ
     *   `perf`: Cải thiện hiệu suất.
     *   `ci`: Thay đổi cấu hình CI.
     *   `build`: Thay đổi hệ thống build.
-feat: Add user authentication
-
-Implement login and registration functionality.
-
-Fixes #42
+    *   Ví dụ
+         feat: Add user authentication
+         
+         Implement login and registration functionality.
+         
+         Fixes #42
 
 ## 3. Quy trình Merge Request (MR) / Pull Request (PR)
 
@@ -105,7 +106,6 @@ Khi merge, có thể xảy ra xung đột.
 Đây là code ở nhánh feature.
 
 feature/add-payment-gateway
-
 
 Sau khi giải quyết:
 
