@@ -29,11 +29,10 @@ Việc đặt tên nhánh rõ ràng và nhất quán giúp dễ dàng quản lý
 
 ## 2. Quy tắc commit message (Conventional Commits)
 
-Commit message cần rõ ràng và mô tả ngắn gọn về những thay đổi đã được thực hiện. Sử dụng định dạng sau:
+Commit message cần rõ ràng và mô tả ngắn gọn về những thay đổi đã được thực hiện. 
+Sử dụng định dạng sau:
 <Loại thay đổi>: <Mô tả ngắn gọn>
-
 [Nội dung chi tiết (tùy chọn)]
-
 [Issue được giải quyết (tùy chọn), ví dụ: Fixes #123]
 
 *   **Loại thay đổi:**
@@ -48,10 +47,8 @@ Commit message cần rõ ràng và mô tả ngắn gọn về những thay đổ
     *   `ci`: Thay đổi cấu hình CI.
     *   `build`: Thay đổi hệ thống build.
     *   Ví dụ
-         feat: Add user authentication
-         
-         Implement login and registration functionality.
-         
+         feat: Add user authentication         
+         Implement login and registration functionality.         
          Fixes #42
 
 ## 3. Quy trình Merge Request (MR) / Pull Request (PR)
@@ -111,7 +108,3 @@ Sau khi giải quyết:
 
 Đây là code đã được chỉnh sửa để giải quyết xung đột.
 
-
-## Kết luận
-
-Việc tuân thủ các quy tắc này giúp dự án được quản lý tốt hơn, giảm thiểu lỗi và tăng hiệu quả là
