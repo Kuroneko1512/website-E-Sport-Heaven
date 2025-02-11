@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Attribute;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Dotenv\Validator;
