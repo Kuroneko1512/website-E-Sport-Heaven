@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Attribute;
 
 use Dotenv\Validator;
 use Illuminate\Contracts\Validation\Validator as ValidationValidator;
