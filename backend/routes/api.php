@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AttributeController;
 use App\Http\Controllers\Api\AttributeValueController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,3 +24,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::resource('/attribute',AttributeController::class);
 Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
 Route::resource('/attributeValue',AttributeValueController::class)->except(['index']);
+Route::resource('/category', CategoryController::class);
