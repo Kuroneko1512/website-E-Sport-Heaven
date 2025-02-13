@@ -9,6 +9,7 @@ import Shop from './pages/Shop'
 import Blog from './pages/Blog'
 import Story from './pages/Story'
 import Contact from './pages/Contact'
+import Signup from './pages/Signup'
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
     <>
       <Routes>
         <Route path='/login' element={<Login />} />
+        <Route path='/signup' element={<Signup />} />
         <Route path='/' element={<Layout />} >
           <Route path='home' element={<Navigate to={'/'} />} />
           <Route index element={<Home />} />
