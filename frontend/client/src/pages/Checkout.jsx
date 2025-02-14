@@ -1,14 +1,37 @@
-import React from 'react';
-
-import Logo from '../components/header/Logo';
-import Navbar from '../components/header/Navbar';
-import RightNavbar from '../components/header/RightNavbar';
-import Footer from '../components/footer/Footer';
-
-
-
-
+import React, { useState } from 'react';
 const Checkout = () => {
+    const [cartItems, setCartItems] = useState([
+        {
+          id: 1,
+          name: 'Girls Pink Moana Printed Dress',
+          size: 'S',
+          price: 80.00,
+          quantity: 1,
+          image: 'https://storage.googleapis.com/a1aa/image/PeMwLRcbAF2jMKYoxv8f536TvriyOFSdHio1E9fYTff1P85gC.jpg'
+        },
+        {
+          id: 2,
+          name: 'Women Textured Handheld Bag',
+          size: 'Regular',
+          price: 80.00,
+          quantity: 1,
+          image: 'https://storage.googleapis.com/a1aa/image/uOOMvHgu0HY1BVqNKTeAipd3h8Fe80XsMciSwt7Xfqd3DfcQB.jpg'
+        },
+        {
+          id: 3,
+          name: 'Tailored Cotton Casual Shirt',
+          size: 'M',
+          price: 40.00,
+          quantity: 1,
+          image: 'https://storage.googleapis.com/a1aa/image/NUjFXvMAo2roPRTyTLVg2y6vX27s14bfajjCi3EElMn7wnDKA.jpg'
+        }
+      ]);
+      //Thay doi so luong san pham
+      const handleQuantityChange = (id, delta) => {
+        setCartItems(cartItems.map(item => 
+          item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
+        ));
+      }; 
   return (
     <div className="bg-white text-gray-800">
       
@@ -29,20 +52,21 @@ const Checkout = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-gray-200">
+              {cartItems.map(item =>(
+                <tr key={item.id} className="border-b border-gray-200">
                   <td className="py-4">
-                    <img
-                      src="https://storage.googleapis.com/a1aa/image/PeMwLRcbAF2jMKYoxv8f536TvriyOFSdHio1E9fYTff1P85gC.jpg"
-                      alt="Girls Pink Moana Printed Dress"
-                      className="h-16"
-                      width="50"
-                      height="50"
-                    />
+                  <img
+                        src={item.image}
+                        alt={item.name}
+                        className="h-16"
+                        width="50"
+                        height="50"
+                      />
                   </td>
                   <td className="py-4">
                     <div>
-                      <h2 className="text-lg font-semibold">Girls Pink Moana Printed Dress</h2>
-                      <p className="text-gray-600">Size: S</p>
+                    <h2 className="text-lg font-semibold">{item.name}</h2>
+                    <p className="text-gray-600">Size: {item.size}</p>
                     </div>
                   </td>
                   <td className="py-4">
@@ -50,9 +74,9 @@ const Checkout = () => {
                   </td>
                   <td className="py-4">
                     <div className="flex items-center border border-gray-300 rounded w-fit">
-                      <button className="px-2 py-1">−</button>
-                      <span className="px-4 py-1">1</span>
-                      <button className="px-2 py-1">+</button>
+                      <button className="px-2 py-1" onClick={()=> handleQuantityChange(item.id, -1)}>−</button>
+                      <span className="px-4 py-1">{item.quantity}</span>
+                      <button className="px-2 py-1" onClick={()=> handleQuantityChange(item.id, 1)}>+</button>
                     </div>
                   </td>
                   <td className="py-4">
@@ -64,76 +88,9 @@ const Checkout = () => {
                     </button>
                   </td>
                 </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4">
-                    <img
-                      src="https://storage.googleapis.com/a1aa/image/uOOMvHgu0HY1BVqNKTeAipd3h8Fe80XsMciSwt7Xfqd3DfcQB.jpg"
-                      alt="Women Textured Handheld Bag"
-                      className="h-16"
-                      width="50"
-                      height="50"
-                    />
-                  </td>
-                  <td className="py-4">
-                    <div>
-                      <h2 className="text-lg font-semibold">Women Textured Handheld Bag</h2>
-                      <p className="text-gray-600">Size: Regular</p>
-                    </div>
-                  </td>
-                  <td className="py-4">
-                    <span className="text-lg">$80.00</span>
-                  </td>
-                  <td className="py-4">
-                    <div className="flex items-center border border-gray-300 rounded w-fit">
-                      <button className="px-2 py-1">−</button>
-                      <span className="px-4 py-1">1</span>
-                      <button className="px-2 py-1">+</button>
-                    </div>
-                  </td>
-                  <td className="py-4">
-                    <span className="text-lg">$80.00</span>
-                  </td>
-                  <td className="py-4">
-                    <button className="text-red-500">
-                      <i className="fas fa-trash-alt"></i>
-                    </button>
-                  </td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4">
-                    <img
-                      src="https://storage.googleapis.com/a1aa/image/NUjFXvMAo2roPRTyTLVg2y6vX27s14bfajjCi3EElMn7wnDKA.jpg"
-                      alt="Tailored Cotton Casual Shirt"
-                      className="h-16"
-                      width="50"
-                      height="50"
-                    />
-                  </td>
-                  <td className="py-4">
-                    <div>
-                      <h2 className="text-lg font-semibold">Tailored Cotton Casual Shirt</h2>
-                      <p className="text-gray-600">Size: M</p>
-                    </div>
-                  </td>
-                  <td className="py-4">
-                    <span className="text-lg">$40.00</span>
-                  </td>
-                  <td className="py-4">
-                    <div className="flex items-center border border-gray-300 rounded w-fit">
-                      <button className="px-2 py-1">−</button>
-                      <span className="px-4 py-1">1</span>
-                      <button className="px-2 py-1">+</button>
-                    </div>
-                  </td>
-                  <td className="py-4">
-                    <span className="text-lg">$40.00</span>
-                  </td>
-                  <td className="py-4">
-                    <button className="text-red-500">
-                      <i className="fas fa-trash-alt"></i>
-                    </button>
-                  </td>
-                </tr>
+              ))}
+                
+                
               </tbody>
             </table>
           </div>
