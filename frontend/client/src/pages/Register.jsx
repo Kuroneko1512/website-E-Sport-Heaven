@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Signup = () => {
+const Register = () => {
     const [firstName, setFirstName] = useState();
     const [lastName, setLastName] = useState();
     const [email, setEmail] = useState();
@@ -88,7 +88,7 @@ const Signup = () => {
                             className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800"
                             type="submit"
                         >
-                            Signup
+                            Register
                         </button>
                     </div>
                 </form>
@@ -97,4 +97,4 @@ const Signup = () => {
     );
 };
 
-export default Signup;
+export default Register;

@@ -9,7 +9,9 @@ import Shop from './pages/Shop'
 import Blog from './pages/Blog'
 import Story from './pages/Story'
 import Contact from './pages/Contact'
-import Signup from './pages/Signup'
+
+import Checkout from './pages/Checkout'
+import Register from './pages/Register'
 
 function App() {
 
@@ -17,7 +19,7 @@ function App() {
     <>
       <Routes>
         <Route path='/login' element={<Login />} />
-        <Route path='/signup' element={<Signup />} />
+        <Route path='/register' element={<Register />} />
         <Route path='/' element={<Layout />} >
           <Route path='home' element={<Navigate to={'/'} />} />
           <Route index element={<Home />} />
@@ -26,6 +28,7 @@ function App() {
           <Route path='story' element={<Story />} />
           <Route path='contact' element={<Contact />} />
           <Route path='*' element={<Notfound />} />
+          <Route path='checkout' element={<Checkout />}/>
         </Route>
       </Routes>
     </>
