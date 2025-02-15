@@ -9,6 +9,7 @@ import Shop from './pages/Shop'
 import Blog from './pages/Blog'
 import Story from './pages/Story'
 import Contact from './pages/Contact'
+import Register from './pages/Register'
 
 function App() {
 
@@ -16,13 +17,14 @@ function App() {
     <>
       <Routes>
         <Route path='/login' element={<Login />} />
+        <Route path='/register' element={<Register />} />
         <Route path='/' element={<Layout />} >
           <Route path='home' element={<Navigate to={'/'} />} />
           <Route index element={<Home />} />
           <Route path='shop' element={<Shop />} />
           <Route path='blog' element={<Blog />} />
           <Route path='story' element={<Story />} />
-          <Route path='contact' element={<Contact />} />
+          <Route path='contact' element={<Contact />}/>
           <Route path='*' element={<Notfound />} />
         </Route>
       </Routes>

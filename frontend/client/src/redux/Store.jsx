@@ -1,4 +1,5 @@
-const { configureStore } = require("@reduxjs/toolkit");
+import { configureStore } from "@reduxjs/toolkit"
+import authReducer from "./AuthSide"
 
 const store = configureStore({
     reducer:{
