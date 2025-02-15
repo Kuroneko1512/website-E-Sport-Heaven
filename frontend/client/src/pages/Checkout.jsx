@@ -28,10 +28,22 @@ const Checkout = () => {
       ]);
       //Thay doi so luong san pham
       const handleQuantityChange = (id, delta) => {
+      
         setCartItems(cartItems.map(item => 
           item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
         ));
+      };
+      //Xoa san pham
+      const handleRemoveItem = (id) => {
+        if (window.confirm('Are you sure you want to remove this item?')) {
+          setCartItems(cartItems.filter(item => item.id !== id));
+        }
+        
       }; 
+      //Tinh tong tien
+      const calculateSubtotal = () => {
+        return cartItems.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2);
+      };
   return (
     <div className="bg-white text-gray-800">
       
@@ -70,7 +82,7 @@ const Checkout = () => {
                     </div>
                   </td>
                   <td className="py-4">
-                    <span className="text-lg">$80.00</span>
+                    <span className="text-lg">${item.price.toFixed(2)}</span>
                   </td>
                   <td className="py-4">
                     <div className="flex items-center border border-gray-300 rounded w-fit">
@@ -80,10 +92,10 @@ const Checkout = () => {
                     </div>
                   </td>
                   <td className="py-4">
-                    <span className="text-lg">$80.00</span>
+                    <span className="text-lg">${(item.price * item.quantity).toFixed(2)}</span>
                   </td>
                   <td className="py-4">
-                    <button className="text-red-500">
+                    <button className="text-red-500" onClick={() => handleRemoveItem(item.id)}>
                       <i className="fas fa-trash-alt"></i>
                     </button>
                   </td>
@@ -97,7 +109,7 @@ const Checkout = () => {
           <div className="border border-gray-200 p-6 rounded-lg">
             <div className="flex justify-between mb-4">
               <span className="text-lg">Subtotal</span>
-              <span className="text-lg">$200.00</span>
+              <span className="text-lg">${calculateSubtotal()}</span>
             </div>
             <div className="mb-4">
               <label className="block text-gray-600 mb-2" htmlFor="discount-code">
@@ -119,7 +131,7 @@ const Checkout = () => {
             </div>
             <div className="flex justify-between mb-4">
               <span className="text-lg font-bold">Grand Total</span>
-              <span className="text-lg font-bold">$205.00</span>
+              <span className="text-lg font-bold">${(parseFloat(calculateSubtotal()) + 5.00).toFixed(2)}</span>
             </div>
             <button className="bg-black text-white w-full py-3 rounded">Proceed to Checkout</button>
           </div>
