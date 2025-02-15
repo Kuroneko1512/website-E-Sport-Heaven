@@ -15,11 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable();
             $table->decimal('price', 10, 2)->nullable();
-            $table->string('sku')->nullable();
+            $table->string('sku')->unique();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
+            $table->enum('product_type', ['simple', 'variable'])->default('simple');
+            $table->enum('status',['active','inactive'])->default('active');
             $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
-            $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
         });
     }
