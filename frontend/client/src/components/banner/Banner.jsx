@@ -1,4 +1,5 @@
 import React from "react";
+import anhBanner from '../../assets/banner.jpg'
 
 const Banner = () => {
   return (
@@ -8,7 +9,7 @@ const Banner = () => {
         <img
           alt="Woman in stylish outfit"
           className="w-full h-auto"
-          src="https://picsum.photos/1440/600"
+          src={anhBanner}
         />
         {/* fake nội dungdung */}
         <div className="absolute inset-0 flex flex-col justify-center items-start p-8 md:p-16 bg-black bg-opacity-50">
