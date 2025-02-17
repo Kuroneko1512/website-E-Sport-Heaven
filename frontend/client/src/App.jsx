@@ -10,6 +10,10 @@ import Blog from './pages/Blog'
 import Story from './pages/Story'
 import Contact from './pages/Contact'
 import Register from './pages/Register'
+import ProductDetail from './pages/ProductDetail'
+import Description from './components/elementProduct/Description'
+import AdditionalInformation from './components/elementProduct/AdditionalInformation'
+import Review from './components/elementProduct/Review'
 
 function App() {
 
@@ -22,6 +26,12 @@ function App() {
           <Route path='home' element={<Navigate to={'/'} />} />
           <Route index element={<Home />} />
           <Route path='shop' element={<Shop />} />
+          <Route path='product-detail/:id' element={<ProductDetail />} >
+            <Route path="descriptions" element={<Description />} />
+            <Route index element={<Description />} />
+            <Route path="information" element={<AdditionalInformation />} />
+            <Route path="reviews" element={<Review />} />
+          </Route>
           <Route path='blog' element={<Blog />} />
           <Route path='story' element={<Story />} />
           <Route path='contact' element={<Contact />}/>

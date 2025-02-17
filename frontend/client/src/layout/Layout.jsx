@@ -4,7 +4,6 @@ import Navbar from "../components/header/Navbar";
 import RightNavbar from "../components/header/RightNavbar";
 import Footer from "../components/footer/Footer";
 import { Outlet } from "react-router-dom";
-import Banner from "../components/banner/Banner";
 
 const Layout = () => {
   return (
@@ -15,8 +14,6 @@ const Layout = () => {
         <Navbar />
         <RightNavbar />
       </header>
-      {/* Banner */}
-      <Banner />
 
       {/* Main Page */}
       <Outlet />

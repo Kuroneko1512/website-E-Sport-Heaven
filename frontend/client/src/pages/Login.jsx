@@ -22,14 +22,14 @@ const Login = () => {
         onSuccess: async () => {
             dispatch(login());
             setSuccess(true);
-            message.success("Login successful!");
+            // message.success("Login successful!");
             setTimeout(() => {
                 nav('/');
             }, 2000);
         },
         onError: async () => {
             setError(true);
-            message.error("Login failed. Please try again.");
+            // message.error("Login failed. Please try again.");
         }
     });
 

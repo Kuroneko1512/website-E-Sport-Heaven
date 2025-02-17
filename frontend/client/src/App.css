@@ -1,4 +1,9 @@
 *{
     font-family: 'Jost', sans-serif;
 }
-  
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .card:hover .overlay {
+    opacity: 1;
+  }
