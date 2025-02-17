@@ -24,4 +24,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::resource('/attribute',AttributeController::class);
 Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
 Route::resource('/attributeValue',AttributeValueController::class)->except(['index']);
-Route::resource('/category', CategoryController::class);
+Route::resource('/category', CategoryController::class); //Category
+

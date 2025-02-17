@@ -27,19 +27,19 @@ class CategoryUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $id = $this->route('attribute');
+        $id = $this->route('category');
         return [
-            'name' => 'required|string|max:255|unique:attributes,name,' . $id,
+            'name' => 'required|string|max:255|unique:categories,name,' . $id,
             'description' => 'nullable|string|max:1000',
         ];
     }
     public function messages()
     {
         return [
-            'name.required' => 'Tên thuộc tính không được để trống.',
-            'name.string' => 'Tên thuộc tính phải là chuỗi.',
-            'name.max' => 'Tên thuộc tính không được vượt quá 255 ký tự.',
-            'name.unique' => 'Tên thuộc tính đã tồn tại.',
+            'name.required' => 'Tên danh mục không được để trống.',
+            'name.string' => 'Tên danh mục phải là chuỗi.',
+            'name.max' => 'Tên danh mục không được vượt quá 255 ký tự.',
+            'name.unique' => 'Tên danh mục đã tồn tại.',
             'description.string' => 'Mô tả phải là chuỗi.',
             'description.max' => 'Mô tả không được vượt quá 1000 ký tự.',
         ];
