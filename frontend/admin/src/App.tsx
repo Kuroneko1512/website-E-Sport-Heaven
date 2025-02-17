@@ -24,7 +24,7 @@ import { firebaseAuth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useAppDispatch, useAppSelector } from "./store/store";
 import { Loading } from "./components/Loading";
-
+import EditComponent from '@pages/Attribute/EditComponent';
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {
@@ -99,6 +99,8 @@ const App = () => {
           <Route path="add-product" element={<Store />} />
           {/*Route attribute*/}
           <Route path="Attribute" element={<Attribute />} />
+         
+          <Route path="Attribute/attribute/edit/:id"  element={<EditComponent/>} />
         </Route>
       </Route>
     </Routes>

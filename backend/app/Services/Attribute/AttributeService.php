@@ -9,7 +9,7 @@ class AttributeService extends BaseService {
     public function __construct(Attribute $attribute){
         parent::__construct($attribute);
     }
-    public function getAttributes($paginate = 10){
+    public function getAttributes($paginate = 5){
         return $this->getAll($paginate);
     }
    
