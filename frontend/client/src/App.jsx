@@ -12,6 +12,7 @@ import Contact from './pages/Contact'
 
 import Checkout from './pages/Checkout'
 import Register from './pages/Register'
+import ShippingAddress from './pages/ShippingAddress'
 
 function App() {
 
@@ -29,6 +30,7 @@ function App() {
           <Route path='contact' element={<Contact />} />
           <Route path='*' element={<Notfound />} />
           <Route path='checkout' element={<Checkout />}/>
+          <Route path='address' element={<ShippingAddress />}/>
         </Route>
       </Routes>
     </>
