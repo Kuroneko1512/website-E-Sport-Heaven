@@ -37,7 +37,7 @@ const Footer = () => {
                 <li>
                   <Link
                     className="text-sm text-gray-400 hover:text-white"
-                    to={'/my-profileprofile'}
+                    to={'/my-profile'}
                   >
                     My Account
                   </Link>

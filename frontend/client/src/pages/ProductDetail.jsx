@@ -193,7 +193,7 @@ const ProductDetail = () => {
         </div>
       <div>
         {/* Sản phẩm gần đây */}
-        <div className="mt-8">
+        <div className="my-8">
         <h2 className="text-2xl font-bold mb-4">Related Products</h2>
         <RelatedProducts />
         </div>
