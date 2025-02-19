@@ -1,10 +1,12 @@
 import React from "react";
+import { Link } from "react-router-dom";
 const ProductList = ({ products }) => {
   // console.log("products", products);
   return (
     <div className='grid grid-cols-1 p-5 md:grid-cols-2 xl:grid-cols-3 gap-4 '>
       {/* Thử giao diện */}
       {products.map((item)=> (
+        <Link to={`/product-detail/${item.id}`} >
         <div className="card bg-white hover:shadow-xl w-64 h-110 relative overflow-hidden" key={item.id}>
         <div className="relative h-80">
           <img
@@ -33,6 +35,7 @@ const ProductList = ({ products }) => {
           </div>
         </div>
       </div>
+      </Link>
       ))}
     </div>
   );
