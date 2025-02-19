@@ -36,7 +36,6 @@ Route::post('/blog-categories', [BlogCategoryController::class, 'store']);
 Route::put('/blog-categories/{id}', [BlogCategoryController::class, 'update']);
 // Xóa danh mục blog
 Route::delete('/blog-categories/{id}', [BlogCategoryController::class, 'destroy']);
-
 // Lấy danh sách tất cả bài viết blog
 Route::get('/blogs', [BlogController::class, 'index']);
 // Lấy thông tin chi tiết bài viết blog
