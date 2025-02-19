@@ -30,12 +30,8 @@ Route::resource('/attributeValue',AttributeValueController::class)->except(['ind
 Route::get('/blog-categories', [BlogCategoryController::class, 'index']);
 // Lấy thông tin chi tiết danh mục blog
 Route::get('/blog-categories/{id}', [BlogCategoryController::class, 'show']);
-// Trả về trang tạo mới danh mục blog (thường không dùng trong API, nhưng có thể dùng để kiểm tra form)
-Route::get('/blog-categories/create', [BlogCategoryController::class, 'create']);
 // Tạo mới danh mục blog
 Route::post('/blog-categories', [BlogCategoryController::class, 'store']);
-// Trả về thông tin chi tiết của danh mục blog để chỉnh sửa
-Route::get('/blog-categories/{id}/edit', [BlogCategoryController::class, 'edit']);
 // Cập nhật danh mục blog
 Route::put('/blog-categories/{id}', [BlogCategoryController::class, 'update']);
 // Xóa danh mục blog

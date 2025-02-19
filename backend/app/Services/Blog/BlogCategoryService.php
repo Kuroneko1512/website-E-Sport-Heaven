@@ -4,6 +4,7 @@ namespace App\Services\Blog;
 
 use App\Models\BlogCategory;
 use App\Services\BaseService;
+use Illuminate\Support\Str;
 
 class BlogCategoryService extends BaseService
 {
@@ -23,6 +24,10 @@ class BlogCategoryService extends BaseService
     // Phương thức tạo mới một danh mục blog
     public function createCategory(array $data)
     {
+        // Kiểm tra nếu slug chưa có, tự động tạo slug từ name
+        if (!isset($data['slug']) || empty($data['slug'])) {
+            $data['slug'] = Str::slug($data['name']);
+        }
         // Gọi phương thức create của BaseService để tạo mới danh mục
         return $this->create($data);
     }
@@ -30,8 +35,21 @@ class BlogCategoryService extends BaseService
     // Phương thức cập nhật danh mục blog theo ID
     public function updateCategory($id, array $data)
     {
-        // Gọi phương thức update của BaseService để cập nhật danh mục blog
-        return $this->update($id, $data);
+        $category = $this->model->find($id); // Kiểm tra danh mục có tồn tại không
+        if (!$category) {
+            return false; 
+        }
+
+        // Nếu 'name' thay đổi, tạo lại slug
+        if (isset($data['name']) && $data['name'] !== $category->name) {
+            $data['slug'] = Str::slug($data['name']);
+        }
+
+        // Cập nhật dữ liệu
+        $category->update($data);
+
+        // Trả về dữ liệu mới sau cập nhật
+        return $category->fresh();
     }
 
     // Phương thức xóa danh mục blog theo ID

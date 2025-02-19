@@ -26,8 +26,7 @@ class BlogCategoryStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255|unique:blog_categories,name',
-            'description' => 'nullable|string|max:1000',
+            'name' => 'required|string|max:255|unique:blog_categories,name'
         ];
     }
 
@@ -40,11 +39,10 @@ class BlogCategoryStoreRequest extends FormRequest
             'name.required' => 'Tên danh mục không được để trống.',
             'name.string' => 'Tên danh mục phải là chuỗi.',
             'name.max' => 'Tên danh mục không được vượt quá 255 ký tự.',
-            'name.unique' => 'Tên danh mục đã tồn tại.',
-            'description.string' => 'Mô tả phải là chuỗi.',
-            'description.max' => 'Mô tả không được vượt quá 1000 ký tự.',
+            'name.unique' => 'Tên danh mục đã tồn tại.'
         ];
     }
+    
 
     /**
      * Handle failed validation.
