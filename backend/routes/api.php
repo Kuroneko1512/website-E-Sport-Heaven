@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AttributeValueController;
 use App\Http\Controllers\Api\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,3 +26,5 @@ Route::resource('/attribute',AttributeController::class);
 Route::resource('/product',ProductController::class);
 Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
 Route::resource('/attributeValue',AttributeValueController::class)->except(['index']);
+Route::resource('/category', CategoryController::class); //Category
+
