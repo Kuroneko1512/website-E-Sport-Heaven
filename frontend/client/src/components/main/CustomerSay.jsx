@@ -1,0 +1,65 @@
+import React, { useState } from "react";
+
+const testimonials = [
+  { name: "Leslie Alexander", role: "Model", img: "https://placehold.co/40x40", text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", rating: 5 },
+  { name: "Jacob Jones", role: "Co-Founder", img: "https://placehold.co/40x40", text: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", rating: 4 },
+  { name: "Jenny Wilson", role: "Fashion Designer", img: "https://placehold.co/40x40", text: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi.", rating: 3 },
+  { name: "Cameron Williamson", role: "Entrepreneur", img: "https://placehold.co/40x40", text: "Duis aute irure dolor in reprehenderit in voluptate velit esse.", rating: 5 },
+  { name: "Kristin Watson", role: "CEO", img: "https://placehold.co/40x40", text: "Excepteur sint occaecat cupidatat non proident, sunt in culpa.", rating: 4 },
+  { name: "Ralph Edwards", role: "Investor", img: "https://placehold.co/40x40", text: "Consectetur adipiscing elit, sed do eiusmod tempor incididunt.", rating: 2 }
+];
+
+const CustomerSay = () => {
+  const [startIndex, setStartIndex] = useState(0);
+
+  const nextTestimonial = () => {
+    setStartIndex((startIndex + 1) % testimonials.length);
+  };
+
+  const prevTestimonial = () => {
+    setStartIndex((startIndex - 1 + testimonials.length) % testimonials.length);
+  };
+
+  return (
+    <div className="container mx-auto py-16 px-4">
+      <div className="flex justify-between items-center mb-12">
+        <h2 className="text-4xl font-bold">What our Customer say's</h2>
+        <div className="flex space-x-2">
+          <button onClick={prevTestimonial} className="bg-white text-black p-2 rounded-full shadow-md">
+            <i className="fas fa-arrow-left"></i>
+          </button>
+          <button onClick={nextTestimonial} className="bg-black text-white p-2 rounded-full shadow-md">
+            <i className="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+      <div className="flex justify-center space-x-4">
+        {Array.from({ length: 3 }).map((_, i) => {
+          const index = (startIndex + i) % testimonials.length;
+          const t = testimonials[index];
+          return (
+            <div key={index} className="bg-white p-6 rounded-lg shadow-lg max-w-sm">
+              <div className="flex items-center mb-4">
+                <div className="flex text-yellow-500">
+                  {[...Array(t.rating)].map((_, starIndex) => (
+                    <i key={starIndex} className="fas fa-star"></i>
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-700 mb-4">{t.text}</p>
+              <div className="flex items-center">
+                <img className="w-10 h-10 rounded-full mr-4" src={t.img} alt={t.name} />
+                <div>
+                  <p className="font-bold">{t.name}</p>
+                  <p className="text-sm text-gray-500">{t.role}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export default CustomerSay;
