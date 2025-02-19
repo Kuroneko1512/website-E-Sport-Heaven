@@ -35,12 +35,27 @@ class BlogCategoryController extends Controller
         }
     }
 
+    // Tạo mới danh mục blog 
+    public function create()
+    {
+        try {
+            return response()->json([
+                'message' => 'Trang tạo danh mục blog. Gửi dữ liệu qua POST để tạo mới.'
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Lỗi khi vào trang tạo danh mục blog.',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     // Tạo mới danh mục blog
     public function store(BlogCategoryStoreRequest $request)
     {
         try {
             $data = $request->validated();
-            $category = $this->blogCategoryService->createCategory($data); // Changed here
+            $category = $this->blogCategoryService->createCategory($data); // Tạo mới danh mục blog
 
             return response()->json([
                 'message' => 'Danh mục blog đã được tạo thành công!',
@@ -54,12 +69,35 @@ class BlogCategoryController extends Controller
         }
     }
 
+    // Lấy thông tin chi tiết danh mục blog để chỉnh sửa
+    public function edit($id)
+    {
+        try {
+            $category = $this->blogCategoryService->findCategory($id); // Lấy danh mục từ DB để chỉnh sửa
+            if ($category) {
+                return response()->json([
+                    'status' => 200,
+                    'data' => $category
+                ], 200);
+            } else {
+                return response()->json([
+                    'error' => 'Danh mục blog không tồn tại.',
+                ], 404);
+            }
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Lỗi khi lấy thông tin danh mục blog.',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     // Cập nhật danh mục blog
     public function update(BlogCategoryUpdateRequest $request, $id)
     {
         try {
             $data = $request->validated();
-            $category = $this->blogCategoryService->updateCategory($id, $data); // Changed here
+            $category = $this->blogCategoryService->updateCategory($id, $data); // Cập nhật danh mục
 
             return response()->json([
                 'message' => 'Danh mục blog đã được cập nhật thành công!',
@@ -72,6 +110,7 @@ class BlogCategoryController extends Controller
             ], 500);
         }
     }
+
 
     // Xóa danh mục blog
     public function destroy($id)
