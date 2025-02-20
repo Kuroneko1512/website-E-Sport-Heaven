@@ -14,6 +14,7 @@ import Checkout from './pages/Checkout'
 import Register from './pages/Register'
 import ShippingAddress from './pages/ShippingAddress'
 
+
 function App() {
 
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path='*' element={<Notfound />} />
           <Route path='checkout' element={<Checkout />}/>
           <Route path='address' element={<ShippingAddress />}/>
+          
         </Route>
       </Routes>
     </>
