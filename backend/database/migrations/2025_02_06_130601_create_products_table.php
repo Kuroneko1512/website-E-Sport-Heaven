@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable();
             $table->decimal('price', 10, 2)->nullable();
+            $table->decimal('discount_percent', 5, 2)->nullable(); // Giảm giá theo %
+            $table->dateTime('discount_start')->nullable(); // Thời gian bắt đầu giảm giá
+            $table->dateTime('discount_end')->nullable(); // Thời gian kết thúc giảm giá
             $table->string('sku')->unique();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
@@ -22,6 +25,7 @@ return new class extends Migration
             $table->enum('status',['active','inactive'])->default('active');
             $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

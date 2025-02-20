@@ -17,7 +17,7 @@ class AttributeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word, // Tạo tên thuộc tính ngẫu nhiên
+            'name' => $this->faker->unique()->word, // Tạo tên thuộc tính ngẫu nhiên
             'description' => $this->faker->sentence, // Tạo mô tả ngẫu nhiên
             'created_at' => now(),
             'updated_at' => now(),
