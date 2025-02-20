@@ -21,7 +21,6 @@ class ProductController extends Controller
     public function __construct(ProductService $productService)
     {
         $this->productService = $productService;
-       
     }
     public function index()
     {
@@ -35,8 +34,8 @@ class ProductController extends Controller
         } catch (\Throwable $th) {
             // Trường hợp có lỗi xảy ra khi lấy dữ liệu
             return response()->json([
-                'errnor' => 'lấy thất bại',
-                'mess'=>$th,
+                'error' => 'lấy thất bại',
+                'mess' => $th,
                 'status' => 500
             ], 500); // Trả về mã lỗi 500 (Internal Server Error)
         }
@@ -47,19 +46,19 @@ class ProductController extends Controller
      */
     public function store(ProductStoreRequest $request)
     {
-       
+
         DB::beginTransaction();
         try {
 
             // Validate và lấy dữ liệu từ request
             $data = $request->validated();
-             //tạo sp
-            $product = $this->productService->createProduct($data);
-           
+            //tạo sp
+            $product = $this->productService->create($data);
+
             DB::commit();
             return response()->json([
-                'message' => 'Thuộc tính đã được tạo thành công!', // Thông báo thành công
-                'data' => $data
+                'message' => 'Sản phẩm đã được tạo thành công!', // Thông báo thành công
+                'data' => $product
             ], 201); // Trả về mã thành công 201 (Created)
 
         } catch (Exception $e) {
@@ -99,28 +98,27 @@ class ProductController extends Controller
      */
     public function update(ProductUpdateRequest $request, $id)
     {
-      
+
         try {
             // Validate và lấy dữ liệu từ request
-          $data = $request->validated();
-          
-          // Gọi service để cập nhật thuộc tính
-          $Product = $this->productService->updateProduct($data,$id);
+            $data = $request->validated();
 
-          return response()->json([
-              'message' => 'Thuộc tính đã được sửa thành công!', // Thông báo thành công
-              'data' => $Product,
-              'status'=>200
-          ], 200);// Trả về mã trạng thái 200 (OK)
+            // Gọi service để cập nhật sản phẩm
+            $product = $this->productService->update($id, $data);
 
-      } catch (Exception $e) {
-          // Trường hợp có lỗi xảy ra khi cập nhật thuộc tính
-          return response()->json([
-              'message' => 'Lỗi khi xử lý dữ liệu.',
-              'error' => $e->getMessage(),
-              'status'=>500
-          ], 500); // Trả về mã lỗi 500 (Internal Server Error)
-      }
+            return response()->json([
+                'message' => 'Sản phẩm đã được cập nhật thành công!',
+                'data' => $product,
+                'status' => 200
+            ], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Lỗi khi cập nhật sản phẩm.',
+                'error' => $e->getMessage(),
+                'status' => 500
+            ], 500);
+        }
     }
 
     /**
@@ -134,15 +132,78 @@ class ProductController extends Controller
             return response()->json([
                 'message' => 'Thuộc tính đã được xóa',
                 'data' => $atr,
-                'status'=>200
-            ], 200);// Trả về mã trạng thái 200 (OK)
+                'status' => 200
+            ], 200); // Trả về mã trạng thái 200 (OK)
 
         } catch (Exception $e) {
-               // Trường hợp có lỗi xảy ra khi xóa thuộc tính
+            // Trường hợp có lỗi xảy ra khi xóa thuộc tính
             return response()->json([
                 'message' => 'Lỗi khi xử lý dữ liệu.',
                 'error' => $e->getMessage()  // Lỗi cụ thể
-            ], 500);// Trả về mã lỗi 500 (Internal Server Error)
+            ], 500); // Trả về mã lỗi 500 (Internal Server Error)
+        }
+    }
+
+    /**
+     * Get list of soft deleted products
+     * Lấy danh sách sản phẩm đã xóa mềm
+     */
+    public function trashed()
+    {
+        try {
+            $products = $this->productService->getTrashed();
+            return response()->json([
+                'status' => 200,
+                'data' => $products,
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => 'Lấy danh sách thất bại',
+                'message' => $th->getMessage(),
+                'status' => 500
+            ], 500);
+        }
+    }
+
+    /**
+     * Restore a soft deleted product
+     * Khôi phục sản phẩm đã xóa mềm
+     */
+    public function restore($id)
+    {
+        try {
+            $this->productService->restore($id);
+            return response()->json([
+                'status' => 200,
+                'message' => 'Khôi phục sản phẩm thành công',
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => 'Khôi phục thất bại',
+                'message' => $th->getMessage(),
+                'status' => 500
+            ], 500);
+        }
+    }
+
+    /**
+     * Force delete a product
+     * Xóa hoàn toàn sản phẩm
+     */
+    public function forceDelete($id)
+    {
+        try {
+            $this->productService->delete($id, true);
+            return response()->json([
+                'status' => 200,
+                'message' => 'Xóa sản phẩm thành công',
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => 'Xóa thất bại',
+                'message' => $th->getMessage(),
+                'status' => 500
+            ], 500);
         }
     }
 }

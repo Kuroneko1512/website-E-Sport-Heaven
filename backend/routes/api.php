@@ -22,6 +22,21 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::resource('/attribute',AttributeController::class);
+Route::prefix('attribute')->group(function () {
+    Route::get('/trashed', [AttributeController::class, 'trashed']);
+    Route::post('/{id}/restore', [AttributeController::class, 'restore']);
+    Route::delete('/{id}/force', [AttributeController::class, 'forceDelete']);
+});
+
 Route::resource('/product',ProductController::class);
+Route::prefix('product')->group(function () {
+    Route::get('/trashed', [ProductController::class, 'trashed']);
+    Route::post('/{id}/restore', [ProductController::class, 'restore']);
+    Route::delete('/{id}/force', [ProductController::class, 'forceDelete']);
+});
+
 Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
+Route::get('/attributeValue/trashed/{attribute_id?}', [AttributeValueController::class, 'trashed']);
+Route::post('/attributeValue/{id}/restore', [AttributeValueController::class, 'restore']);
+Route::delete('/attributeValue/{id}/force', [AttributeValueController::class, 'forceDelete']);
 Route::resource('/attributeValue',AttributeValueController::class)->except(['index']);
