@@ -33,7 +33,7 @@ class AttributeController extends Controller
         } catch (\Throwable $th) {
             // Trường hợp có lỗi xảy ra khi lấy dữ liệu
             return response()->json([
-                'errnor' => 'lấy thất bại',
+                'error' => 'lấy thất bại',
                 'status' => 200
             ], 500); // Trả về mã lỗi 500 (Internal Server Error)
         }
