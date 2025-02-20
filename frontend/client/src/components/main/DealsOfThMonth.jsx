@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import instanceAxios from "../../config/db";
 
-export default function DealsOfTheMonth() {
+const DealsOfTheMonth = () => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, mins: 0, secs: 0 });
 
   useEffect(() => {
     const fetchTime = async () => {
       try {
-        const response = await instanceAxios.get("/deals") // API từ db.json
+        const response = await instanceAxios.get("/deals"); // API từ db.json
         const endTime = new Date(response.data.endTime).getTime();
         updateCountdown(endTime);
       } catch (error) {
@@ -44,7 +44,7 @@ export default function DealsOfTheMonth() {
         <div className="lg:w-1/2 text-center lg:text-left">
           <h1 className="text-4xl font-bold mb-4">Deals of the Month</h1>
           <p className="text-gray-600 mb-6">
-            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters
+            It is a long established fact that a reader will be distracted by the readable content.
           </p>
           <div className="flex justify-center lg:justify-start space-x-4 mb-6">
             {[{ label: "Days", value: timeLeft.days }, { label: "Hours", value: timeLeft.hours }, { label: "Mins", value: timeLeft.mins }, { label: "Secs", value: timeLeft.secs }].map((item, index) => (
@@ -62,13 +62,13 @@ export default function DealsOfTheMonth() {
         <div className="lg:w-1/2 mt-8 lg:mt-0">
           <img
             src="https://storage.googleapis.com/a1aa/image/WiGcjCEUwL5nPqYyQZFWhgRoq051xsCUJS6w8IKcpMA.jpg"
-            alt="A woman wearing a stylish black hat and black dress with a red and white background"
+            alt="A woman wearing a stylish black hat"
             className="w-full rounded-lg shadow-md"
-            width="600"
-            height="400"
           />
         </div>
       </div>
     </div>
   );
 }
+
+export default DealsOfTheMonth

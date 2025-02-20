@@ -22,23 +22,23 @@ const CustomerSay = () => {
 
   return (
     <div className="container mx-auto py-16 px-4">
-      <div className="flex justify-between items-center mb-12">
-        <h2 className="text-4xl font-bold">What our Customer say's</h2>
-        <div className="flex space-x-2">
-          <button onClick={prevTestimonial} className="bg-white text-black p-2 rounded-full shadow-md">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-12">
+        <h2 className="text-2xl md:text-4xl font-bold text-center md:text-left">What our Customer say's</h2>
+        <div className="flex space-x-4 mt-4 md:mt-0">
+          <button onClick={prevTestimonial} className="bg-white text-black p-3 rounded-full shadow-md hover:bg-gray-200">
             <i className="fas fa-arrow-left"></i>
           </button>
-          <button onClick={nextTestimonial} className="bg-black text-white p-2 rounded-full shadow-md">
+          <button onClick={nextTestimonial} className="bg-black text-white p-3 rounded-full shadow-md hover:bg-gray-800">
             <i className="fas fa-arrow-right"></i>
           </button>
         </div>
       </div>
-      <div className="flex justify-center space-x-4">
-        {Array.from({ length: 3 }).map((_, i) => {
+      <div className="flex justify-center gap-4 flex-wrap">
+        {Array.from({ length: window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 3 }).map((_, i) => {
           const index = (startIndex + i) % testimonials.length;
           const t = testimonials[index];
           return (
-            <div key={index} className="bg-white p-6 rounded-lg shadow-lg max-w-sm">
+            <div key={index} className="bg-white p-6 rounded-lg shadow-lg max-w-xs sm:max-w-sm">
               <div className="flex items-center mb-4">
                 <div className="flex text-yellow-500">
                   {[...Array(t.rating)].map((_, starIndex) => (
