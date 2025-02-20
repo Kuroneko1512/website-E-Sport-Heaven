@@ -13,6 +13,7 @@ import Contact from './pages/Contact'
 import Checkout from './pages/Checkout'
 import Register from './pages/Register'
 import ShippingAddress from './pages/ShippingAddress'
+import PaymentMethod from './pages/PaymentMethod'
 
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
           <Route path='*' element={<Notfound />} />
           <Route path='checkout' element={<Checkout />}/>
           <Route path='address' element={<ShippingAddress />}/>
+          <Route path='payment' element={<PaymentMethod />}/>
           
         </Route>
       </Routes>

@@ -2,7 +2,7 @@ import React from 'react'
 
 const ShippingAddress = () => {
   return (
-    <main className="max-w-7xl mx-auto p-6">
+    <main className="container mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold mb-6">Shipping Address</h1>
           <div className="flex flex-col lg:flex-row lg:space-x-12">
             <div className="flex-1">
