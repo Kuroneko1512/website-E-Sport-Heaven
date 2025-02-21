@@ -25,11 +25,11 @@ const CustomerSay = () => {
       <div className="flex flex-col md:flex-row justify-between items-center mb-12">
         <h2 className="text-2xl md:text-4xl font-bold text-center md:text-left">What our Customer say's</h2>
         <div className="flex space-x-4 mt-4 md:mt-0">
-          <button onClick={prevTestimonial} className="bg-white text-black p-3 rounded-full shadow-md hover:bg-gray-200">
-            <i className="fas fa-arrow-left"></i>
+          <button onClick={prevTestimonial} className=" bg-white text-black hover:bg-black hover:text-white px-3 py-2 border rounded-lg shadow-md z-10 hidden md:block">
+          ←
           </button>
-          <button onClick={nextTestimonial} className="bg-black text-white p-3 rounded-full shadow-md hover:bg-gray-800">
-            <i className="fas fa-arrow-right"></i>
+          <button onClick={nextTestimonial} className=" bg-white text-black hover:bg-black hover:text-white px-3 py-2 border rounded-lg shadow-md z-10 hidden md:block">
+          →
           </button>
         </div>
       </div>

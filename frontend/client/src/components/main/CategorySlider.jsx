@@ -42,7 +42,7 @@ const CategorySlider = () => {
             className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide snap-x snap-mandatory"
           >
             {categories.map((category, index) => (
-              <div key={index} className="relative flex-shrink-0 w-3/4 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 snap-center">
+              <div key={index} className="relative flex-shrink-0 w-3/4 sm:w-1/2 md:w-1/3 lg:w-1/4 snap-center">
                 <img src={category.image} alt={category.name} className="w-full h-[250px] object-cover rounded-lg" />
                 <button className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-lg shadow-md text-sm font-semibold">
                   {category.name}
