@@ -1,0 +1,43 @@
+{
+    "users": [
+    {
+      "email": "toanphung353@gmail.com",
+      "password": "$2a$10$0z81BPPRK0rBpFFbpvINceRsqVh7VFVVNZhTZrZ5uJ9Xfrnj4nOtS",
+      "id": 1
+    },
+    {
+      "email": "toan1@gmail.com",
+      "password": "$2a$10$.c1GKDmBZtiLm7EZlwv.GOHkElZQMZCBHlcPkKX6mXuJdJYQzD.Qq",
+      "id": 2
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "brand": "YK Disney",
+      "name": "Girls Pink Moana Printed Dress",
+      "description": "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout...",
+      "color": ["Red", "Green", "Blue", "Black", "White"],
+      "size": ["S", "M", "L", "XL", "XXL"],
+      "fiveStart": 121,
+      "fourStart": 0,
+      "threeStart": 0,
+      "twoStart": 0,
+      "oneStart": 0,
+      "price": 80,
+      "oldPrice": 100,
+      "fav": false,
+      "image": "https://storage.googleapis.com/a1aa/image/sun96fvF1rSkAy7azff5bJJeOpU76F7KVNvUEigzuUkhQuaQB.jpg",
+      "thumbnails": [
+        "https://storage.googleapis.com/a1aa/image/QNCvVWfsqJzfZ0jvriCecffdfOVWJX2zfjmqGoZFARG8a98DKA.jpg",
+        "https://storage.googleapis.com/a1aa/image/QNCvVWfsqJzfZ0jvriCecffdfOVWJX2zfjmqGoZFARG8a98DKA.jpg",
+        "https://storage.googleapis.com/a1aa/image/QNCvVWfsqJzfZ0jvriCecffdfOVWJX2zfjmqGoZFARG8a98DKA.jpg",
+        "https://storage.googleapis.com/a1aa/image/QNCvVWfsqJzfZ0jvriCecffdfOVWJX2zfjmqGoZFARG8a98DKA.jpg",
+        "https://storage.googleapis.com/a1aa/image/QNCvVWfsqJzfZ0jvriCecffdfOVWJX2zfjmqGoZFARG8a98DKA.jpg"
+      ]
+    }
+  ],
+  "deals":{
+    "endTime": "2025-03-01T23:59:59Z"
+  }
+}

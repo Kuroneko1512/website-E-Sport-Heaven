@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\Attribute\AttributeService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +12,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(AttributeService::class, function ($app) {
+            return new AttributeService($app->make(\App\Models\Attribute::class));
+        });
     }
 
     /**
