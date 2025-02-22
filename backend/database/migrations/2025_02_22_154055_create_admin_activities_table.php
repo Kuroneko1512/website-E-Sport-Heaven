@@ -12,24 +12,29 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('admin_activities', function (Blueprint $table) {
+            // Khoá chính và khoá ngoại
             $table->id();
-
-            // Foreign key với index sẵn
             $table->foreignId('admin_id')->constrained('admins');
 
-            // Tracking fields với index cho tìm kiếm và filter
-            $table->string('action')->index();
-            $table->string('entity_type');
+            // Thông tin hoạt động
+            $table->string('action')->index();  // create, update, delete
+            $table->string('module')->index();  // products, orders, admins, roles
+            $table->string('entity_type');      // App\Models\Product
             $table->unsignedBigInteger('entity_id');
+
+            // Dữ liệu thay đổi
             $table->json('old_values')->nullable();
             $table->json('new_values')->nullable();
+
+            // Thông tin truy cập
             $table->string('ip_address');
             $table->text('user_agent');
             $table->timestamps();
 
-            // Composite index cho truy vấn logs
-            $table->index(['entity_type', 'entity_id']);
+            // Indexes cho audit queries
             $table->index(['admin_id', 'created_at']);
+            $table->index(['module', 'action']);
+            $table->index(['entity_type', 'entity_id']);
         });
     }
 

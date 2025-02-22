@@ -12,20 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('role_history', function (Blueprint $table) {
+            // Khoá chính và Khoá ngoại
             $table->id();
-
-            // Foreign keys với index sẵn
             $table->foreignId('admin_id')->constrained('admins');
             $table->foreignId('changed_by')->constrained('admins');
 
-            // Role change data
+            // Thông tin thay đổi role
             $table->json('old_roles');
             $table->json('new_roles');
             $table->text('reason');
             $table->timestamps();
 
-            // Index cho audit queries
+            // Indexes cho audit
             $table->index(['admin_id', 'created_at']);
+            $table->index(['changed_by', 'created_at']);
         });
     }
 

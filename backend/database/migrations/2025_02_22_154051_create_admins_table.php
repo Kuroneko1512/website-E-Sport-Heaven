@@ -12,39 +12,31 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('admins', function (Blueprint $table) {
+            // Thông tin cơ bản admin
             $table->id();
-
-            // Thông tin cơ bản
             $table->string('name');
-            $table->string('email')->unique()->index(); // Index cho login và tìm kiếm
+            $table->string('email')->unique()->index();
             $table->string('password');
-
-            // Phân loại và trạng thái - index cho phân quyền và filter
-            $table->enum('type', ['super_admin', 'admin', 'staff'])->index();
             $table->string('position')->nullable();
             $table->string('department')->nullable();
-            $table->enum('status', ['active', 'inactive', 'blocked'])->default('active')->index();
 
-            // Security tracking - index cho monitoring
+            // Trạng thái và security
+            $table->enum('status', ['active', 'inactive', 'blocked'])
+                ->default('active')
+                ->index();
             $table->integer('failed_login_attempts')->default(0)->index();
             $table->timestamp('last_login_at')->nullable()->index();
             $table->string('last_login_ip')->nullable();
-            $table->timestamp('password_changed_at')->nullable();
-            $table->boolean('force_password_change')->default(false);
-            $table->timestamp('email_verified_at')->nullable();
-            $table->rememberToken();
 
             // Audit fields
             $table->foreignId('created_by')->nullable()->constrained('admins');
             $table->foreignId('updated_by')->nullable()->constrained('admins');
-
-            // Soft delete với index để query
             $table->softDeletes()->index();
             $table->timestamps();
 
-            // Composite index cho các truy vấn phổ biến
+            // Indexes cho queries phổ biến
             $table->index(['department', 'status']);
-            $table->index(['type', 'status']);
+            $table->index(['email', 'status']);
         });
     }
 
