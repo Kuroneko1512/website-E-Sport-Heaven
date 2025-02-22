@@ -25,7 +25,6 @@ class BlogFactory extends Factory
             'slug' => Str::slug($title), // Tạo slug từ tiêu đề
             'content' => $this->faker->paragraphs(5, true), // Tạo nội dung giả
             'category_id' => BlogCategory::factory(), // Tạo danh mục ngẫu nhiên
-            'user_id' => User::factory(), // Tạo user ngẫu nhiên
             'created_at' => now(),
             'updated_at' => now(),
         ];

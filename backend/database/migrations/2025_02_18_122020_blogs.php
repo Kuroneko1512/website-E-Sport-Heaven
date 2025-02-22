@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('slug')->unique(); // tạo URL thân thiện
             $table->text('content'); // nội dung bài viết
             $table->foreignId('category_id')->constrained('blog_categories')->onDelete('cascade'); // liên kết danh mục
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // tác giả bài viết
+            // $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade'); // tác giả bài viết
             //onDelete('cascade'): Nếu danh mục hoặc user bị xóa thì bài viết cũng bị xóa theo.
             $table->timestamps();
         });

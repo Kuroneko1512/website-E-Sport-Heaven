@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Blog\BlogStoreRequest;
 use App\Http\Requests\Blog\BlogUpdateRequest;
 use App\Services\Blog\BlogService;
+use Illuminate\Support\Str;
 use Exception;
 
 class BlogController extends Controller
@@ -39,7 +40,9 @@ class BlogController extends Controller
     public function store(BlogStoreRequest $request)
     {
         try {
+            // $data['user_id'] = auth()->id(); // Gán user_id từ user đang đăng nhập
             $data = $request->validated();
+            $data['slug'] = Str::slug($data['title']); // Tạo slug tự động
             $blog = $this->blogService->create($data);
 
             return response()->json([
@@ -58,7 +61,19 @@ class BlogController extends Controller
     public function update(BlogUpdateRequest $request, $id)
     {
         try {
+            // Kiểm tra bài viết có tồn tại không
+            $blog = $this->blogService->findBlog($id);
+            if (!$blog) {
+                return response()->json([
+                    'error' => 'Bài viết blog không tồn tại!',
+                ], 404);
+            }
             $data = $request->validated();
+            // Nếu title thay đổi thì cập nhật slug
+            if (isset($data['title']) && $data['title'] !== $blog->title) {
+                $data['slug'] = Str::slug($data['title']);
+            }
+
             $blog = $this->blogService->update($id, $data);
 
             return response()->json([

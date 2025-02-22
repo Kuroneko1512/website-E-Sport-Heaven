@@ -25,14 +25,21 @@ class BlogUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $id = $this->route('blog');
-        return [
-            'title' => 'required|string|max:255|unique:blogs,title,' . $id,
+        $id = $this->route('id'); // Lấy ID bài viết từ route
+        $rules = [
+            'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'category_id' => 'required|exists:blog_categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'category_id' => 'required|exists:blog_categories,id'
         ];
+
+        // Chỉ kiểm tra unique nếu title có thay đổi
+        if ($this->has('title')) {
+            $rules['title'] .= '|unique:blogs,title,' . $id . ',id';
+        }
+
+        return $rules;
     }
+
 
     /**
      * Get the custom validation messages.
@@ -47,10 +54,7 @@ class BlogUpdateRequest extends FormRequest
             'content.required' => 'Nội dung không được để trống.',
             'content.string' => 'Nội dung phải là chuỗi.',
             'category_id.required' => 'Danh mục không được để trống.',
-            'category_id.exists' => 'Danh mục không tồn tại.',
-            'image.image' => 'Tệp tải lên phải là một hình ảnh.',
-            'image.mimes' => 'Ảnh chỉ chấp nhận các định dạng: jpeg, png, jpg, gif.',
-            'image.max' => 'Dung lượng ảnh không được vượt quá 2MB.',
+            'category_id.exists' => 'Danh mục không tồn tại.'
         ];
     }
 

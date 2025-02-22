@@ -29,7 +29,6 @@ class BlogStoreRequest extends FormRequest
             'title' => 'required|string|max:255|unique:blogs,title',
             'content' => 'required|string',
             'category_id' => 'required|exists:blog_categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }
 
@@ -47,9 +46,6 @@ class BlogStoreRequest extends FormRequest
             'content.string' => 'Nội dung phải là chuỗi.',
             'category_id.required' => 'Danh mục không được để trống.',
             'category_id.exists' => 'Danh mục không tồn tại.',
-            'image.image' => 'Tệp tải lên phải là một hình ảnh.',
-            'image.mimes' => 'Ảnh chỉ chấp nhận các định dạng: jpeg, png, jpg, gif.',
-            'image.max' => 'Dung lượng ảnh không được vượt quá 2MB.',
         ];
     }
 
