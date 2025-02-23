@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const ProductList = ({ products }) => {
   const itemsPerPage = 12; // Số sản phẩm mỗi trang
@@ -12,10 +13,11 @@ const ProductList = ({ products }) => {
   const selectedProducts = products.slice(startIndex, startIndex + itemsPerPage);
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {selectedProducts.map((item) => (
+          <Link to={`/product-detail/${item.id}`}>
           <div
-            className="card bg-white hover:shadow-xl w-64 h-110 relative overflow-hidden"
+            className="card bg-white hover:shadow-xl w-full sm:w-64 relative overflow-hidden"
             key={item.id}
           >
             <div className="relative h-80">
@@ -38,6 +40,7 @@ const ProductList = ({ products }) => {
               </div>
             </div>
           </div>
+          </Link>
         ))}
       </div>
     </div>
