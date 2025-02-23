@@ -15,6 +15,12 @@ import Description from './components/elementProduct/Description'
 import AdditionalInformation from './components/elementProduct/AdditionalInformation'
 import Review from './components/elementProduct/Review'
 
+import Checkout from './pages/Checkout'
+import Register from './pages/Register'
+import ShippingAddress from './pages/ShippingAddress'
+import PaymentMethod from './pages/PaymentMethod'
+
+
 function App() {
 
   return (
@@ -36,6 +42,10 @@ function App() {
           <Route path='story' element={<Story />} />
           <Route path='contact' element={<Contact />}/>
           <Route path='*' element={<Notfound />} />
+          <Route path='checkout' element={<Checkout />}/>
+          <Route path='address' element={<ShippingAddress />}/>
+          <Route path='payment' element={<PaymentMethod />}/>
+          
         </Route>
       </Routes>
     </>
