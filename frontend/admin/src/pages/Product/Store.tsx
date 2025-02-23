@@ -1,80 +1,89 @@
+import { useState } from "react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import AttributeForm from "./AttributeForm";
+import NoImage from "../../../public/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
+import { Link, Outlet, useLocation, useParams } from "react-router-dom";
+const Store = () => {
+  const [value, setValue] = useState("");
+  const [image, setImage] = useState<string | null>(null);
+  const [selectedComponent, setSelectedComponent] =
+    useState<JSX.Element | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [price, setPrice] = useState<number>(0);
+  const [variant, setVariant] = useState<string>("");
 
-
-
-
-  const Store = () => {
-   
- 
-    return (
-      <div className="w-full min-h-screen flex items-center justify-center bg-gray-100 p-5">
-        <div className=" w-75 bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4 text-center">Thêm Sản Phẩm</h2>
-  
-          <form  className="space-y-4">
-            <input
-              type="text"
-              name="name"
-              
-              
-              placeholder="Tên sản phẩm"
-              className="w-full p-2 border rounded"
-              required
-            />
-  
-            <input
-              type="text"
-              name="code"
-            
-            
-              placeholder="Mã sản phẩm"
-              className="w-full p-2 border rounded"
-              required
-            />
-  
-            <input
-              type="number"
-              name="quantity"
-             
-             
-              placeholder="Số lượng"
-              className="w-full p-2 border rounded"
-              required
-            />
-  
-            <input
-              type="number"
-              name="price"
-              
-             
-              placeholder="Giá"
-              className="w-full p-2 border rounded"
-              required
-            />
-  
-            <input
-              type="file"
-              name="main_image"
-             
-              placeholder="Ảnh đại diện (Mặc định: 0)"
-              className="w-full p-2 border rounded"
-            />
-  
-            <input
-              type="file"
-              name="sub_image"
-           
-           
-              placeholder="Ảnh phụ )"
-              className="w-full p-2 border rounded"
-            />
-  
-            <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
-              Thêm Sản Phẩm
-            </button>
-          </form>
-        </div>
-      </div>
-    );
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImage(URL.createObjectURL(file));
+    }
   };
-export default Store ;
 
+  return (
+    <div className="container-fluid bg-white p-4">
+      <h3>ADD PRODUCT</h3>
+      <form>
+        <div className="row align-items-stretch">
+          {/* Cột nhập thông tin sản phẩm */}
+          <div className="col-8 bg-body-secondary p-3">
+            <input
+              type="text"
+              className="w-100 form-control my-2"
+              placeholder="Name"
+              name="name"
+            />
+            <ReactQuill
+              theme="snow"
+              value={value}
+              style={{ height: "300px", marginBottom: "20px" }}
+              onChange={setValue}
+            />
+            <div className="Choose mt-5">
+              <h3>Choose Product</h3>
+            </div>
+
+            {/* Chọn sản phẩm */}
+            <div className="row align-items-stretch my-3">
+              <div className="col-3 p-3 bg-light border rounded">
+                <ul>
+                  <li>
+                    <Link to="AttributeForm">Attribute</Link>
+                  </li>
+                  <li>
+               
+                    <Link to="Description">Description</Link>
+                  </li>
+                </ul>
+              </div>
+              <div className="col-9 p-3 bg-light border">
+                <Outlet />
+              </div>
+            </div>
+          </div>
+
+          {/* Cột upload ảnh & chọn danh mục */}
+          <div className="col-4 p-3">
+            <img
+              src={image || NoImage}
+              alt="Preview"
+              className="mx-4 mt-2"
+              style={{ maxHeight: "200px", borderRadius: "8px" }}
+            />
+            <input
+              type="file"
+              className="form-control my-3"
+              onChange={handleImageChange}
+              accept="image/*"
+            />
+            <select name="categories" className="form-control mt-2">
+              <option value="">Category</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default Store;
