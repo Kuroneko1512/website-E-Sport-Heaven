@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Attribute\V1;
 
 
 use App\Http\Controllers\Controller;
@@ -8,6 +8,7 @@ use App\Http\Requests\Attribute\AttributeStoreRequest;
 use App\Http\Requests\Attribute\AttributeUpdateRequest;
 use App\Services\Attribute\AttributeService;
 use Exception;
+
 use Illuminate\Database\QueryException;
 
 

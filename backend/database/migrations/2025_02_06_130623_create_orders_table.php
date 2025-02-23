@@ -18,9 +18,11 @@ return new class extends Migration
             $table->string('customer_email')->nullable();
             $table->string('customer_phone')->nullable();
             $table->text('shipping_address')->nullable();
+            $table->string('order_code')->unique();
             $table->decimal('total_amount', 10, 2);
-            $table->string('status')->default('đang xử lý');
+            $table->enum('status', ['đang xử lý', 'đã xác nhận', 'đang giao', 'hoàn thành', 'đã hủy'])->default('đang xử lý');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
