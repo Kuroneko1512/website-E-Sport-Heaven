@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 const Register = () => {
@@ -98,3 +99,4 @@ const Register = () => {
 };
 
 export default Register;
+
