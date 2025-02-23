@@ -25,19 +25,18 @@ class ProductStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'nullable|string|max:255',
-            'price' => 'nullable|numeric|between:0,99999999.99',
-            'sku' => [
-                'required',
-                'string',
-                Rule::unique('products', 'sku'),
-            ],
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
-            'product_type' => 'nullable|in:simple,variable',
-            'status' => 'nullable|in:active,inactive',
-            'category_id' => 'nullable|exists:categories,id',
-    
+            'name'             => ['nullable', 'string', 'max:255'],
+            'price'            => ['nullable', 'numeric', 'between:0,99999999.99'],
+            'sku'              => ['required', 'string', Rule::unique('products', 'sku')],
+            'description'      => ['nullable', 'string'],
+            'image'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:10240'],
+            'product_type'     => ['nullable', 'in:simple,variable'],
+            'status'           => ['nullable', 'in:active,inactive'],
+            'category_id'      => ['nullable', 'exists:categories,id'],
+            'discount_percent' => ['nullable', 'numeric', 'between:0,100'], // Giảm giá 0 - 100%
+            'discount_start'   => ['nullable', 'date', 'before_or_equal:discount_end'],
+            'discount_end'     => ['nullable', 'date', 'after_or_equal:discount_start'],
+
             // 🚀 Kiểm tra biến thể (variants)
             'variants' => [
                 'nullable',
@@ -53,11 +52,17 @@ class ProductStoreRequest extends FormRequest
                 'string',
                 Rule::unique('product_variants', 'sku'),
             ],
-            'variants.*.price' => 'nullable|numeric|min:0',
-            'variants.*.stock' => 'required_if:product_type,variable|integer|min:0',
-    
+            'variants.*.discount_percent' => ['nullable', 'numeric', 'between:0,100'],
+            'variants.*.discount_start'   => ['nullable', 'date', 'before_or_equal:variants.*.discount_end'],
+            'variants.*.discount_end'     => ['nullable', 'date', 'after_or_equal:variants.*.discount_start'],
+            'variants.*.price' => ['required_if:product_type,variable', 'nullable', 'numeric', 'min:0'],
+            'variants.*.stock' => ['required_if:product_type,variable', 'integer', 'min:0'],
             // 🚀 Kiểm tra thuộc tính của biến thể
-            'variants.*.attributes' => 'required_if:product_type,variable|array|min:1',
+            'variants.*.attributes' => [
+                'required_if:product_type,variable',
+                'array',
+                'min:1'
+            ],
             'variants.*.attributes.*.attribute_id' => [
                 'required_if:product_type,variable',
                 'exists:attributes,id',
@@ -67,22 +72,22 @@ class ProductStoreRequest extends FormRequest
                 'exists:attribute_values,id',
                 function ($attribute, $value, $fail) {
                     $variantIndex = explode('.', $attribute)[1];
-                
+
                     // Lấy giá trị attribute_value
                     $attributeValue = \App\Models\AttributeValue::find($value);
                     if (!$attributeValue) {
                         return $fail("Giá trị thuộc tính không hợp lệ.");
                     }
-                
+
                     $attributeId = $attributeValue->attribute_id;
                     $variantAttributes = $this->input("variants.{$variantIndex}.attributes", []);
-                
+
                     // 🛑 Kiểm tra một biến thể có nhiều giá trị của cùng một thuộc tính không
                     $existingAttributes = collect($variantAttributes)->pluck('attribute_id');
                     if ($existingAttributes->duplicates()->isNotEmpty()) {
                         return $fail("Biến thể không thể có hai giá trị cho cùng một thuộc tính.");
                     }
-                
+
                     // 🛑 Kiểm tra trùng giá trị thuộc tính giữa các biến thể trong request
                     $variants = $this->input('variants', []);
                     foreach ($variants as $index => $variant) {
@@ -96,13 +101,18 @@ class ProductStoreRequest extends FormRequest
                     }
                 }
             ],
-    
+
             // 🚀 Kiểm tra ảnh của biến thể
-            'variants.*.images' => 'nullable|array',
-            'variants.*.images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'variants.*.images' => ['nullable', 'array', 'max:5'], // Tối đa 5 ảnh trên mỗi biến thể
+            'variants.*.images.*' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg,gif,svg',
+                'max:5120'
+            ],
         ];
     }
-    
+
     public function messages()
     {
         return [

@@ -16,6 +16,9 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained(); // Khóa ngoại liên kết với bảng products
             $table->string('sku')->unique(); // Mã SKU cho biến thể
             $table->decimal('price', 10, 2); // Giá của biến thể
+            $table->decimal('discount_percent', 5, 2)->nullable(); // Giảm giá theo %
+            $table->dateTime('discount_start')->nullable(); // Thời gian bắt đầu giảm giá
+            $table->dateTime('discount_end')->nullable(); // Thời gian kết thúc giảm giá
             $table->integer('stock')->default(0);
             $table->string('image')->nullable(); // Số lượng tồn kho
             $table->timestamps(); // Timestamps (created_at, updated_at)
