@@ -1,17 +1,13 @@
 import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import AttributeForm from "./AttributeForm";
+
 import NoImage from "../../../public/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
-import { Link, Outlet, useLocation, useParams } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 const Store = () => {
   const [value, setValue] = useState("");
   const [image, setImage] = useState<string | null>(null);
-  const [selectedComponent, setSelectedComponent] =
-    useState<JSX.Element | null>(null);
-  const [quantity, setQuantity] = useState<number>(1);
-  const [price, setPrice] = useState<number>(0);
-  const [variant, setVariant] = useState<string>("");
+ 
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
