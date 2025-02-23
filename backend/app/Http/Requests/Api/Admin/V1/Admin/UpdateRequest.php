@@ -11,7 +11,7 @@ class UpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,25 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:admins,email,' . $this->admin->id,
+            'password' => 'sometimes|min:8',
+            'role' => 'sometimes|exists:roles,name',
+            'position' => 'sometimes|string',
+            'department' => 'sometimes|string',
+            'status' => 'sometimes|in:active,inactive,blocked',
+            'reason' => 'required_with:role|string' // Lý do khi thay đổi role
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'email.unique' => 'Email đã tồn tại',
+            'password.min' => 'Mật khẩu tối thiểu 8 ký tự',
+            'role.exists' => 'Role không tồn tại',
+            'status.in' => 'Trạng thái không hợp lệ',
+            'reason.required_with' => 'Vui lòng nhập lý do thay đổi role'
         ];
     }
 }

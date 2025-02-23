@@ -4,11 +4,31 @@ namespace App\Http\Controllers\Api\Admin\V1;
 
 use App\Models\Admin;
 use Illuminate\Http\Request;
+use App\Services\AdminService;
+use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\Admin\V1\AdminResource;
+use App\Http\Requests\Api\Admin\V1\Admin\StoreRequest;
+use App\Http\Requests\Api\Admin\V1\Admin\UpdateRequest;
 
 class AdminController extends Controller
 {
+    protected $adminService;
+
+    /**
+     * Khởi tạo controller với service và middleware
+     * 
+     * @param AdminService $adminService
+     */
+    public function __construct(AdminService $adminService)
+    {
+        $this->adminService = $adminService;
+        // Kiểm tra quyền truy cập cho từng action
+        $this->middleware('permission:view_admins')->only('index', 'show');
+        $this->middleware('permission:create_admins')->only('store');
+        $this->middleware('permission:edit_admins')->only('update');
+        $this->middleware('permission:delete_admins')->only('destroy');
+    }
     /**
      * Format response API
      * 
@@ -25,74 +45,101 @@ class AdminController extends Controller
             'data' => $data
         ], $code);
     }
+
     /**
      * Lấy danh sách admin có phân trang
-     * Load thêm thông tin roles của admin
+     * Kèm theo danh sách roles cho frontend
+     * 
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        $admins = Admin::with('roles')->paginate(10);
+        $admins = $this->adminService->getAdminsWithRoles(10);
         return $this->responseJson(
             true,
             'Lấy danh sách admin thành công',
-            AdminResource::collection($admins)
+            [
+                'admins' => AdminResource::collection($admins),
+                'roles' => Role::all()->pluck('name'),
+                'pagination' => [
+                    'total' => $admins->total(),
+                    'per_page' => $admins->perPage(),
+                    'current_page' => $admins->currentPage(),
+                    'last_page' => $admins->lastPage()
+                ]
+            ]
         );
     }
 
     /**
      * Tạo mới tài khoản admin
-     * Gán role cho admin mới
+     * 
+     * @param StoreRequest $request Request đã validate
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(StoreRequest $request)
     {
-        $admin = Admin::create($request->validated());
-        $admin->assignRole($request->role);
-
+        $admin = $this->adminService->createAdminWithRole($request->validated());
         return $this->responseJson(
             true,
-            'Tạo tài khoản admin thành công',
-            new AdminResource($admin)
+            'Tạo admin thành công',
+            [
+                'admin' => new AdminResource($admin)
+            ]
         );
     }
 
     /**
-     * Xem chi tiết thông tin một admin
+     * Xem chi tiết thông tin admin
+     * Kèm theo danh sách roles cho form edit
+     * 
+     * @param Admin $admin Model binding
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(string $id)
+    public function show(Admin $admin)
     {
-        $admin = Admin::with('roles')->findOrFail($id);
+        $admin = $this->adminService->show($admin->id);
         return $this->responseJson(
             true,
             'Lấy thông tin admin thành công',
-            new AdminResource($admin)
+            [
+                'admin' => new AdminResource($admin),
+                'roles' => Role::all()->pluck('name')
+            ]
         );
     }
 
     /**
      * Cập nhật thông tin admin
-     * Cập nhật role nếu có thay đổi
+     * 
+     * @param UpdateRequest $request Request đã validate
+     * @param Admin $admin Model binding
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateRequest $request, Admin $admin)
     {
-        $admin->update($request->validated());
-
-        if ($request->role) {
-            $admin->syncRoles($request->role);
-        }
-
+        $admin = $this->adminService->updateAdminWithRole($admin->id, $request->validated());
         return $this->responseJson(
             true,
-            'Cập nhật thông tin admin thành công',
-            new AdminResource($admin)
+            'Cập nhật admin thành công',
+            [
+                'admin' => new AdminResource($admin)
+            ]
         );
     }
 
     /**
      * Xóa tài khoản admin
+     * 
+     * @param Admin $admin Model binding
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(string $id)
+    public function destroy(Admin $admin)
     {
-        $admin->delete();
-        return $this->responseJson(true, 'Xóa tài khoản admin thành công');
+        $this->adminService->deleteAdmin($admin->id);
+        return $this->responseJson(
+            true,
+            'Xóa admin thành công'
+        );
     }
 }
