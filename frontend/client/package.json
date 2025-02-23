@@ -5,13 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "json-server-auth db.json",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.7.2",
+    "@reduxjs/toolkit": "^2.5.1",
     "@tanstack/react-query": "^5.66.0",
+    "express": "^4.21.2",
+    "json-server": "^1.0.0-beta.3",
+    "json-server-auth": "^2.1.0",
     "react": "^18.3.1",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.1.5"
   },
@@ -26,6 +33,8 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
+    "json-server": "^0.17.4",
+    "json-server-auth": "^2.1.0",
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
     "vite": "^6.0.5"

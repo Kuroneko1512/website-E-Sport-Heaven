@@ -14,6 +14,7 @@ import Checkout from './pages/Checkout'
 import Register from './pages/Register'
 import ShippingAddress from './pages/ShippingAddress'
 import PaymentMethod from './pages/PaymentMethod'
+import Review from './pages/Review'
 
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
           <Route path='checkout' element={<Checkout />}/>
           <Route path='address' element={<ShippingAddress />}/>
           <Route path='payment' element={<PaymentMethod />}/>
+          <Route path='review' element={<Review />}/>
           
         </Route>
       </Routes>
