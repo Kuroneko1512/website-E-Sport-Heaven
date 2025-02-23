@@ -30,6 +30,7 @@ class CategoryStoreRequest extends FormRequest
         return [
             'name' => 'required|string|max:255|unique:categories,name',
             'description' => 'nullable|string|max:1000',
+            'parent_id' => 'nullable|exists:categories,id'
         ];
     }
     public function messages()
@@ -41,6 +42,7 @@ class CategoryStoreRequest extends FormRequest
             'name.unique' => 'Tên danh mục đã tồn tại.',
             'description.string' => 'Mô tả phải là chuỗi.',
             'description.max' => 'Mô tả không được vượt quá 1000 ký tự.',
+            'parent_id.exists'   => 'Danh mục không tồn tại trong hệ thống.',
         ];
     }
     protected function failedValidation(ValidationValidator $validator)
