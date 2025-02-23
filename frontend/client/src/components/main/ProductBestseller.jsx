@@ -36,6 +36,38 @@ const fakeData = [
     oldPrice: 50,
     image:
       "https://storage.googleapis.com/a1aa/image/MSTn7yA3fyZFHAGlWXBk7nhwiz0apOyrlCgC-ufECbM.jpg",
+  },{
+    id: 5,
+    name: "Printed Cotton T-Shirt",
+    brand: "Roadstar",
+    price: 38,
+    oldPrice: 50,
+    image:
+      "https://storage.googleapis.com/a1aa/image/MSTn7yA3fyZFHAGlWXBk7nhwiz0apOyrlCgC-ufECbM.jpg",
+  },{
+    id: 6,
+    name: "Printed Cotton T-Shirt",
+    brand: "Roadstar",
+    price: 38,
+    oldPrice: 50,
+    image:
+      "https://storage.googleapis.com/a1aa/image/MSTn7yA3fyZFHAGlWXBk7nhwiz0apOyrlCgC-ufECbM.jpg",
+  },{
+    id: 7,
+    name: "Printed Cotton T-Shirt",
+    brand: "Roadstar",
+    price: 38,
+    oldPrice: 50,
+    image:
+      "https://storage.googleapis.com/a1aa/image/MSTn7yA3fyZFHAGlWXBk7nhwiz0apOyrlCgC-ufECbM.jpg",
+  },{
+    id: 8,
+    name: "Printed Cotton T-Shirt",
+    brand: "Roadstar",
+    price: 38,
+    oldPrice: 50,
+    image:
+      "https://storage.googleapis.com/a1aa/image/MSTn7yA3fyZFHAGlWXBk7nhwiz0apOyrlCgC-ufECbM.jpg",
   },
 ];
 

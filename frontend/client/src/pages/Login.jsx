@@ -7,9 +7,9 @@ import { useMutation } from '@tanstack/react-query';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../redux/AuthSide';
+import instanceAxios from '../config/db';
 
 const Login = () => {
-    const [hidden, setHidden] = useState(true);
     const nav = useNavigate();
     const dispatch = useDispatch();
     const [success, setSuccess] = useState(false);
@@ -29,6 +29,9 @@ const Login = () => {
         },
         onError: async () => {
             setError(true);
+            setTimeout(() => {
+                setError(false);
+            }, 100);
             // message.error("Login failed. Please try again.");
         }
     });
