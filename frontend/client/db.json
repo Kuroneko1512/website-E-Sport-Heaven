@@ -27,17 +27,17 @@
             "M",
             "L"
         ],
-        "image": "https://hoanghamobile.com/tin-tuc/wp-content/uploads/2023/07/hinh-dep-5.jpg",
+        "image": "https://picsum.photos/id/1/300/300",
         "thumbnails": [
             "https://picsum.photos/id/1/100/100",
             "https://picsum.photos/id/1/100/100"
         ],
         "description": "Description for Product 1",
-        "fiveStart": 4.5,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -62,11 +62,11 @@
             "https://picsum.photos/id/2/100/100"
         ],
         "description": "Description for Product 2",
-        "fiveStart": 5.0,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -88,11 +88,11 @@
             "https://picsum.photos/id/3/100/100"
         ],
         "description": "Description for Product 3",
-        "fiveStart": 5.5,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -115,11 +115,11 @@
             "https://picsum.photos/id/4/100/100"
         ],
         "description": "Description for Product 4",
-        "fiveStart": 6.0,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -145,11 +145,11 @@
             "https://picsum.photos/id/5/100/100"
         ],
         "description": "Description for Product 5",
-        "fiveStart": 4.0,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -170,11 +170,11 @@
             "https://picsum.photos/id/6/100/100"
         ],
         "description": "Description for Product 6",
-        "fiveStart": 4.5,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -198,11 +198,11 @@
             "https://picsum.photos/id/7/100/100"
         ],
         "description": "Description for Product 7",
-        "fiveStart": 5.0,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -227,11 +227,11 @@
             "https://picsum.photos/id/8/100/100"
         ],
         "description": "Description for Product 8",
-        "fiveStart": 5.5,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -253,11 +253,11 @@
             "https://picsum.photos/id/9/100/100"
         ],
         "description": "Description for Product 9",
-        "fiveStart": 6.0,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -280,11 +280,11 @@
             "https://picsum.photos/id/10/100/100"
         ],
         "description": "Description for Product 10",
-        "fiveStart": 4.0,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -310,11 +310,11 @@
             "https://picsum.photos/id/11/100/100"
         ],
         "description": "Description for Product 11",
-        "fiveStart": 4.5,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -335,11 +335,11 @@
             "https://picsum.photos/id/12/100/100"
         ],
         "description": "Description for Product 12",
-        "fiveStart": 5.0,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -363,11 +363,11 @@
             "https://picsum.photos/id/13/100/100"
         ],
         "description": "Description for Product 13",
-        "fiveStart": 5.5,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -392,11 +392,11 @@
             "https://picsum.photos/id/14/100/100"
         ],
         "description": "Description for Product 14",
-        "fiveStart": 6.0,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -418,11 +418,11 @@
             "https://picsum.photos/id/15/100/100"
         ],
         "description": "Description for Product 15",
-        "fiveStart": 4.0,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -445,11 +445,11 @@
             "https://picsum.photos/id/16/100/100"
         ],
         "description": "Description for Product 16",
-        "fiveStart": 4.5,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -475,11 +475,11 @@
             "https://picsum.photos/id/17/100/100"
         ],
         "description": "Description for Product 17",
-        "fiveStart": 5.0,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -500,11 +500,11 @@
             "https://picsum.photos/id/18/100/100"
         ],
         "description": "Description for Product 18",
-        "fiveStart": 5.5,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -528,11 +528,11 @@
             "https://picsum.photos/id/19/100/100"
         ],
         "description": "Description for Product 19",
-        "fiveStart": 6.0,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -557,11 +557,11 @@
             "https://picsum.photos/id/20/100/100"
         ],
         "description": "Description for Product 20",
-        "fiveStart": 4.0,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -583,11 +583,11 @@
             "https://picsum.photos/id/21/100/100"
         ],
         "description": "Description for Product 21",
-        "fiveStart": 4.5,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -610,11 +610,11 @@
             "https://picsum.photos/id/22/100/100"
         ],
         "description": "Description for Product 22",
-        "fiveStart": 5.0,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -640,11 +640,11 @@
             "https://picsum.photos/id/23/100/100"
         ],
         "description": "Description for Product 23",
-        "fiveStart": 5.5,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -665,11 +665,11 @@
             "https://picsum.photos/id/24/100/100"
         ],
         "description": "Description for Product 24",
-        "fiveStart": 6.0,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -693,11 +693,11 @@
             "https://picsum.photos/id/25/100/100"
         ],
         "description": "Description for Product 25",
-        "fiveStart": 4.0,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -722,11 +722,11 @@
             "https://picsum.photos/id/26/100/100"
         ],
         "description": "Description for Product 26",
-        "fiveStart": 4.5,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -748,11 +748,11 @@
             "https://picsum.photos/id/27/100/100"
         ],
         "description": "Description for Product 27",
-        "fiveStart": 5.0,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -775,11 +775,11 @@
             "https://picsum.photos/id/28/100/100"
         ],
         "description": "Description for Product 28",
-        "fiveStart": 5.5,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -805,11 +805,11 @@
             "https://picsum.photos/id/29/100/100"
         ],
         "description": "Description for Product 29",
-        "fiveStart": 6.0,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -830,11 +830,11 @@
             "https://picsum.photos/id/30/100/100"
         ],
         "description": "Description for Product 30",
-        "fiveStart": 4.0,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -858,11 +858,11 @@
             "https://picsum.photos/id/31/100/100"
         ],
         "description": "Description for Product 31",
-        "fiveStart": 4.5,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -887,11 +887,11 @@
             "https://picsum.photos/id/32/100/100"
         ],
         "description": "Description for Product 32",
-        "fiveStart": 5.0,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -913,11 +913,11 @@
             "https://picsum.photos/id/33/100/100"
         ],
         "description": "Description for Product 33",
-        "fiveStart": 5.5,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -940,11 +940,11 @@
             "https://picsum.photos/id/34/100/100"
         ],
         "description": "Description for Product 34",
-        "fiveStart": 6.0,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -970,11 +970,11 @@
             "https://picsum.photos/id/35/100/100"
         ],
         "description": "Description for Product 35",
-        "fiveStart": 4.0,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -995,11 +995,11 @@
             "https://picsum.photos/id/36/100/100"
         ],
         "description": "Description for Product 36",
-        "fiveStart": 4.5,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1023,11 +1023,11 @@
             "https://picsum.photos/id/37/100/100"
         ],
         "description": "Description for Product 37",
-        "fiveStart": 5.0,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1052,11 +1052,11 @@
             "https://picsum.photos/id/38/100/100"
         ],
         "description": "Description for Product 38",
-        "fiveStart": 5.5,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1078,11 +1078,11 @@
             "https://picsum.photos/id/39/100/100"
         ],
         "description": "Description for Product 39",
-        "fiveStart": 6.0,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1105,11 +1105,11 @@
             "https://picsum.photos/id/40/100/100"
         ],
         "description": "Description for Product 40",
-        "fiveStart": 4.0,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1135,11 +1135,11 @@
             "https://picsum.photos/id/41/100/100"
         ],
         "description": "Description for Product 41",
-        "fiveStart": 4.5,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1160,11 +1160,11 @@
             "https://picsum.photos/id/42/100/100"
         ],
         "description": "Description for Product 42",
-        "fiveStart": 5.0,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1188,11 +1188,11 @@
             "https://picsum.photos/id/43/100/100"
         ],
         "description": "Description for Product 43",
-        "fiveStart": 5.5,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1217,11 +1217,11 @@
             "https://picsum.photos/id/44/100/100"
         ],
         "description": "Description for Product 44",
-        "fiveStart": 6.0,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1243,11 +1243,11 @@
             "https://picsum.photos/id/45/100/100"
         ],
         "description": "Description for Product 45",
-        "fiveStart": 4.0,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1270,11 +1270,11 @@
             "https://picsum.photos/id/46/100/100"
         ],
         "description": "Description for Product 46",
-        "fiveStart": 4.5,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1300,11 +1300,11 @@
             "https://picsum.photos/id/47/100/100"
         ],
         "description": "Description for Product 47",
-        "fiveStart": 5.0,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1325,11 +1325,11 @@
             "https://picsum.photos/id/48/100/100"
         ],
         "description": "Description for Product 48",
-        "fiveStart": 5.5,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1353,11 +1353,11 @@
             "https://picsum.photos/id/49/100/100"
         ],
         "description": "Description for Product 49",
-        "fiveStart": 6.0,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1382,11 +1382,11 @@
             "https://picsum.photos/id/50/100/100"
         ],
         "description": "Description for Product 50",
-        "fiveStart": 4.0,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1408,11 +1408,11 @@
             "https://picsum.photos/id/51/100/100"
         ],
         "description": "Description for Product 51",
-        "fiveStart": 4.5,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1435,11 +1435,11 @@
             "https://picsum.photos/id/52/100/100"
         ],
         "description": "Description for Product 52",
-        "fiveStart": 5.0,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1465,11 +1465,11 @@
             "https://picsum.photos/id/53/100/100"
         ],
         "description": "Description for Product 53",
-        "fiveStart": 5.5,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1490,11 +1490,11 @@
             "https://picsum.photos/id/54/100/100"
         ],
         "description": "Description for Product 54",
-        "fiveStart": 6.0,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1518,11 +1518,11 @@
             "https://picsum.photos/id/55/100/100"
         ],
         "description": "Description for Product 55",
-        "fiveStart": 4.0,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1547,11 +1547,11 @@
             "https://picsum.photos/id/56/100/100"
         ],
         "description": "Description for Product 56",
-        "fiveStart": 4.5,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1573,11 +1573,11 @@
             "https://picsum.photos/id/57/100/100"
         ],
         "description": "Description for Product 57",
-        "fiveStart": 5.0,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1600,11 +1600,11 @@
             "https://picsum.photos/id/58/100/100"
         ],
         "description": "Description for Product 58",
-        "fiveStart": 5.5,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1630,11 +1630,11 @@
             "https://picsum.photos/id/59/100/100"
         ],
         "description": "Description for Product 59",
-        "fiveStart": 6.0,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1655,11 +1655,11 @@
             "https://picsum.photos/id/60/100/100"
         ],
         "description": "Description for Product 60",
-        "fiveStart": 4.0,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1683,11 +1683,11 @@
             "https://picsum.photos/id/61/100/100"
         ],
         "description": "Description for Product 61",
-        "fiveStart": 4.5,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1712,11 +1712,11 @@
             "https://picsum.photos/id/62/100/100"
         ],
         "description": "Description for Product 62",
-        "fiveStart": 5.0,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1738,11 +1738,11 @@
             "https://picsum.photos/id/63/100/100"
         ],
         "description": "Description for Product 63",
-        "fiveStart": 5.5,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1765,11 +1765,11 @@
             "https://picsum.photos/id/64/100/100"
         ],
         "description": "Description for Product 64",
-        "fiveStart": 6.0,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1795,11 +1795,11 @@
             "https://picsum.photos/id/65/100/100"
         ],
         "description": "Description for Product 65",
-        "fiveStart": 4.0,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1820,11 +1820,11 @@
             "https://picsum.photos/id/66/100/100"
         ],
         "description": "Description for Product 66",
-        "fiveStart": 4.5,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1848,11 +1848,11 @@
             "https://picsum.photos/id/67/100/100"
         ],
         "description": "Description for Product 67",
-        "fiveStart": 5.0,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1877,11 +1877,11 @@
             "https://picsum.photos/id/68/100/100"
         ],
         "description": "Description for Product 68",
-        "fiveStart": 5.5,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1903,11 +1903,11 @@
             "https://picsum.photos/id/69/100/100"
         ],
         "description": "Description for Product 69",
-        "fiveStart": 6.0,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1930,11 +1930,11 @@
             "https://picsum.photos/id/70/100/100"
         ],
         "description": "Description for Product 70",
-        "fiveStart": 4.0,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -1960,11 +1960,11 @@
             "https://picsum.photos/id/71/100/100"
         ],
         "description": "Description for Product 71",
-        "fiveStart": 4.5,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -1985,11 +1985,11 @@
             "https://picsum.photos/id/72/100/100"
         ],
         "description": "Description for Product 72",
-        "fiveStart": 5.0,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2013,11 +2013,11 @@
             "https://picsum.photos/id/73/100/100"
         ],
         "description": "Description for Product 73",
-        "fiveStart": 5.5,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2042,11 +2042,11 @@
             "https://picsum.photos/id/74/100/100"
         ],
         "description": "Description for Product 74",
-        "fiveStart": 6.0,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2068,11 +2068,11 @@
             "https://picsum.photos/id/75/100/100"
         ],
         "description": "Description for Product 75",
-        "fiveStart": 4.0,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2095,11 +2095,11 @@
             "https://picsum.photos/id/76/100/100"
         ],
         "description": "Description for Product 76",
-        "fiveStart": 4.5,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2125,11 +2125,11 @@
             "https://picsum.photos/id/77/100/100"
         ],
         "description": "Description for Product 77",
-        "fiveStart": 5.0,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2150,11 +2150,11 @@
             "https://picsum.photos/id/78/100/100"
         ],
         "description": "Description for Product 78",
-        "fiveStart": 5.5,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2178,11 +2178,11 @@
             "https://picsum.photos/id/79/100/100"
         ],
         "description": "Description for Product 79",
-        "fiveStart": 6.0,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2207,11 +2207,11 @@
             "https://picsum.photos/id/80/100/100"
         ],
         "description": "Description for Product 80",
-        "fiveStart": 4.0,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2233,11 +2233,11 @@
             "https://picsum.photos/id/81/100/100"
         ],
         "description": "Description for Product 81",
-        "fiveStart": 4.5,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2260,11 +2260,11 @@
             "https://picsum.photos/id/82/100/100"
         ],
         "description": "Description for Product 82",
-        "fiveStart": 5.0,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2290,11 +2290,11 @@
             "https://picsum.photos/id/83/100/100"
         ],
         "description": "Description for Product 83",
-        "fiveStart": 5.5,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2315,11 +2315,11 @@
             "https://picsum.photos/id/84/100/100"
         ],
         "description": "Description for Product 84",
-        "fiveStart": 6.0,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2343,11 +2343,11 @@
             "https://picsum.photos/id/85/100/100"
         ],
         "description": "Description for Product 85",
-        "fiveStart": 4.0,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2372,11 +2372,11 @@
             "https://picsum.photos/id/86/100/100"
         ],
         "description": "Description for Product 86",
-        "fiveStart": 4.5,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2398,11 +2398,11 @@
             "https://picsum.photos/id/87/100/100"
         ],
         "description": "Description for Product 87",
-        "fiveStart": 5.0,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2425,11 +2425,11 @@
             "https://picsum.photos/id/88/100/100"
         ],
         "description": "Description for Product 88",
-        "fiveStart": 5.5,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2455,11 +2455,11 @@
             "https://picsum.photos/id/89/100/100"
         ],
         "description": "Description for Product 89",
-        "fiveStart": 6.0,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2480,11 +2480,11 @@
             "https://picsum.photos/id/90/100/100"
         ],
         "description": "Description for Product 90",
-        "fiveStart": 4.0,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2508,11 +2508,11 @@
             "https://picsum.photos/id/91/100/100"
         ],
         "description": "Description for Product 91",
-        "fiveStart": 4.5,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2537,11 +2537,11 @@
             "https://picsum.photos/id/92/100/100"
         ],
         "description": "Description for Product 92",
-        "fiveStart": 5.0,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2563,11 +2563,11 @@
             "https://picsum.photos/id/93/100/100"
         ],
         "description": "Description for Product 93",
-        "fiveStart": 5.5,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2590,11 +2590,11 @@
             "https://picsum.photos/id/94/100/100"
         ],
         "description": "Description for Product 94",
-        "fiveStart": 6.0,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2620,11 +2620,11 @@
             "https://picsum.photos/id/95/100/100"
         ],
         "description": "Description for Product 95",
-        "fiveStart": 4.0,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2645,11 +2645,11 @@
             "https://picsum.photos/id/96/100/100"
         ],
         "description": "Description for Product 96",
-        "fiveStart": 4.5,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2673,11 +2673,11 @@
             "https://picsum.photos/id/97/100/100"
         ],
         "description": "Description for Product 97",
-        "fiveStart": 5.0,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2702,11 +2702,11 @@
             "https://picsum.photos/id/98/100/100"
         ],
         "description": "Description for Product 98",
-        "fiveStart": 5.5,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2728,11 +2728,11 @@
             "https://picsum.photos/id/99/100/100"
         ],
         "description": "Description for Product 99",
-        "fiveStart": 6.0,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2755,11 +2755,11 @@
             "https://picsum.photos/id/100/100/100"
         ],
         "description": "Description for Product 100",
-        "fiveStart": 4.0,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2785,11 +2785,11 @@
             "https://picsum.photos/id/101/100/100"
         ],
         "description": "Description for Product 101",
-        "fiveStart": 4.5,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2810,11 +2810,11 @@
             "https://picsum.photos/id/102/100/100"
         ],
         "description": "Description for Product 102",
-        "fiveStart": 5.0,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2838,11 +2838,11 @@
             "https://picsum.photos/id/103/100/100"
         ],
         "description": "Description for Product 103",
-        "fiveStart": 5.5,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2867,11 +2867,11 @@
             "https://picsum.photos/id/104/100/100"
         ],
         "description": "Description for Product 104",
-        "fiveStart": 6.0,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2893,11 +2893,11 @@
             "https://picsum.photos/id/105/100/100"
         ],
         "description": "Description for Product 105",
-        "fiveStart": 4.0,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2920,11 +2920,11 @@
             "https://picsum.photos/id/106/100/100"
         ],
         "description": "Description for Product 106",
-        "fiveStart": 4.5,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -2950,11 +2950,11 @@
             "https://picsum.photos/id/107/100/100"
         ],
         "description": "Description for Product 107",
-        "fiveStart": 5.0,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -2975,11 +2975,11 @@
             "https://picsum.photos/id/108/100/100"
         ],
         "description": "Description for Product 108",
-        "fiveStart": 5.5,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3003,11 +3003,11 @@
             "https://picsum.photos/id/109/100/100"
         ],
         "description": "Description for Product 109",
-        "fiveStart": 6.0,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3032,11 +3032,11 @@
             "https://picsum.photos/id/110/100/100"
         ],
         "description": "Description for Product 110",
-        "fiveStart": 4.0,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3058,11 +3058,11 @@
             "https://picsum.photos/id/111/100/100"
         ],
         "description": "Description for Product 111",
-        "fiveStart": 4.5,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3085,11 +3085,11 @@
             "https://picsum.photos/id/112/100/100"
         ],
         "description": "Description for Product 112",
-        "fiveStart": 5.0,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3115,11 +3115,11 @@
             "https://picsum.photos/id/113/100/100"
         ],
         "description": "Description for Product 113",
-        "fiveStart": 5.5,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3140,11 +3140,11 @@
             "https://picsum.photos/id/114/100/100"
         ],
         "description": "Description for Product 114",
-        "fiveStart": 6.0,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3168,11 +3168,11 @@
             "https://picsum.photos/id/115/100/100"
         ],
         "description": "Description for Product 115",
-        "fiveStart": 4.0,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3197,11 +3197,11 @@
             "https://picsum.photos/id/116/100/100"
         ],
         "description": "Description for Product 116",
-        "fiveStart": 4.5,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3223,11 +3223,11 @@
             "https://picsum.photos/id/117/100/100"
         ],
         "description": "Description for Product 117",
-        "fiveStart": 5.0,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3250,11 +3250,11 @@
             "https://picsum.photos/id/118/100/100"
         ],
         "description": "Description for Product 118",
-        "fiveStart": 5.5,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3280,11 +3280,11 @@
             "https://picsum.photos/id/119/100/100"
         ],
         "description": "Description for Product 119",
-        "fiveStart": 6.0,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3305,11 +3305,11 @@
             "https://picsum.photos/id/120/100/100"
         ],
         "description": "Description for Product 120",
-        "fiveStart": 4.0,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3333,11 +3333,11 @@
             "https://picsum.photos/id/121/100/100"
         ],
         "description": "Description for Product 121",
-        "fiveStart": 4.5,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3362,11 +3362,11 @@
             "https://picsum.photos/id/122/100/100"
         ],
         "description": "Description for Product 122",
-        "fiveStart": 5.0,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3388,11 +3388,11 @@
             "https://picsum.photos/id/123/100/100"
         ],
         "description": "Description for Product 123",
-        "fiveStart": 5.5,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3415,11 +3415,11 @@
             "https://picsum.photos/id/124/100/100"
         ],
         "description": "Description for Product 124",
-        "fiveStart": 6.0,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3445,11 +3445,11 @@
             "https://picsum.photos/id/125/100/100"
         ],
         "description": "Description for Product 125",
-        "fiveStart": 4.0,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3470,11 +3470,11 @@
             "https://picsum.photos/id/126/100/100"
         ],
         "description": "Description for Product 126",
-        "fiveStart": 4.5,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3498,11 +3498,11 @@
             "https://picsum.photos/id/127/100/100"
         ],
         "description": "Description for Product 127",
-        "fiveStart": 5.0,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3527,11 +3527,11 @@
             "https://picsum.photos/id/128/100/100"
         ],
         "description": "Description for Product 128",
-        "fiveStart": 5.5,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3553,11 +3553,11 @@
             "https://picsum.photos/id/129/100/100"
         ],
         "description": "Description for Product 129",
-        "fiveStart": 6.0,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3580,11 +3580,11 @@
             "https://picsum.photos/id/130/100/100"
         ],
         "description": "Description for Product 130",
-        "fiveStart": 4.0,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3610,11 +3610,11 @@
             "https://picsum.photos/id/131/100/100"
         ],
         "description": "Description for Product 131",
-        "fiveStart": 4.5,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3635,11 +3635,11 @@
             "https://picsum.photos/id/132/100/100"
         ],
         "description": "Description for Product 132",
-        "fiveStart": 5.0,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3663,11 +3663,11 @@
             "https://picsum.photos/id/133/100/100"
         ],
         "description": "Description for Product 133",
-        "fiveStart": 5.5,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3692,11 +3692,11 @@
             "https://picsum.photos/id/134/100/100"
         ],
         "description": "Description for Product 134",
-        "fiveStart": 6.0,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3718,11 +3718,11 @@
             "https://picsum.photos/id/135/100/100"
         ],
         "description": "Description for Product 135",
-        "fiveStart": 4.0,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3745,11 +3745,11 @@
             "https://picsum.photos/id/136/100/100"
         ],
         "description": "Description for Product 136",
-        "fiveStart": 4.5,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3775,11 +3775,11 @@
             "https://picsum.photos/id/137/100/100"
         ],
         "description": "Description for Product 137",
-        "fiveStart": 5.0,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3800,11 +3800,11 @@
             "https://picsum.photos/id/138/100/100"
         ],
         "description": "Description for Product 138",
-        "fiveStart": 5.5,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3828,11 +3828,11 @@
             "https://picsum.photos/id/139/100/100"
         ],
         "description": "Description for Product 139",
-        "fiveStart": 6.0,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3857,11 +3857,11 @@
             "https://picsum.photos/id/140/100/100"
         ],
         "description": "Description for Product 140",
-        "fiveStart": 4.0,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3883,11 +3883,11 @@
             "https://picsum.photos/id/141/100/100"
         ],
         "description": "Description for Product 141",
-        "fiveStart": 4.5,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3910,11 +3910,11 @@
             "https://picsum.photos/id/142/100/100"
         ],
         "description": "Description for Product 142",
-        "fiveStart": 5.0,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3940,11 +3940,11 @@
             "https://picsum.photos/id/143/100/100"
         ],
         "description": "Description for Product 143",
-        "fiveStart": 5.5,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -3965,11 +3965,11 @@
             "https://picsum.photos/id/144/100/100"
         ],
         "description": "Description for Product 144",
-        "fiveStart": 6.0,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -3993,11 +3993,11 @@
             "https://picsum.photos/id/145/100/100"
         ],
         "description": "Description for Product 145",
-        "fiveStart": 4.0,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4022,11 +4022,11 @@
             "https://picsum.photos/id/146/100/100"
         ],
         "description": "Description for Product 146",
-        "fiveStart": 4.5,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4048,11 +4048,11 @@
             "https://picsum.photos/id/147/100/100"
         ],
         "description": "Description for Product 147",
-        "fiveStart": 5.0,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4075,11 +4075,11 @@
             "https://picsum.photos/id/148/100/100"
         ],
         "description": "Description for Product 148",
-        "fiveStart": 5.5,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4105,11 +4105,11 @@
             "https://picsum.photos/id/149/100/100"
         ],
         "description": "Description for Product 149",
-        "fiveStart": 6.0,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4130,11 +4130,11 @@
             "https://picsum.photos/id/150/100/100"
         ],
         "description": "Description for Product 150",
-        "fiveStart": 4.0,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4158,11 +4158,11 @@
             "https://picsum.photos/id/151/100/100"
         ],
         "description": "Description for Product 151",
-        "fiveStart": 4.5,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4187,11 +4187,11 @@
             "https://picsum.photos/id/152/100/100"
         ],
         "description": "Description for Product 152",
-        "fiveStart": 5.0,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4213,11 +4213,11 @@
             "https://picsum.photos/id/153/100/100"
         ],
         "description": "Description for Product 153",
-        "fiveStart": 5.5,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4240,11 +4240,11 @@
             "https://picsum.photos/id/154/100/100"
         ],
         "description": "Description for Product 154",
-        "fiveStart": 6.0,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4270,11 +4270,11 @@
             "https://picsum.photos/id/155/100/100"
         ],
         "description": "Description for Product 155",
-        "fiveStart": 4.0,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4295,11 +4295,11 @@
             "https://picsum.photos/id/156/100/100"
         ],
         "description": "Description for Product 156",
-        "fiveStart": 4.5,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4323,11 +4323,11 @@
             "https://picsum.photos/id/157/100/100"
         ],
         "description": "Description for Product 157",
-        "fiveStart": 5.0,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4352,11 +4352,11 @@
             "https://picsum.photos/id/158/100/100"
         ],
         "description": "Description for Product 158",
-        "fiveStart": 5.5,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4378,11 +4378,11 @@
             "https://picsum.photos/id/159/100/100"
         ],
         "description": "Description for Product 159",
-        "fiveStart": 6.0,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4405,11 +4405,11 @@
             "https://picsum.photos/id/160/100/100"
         ],
         "description": "Description for Product 160",
-        "fiveStart": 4.0,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4435,11 +4435,11 @@
             "https://picsum.photos/id/161/100/100"
         ],
         "description": "Description for Product 161",
-        "fiveStart": 4.5,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4460,11 +4460,11 @@
             "https://picsum.photos/id/162/100/100"
         ],
         "description": "Description for Product 162",
-        "fiveStart": 5.0,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4488,11 +4488,11 @@
             "https://picsum.photos/id/163/100/100"
         ],
         "description": "Description for Product 163",
-        "fiveStart": 5.5,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4517,11 +4517,11 @@
             "https://picsum.photos/id/164/100/100"
         ],
         "description": "Description for Product 164",
-        "fiveStart": 6.0,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4543,11 +4543,11 @@
             "https://picsum.photos/id/165/100/100"
         ],
         "description": "Description for Product 165",
-        "fiveStart": 4.0,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4570,11 +4570,11 @@
             "https://picsum.photos/id/166/100/100"
         ],
         "description": "Description for Product 166",
-        "fiveStart": 4.5,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4600,11 +4600,11 @@
             "https://picsum.photos/id/167/100/100"
         ],
         "description": "Description for Product 167",
-        "fiveStart": 5.0,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4625,11 +4625,11 @@
             "https://picsum.photos/id/168/100/100"
         ],
         "description": "Description for Product 168",
-        "fiveStart": 5.5,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4653,11 +4653,11 @@
             "https://picsum.photos/id/169/100/100"
         ],
         "description": "Description for Product 169",
-        "fiveStart": 6.0,
-        "fourStart": 3.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4682,11 +4682,11 @@
             "https://picsum.photos/id/170/100/100"
         ],
         "description": "Description for Product 170",
-        "fiveStart": 4.0,
-        "fourStart": 4.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4708,11 +4708,11 @@
             "https://picsum.photos/id/171/100/100"
         ],
         "description": "Description for Product 171",
-        "fiveStart": 4.5,
-        "fourStart": 4.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4735,11 +4735,11 @@
             "https://picsum.photos/id/172/100/100"
         ],
         "description": "Description for Product 172",
-        "fiveStart": 5.0,
-        "fourStart": 3.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4765,11 +4765,11 @@
             "https://picsum.photos/id/173/100/100"
         ],
         "description": "Description for Product 173",
-        "fiveStart": 5.5,
-        "fourStart": 3.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4790,11 +4790,11 @@
             "https://picsum.photos/id/174/100/100"
         ],
         "description": "Description for Product 174",
-        "fiveStart": 6.0,
-        "fourStart": 4.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4818,11 +4818,11 @@
             "https://picsum.photos/id/175/100/100"
         ],
         "description": "Description for Product 175",
-        "fiveStart": 4.0,
-        "fourStart": 4.5,
-        "threeStart": 2.5,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4847,11 +4847,11 @@
             "https://picsum.photos/id/176/100/100"
         ],
         "description": "Description for Product 176",
-        "fiveStart": 4.5,
-        "fourStart": 3.0,
-        "threeStart": 3.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 3,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4873,11 +4873,11 @@
             "https://picsum.photos/id/177/100/100"
         ],
         "description": "Description for Product 177",
-        "fiveStart": 5.0,
-        "fourStart": 3.5,
-        "threeStart": 2.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 5,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4900,11 +4900,11 @@
             "https://picsum.photos/id/178/100/100"
         ],
         "description": "Description for Product 178",
-        "fiveStart": 5.5,
-        "fourStart": 4.0,
-        "threeStart": 2.5,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     },
     {
@@ -4930,11 +4930,11 @@
             "https://picsum.photos/id/179/100/100"
         ],
         "description": "Description for Product 179",
-        "fiveStart": 6.0,
-        "fourStart": 4.5,
-        "threeStart": 3.0,
-        "twoStart": 1.5,
-        "oneStart": 0.0,
+        "fiveStart": 6,
+        "fourStart": 4,
+        "threeStart": 3,
+        "twoStart": 2,
+        "oneStart": 0,
         "fav": false
     },
     {
@@ -4955,14 +4955,14 @@
             "https://picsum.photos/id/180/100/100"
         ],
         "description": "Description for Product 180",
-        "fiveStart": 4.0,
-        "fourStart": 3.0,
-        "threeStart": 2.0,
-        "twoStart": 1.0,
-        "oneStart": 0.0,
+        "fiveStart": 4,
+        "fourStart": 3,
+        "threeStart": 2,
+        "twoStart": 1,
+        "oneStart": 0,
         "fav": true
     }
-  ],
+    ],
   "deals":{
     "endTime": "2025-03-01T23:59:59Z"
   }

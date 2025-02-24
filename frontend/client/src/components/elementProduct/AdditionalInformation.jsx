@@ -1,13 +1,23 @@
+import { useQuery } from '@tanstack/react-query';
 import React from 'react'
-import { fakeData } from '../../pages/ProductDetail'
+import { useParams } from 'react-router-dom';
+// import { fakeData } from '../../pages/ProductDetail'
 
-const AdditionalInformation = () => {
-    const {size, color} = fakeData
-    
+
+const Description = () => {
+
+  const {id} = useParams()
+
+  const {data, isLoading, isError} = useQuery({
+    queryKey: ["product", id],
+    queryFn: async () => {
+      return await instanceAxios.get(`/products/${id}`);
+    }
+  })
+
+    const {description} = data?.data
   return (
-    <div><span className='font-bold'>Size:</span> {size.map((item, index) => item + " ")} 
-    <br /><span className='font-bold'>Color:</span> {color.map((item, index) => item + " ")}</div>
+    <div>{description}</div>
   )
 }
-
-export default AdditionalInformation
+export default Description
