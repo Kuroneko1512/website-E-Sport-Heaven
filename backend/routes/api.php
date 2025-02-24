@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Attribute\V1\AttributeValueController as V1Attribut
 use App\Http\Controllers\Api\Product\V1\ProductController as V1ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,4 +23,10 @@ require __DIR__.'/api_v1.php';
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::resource('/attribute',AttributeController::class);
+Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
+Route::resource('/attributeValue',AttributeValueController::class)->except(['index']);
+Route::resource('/category', CategoryController::class); //Category
+
    
