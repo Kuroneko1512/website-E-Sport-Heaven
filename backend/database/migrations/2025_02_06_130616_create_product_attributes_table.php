@@ -13,12 +13,11 @@ return new class extends Migration
     {
         Schema::create('product_attributes', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
-            $table->decimal('price', 10, 2)->nullable();
-            $table->string('sku')->nullable();
-            $table->text('description')->nullable();
-            $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
+            $table->foreignId('product_variant_id')->constrained('product_variants');
+            $table->foreignId('attribute_value_id')->constrained('attribute_values'); 
+            $table->foreignId('attribute_id')->constrained('attributes');
             $table->timestamps();
+            $table->unique(['product_variant_id', 'attribute_id']);
         });
     }
 

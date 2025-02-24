@@ -108,6 +108,7 @@ const Header = ({ containered, ...rest }: { containered?: boolean } & any) => {
               Profile
             </Link>
           </li>
+         
         </ul>
         <ul className="navbar-nav ml-auto">
           <MessagesDropdown />
