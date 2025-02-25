@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import instanceAxios from "../../config/db";
+import { Link } from "react-router-dom";
 
 const DealsOfTheMonth = () => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, mins: 0, secs: 0 });
@@ -55,7 +56,7 @@ const DealsOfTheMonth = () => {
             ))}
           </div>
           <button className="bg-black text-white px-6 py-3 rounded-lg shadow-md hover:bg-gray-800 transition duration-300 flex items-center">
-            View All Products
+            <Link to={`shop`} >View All Products</Link>
             <span className="ml-2">→</span>
           </button>
         </div>
