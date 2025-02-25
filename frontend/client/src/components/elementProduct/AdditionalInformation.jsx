@@ -1,10 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
 import React from 'react'
-import { useParams } from 'react-router-dom';
-// import { fakeData } from '../../pages/ProductDetail'
+import { useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 
-
-const Description = () => {
+const AdditionalInformation = () => {
 
   const {id} = useParams()
 
@@ -15,9 +13,13 @@ const Description = () => {
     }
   })
 
-    const {description} = data?.data
+
+    const {size, color} = data?.data
+    
   return (
-    <div>{description}</div>
+    <div><span className='font-bold'>Size:</span> {size.map((item, index) => item + " ")} 
+    <br /><span className='font-bold'>Color:</span> {color.map((item, index) => item + " ")}</div>
   )
 }
-export default Description
+
+export default AdditionalInformation
