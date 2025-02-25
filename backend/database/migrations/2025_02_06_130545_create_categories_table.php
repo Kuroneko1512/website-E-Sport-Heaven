@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreign('parent_id')->references('id')->on('categories')->onDelete('cascade'); // Khóa ngoại tham chiếu đến bảng categories
             $table->text('description')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

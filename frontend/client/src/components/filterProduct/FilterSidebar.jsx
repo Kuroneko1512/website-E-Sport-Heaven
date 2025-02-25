@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { Slider, Checkbox } from "antd";
 
 const FilterSidebar = ({ filters, setFilters, categories, colors, sizes }) => {
