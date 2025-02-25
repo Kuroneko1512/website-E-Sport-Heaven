@@ -97,5 +97,22 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string',
+        ]);
+
+        $result = $this->orderService->updateStatus($id, $request->status);
+
+        if (!$result['success']) {
+            return response()->json(['message' => $result['message']], 404);
+        }
+
+        return response()->json([
+            'message' => $result['message'],
+            'data' => $result['data']
+        ]);
+    }
 
 }

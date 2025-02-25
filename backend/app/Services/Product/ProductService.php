@@ -30,6 +30,10 @@ class ProductService extends BaseService
         $isVariable = $data['product_type'] === 'variable';
         // Gọi service để tạo mới thuộc tính
         $product = $this->model->create($data);
+        if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
+            $imagePath = $data['image']->store('products', 'public');
+            $product->update(['image' => $imagePath]);
+        }
         if ($isVariable) {
 
             // Kiểm tra và tạo biến thể cho sản phẩm
