@@ -137,7 +137,7 @@ const RightNavbar = () => {
           <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg z-50 transition-all duration-300">
             {open && (
               <>
-                <Link to="/profile" className="block px-3 py-1.5 text-black bg-white hover:bg-gray-200">My Profile</Link>
+                <Link to="/my-profile" className="block px-3 py-1.5 text-black bg-white hover:bg-gray-200">My Profile</Link>
                 <button onClick={handleLogout} className="block w-full text-left px-3 py-1.5 text-black bg-white hover:bg-gray-200">Logout</button>
               </>
             )}
