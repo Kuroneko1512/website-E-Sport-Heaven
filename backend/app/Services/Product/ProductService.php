@@ -21,9 +21,9 @@ class ProductService extends BaseService
     }
     public function getProduct($id)
     {
-        return $this->model->findOrFail($id)->with([
+        return $this->model->with([
             'variants.productAttributes.attributeValue:id,value', // Lấy giá trị thuộc tính
-        ])->get();
+        ])->findOrFail($id);
     }
     public function createProduct($data)
     {
