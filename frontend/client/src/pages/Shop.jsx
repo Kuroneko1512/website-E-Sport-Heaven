@@ -12,11 +12,13 @@ export default function Shop() {
   const { data: products = [], isLoading, isError } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const res = await instanceAxios.get("/products");
+      const res = await instanceAxios.get("/api/v1/product");
       return res.data;
     },
     staleTime: 60000, // Giữ dữ liệu trong 60 giây để tránh gọi API lại
   });
+
+  console.log("products", products);
 
   // State bộ lọc
   const [filters, setFilters] = useState({
