@@ -7,11 +7,11 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::prefix('v1')->group(function (){
-    Route::resource('/attribute',AttributeController::class);
-    Route::resource('/product',ProductController::class);
+    Route::apiResource('/attribute',AttributeController::class);
+    Route::apiResource('/product',ProductController::class);
     Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
-    Route::resource('/attributeValue',AttributeValueController::class)->except(['index']);
-    Route::resource('/order',OrderController::class);
+    Route::apiResource('/attributeValue',AttributeValueController::class)->except(['index']);
+    Route::apiResource('/order',OrderController::class);
     Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
 
 }); 
