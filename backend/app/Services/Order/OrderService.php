@@ -33,11 +33,36 @@ class OrderService extends BaseService
     }
     public function getOrderAll()
     {
-        return $this->model->with('orderItems')->get();
+        return $this->model->with([
+            'orderItems.product',
+            'orderItems.productVariant'
+        ])->get();
     }
+
+
     public function getOrderById($id)
     {
-        return $this->model->with('orderItems')->findOrFail($id);
+        return $this->model->with([
+            'orderItems.product',
+            'orderItems.productVariant'
+        ])->findOrFail($id);
+    }
+
+    public function updateStatus($id, $status)
+    {
+        $order = $this->model->find($id);
+        if (!$order) {
+            return ['success' => false, 'message' => 'Order not found'];
+        }
+
+        $order->status = $status;
+        $order->save();
+
+        return [
+            'success' => true,
+            'message' => 'Order status updated successfully',
+            'data' => $order
+        ];
     }
 
     /**

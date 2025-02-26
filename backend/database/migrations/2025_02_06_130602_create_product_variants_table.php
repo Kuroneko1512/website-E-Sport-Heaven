@@ -19,8 +19,8 @@ return new class extends Migration
             $table->decimal('discount_percent', 5, 2)->nullable(); // Giảm giá theo %
             $table->dateTime('discount_start')->nullable(); // Thời gian bắt đầu giảm giá
             $table->dateTime('discount_end')->nullable(); // Thời gian kết thúc giảm giá
-            $table->integer('stock')->default(0);
-            $table->string('image')->nullable(); // Số lượng tồn kho
+            $table->integer('stock')->default(0);// Số lượng tồn kho
+            $table->string('image')->nullable(); 
             $table->timestamps(); // Timestamps (created_at, updated_at)
         });
     }

@@ -13,5 +13,5 @@ Route::prefix('v1')->group(function (){
     Route::apiResource('/attributeValue',AttributeValueController::class)->except(['index']);
     Route::apiResource('/order',OrderController::class);
     Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
-
+    Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
 }); 
