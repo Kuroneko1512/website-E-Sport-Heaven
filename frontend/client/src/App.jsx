@@ -16,7 +16,6 @@ import AdditionalInformation from './components/elementProduct/AdditionalInforma
 
 
 import Checkout from './pages/Checkout'
-
 import ShippingAddress from './pages/ShippingAddress'
 import PaymentMethod from './pages/PaymentMethod'
 import Review from './pages/Review'

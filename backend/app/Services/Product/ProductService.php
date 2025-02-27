@@ -21,15 +21,19 @@ class ProductService extends BaseService
     }
     public function getProduct($id)
     {
-        return $this->model->findOrFail($id)->with([
+        return $this->model->with([
             'variants.productAttributes.attributeValue:id,value', // Lấy giá trị thuộc tính
-        ])->get();
+        ])->findOrFail($id);
     }
     public function createProduct($data)
     {
         $isVariable = $data['product_type'] === 'variable';
         // Gọi service để tạo mới thuộc tính
         $product = $this->model->create($data);
+        if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
+            $imagePath = $data['image']->store('products', 'public');
+            $product->update(['image' => $imagePath]);
+        }
         if ($isVariable) {
 
             // Kiểm tra và tạo biến thể cho sản phẩm
