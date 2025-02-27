@@ -13,10 +13,10 @@ import Register from './pages/Register'
 import ProductDetail from './pages/ProductDetail'
 import Description from './components/elementProduct/Description'
 import AdditionalInformation from './components/elementProduct/AdditionalInformation'
-import Review from './components/elementProduct/Review'
+
 
 import Checkout from './pages/Checkout'
-import Register from './pages/Register'
+
 import ShippingAddress from './pages/ShippingAddress'
 import PaymentMethod from './pages/PaymentMethod'
 import Review from './pages/Review'

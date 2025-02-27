@@ -1,32 +1,18 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import instanceAxios from '../config/db';
 
 const Review = () => {
-    const [cartItems, setCartItems] = useState([
-            {
-              id: 1,
-              name: 'Girls Pink Moana Printed Dress',
-              size: 'S',
-              price: 80.00,
-              quantity: 1,
-              image: 'https://storage.googleapis.com/a1aa/image/PeMwLRcbAF2jMKYoxv8f536TvriyOFSdHio1E9fYTff1P85gC.jpg'
-            },
-            {
-              id: 2,
-              name: 'Women Textured Handheld Bag',
-              size: 'Regular',
-              price: 80.00,
-              quantity: 1,
-              image: 'https://storage.googleapis.com/a1aa/image/uOOMvHgu0HY1BVqNKTeAipd3h8Fe80XsMciSwt7Xfqd3DfcQB.jpg'
-            },
-            {
-              id: 3,
-              name: 'Tailored Cotton Casual Shirt',
-              size: 'M',
-              price: 40.00,
-              quantity: 1,
-              image: 'https://storage.googleapis.com/a1aa/image/NUjFXvMAo2roPRTyTLVg2y6vX27s14bfajjCi3EElMn7wnDKA.jpg'
-            }
-          ]);
+  const [cartItems, setCartItems] = useState([]);
+  useEffect(() => {
+    (async()=>{
+      try{
+        const {data} = await instanceAxios.get("/products");
+        setCartItems(data);
+      }catch(err){
+        console.log(err);
+      }
+    })()
+  },[])
           const calculateSubtotal = () => {
             return cartItems.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2);
           };
@@ -72,7 +58,7 @@ const Review = () => {
             </tr>
           </thead>
           <tbody>
-            {cartItems.map(item => (
+            {cartItems.slice(0, 4).map(item => (
               <tr key={item.id} className="border-b border-gray-200">
                 <td className="py-4">
                   <img

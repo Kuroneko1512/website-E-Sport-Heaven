@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import LoginAlert from "../popupmodal/LoginAlert";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/AuthSide";
-import classNames from "classnames";
+
 
 const fakeData = [
   {
