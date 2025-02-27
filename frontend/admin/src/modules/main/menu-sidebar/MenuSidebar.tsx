@@ -35,6 +35,11 @@ export const MENU: IMenuItem[] = [
     path: '/Attribute',
   },
   {
+    name: 'Order',
+    icon: 'fas fa-box nav-icon',
+    path: '/Order',
+  },
+  {
     name: i18n.t('menusidebar.label.mainMenu'),
     icon: 'far fa-caret-square-down nav-icon',
     children: [

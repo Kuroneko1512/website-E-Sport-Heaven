@@ -12,5 +12,13 @@ class Attribute extends Model
        'name',
        'description'
     ];
+    public function attributeValues()
+    {
+        return $this->hasMany(AttributeValue::class, 'attribute_id');
+    }
+    public function values()
+    {
+        return $this->hasMany(AttributeValue::class);
+    }
 
 }

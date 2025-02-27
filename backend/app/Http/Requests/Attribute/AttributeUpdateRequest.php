@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Attribute;
 
+use Illuminate\Foundation\Http\FormRequest;
 use Dotenv\Validator;
 use Illuminate\Contracts\Validation\Validator as ValidationValidator;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-class AttributeStoreRequest extends FormRequest
+class AttributeUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,8 +27,9 @@ class AttributeStoreRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id = $this->route('attribute');
         return [
-            'name' => 'required|string|max:255|unique:attributes,name',
+            'name' => 'required|string|max:255|unique:attributes,name,' . $id,
             'description' => 'nullable|string|max:1000',
         ];
     }
