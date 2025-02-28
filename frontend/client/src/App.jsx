@@ -14,11 +14,13 @@ import ProductDetail from './pages/ProductDetail'
 import Description from './components/elementProduct/Description'
 import AdditionalInformation from './components/elementProduct/AdditionalInformation'
 
+import Review from './components/elementProduct/Review'
 
 import Checkout from './pages/Checkout'
 import ShippingAddress from './pages/ShippingAddress'
 import PaymentMethod from './pages/PaymentMethod'
-import Review from './pages/Review'
+
+import Order from './pages/Order'
 
 
 function App() {
@@ -45,7 +47,7 @@ function App() {
           <Route path='checkout' element={<Checkout />}/>
           <Route path='address' element={<ShippingAddress />}/>
           <Route path='payment' element={<PaymentMethod />}/>
-          <Route path='review' element={<Review />}/>
+          <Route path='order' element={<Order />}/>
           
         </Route>
       </Routes>

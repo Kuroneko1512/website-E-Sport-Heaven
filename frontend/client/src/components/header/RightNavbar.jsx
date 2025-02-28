@@ -87,7 +87,7 @@ const RightNavbar = () => {
         <i className="fas fa-search text-gray-700 cursor-pointer" onClick={() => setSearchVisible(!searchVisible)} aria-label="Search"></i>
         <input
           type="text"
-          className={classNames(
+          className={(
             "absolute right-10 top-[-0.5rem] bg-white border border-gray-300 shadow-lg rounded-md px-4 py-2 transition-all duration-300 w-64 md:w-[400px]",
             { "opacity-100 scale-100": searchVisible, "opacity-0 scale-95 hidden": !searchVisible }
           )}
