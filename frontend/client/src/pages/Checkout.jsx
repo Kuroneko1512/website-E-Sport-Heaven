@@ -36,10 +36,12 @@ const Checkout = () => {
   };
 
   // Handle removing item
-  const handleRemoveItem = async (id) => {
-    // Call API to remove item from server (if applicable)
-    await instanceAxios.delete(`/api/v1/order/items/${id}`);
-    setCartItems(prev => prev.filter(item => item.id !== id)); // Update local state
+  const handleRemoveItem = (id) => {
+   
+    if (window.confirm('Are you sure you want to remove this item?')) {
+      setCartItems(prevItems => prevItems.filter(item => item.id !== id));
+      
+    }
   };
 
   // Calculate subtotal

@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react'
 import instanceAxios from '../config/db';
 
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 
 const Order = () => {
-  const [cartItems, setCartItems] = useState([]);
-  const [error, setError] = useState(null); // State for error handling
+  
   
  const {data,isLoading,isError} = useQuery({
   queryKey: ["order"],
@@ -110,6 +110,7 @@ product_variant
             </table>
           </div>
         </div>
+        
 
         {/* Order Summary */}
         <div className="w-full lg:w-1/3 mt-8 lg:mt-0">
@@ -144,9 +145,31 @@ product_variant
               <span className="text-lg font-bold">Grand Total</span>
               <span className="text-lg font-bold">${(parseFloat(calculateSubtotal()) + 5.00).toFixed(2)}</span>
             </div>
+            <button className="bg-black text-white w-full py-3 rounded"> <Link to={`/order`}>Place Order</Link> </button>
           </div>
         </div>
       </div>
+      {/* review address + payment */}
+      <div className="mb-8">
+            <h2 className="font-semibold mb-4">Shipping Address</h2>
+            <div className="flex justify-between  items-center">
+              <div>
+                <p className="font-semibold">Robert Fox</p>
+                <p className="text-gray-600">4517 Washington Ave. Manchester, Kentucky 39495</p>
+              </div>
+              <i className="fas fa-edit text-gray-600"></i>
+            </div>
+          </div>
+          <div className="flex-grow border-t border-gray-300 "></div>
+          <div className="mb-8">
+            <h2 className="font-semibold mb-4">Payment Method</h2>
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-semibold">Debit Card (.... .... .... 89)</p>
+              </div>
+              <i className="fas fa-edit text-gray-600"></i>
+            </div>
+          </div>
     </main>
   )
 }
