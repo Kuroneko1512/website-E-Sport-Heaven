@@ -26,7 +26,7 @@ import { useAppDispatch, useAppSelector } from "./store/store";
 import { Loading } from "./components/Loading";
 import EditComponent from '@pages/Attribute/EditComponent';
 import AttributeForm from "./pages/Product/AttributeForm";
-import Description from "./pages/Product/Description";
+import ValueProduct from "./pages/Product/ValueProduct";
 
 import Order from "./pages/Order/Order";
 import DetailOrder from "./pages/Order/DetailOrder";
@@ -106,7 +106,8 @@ const App = () => {
        
           <Route path="add-product" element={<Store />} >
            <Route path="AttributeForm" element={<AttributeForm />} /> 
-           <Route path="Description" element={<Description />} /> 
+           <Route path="ValueProduct" element={<ValueProduct />} /> 
+           <Route index element={<ValueProduct />} />
           </Route>
           {/*Route attribute*/}
           <Route path="Attribute" element={<Attribute />} />
