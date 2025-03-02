@@ -4989,6 +4989,4786 @@
     ],
     "deals":{
       "endTime": "2025-03-01T23:59:59Z"
-    }
-  
+    },
+    "address":
+    [
+        {
+            "Code": "01",
+            "FullName": "Thành phố Hà Nội",
+            "District": [
+             {
+              "Code": "001",
+              "FullName": "Quận Ba Đình",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00001",
+                "FullName": "Phường Phúc Xá",
+                "DistrictCode": "001"
+               },
+               {
+                "Code": "00004",
+                "FullName": "Phường Trúc Bạch",
+                "DistrictCode": "001"
+               },
+               {
+                "Code": "00006",
+                "FullName": "Phường Vĩnh Phúc",
+                "DistrictCode": "001"
+               },
+               {
+                "Code": "00007",
+                "FullName": "Phường Cống Vị",
+                "DistrictCode": "001"
+               },
+               {
+                "Code": "00008",
+                "FullName": "Phường Liễu Giai",
+                "DistrictCode": "001"
+               },
+               {
+                "Code": "00013",
+                "FullName": "Phường Quán Thánh",
+                "DistrictCode": "001"
+               },
+               {
+                "Code": "00016",
+                "FullName": "Phường Ngọc Hà",
+                "DistrictCode": "001"
+               },
+               {
+                "Code": "00019",
+                "FullName": "Phường Điện Biên",
+                "DistrictCode": "001"
+               },
+               {
+                "Code": "00022",
+                "FullName": "Phường Đội Cấn",
+                "DistrictCode": "001"
+               },
+               {
+                "Code": "00025",
+                "FullName": "Phường Ngọc Khánh",
+                "DistrictCode": "001"
+               },
+               {
+                "Code": "00028",
+                "FullName": "Phường Kim Mã",
+                "DistrictCode": "001"
+               },
+               {
+                "Code": "00031",
+                "FullName": "Phường Giảng Võ",
+                "DistrictCode": "001"
+               },
+               {
+                "Code": "00034",
+                "FullName": "Phường Thành Công",
+                "DistrictCode": "001"
+               }
+              ]
+             },
+             {
+              "Code": "002",
+              "FullName": "Quận Hoàn Kiếm",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00037",
+                "FullName": "Phường Phúc Tân",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00040",
+                "FullName": "Phường Đồng Xuân",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00043",
+                "FullName": "Phường Hàng Mã",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00046",
+                "FullName": "Phường Hàng Buồm",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00049",
+                "FullName": "Phường Hàng Đào",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00052",
+                "FullName": "Phường Hàng Bồ",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00055",
+                "FullName": "Phường Cửa Đông",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00058",
+                "FullName": "Phường Lý Thái Tổ",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00061",
+                "FullName": "Phường Hàng Bạc",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00064",
+                "FullName": "Phường Hàng Gai",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00067",
+                "FullName": "Phường Chương Dương",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00070",
+                "FullName": "Phường Hàng Trống",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00073",
+                "FullName": "Phường Cửa Nam",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00076",
+                "FullName": "Phường Hàng Bông",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00079",
+                "FullName": "Phường Tràng Tiền",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00082",
+                "FullName": "Phường Trần Hưng Đạo",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00085",
+                "FullName": "Phường Phan Chu Trinh",
+                "DistrictCode": "002"
+               },
+               {
+                "Code": "00088",
+                "FullName": "Phường Hàng Bài",
+                "DistrictCode": "002"
+               }
+              ]
+             },
+             {
+              "Code": "003",
+              "FullName": "Quận Tây Hồ",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00091",
+                "FullName": "Phường Phú Thượng",
+                "DistrictCode": "003"
+               },
+               {
+                "Code": "00094",
+                "FullName": "Phường Nhật Tân",
+                "DistrictCode": "003"
+               },
+               {
+                "Code": "00097",
+                "FullName": "Phường Tứ Liên",
+                "DistrictCode": "003"
+               },
+               {
+                "Code": "00100",
+                "FullName": "Phường Quảng An",
+                "DistrictCode": "003"
+               },
+               {
+                "Code": "00103",
+                "FullName": "Phường Xuân La",
+                "DistrictCode": "003"
+               },
+               {
+                "Code": "00106",
+                "FullName": "Phường Yên Phụ",
+                "DistrictCode": "003"
+               },
+               {
+                "Code": "00109",
+                "FullName": "Phường Bưởi",
+                "DistrictCode": "003"
+               },
+               {
+                "Code": "00112",
+                "FullName": "Phường Thụy Khuê",
+                "DistrictCode": "003"
+               }
+              ]
+             },
+             {
+              "Code": "004",
+              "FullName": "Quận Long Biên",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00115",
+                "FullName": "Phường Thượng Thanh",
+                "DistrictCode": "004"
+               },
+               {
+                "Code": "00118",
+                "FullName": "Phường Ngọc Thụy",
+                "DistrictCode": "004"
+               },
+               {
+                "Code": "00121",
+                "FullName": "Phường Giang Biên",
+                "DistrictCode": "004"
+               },
+               {
+                "Code": "00124",
+                "FullName": "Phường Đức Giang",
+                "DistrictCode": "004"
+               },
+               {
+                "Code": "00127",
+                "FullName": "Phường Việt Hưng",
+                "DistrictCode": "004"
+               },
+               {
+                "Code": "00130",
+                "FullName": "Phường Gia Thụy",
+                "DistrictCode": "004"
+               },
+               {
+                "Code": "00133",
+                "FullName": "Phường Ngọc Lâm",
+                "DistrictCode": "004"
+               },
+               {
+                "Code": "00136",
+                "FullName": "Phường Phúc Lợi",
+                "DistrictCode": "004"
+               },
+               {
+                "Code": "00139",
+                "FullName": "Phường Bồ Đề",
+                "DistrictCode": "004"
+               },
+               {
+                "Code": "00145",
+                "FullName": "Phường Long Biên",
+                "DistrictCode": "004"
+               },
+               {
+                "Code": "00148",
+                "FullName": "Phường Thạch Bàn",
+                "DistrictCode": "004"
+               },
+               {
+                "Code": "00151",
+                "FullName": "Phường Phúc Đồng",
+                "DistrictCode": "004"
+               },
+               {
+                "Code": "00154",
+                "FullName": "Phường Cự Khối",
+                "DistrictCode": "004"
+               }
+              ]
+             },
+             {
+              "Code": "005",
+              "FullName": "Quận Cầu Giấy",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00157",
+                "FullName": "Phường Nghĩa Đô",
+                "DistrictCode": "005"
+               },
+               {
+                "Code": "00160",
+                "FullName": "Phường Nghĩa Tân",
+                "DistrictCode": "005"
+               },
+               {
+                "Code": "00163",
+                "FullName": "Phường Mai Dịch",
+                "DistrictCode": "005"
+               },
+               {
+                "Code": "00166",
+                "FullName": "Phường Dịch Vọng",
+                "DistrictCode": "005"
+               },
+               {
+                "Code": "00167",
+                "FullName": "Phường Dịch Vọng Hậu",
+                "DistrictCode": "005"
+               },
+               {
+                "Code": "00169",
+                "FullName": "Phường Quan Hoa",
+                "DistrictCode": "005"
+               },
+               {
+                "Code": "00172",
+                "FullName": "Phường Yên Hoà",
+                "DistrictCode": "005"
+               },
+               {
+                "Code": "00175",
+                "FullName": "Phường Trung Hoà",
+                "DistrictCode": "005"
+               }
+              ]
+             },
+             {
+              "Code": "006",
+              "FullName": "Quận Đống Đa",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00178",
+                "FullName": "Phường Cát Linh",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00181",
+                "FullName": "Phường Văn Miếu - Quốc Tử Giám",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00187",
+                "FullName": "Phường Láng Thượng",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00190",
+                "FullName": "Phường Ô Chợ Dừa",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00193",
+                "FullName": "Phường Văn Chương",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00196",
+                "FullName": "Phường Hàng Bột",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00199",
+                "FullName": "Phường Láng Hạ",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00202",
+                "FullName": "Phường Khâm Thiên",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00205",
+                "FullName": "Phường Thổ Quan",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00208",
+                "FullName": "Phường Nam Đồng",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00214",
+                "FullName": "Phường Quang Trung",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00217",
+                "FullName": "Phường Trung Liệt",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00226",
+                "FullName": "Phường Phương Liên - Trung Tự",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00229",
+                "FullName": "Phường Kim Liên",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00232",
+                "FullName": "Phường Phương Mai",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00235",
+                "FullName": "Phường Thịnh Quang",
+                "DistrictCode": "006"
+               },
+               {
+                "Code": "00238",
+                "FullName": "Phường Khương Thượng",
+                "DistrictCode": "006"
+               }
+              ]
+             },
+             {
+              "Code": "007",
+              "FullName": "Quận Hai Bà Trưng",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00241",
+                "FullName": "Phường Nguyễn Du",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00244",
+                "FullName": "Phường Bạch Đằng",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00247",
+                "FullName": "Phường Phạm Đình Hổ",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00256",
+                "FullName": "Phường Lê Đại Hành",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00259",
+                "FullName": "Phường Đồng Nhân",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00262",
+                "FullName": "Phường Phố Huế",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00268",
+                "FullName": "Phường Thanh Lương",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00271",
+                "FullName": "Phường Thanh Nhàn",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00277",
+                "FullName": "Phường Bách Khoa",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00280",
+                "FullName": "Phường Đồng Tâm",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00283",
+                "FullName": "Phường Vĩnh Tuy",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00289",
+                "FullName": "Phường Quỳnh Mai",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00292",
+                "FullName": "Phường Bạch Mai",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00295",
+                "FullName": "Phường Minh Khai",
+                "DistrictCode": "007"
+               },
+               {
+                "Code": "00298",
+                "FullName": "Phường Trương Định",
+                "DistrictCode": "007"
+               }
+              ]
+             },
+             {
+              "Code": "008",
+              "FullName": "Quận Hoàng Mai",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00301",
+                "FullName": "Phường Thanh Trì",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00304",
+                "FullName": "Phường Vĩnh Hưng",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00307",
+                "FullName": "Phường Định Công",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00310",
+                "FullName": "Phường Mai Động",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00313",
+                "FullName": "Phường Tương Mai",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00316",
+                "FullName": "Phường Đại Kim",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00319",
+                "FullName": "Phường Tân Mai",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00322",
+                "FullName": "Phường Hoàng Văn Thụ",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00325",
+                "FullName": "Phường Giáp Bát",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00328",
+                "FullName": "Phường Lĩnh Nam",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00331",
+                "FullName": "Phường Thịnh Liệt",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00334",
+                "FullName": "Phường Trần Phú",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00337",
+                "FullName": "Phường Hoàng Liệt",
+                "DistrictCode": "008"
+               },
+               {
+                "Code": "00340",
+                "FullName": "Phường Yên Sở",
+                "DistrictCode": "008"
+               }
+              ]
+             },
+             {
+              "Code": "009",
+              "FullName": "Quận Thanh Xuân",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00343",
+                "FullName": "Phường Nhân Chính",
+                "DistrictCode": "009"
+               },
+               {
+                "Code": "00346",
+                "FullName": "Phường Thượng Đình",
+                "DistrictCode": "009"
+               },
+               {
+                "Code": "00349",
+                "FullName": "Phường Khương Trung",
+                "DistrictCode": "009"
+               },
+               {
+                "Code": "00352",
+                "FullName": "Phường Khương Mai",
+                "DistrictCode": "009"
+               },
+               {
+                "Code": "00355",
+                "FullName": "Phường Thanh Xuân Trung",
+                "DistrictCode": "009"
+               },
+               {
+                "Code": "00358",
+                "FullName": "Phường Phương Liệt",
+                "DistrictCode": "009"
+               },
+               {
+                "Code": "00364",
+                "FullName": "Phường Khương Đình",
+                "DistrictCode": "009"
+               },
+               {
+                "Code": "00367",
+                "FullName": "Phường Thanh Xuân Bắc",
+                "DistrictCode": "009"
+               },
+               {
+                "Code": "00373",
+                "FullName": "Phường Hạ Đình",
+                "DistrictCode": "009"
+               }
+              ]
+             },
+             {
+              "Code": "016",
+              "FullName": "Huyện Sóc Sơn",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00376",
+                "FullName": "Thị trấn Sóc Sơn",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00379",
+                "FullName": "Xã Bắc Sơn",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00382",
+                "FullName": "Xã Minh Trí",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00385",
+                "FullName": "Xã Hồng Kỳ",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00388",
+                "FullName": "Xã Nam Sơn",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00391",
+                "FullName": "Xã Trung Giã",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00394",
+                "FullName": "Xã Tân Hưng",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00397",
+                "FullName": "Xã Minh Phú",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00400",
+                "FullName": "Xã Phù Linh",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00403",
+                "FullName": "Xã Bắc Phú",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00406",
+                "FullName": "Xã Tân Minh",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00409",
+                "FullName": "Xã Quang Tiến",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00412",
+                "FullName": "Xã Hiền Ninh",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00415",
+                "FullName": "Xã Tân Dân",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00418",
+                "FullName": "Xã Tiên Dược",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00421",
+                "FullName": "Xã Việt Long",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00424",
+                "FullName": "Xã Xuân Giang",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00427",
+                "FullName": "Xã Mai Đình",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00430",
+                "FullName": "Xã Đức Hoà",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00433",
+                "FullName": "Xã Thanh Xuân",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00436",
+                "FullName": "Xã Đông Xuân",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00439",
+                "FullName": "Xã Kim Lũ",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00442",
+                "FullName": "Xã Phú Cường",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00445",
+                "FullName": "Xã Phú Minh",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00448",
+                "FullName": "Xã Phù Lỗ",
+                "DistrictCode": "016"
+               },
+               {
+                "Code": "00451",
+                "FullName": "Xã Xuân Thu",
+                "DistrictCode": "016"
+               }
+              ]
+             },
+             {
+              "Code": "017",
+              "FullName": "Huyện Đông Anh",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00454",
+                "FullName": "Thị trấn Đông Anh",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00457",
+                "FullName": "Xã Xuân Nộn",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00460",
+                "FullName": "Xã Thuỵ Lâm",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00463",
+                "FullName": "Xã Bắc Hồng",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00466",
+                "FullName": "Xã Nguyên Khê",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00469",
+                "FullName": "Xã Nam Hồng",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00472",
+                "FullName": "Xã Tiên Dương",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00475",
+                "FullName": "Xã Vân Hà",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00478",
+                "FullName": "Xã Uy Nỗ",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00481",
+                "FullName": "Xã Vân Nội",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00484",
+                "FullName": "Xã Liên Hà",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00487",
+                "FullName": "Xã Việt Hùng",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00490",
+                "FullName": "Xã Kim Nỗ",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00493",
+                "FullName": "Xã Kim Chung",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00496",
+                "FullName": "Xã Dục Tú",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00499",
+                "FullName": "Xã Đại Mạch",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00502",
+                "FullName": "Xã Vĩnh Ngọc",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00505",
+                "FullName": "Xã Cổ Loa",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00508",
+                "FullName": "Xã Hải Bối",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00511",
+                "FullName": "Xã Xuân Canh",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00514",
+                "FullName": "Xã Võng La",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00517",
+                "FullName": "Xã Tàm Xá",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00520",
+                "FullName": "Xã Mai Lâm",
+                "DistrictCode": "017"
+               },
+               {
+                "Code": "00523",
+                "FullName": "Xã Đông Hội",
+                "DistrictCode": "017"
+               }
+              ]
+             },
+             {
+              "Code": "018",
+              "FullName": "Huyện Gia Lâm",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00526",
+                "FullName": "Thị trấn Yên Viên",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00529",
+                "FullName": "Xã Yên Thường",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00532",
+                "FullName": "Xã Yên Viên",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00535",
+                "FullName": "Xã Ninh Hiệp",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00541",
+                "FullName": "Xã Thiên Đức",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00544",
+                "FullName": "Xã Phù Đổng",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00550",
+                "FullName": "Xã Lệ Chi",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00553",
+                "FullName": "Xã Cổ Bi",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00556",
+                "FullName": "Xã Đặng Xá",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00562",
+                "FullName": "Xã Phú Sơn",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00565",
+                "FullName": "Thị trấn Trâu Quỳ",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00568",
+                "FullName": "Xã Dương Quang",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00571",
+                "FullName": "Xã Dương Xá",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00577",
+                "FullName": "Xã Đa Tốn",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00580",
+                "FullName": "Xã Kiêu Kỵ",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00583",
+                "FullName": "Xã Bát Tràng",
+                "DistrictCode": "018"
+               },
+               {
+                "Code": "00589",
+                "FullName": "Xã Kim Đức",
+                "DistrictCode": "018"
+               }
+              ]
+             },
+             {
+              "Code": "019",
+              "FullName": "Quận Nam Từ Liêm",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00592",
+                "FullName": "Phường Cầu Diễn",
+                "DistrictCode": "019"
+               },
+               {
+                "Code": "00622",
+                "FullName": "Phường Xuân Phương",
+                "DistrictCode": "019"
+               },
+               {
+                "Code": "00623",
+                "FullName": "Phường Phương Canh",
+                "DistrictCode": "019"
+               },
+               {
+                "Code": "00625",
+                "FullName": "Phường Mỹ Đình 1",
+                "DistrictCode": "019"
+               },
+               {
+                "Code": "00626",
+                "FullName": "Phường Mỹ Đình 2",
+                "DistrictCode": "019"
+               },
+               {
+                "Code": "00628",
+                "FullName": "Phường Tây Mỗ",
+                "DistrictCode": "019"
+               },
+               {
+                "Code": "00631",
+                "FullName": "Phường Mễ Trì",
+                "DistrictCode": "019"
+               },
+               {
+                "Code": "00632",
+                "FullName": "Phường Phú Đô",
+                "DistrictCode": "019"
+               },
+               {
+                "Code": "00634",
+                "FullName": "Phường Đại Mỗ",
+                "DistrictCode": "019"
+               },
+               {
+                "Code": "00637",
+                "FullName": "Phường Trung Văn",
+                "DistrictCode": "019"
+               }
+              ]
+             },
+             {
+              "Code": "020",
+              "FullName": "Huyện Thanh Trì",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00640",
+                "FullName": "Thị trấn Văn Điển",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00643",
+                "FullName": "Xã Tân Triều",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00646",
+                "FullName": "Xã Thanh Liệt",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00649",
+                "FullName": "Xã Tả Thanh Oai",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00652",
+                "FullName": "Xã Hữu Hoà",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00655",
+                "FullName": "Xã Tam Hiệp",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00658",
+                "FullName": "Xã Tứ Hiệp",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00661",
+                "FullName": "Xã Yên Mỹ",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00664",
+                "FullName": "Xã Vĩnh Quỳnh",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00667",
+                "FullName": "Xã Ngũ Hiệp",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00670",
+                "FullName": "Xã Duyên Hà",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00673",
+                "FullName": "Xã Ngọc Hồi",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00676",
+                "FullName": "Xã Vạn Phúc",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00679",
+                "FullName": "Xã Đại áng",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00682",
+                "FullName": "Xã Liên Ninh",
+                "DistrictCode": "020"
+               },
+               {
+                "Code": "00685",
+                "FullName": "Xã Đông Mỹ",
+                "DistrictCode": "020"
+               }
+              ]
+             },
+             {
+              "Code": "021",
+              "FullName": "Quận Bắc Từ Liêm",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "00595",
+                "FullName": "Phường Thượng Cát",
+                "DistrictCode": "021"
+               },
+               {
+                "Code": "00598",
+                "FullName": "Phường Liên Mạc",
+                "DistrictCode": "021"
+               },
+               {
+                "Code": "00601",
+                "FullName": "Phường Đông Ngạc",
+                "DistrictCode": "021"
+               },
+               {
+                "Code": "00602",
+                "FullName": "Phường Đức Thắng",
+                "DistrictCode": "021"
+               },
+               {
+                "Code": "00604",
+                "FullName": "Phường Thụy Phương",
+                "DistrictCode": "021"
+               },
+               {
+                "Code": "00607",
+                "FullName": "Phường Tây Tựu",
+                "DistrictCode": "021"
+               },
+               {
+                "Code": "00610",
+                "FullName": "Phường Xuân Đỉnh",
+                "DistrictCode": "021"
+               },
+               {
+                "Code": "00611",
+                "FullName": "Phường Xuân Tảo",
+                "DistrictCode": "021"
+               },
+               {
+                "Code": "00613",
+                "FullName": "Phường Minh Khai",
+                "DistrictCode": "021"
+               },
+               {
+                "Code": "00616",
+                "FullName": "Phường Cổ Nhuế 1",
+                "DistrictCode": "021"
+               },
+               {
+                "Code": "00617",
+                "FullName": "Phường Cổ Nhuế 2",
+                "DistrictCode": "021"
+               },
+               {
+                "Code": "00619",
+                "FullName": "Phường Phú Diễn",
+                "DistrictCode": "021"
+               },
+               {
+                "Code": "00620",
+                "FullName": "Phường Phúc Diễn",
+                "DistrictCode": "021"
+               }
+              ]
+             },
+             {
+              "Code": "250",
+              "FullName": "Huyện Mê Linh",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "08973",
+                "FullName": "Thị trấn Chi Đông",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "08974",
+                "FullName": "Xã Đại Thịnh",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "08977",
+                "FullName": "Xã Kim Hoa",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "08980",
+                "FullName": "Xã Thạch Đà",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "08983",
+                "FullName": "Xã Tiến Thắng",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "08986",
+                "FullName": "Xã Tự Lập",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "08989",
+                "FullName": "Thị trấn Quang Minh",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "08992",
+                "FullName": "Xã Thanh Lâm",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "08995",
+                "FullName": "Xã Tam Đồng",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "08998",
+                "FullName": "Xã Liên Mạc",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "09004",
+                "FullName": "Xã Chu Phan",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "09007",
+                "FullName": "Xã Tiến Thịnh",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "09010",
+                "FullName": "Xã Mê Linh",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "09013",
+                "FullName": "Xã Văn Khê",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "09016",
+                "FullName": "Xã Hoàng Kim",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "09019",
+                "FullName": "Xã Tiền Phong",
+                "DistrictCode": "250"
+               },
+               {
+                "Code": "09022",
+                "FullName": "Xã Tráng Việt",
+                "DistrictCode": "250"
+               }
+              ]
+             },
+             {
+              "Code": "268",
+              "FullName": "Quận Hà Đông",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "09538",
+                "FullName": "Phường Quang Trung",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "09541",
+                "FullName": "Phường Mộ Lao",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "09542",
+                "FullName": "Phường Văn Quán",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "09544",
+                "FullName": "Phường Vạn Phúc",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "09551",
+                "FullName": "Phường La Khê",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "09552",
+                "FullName": "Phường Phú La",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "09553",
+                "FullName": "Phường Phúc La",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "09556",
+                "FullName": "Phường Hà Cầu",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "09562",
+                "FullName": "Phường Yên Nghĩa",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "09565",
+                "FullName": "Phường Kiến Hưng",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "09568",
+                "FullName": "Phường Phú Lãm",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "09571",
+                "FullName": "Phường Phú Lương",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "09886",
+                "FullName": "Phường Dương Nội",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "10117",
+                "FullName": "Phường Đồng Mai",
+                "DistrictCode": "268"
+               },
+               {
+                "Code": "10123",
+                "FullName": "Phường Biên Giang",
+                "DistrictCode": "268"
+               }
+              ]
+             },
+             {
+              "Code": "269",
+              "FullName": "Thị xã Sơn Tây",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "09574",
+                "FullName": "Phường Ngô Quyền",
+                "DistrictCode": "269"
+               },
+               {
+                "Code": "09577",
+                "FullName": "Phường Phú Thịnh",
+                "DistrictCode": "269"
+               },
+               {
+                "Code": "09586",
+                "FullName": "Phường Sơn Lộc",
+                "DistrictCode": "269"
+               },
+               {
+                "Code": "09589",
+                "FullName": "Phường Xuân Khanh",
+                "DistrictCode": "269"
+               },
+               {
+                "Code": "09592",
+                "FullName": "Xã Đường Lâm",
+                "DistrictCode": "269"
+               },
+               {
+                "Code": "09595",
+                "FullName": "Phường Viên Sơn",
+                "DistrictCode": "269"
+               },
+               {
+                "Code": "09598",
+                "FullName": "Xã Xuân Sơn",
+                "DistrictCode": "269"
+               },
+               {
+                "Code": "09601",
+                "FullName": "Phường Trung Hưng",
+                "DistrictCode": "269"
+               },
+               {
+                "Code": "09604",
+                "FullName": "Xã Thanh Mỹ",
+                "DistrictCode": "269"
+               },
+               {
+                "Code": "09607",
+                "FullName": "Phường Trung Sơn Trầm",
+                "DistrictCode": "269"
+               },
+               {
+                "Code": "09610",
+                "FullName": "Xã Kim Sơn",
+                "DistrictCode": "269"
+               },
+               {
+                "Code": "09613",
+                "FullName": "Xã Sơn Đông",
+                "DistrictCode": "269"
+               },
+               {
+                "Code": "09616",
+                "FullName": "Xã Cổ Đông",
+                "DistrictCode": "269"
+               }
+              ]
+             },
+             {
+              "Code": "271",
+              "FullName": "Huyện Ba Vì",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "09619",
+                "FullName": "Thị trấn Tây Đằng",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09625",
+                "FullName": "Xã Phú Cường",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09628",
+                "FullName": "Xã Cổ Đô",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09634",
+                "FullName": "Xã Vạn Thắng",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09640",
+                "FullName": "Xã Phong Vân",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09643",
+                "FullName": "Xã Phú Đông",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09646",
+                "FullName": "Xã Phú Hồng",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09649",
+                "FullName": "Xã Phú Châu",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09652",
+                "FullName": "Xã Thái Hòa",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09655",
+                "FullName": "Xã Đồng Thái",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09658",
+                "FullName": "Xã Phú Sơn",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09661",
+                "FullName": "Xã Minh Châu",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09664",
+                "FullName": "Xã Vật Lại",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09667",
+                "FullName": "Xã Chu Minh",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09670",
+                "FullName": "Xã Tòng Bạt",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09673",
+                "FullName": "Xã Cẩm Lĩnh",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09676",
+                "FullName": "Xã Sơn Đà",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09679",
+                "FullName": "Xã Đông Quang",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09682",
+                "FullName": "Xã Tiên Phong",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09685",
+                "FullName": "Xã Thụy An",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09688",
+                "FullName": "Xã Cam Thượng",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09691",
+                "FullName": "Xã Thuần Mỹ",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09694",
+                "FullName": "Xã Tản Lĩnh",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09697",
+                "FullName": "Xã Ba Trại",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09700",
+                "FullName": "Xã Minh Quang",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09703",
+                "FullName": "Xã Ba Vì",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09706",
+                "FullName": "Xã Vân Hòa",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09709",
+                "FullName": "Xã Yên Bài",
+                "DistrictCode": "271"
+               },
+               {
+                "Code": "09712",
+                "FullName": "Xã Khánh Thượng",
+                "DistrictCode": "271"
+               }
+              ]
+             },
+             {
+              "Code": "272",
+              "FullName": "Huyện Phúc Thọ",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "09715",
+                "FullName": "Thị trấn Phúc Thọ",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09721",
+                "FullName": "Xã Vân Phúc",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09724",
+                "FullName": "Xã Nam Hà",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09727",
+                "FullName": "Xã Xuân Đình",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09733",
+                "FullName": "Xã Sen Phương",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09739",
+                "FullName": "Xã Võng Xuyên",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09742",
+                "FullName": "Xã Tích Lộc",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09745",
+                "FullName": "Xã Long Thượng",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09751",
+                "FullName": "Xã Hát Môn",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09757",
+                "FullName": "Xã Thanh Đa",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09760",
+                "FullName": "Xã Trạch Mỹ Lộc",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09763",
+                "FullName": "Xã Phúc Hòa",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09766",
+                "FullName": "Xã Ngọc Tảo",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09769",
+                "FullName": "Xã Phụng Thượng",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09772",
+                "FullName": "Xã Tam Thuấn",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09775",
+                "FullName": "Xã Tam Hiệp",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09778",
+                "FullName": "Xã Hiệp Thuận",
+                "DistrictCode": "272"
+               },
+               {
+                "Code": "09781",
+                "FullName": "Xã Liên Hiệp",
+                "DistrictCode": "272"
+               }
+              ]
+             },
+             {
+              "Code": "273",
+              "FullName": "Huyện Đan Phượng",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "09784",
+                "FullName": "Thị trấn Phùng",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09787",
+                "FullName": "Xã Trung Châu",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09790",
+                "FullName": "Xã Thọ An",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09793",
+                "FullName": "Xã Thọ Xuân",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09796",
+                "FullName": "Xã Hồng Hà",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09799",
+                "FullName": "Xã Liên Hồng",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09802",
+                "FullName": "Xã Liên Hà",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09805",
+                "FullName": "Xã Hạ Mỗ",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09808",
+                "FullName": "Xã Liên Trung",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09811",
+                "FullName": "Xã Phương Đình",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09814",
+                "FullName": "Xã Thượng Mỗ",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09817",
+                "FullName": "Xã Tân Hội",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09820",
+                "FullName": "Xã Tân Lập",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09823",
+                "FullName": "Xã Đan Phượng",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09826",
+                "FullName": "Xã Đồng Tháp",
+                "DistrictCode": "273"
+               },
+               {
+                "Code": "09829",
+                "FullName": "Xã Song Phượng",
+                "DistrictCode": "273"
+               }
+              ]
+             },
+             {
+              "Code": "274",
+              "FullName": "Huyện Hoài Đức",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "09832",
+                "FullName": "Thị trấn Trạm Trôi",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09835",
+                "FullName": "Xã Đức Thượng",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09838",
+                "FullName": "Xã Minh Khai",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09841",
+                "FullName": "Xã Dương Liễu",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09844",
+                "FullName": "Xã Di Trạch",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09847",
+                "FullName": "Xã Đức Giang",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09850",
+                "FullName": "Xã Cát Quế",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09853",
+                "FullName": "Xã Kim Chung",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09856",
+                "FullName": "Xã Yên Sở",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09859",
+                "FullName": "Xã Sơn Đồng",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09862",
+                "FullName": "Xã Vân Canh",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09865",
+                "FullName": "Xã Đắc Sở",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09868",
+                "FullName": "Xã Lại Yên",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09871",
+                "FullName": "Xã Tiền Yên",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09874",
+                "FullName": "Xã Song Phương",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09877",
+                "FullName": "Xã An Khánh",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09880",
+                "FullName": "Xã An Thượng",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09883",
+                "FullName": "Xã Vân Côn",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09889",
+                "FullName": "Xã La Phù",
+                "DistrictCode": "274"
+               },
+               {
+                "Code": "09892",
+                "FullName": "Xã Đông La",
+                "DistrictCode": "274"
+               }
+              ]
+             },
+             {
+              "Code": "275",
+              "FullName": "Huyện Quốc Oai",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "04939",
+                "FullName": "Xã Đông Xuân",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09895",
+                "FullName": "Thị trấn Quốc Oai",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09898",
+                "FullName": "Xã Sài Sơn",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09904",
+                "FullName": "Xã Phượng Sơn",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09907",
+                "FullName": "Xã Ngọc Liệp",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09910",
+                "FullName": "Xã Ngọc Mỹ",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09916",
+                "FullName": "Xã Thạch Thán",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09919",
+                "FullName": "Xã Đồng Quang",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09922",
+                "FullName": "Xã Phú Cát",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09925",
+                "FullName": "Xã Tuyết Nghĩa",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09928",
+                "FullName": "Xã Liệp Nghĩa",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09931",
+                "FullName": "Xã Cộng Hòa",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09934",
+                "FullName": "Xã Hưng Đạo",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09940",
+                "FullName": "Xã Phú Mãn",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09943",
+                "FullName": "Xã Cấn Hữu",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09949",
+                "FullName": "Xã Hòa Thạch",
+                "DistrictCode": "275"
+               },
+               {
+                "Code": "09952",
+                "FullName": "Xã Đông Yên",
+                "DistrictCode": "275"
+               }
+              ]
+             },
+             {
+              "Code": "276",
+              "FullName": "Huyện Thạch Thất",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "04927",
+                "FullName": "Xã Yên Trung",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "04930",
+                "FullName": "Xã Yên Bình",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "04936",
+                "FullName": "Xã Tiến Xuân",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "09955",
+                "FullName": "Thị trấn Liên Quan",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "09958",
+                "FullName": "Xã Đại Đồng",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "09961",
+                "FullName": "Xã Cẩm Yên",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "09964",
+                "FullName": "Xã Lại Thượng",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "09967",
+                "FullName": "Xã Phú Kim",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "09970",
+                "FullName": "Xã Hương Ngải",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "09973",
+                "FullName": "Xã Lam Sơn",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "09976",
+                "FullName": "Xã Kim Quan",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "09982",
+                "FullName": "Xã Bình Yên",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "09988",
+                "FullName": "Xã Thạch Hoà",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "09991",
+                "FullName": "Xã Cần Kiệm",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "09997",
+                "FullName": "Xã Phùng Xá",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "10000",
+                "FullName": "Xã Tân Xã",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "10003",
+                "FullName": "Xã Thạch Xá",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "10006",
+                "FullName": "Xã Quang Trung",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "10009",
+                "FullName": "Xã Hạ Bằng",
+                "DistrictCode": "276"
+               },
+               {
+                "Code": "10012",
+                "FullName": "Xã Đồng Trúc",
+                "DistrictCode": "276"
+               }
+              ]
+             },
+             {
+              "Code": "277",
+              "FullName": "Huyện Chương Mỹ",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "10015",
+                "FullName": "Thị trấn Chúc Sơn",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10018",
+                "FullName": "Thị trấn Xuân Mai",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10021",
+                "FullName": "Xã Phụng Châu",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10024",
+                "FullName": "Xã Tiên Phương",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10027",
+                "FullName": "Xã Đông Sơn",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10030",
+                "FullName": "Xã Đông Phương Yên",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10033",
+                "FullName": "Xã Phú Nghĩa",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10039",
+                "FullName": "Xã Trường Yên",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10042",
+                "FullName": "Xã Ngọc Hòa",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10045",
+                "FullName": "Xã Thủy Xuân Tiên",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10048",
+                "FullName": "Xã Thanh Bình",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10051",
+                "FullName": "Xã Trung Hòa",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10054",
+                "FullName": "Xã Đại Yên",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10057",
+                "FullName": "Xã Thụy Hương",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10060",
+                "FullName": "Xã Tốt Động",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10063",
+                "FullName": "Xã Lam Điền",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10066",
+                "FullName": "Xã Tân Tiến",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10069",
+                "FullName": "Xã Nam Phương Tiến",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10072",
+                "FullName": "Xã Hợp Đồng",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10075",
+                "FullName": "Xã Hoàng Văn Thụ",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10078",
+                "FullName": "Xã Hoàng Diệu",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10081",
+                "FullName": "Xã Hữu Văn",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10084",
+                "FullName": "Xã Quảng Bị",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10087",
+                "FullName": "Xã Mỹ Lương",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10090",
+                "FullName": "Xã Thượng Vực",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10096",
+                "FullName": "Xã Hồng Phú",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10099",
+                "FullName": "Xã Trần Phú",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10102",
+                "FullName": "Xã Văn Võ",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10105",
+                "FullName": "Xã Đồng Lạc",
+                "DistrictCode": "277"
+               },
+               {
+                "Code": "10108",
+                "FullName": "Xã Hòa Phú",
+                "DistrictCode": "277"
+               }
+              ]
+             },
+             {
+              "Code": "278",
+              "FullName": "Huyện Thanh Oai",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "10114",
+                "FullName": "Thị trấn Kim Bài",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10120",
+                "FullName": "Xã Cự Khê",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10126",
+                "FullName": "Xã Bích Hòa",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10129",
+                "FullName": "Xã Mỹ Hưng",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10132",
+                "FullName": "Xã Cao Viên",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10135",
+                "FullName": "Xã Bình Minh",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10138",
+                "FullName": "Xã Tam Hưng",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10141",
+                "FullName": "Xã Thanh Cao",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10144",
+                "FullName": "Xã Thanh Thùy",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10147",
+                "FullName": "Xã Thanh Mai",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10150",
+                "FullName": "Xã Thanh Văn",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10153",
+                "FullName": "Xã Đỗ Động",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10156",
+                "FullName": "Xã Kim An",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10159",
+                "FullName": "Xã Kim Thư",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10162",
+                "FullName": "Xã Phương Trung",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10165",
+                "FullName": "Xã Tân Ước",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10168",
+                "FullName": "Xã Dân Hòa",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10171",
+                "FullName": "Xã Liên Châu",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10174",
+                "FullName": "Xã Cao Xuân Dương",
+                "DistrictCode": "278"
+               },
+               {
+                "Code": "10180",
+                "FullName": "Xã Hồng Dương",
+                "DistrictCode": "278"
+               }
+              ]
+             },
+             {
+              "Code": "279",
+              "FullName": "Huyện Thường Tín",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "10183",
+                "FullName": "Thị trấn Thường Tín",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10186",
+                "FullName": "Xã Ninh Sở",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10189",
+                "FullName": "Xã Nhị Khê",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10192",
+                "FullName": "Xã Duyên Thái",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10195",
+                "FullName": "Xã Khánh Hà",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10198",
+                "FullName": "Xã Hòa Bình",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10201",
+                "FullName": "Xã Văn Bình",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10204",
+                "FullName": "Xã Hiền Giang",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10207",
+                "FullName": "Xã Hồng Vân",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10210",
+                "FullName": "Xã Vân Tảo",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10213",
+                "FullName": "Xã Liên Phương",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10216",
+                "FullName": "Xã Văn Phú",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10219",
+                "FullName": "Xã Tự Nhiên",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10222",
+                "FullName": "Xã Tiền Phong",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10225",
+                "FullName": "Xã Hà Hồi",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10231",
+                "FullName": "Xã Nguyễn Trãi",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10234",
+                "FullName": "Xã Quất Động",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10237",
+                "FullName": "Xã Chương Dương",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10240",
+                "FullName": "Xã Tân Minh",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10243",
+                "FullName": "Xã Lê Lợi",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10246",
+                "FullName": "Xã Thắng Lợi",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10249",
+                "FullName": "Xã Dũng Tiến",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10255",
+                "FullName": "Xã Nghiêm Xuyên",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10258",
+                "FullName": "Xã Tô Hiệu",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10261",
+                "FullName": "Xã Văn Tự",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10264",
+                "FullName": "Xã Vạn Nhất",
+                "DistrictCode": "279"
+               },
+               {
+                "Code": "10267",
+                "FullName": "Xã Minh Cường",
+                "DistrictCode": "279"
+               }
+              ]
+             },
+             {
+              "Code": "280",
+              "FullName": "Huyện Phú Xuyên",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "10270",
+                "FullName": "Thị trấn Phú Minh",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10273",
+                "FullName": "Thị trấn Phú Xuyên",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10276",
+                "FullName": "Xã Hồng Minh",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10279",
+                "FullName": "Xã Phượng Dực",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10282",
+                "FullName": "Xã Nam Tiến",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10291",
+                "FullName": "Xã Văn Hoàng",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10294",
+                "FullName": "Xã Phú Túc",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10300",
+                "FullName": "Xã Hồng Thái",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10303",
+                "FullName": "Xã Hoàng Long",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10312",
+                "FullName": "Xã Nam Phong",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10315",
+                "FullName": "Xã Tân Dân",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10318",
+                "FullName": "Xã Quang Hà",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10321",
+                "FullName": "Xã Chuyên Mỹ",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10324",
+                "FullName": "Xã Khai Thái",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10327",
+                "FullName": "Xã Phúc Tiến",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10330",
+                "FullName": "Xã Vân Từ",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10333",
+                "FullName": "Xã Tri Thủy",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10336",
+                "FullName": "Xã Đại Xuyên",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10339",
+                "FullName": "Xã Phú Yên",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10342",
+                "FullName": "Xã Bạch Hạ",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10345",
+                "FullName": "Xã Quang Lãng",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10348",
+                "FullName": "Xã Châu Can",
+                "DistrictCode": "280"
+               },
+               {
+                "Code": "10351",
+                "FullName": "Xã Minh Tân",
+                "DistrictCode": "280"
+               }
+              ]
+             },
+             {
+              "Code": "281",
+              "FullName": "Huyện Ứng Hòa",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "10354",
+                "FullName": "Thị trấn Vân Đình",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10363",
+                "FullName": "Xã Hoa Viên",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10366",
+                "FullName": "Xã Quảng Phú Cầu",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10369",
+                "FullName": "Xã Trường Thịnh",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10375",
+                "FullName": "Xã Liên Bạt",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10378",
+                "FullName": "Xã Cao Sơn Tiến",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10384",
+                "FullName": "Xã Phương Tú",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10387",
+                "FullName": "Xã Trung Tú",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10390",
+                "FullName": "Xã Đồng Tân",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10393",
+                "FullName": "Xã Tảo Dương Văn",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10396",
+                "FullName": "Xã Thái Hòa",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10399",
+                "FullName": "Xã Minh Đức",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10402",
+                "FullName": "Xã Trầm Lộng",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10411",
+                "FullName": "Xã Kim Đường",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10417",
+                "FullName": "Xã Hòa Phú",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10423",
+                "FullName": "Xã Đại Hùng",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10426",
+                "FullName": "Xã Đông Lỗ",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10429",
+                "FullName": "Xã Phù Lưu",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10432",
+                "FullName": "Xã Đại Cường",
+                "DistrictCode": "281"
+               },
+               {
+                "Code": "10435",
+                "FullName": "Xã Bình Lưu Quang",
+                "DistrictCode": "281"
+               }
+              ]
+             },
+             {
+              "Code": "282",
+              "FullName": "Huyện Mỹ Đức",
+              "ProvinceCode": "01",
+              "Ward": [
+               {
+                "Code": "10441",
+                "FullName": "Thị trấn Đại Nghĩa",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10444",
+                "FullName": "Xã Đồng Tâm",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10447",
+                "FullName": "Xã Thượng Lâm",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10450",
+                "FullName": "Xã Tuy Lai",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10453",
+                "FullName": "Xã Phúc Lâm",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10459",
+                "FullName": "Xã Mỹ Xuyên",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10462",
+                "FullName": "Xã An Mỹ",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10465",
+                "FullName": "Xã Hồng Sơn",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10468",
+                "FullName": "Xã Lê Thanh",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10471",
+                "FullName": "Xã Xuy Xá",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10474",
+                "FullName": "Xã Phùng Xá",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10477",
+                "FullName": "Xã Phù Lưu Tế",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10480",
+                "FullName": "Xã Đại Hưng",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10483",
+                "FullName": "Xã Vạn Tín",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10489",
+                "FullName": "Xã Hương Sơn",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10492",
+                "FullName": "Xã Hùng Tiến",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10495",
+                "FullName": "Xã An Tiến",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10498",
+                "FullName": "Xã Hợp Tiến",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10501",
+                "FullName": "Xã Hợp Thanh",
+                "DistrictCode": "282"
+               },
+               {
+                "Code": "10504",
+                "FullName": "Xã An Phú",
+                "DistrictCode": "282"
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "Code": "02",
+            "FullName": "Tỉnh Hà Giang",
+            "District": [
+             {
+              "Code": "024",
+              "FullName": "Thành phố Hà Giang",
+              "ProvinceCode": "02",
+              "Ward": [
+               {
+                "Code": "00688",
+                "FullName": "Phường Quang Trung",
+                "DistrictCode": "024"
+               },
+               {
+                "Code": "00691",
+                "FullName": "Phường Trần Phú",
+                "DistrictCode": "024"
+               },
+               {
+                "Code": "00692",
+                "FullName": "Phường Ngọc Hà",
+                "DistrictCode": "024"
+               },
+               {
+                "Code": "00694",
+                "FullName": "Phường Nguyễn Trãi",
+                "DistrictCode": "024"
+               },
+               {
+                "Code": "00697",
+                "FullName": "Phường Minh Khai",
+                "DistrictCode": "024"
+               },
+               {
+                "Code": "00700",
+                "FullName": "Xã Ngọc Đường",
+                "DistrictCode": "024"
+               },
+               {
+                "Code": "00946",
+                "FullName": "Xã Phương Độ",
+                "DistrictCode": "024"
+               },
+               {
+                "Code": "00949",
+                "FullName": "Xã Phương Thiện",
+                "DistrictCode": "024"
+               }
+              ]
+             },
+             {
+              "Code": "026",
+              "FullName": "Huyện Đồng Văn",
+              "ProvinceCode": "02",
+              "Ward": [
+               {
+                "Code": "00712",
+                "FullName": "Thị trấn Phó Bảng",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00715",
+                "FullName": "Xã Lũng Cú",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00718",
+                "FullName": "Xã Má Lé",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00721",
+                "FullName": "Thị trấn Đồng Văn",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00724",
+                "FullName": "Xã Lũng Táo",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00727",
+                "FullName": "Xã Phố Là",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00730",
+                "FullName": "Xã Thài Phìn Tủng",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00733",
+                "FullName": "Xã Sủng Là",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00736",
+                "FullName": "Xã Xà Phìn",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00739",
+                "FullName": "Xã Tả Phìn",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00742",
+                "FullName": "Xã Tả Lủng",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00745",
+                "FullName": "Xã Phố Cáo",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00748",
+                "FullName": "Xã Sính Lủng",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00751",
+                "FullName": "Xã Sảng Tủng",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00754",
+                "FullName": "Xã Lũng Thầu",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00757",
+                "FullName": "Xã Hố Quáng Phìn",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00760",
+                "FullName": "Xã Vần Chải",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00763",
+                "FullName": "Xã Lũng Phìn",
+                "DistrictCode": "026"
+               },
+               {
+                "Code": "00766",
+                "FullName": "Xã Sủng Trái",
+                "DistrictCode": "026"
+               }
+              ]
+             },
+             {
+              "Code": "027",
+              "FullName": "Huyện Mèo Vạc",
+              "ProvinceCode": "02",
+              "Ward": [
+               {
+                "Code": "00769",
+                "FullName": "Thị trấn Mèo Vạc",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00772",
+                "FullName": "Xã Thượng Phùng",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00775",
+                "FullName": "Xã Pải Lủng",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00778",
+                "FullName": "Xã Xín Cái",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00781",
+                "FullName": "Xã Pả Vi",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00784",
+                "FullName": "Xã Giàng Chu Phìn",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00787",
+                "FullName": "Xã Sủng Trà",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00790",
+                "FullName": "Xã Sủng Máng",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00793",
+                "FullName": "Xã Sơn Vĩ",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00796",
+                "FullName": "Xã Tả Lủng",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00799",
+                "FullName": "Xã Cán Chu Phìn",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00802",
+                "FullName": "Xã Lũng Pù",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00805",
+                "FullName": "Xã Lũng Chinh",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00808",
+                "FullName": "Xã Tát Ngà",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00811",
+                "FullName": "Xã Nậm Ban",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00814",
+                "FullName": "Xã Khâu Vai",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00815",
+                "FullName": "Xã Niêm Tòng",
+                "DistrictCode": "027"
+               },
+               {
+                "Code": "00817",
+                "FullName": "Xã Niêm Sơn",
+                "DistrictCode": "027"
+               }
+              ]
+             },
+             {
+              "Code": "028",
+              "FullName": "Huyện Yên Minh",
+              "ProvinceCode": "02",
+              "Ward": [
+               {
+                "Code": "00820",
+                "FullName": "Thị trấn Yên Minh",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00823",
+                "FullName": "Xã Thắng Mố",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00826",
+                "FullName": "Xã Phú Lũng",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00829",
+                "FullName": "Xã Sủng Tráng",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00832",
+                "FullName": "Xã Bạch Đích",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00835",
+                "FullName": "Xã Na Khê",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00838",
+                "FullName": "Xã Sủng Thài",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00841",
+                "FullName": "Xã Hữu Vinh",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00844",
+                "FullName": "Xã Lao Và Chải",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00847",
+                "FullName": "Xã Mậu Duệ",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00850",
+                "FullName": "Xã Đông Minh",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00853",
+                "FullName": "Xã Mậu Long",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00856",
+                "FullName": "Xã Ngam La",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00859",
+                "FullName": "Xã Ngọc Long",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00862",
+                "FullName": "Xã Đường Thượng",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00865",
+                "FullName": "Xã Lũng Hồ",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00868",
+                "FullName": "Xã Du Tiến",
+                "DistrictCode": "028"
+               },
+               {
+                "Code": "00871",
+                "FullName": "Xã Du Già",
+                "DistrictCode": "028"
+               }
+              ]
+             },
+             {
+              "Code": "029",
+              "FullName": "Huyện Quản Bạ",
+              "ProvinceCode": "02",
+              "Ward": [
+               {
+                "Code": "00883",
+                "FullName": "Xã Cán Tỷ",
+                "DistrictCode": "029"
+               },
+               {
+                "Code": "00874",
+                "FullName": "Thị trấn Tam Sơn",
+                "DistrictCode": "029"
+               },
+               {
+                "Code": "00877",
+                "FullName": "Xã Bát Đại Sơn",
+                "DistrictCode": "029"
+               },
+               {
+                "Code": "00880",
+                "FullName": "Xã Nghĩa Thuận",
+                "DistrictCode": "029"
+               },
+               {
+                "Code": "00886",
+                "FullName": "Xã Cao Mã Pờ",
+                "DistrictCode": "029"
+               },
+               {
+                "Code": "00889",
+                "FullName": "Xã Thanh Vân",
+                "DistrictCode": "029"
+               },
+               {
+                "Code": "00892",
+                "FullName": "Xã Tùng Vài",
+                "DistrictCode": "029"
+               },
+               {
+                "Code": "00895",
+                "FullName": "Xã Đông Hà",
+                "DistrictCode": "029"
+               },
+               {
+                "Code": "00898",
+                "FullName": "Xã Quản Bạ",
+                "DistrictCode": "029"
+               },
+               {
+                "Code": "00901",
+                "FullName": "Xã Lùng Tám",
+                "DistrictCode": "029"
+               },
+               {
+                "Code": "00904",
+                "FullName": "Xã Quyết Tiến",
+                "DistrictCode": "029"
+               },
+               {
+                "Code": "00907",
+                "FullName": "Xã Tả Ván",
+                "DistrictCode": "029"
+               },
+               {
+                "Code": "00910",
+                "FullName": "Xã Thái An",
+                "DistrictCode": "029"
+               }
+              ]
+             },
+             {
+              "Code": "030",
+              "FullName": "Huyện Vị Xuyên",
+              "ProvinceCode": "02",
+              "Ward": [
+               {
+                "Code": "00703",
+                "FullName": "Xã Kim Thạch",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00706",
+                "FullName": "Xã Phú Linh",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00709",
+                "FullName": "Xã Kim Linh",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00913",
+                "FullName": "Thị trấn Vị Xuyên",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00916",
+                "FullName": "Thị trấn Nông Trường Việt Lâm",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00919",
+                "FullName": "Xã Minh Tân",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00922",
+                "FullName": "Xã Thuận Hoà",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00925",
+                "FullName": "Xã Tùng Bá",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00928",
+                "FullName": "Xã Thanh Thủy",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00931",
+                "FullName": "Xã Thanh Đức",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00934",
+                "FullName": "Xã Phong Quang",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00937",
+                "FullName": "Xã Xín Chải",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00940",
+                "FullName": "Xã Phương Tiến",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00943",
+                "FullName": "Xã Lao Chải",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00952",
+                "FullName": "Xã Cao Bồ",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00955",
+                "FullName": "Xã Đạo Đức",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00958",
+                "FullName": "Xã Thượng Sơn",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00961",
+                "FullName": "Xã Linh Hồ",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00964",
+                "FullName": "Xã Quảng Ngần",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00967",
+                "FullName": "Xã Việt Lâm",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00970",
+                "FullName": "Xã Ngọc Linh",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00973",
+                "FullName": "Xã Ngọc Minh",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00976",
+                "FullName": "Xã Bạch Ngọc",
+                "DistrictCode": "030"
+               },
+               {
+                "Code": "00979",
+                "FullName": "Xã Trung Thành",
+                "DistrictCode": "030"
+               }
+              ]
+             },
+             {
+              "Code": "031",
+              "FullName": "Huyện Bắc Mê",
+              "ProvinceCode": "02",
+              "Ward": [
+               {
+                "Code": "00982",
+                "FullName": "Xã Minh Sơn",
+                "DistrictCode": "031"
+               },
+               {
+                "Code": "00985",
+                "FullName": "Xã Giáp Trung",
+                "DistrictCode": "031"
+               },
+               {
+                "Code": "00988",
+                "FullName": "Xã Yên Định",
+                "DistrictCode": "031"
+               },
+               {
+                "Code": "00991",
+                "FullName": "Thị trấn Yên Phú",
+                "DistrictCode": "031"
+               },
+               {
+                "Code": "00994",
+                "FullName": "Xã Minh Ngọc",
+                "DistrictCode": "031"
+               },
+               {
+                "Code": "00997",
+                "FullName": "Xã Yên Phong",
+                "DistrictCode": "031"
+               },
+               {
+                "Code": "01000",
+                "FullName": "Xã Lạc Nông",
+                "DistrictCode": "031"
+               },
+               {
+                "Code": "01003",
+                "FullName": "Xã Phú Nam",
+                "DistrictCode": "031"
+               },
+               {
+                "Code": "01006",
+                "FullName": "Xã Yên Cường",
+                "DistrictCode": "031"
+               },
+               {
+                "Code": "01009",
+                "FullName": "Xã Thượng Tân",
+                "DistrictCode": "031"
+               },
+               {
+                "Code": "01012",
+                "FullName": "Xã Đường Âm",
+                "DistrictCode": "031"
+               },
+               {
+                "Code": "01015",
+                "FullName": "Xã Đường Hồng",
+                "DistrictCode": "031"
+               },
+               {
+                "Code": "01018",
+                "FullName": "Xã Phiêng Luông",
+                "DistrictCode": "031"
+               }
+              ]
+             },
+             {
+              "Code": "032",
+              "FullName": "Huyện Hoàng Su Phì",
+              "ProvinceCode": "02",
+              "Ward": [
+               {
+                "Code": "01021",
+                "FullName": "Thị trấn Vinh Quang",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01024",
+                "FullName": "Xã Bản Máy",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01027",
+                "FullName": "Xã Thàng Tín",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01030",
+                "FullName": "Xã Thèn Chu Phìn",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01033",
+                "FullName": "Xã Pố Lồ",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01036",
+                "FullName": "Xã Bản Phùng",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01039",
+                "FullName": "Xã Túng Sán",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01042",
+                "FullName": "Xã Chiến Phố",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01045",
+                "FullName": "Xã Đản Ván",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01048",
+                "FullName": "Xã Tụ Nhân",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01051",
+                "FullName": "Xã Tân Tiến",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01054",
+                "FullName": "Xã Nàng Đôn",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01057",
+                "FullName": "Xã Pờ Ly Ngài",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01060",
+                "FullName": "Xã Sán Xả Hồ",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01063",
+                "FullName": "Xã Bản Luốc",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01066",
+                "FullName": "Xã Ngàm Đăng Vài",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01069",
+                "FullName": "Xã Bản Nhùng",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01072",
+                "FullName": "Xã Tả Sử Choóng",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01075",
+                "FullName": "Xã Nậm Dịch",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01081",
+                "FullName": "Xã Hồ Thầu",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01084",
+                "FullName": "Xã Nam Sơn",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01087",
+                "FullName": "Xã Nậm Tỵ",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01090",
+                "FullName": "Xã Thông Nguyên",
+                "DistrictCode": "032"
+               },
+               {
+                "Code": "01093",
+                "FullName": "Xã Nậm Khòa",
+                "DistrictCode": "032"
+               }
+              ]
+             },
+             {
+              "Code": "033",
+              "FullName": "Huyện Xín Mần",
+              "ProvinceCode": "02",
+              "Ward": [
+               {
+                "Code": "01096",
+                "FullName": "Thị trấn Cốc Pài",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01099",
+                "FullName": "Xã Nàn Xỉn",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01102",
+                "FullName": "Xã Bản Díu",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01105",
+                "FullName": "Xã Chí Cà",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01108",
+                "FullName": "Xã Xín Mần",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01114",
+                "FullName": "Xã Thèn Phàng",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01117",
+                "FullName": "Xã Trung Thịnh",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01120",
+                "FullName": "Xã Pà Vầy Sủ",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01123",
+                "FullName": "Xã Cốc Rế",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01126",
+                "FullName": "Xã Thu Tà",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01129",
+                "FullName": "Xã Nàn Ma",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01132",
+                "FullName": "Xã Tả Nhìu",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01135",
+                "FullName": "Xã Bản Ngò",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01138",
+                "FullName": "Xã Chế Là",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01141",
+                "FullName": "Xã Nấm Dẩn",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01144",
+                "FullName": "Xã Quảng Nguyên",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01147",
+                "FullName": "Xã Nà Chì",
+                "DistrictCode": "033"
+               },
+               {
+                "Code": "01150",
+                "FullName": "Xã Khuôn Lùng",
+                "DistrictCode": "033"
+               }
+              ]
+             },
+             {
+              "Code": "034",
+              "FullName": "Huyện Bắc Quang",
+              "ProvinceCode": "02",
+              "Ward": [
+               {
+                "Code": "01153",
+                "FullName": "Thị trấn Việt Quang",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01156",
+                "FullName": "Thị trấn Vĩnh Tuy",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01159",
+                "FullName": "Xã Tân Lập",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01162",
+                "FullName": "Xã Tân Thành",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01165",
+                "FullName": "Xã Đồng Tiến",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01168",
+                "FullName": "Xã Đồng Tâm",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01171",
+                "FullName": "Xã Tân Quang",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01174",
+                "FullName": "Xã Thượng Bình",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01177",
+                "FullName": "Xã Hữu Sản",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01180",
+                "FullName": "Xã Kim Ngọc",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01183",
+                "FullName": "Xã Việt Vinh",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01186",
+                "FullName": "Xã Bằng Hành",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01189",
+                "FullName": "Xã Quang Minh",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01192",
+                "FullName": "Xã Liên Hiệp",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01195",
+                "FullName": "Xã Vô Điếm",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01198",
+                "FullName": "Xã Việt Hồng",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01201",
+                "FullName": "Xã Hùng An",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01204",
+                "FullName": "Xã Đức Xuân",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01207",
+                "FullName": "Xã Tiên Kiều",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01210",
+                "FullName": "Xã Vĩnh Hảo",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01213",
+                "FullName": "Xã Vĩnh Phúc",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01216",
+                "FullName": "Xã Đồng Yên",
+                "DistrictCode": "034"
+               },
+               {
+                "Code": "01219",
+                "FullName": "Xã Đông Thành",
+                "DistrictCode": "034"
+               }
+              ]
+             },
+             {
+              "Code": "035",
+              "FullName": "Huyện Quang Bình",
+              "ProvinceCode": "02",
+              "Ward": [
+               {
+                "Code": "01222",
+                "FullName": "Xã Xuân Minh",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01225",
+                "FullName": "Xã Tiên Nguyên",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01228",
+                "FullName": "Xã Tân Nam",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01231",
+                "FullName": "Xã Bản Rịa",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01234",
+                "FullName": "Xã Yên Thành",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01237",
+                "FullName": "Thị trấn Yên Bình",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01240",
+                "FullName": "Xã Tân Trịnh",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01243",
+                "FullName": "Xã Tân Bắc",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01246",
+                "FullName": "Xã Bằng Lang",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01249",
+                "FullName": "Xã Yên Hà",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01252",
+                "FullName": "Xã Hương Sơn",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01255",
+                "FullName": "Xã Xuân Giang",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01258",
+                "FullName": "Xã Nà Khương",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01261",
+                "FullName": "Xã Tiên Yên",
+                "DistrictCode": "035"
+               },
+               {
+                "Code": "01264",
+                "FullName": "Xã Vĩ Thượng",
+                "DistrictCode": "035"
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "Code": "04",
+            "FullName": "Tỉnh Cao Bằng",
+            "District": [
+             {
+              "Code": "040",
+              "FullName": "Thành phố Cao Bằng",
+              "ProvinceCode": "04",
+              "Ward": [
+               {
+                "Code": "01267",
+                "FullName": "Phường Sông Hiến",
+                "DistrictCode": "040"
+               },
+               {
+                "Code": "01270",
+                "FullName": "Phường Sông Bằng",
+                "DistrictCode": "040"
+               },
+               {
+                "Code": "01273",
+                "FullName": "Phường Hợp Giang",
+                "DistrictCode": "040"
+               },
+               {
+                "Code": "01276",
+                "FullName": "Phường Tân Giang",
+                "DistrictCode": "040"
+               },
+               {
+                "Code": "01279",
+                "FullName": "Phường Ngọc Xuân",
+                "DistrictCode": "040"
+               },
+               {
+                "Code": "01282",
+                "FullName": "Phường Đề Thám",
+                "DistrictCode": "040"
+               },
+               {
+                "Code": "01285",
+                "FullName": "Phường Hoà Chung",
+                "DistrictCode": "040"
+               },
+               {
+                "Code": "01288",
+                "FullName": "Phường Duyệt Trung",
+                "DistrictCode": "040"
+               },
+               {
+                "Code": "01693",
+                "FullName": "Xã Vĩnh Quang",
+                "DistrictCode": "040"
+               },
+               {
+                "Code": "01705",
+                "FullName": "Xã Hưng Đạo",
+                "DistrictCode": "040"
+               },
+               {
+                "Code": "01720",
+                "FullName": "Xã Chu Trinh",
+                "DistrictCode": "040"
+               }
+              ]
+             },
+             {
+              "Code": "042",
+              "FullName": "Huyện Bảo Lâm",
+              "ProvinceCode": "04",
+              "Ward": [
+               {
+                "Code": "01290",
+                "FullName": "Thị trấn Pác Miầu",
+                "DistrictCode": "042"
+               },
+               {
+                "Code": "01291",
+                "FullName": "Xã Đức Hạnh",
+                "DistrictCode": "042"
+               },
+               {
+                "Code": "01294",
+                "FullName": "Xã Lý Bôn",
+                "DistrictCode": "042"
+               },
+               {
+                "Code": "01296",
+                "FullName": "Xã Nam Cao",
+                "DistrictCode": "042"
+               },
+               {
+                "Code": "01297",
+                "FullName": "Xã Nam Quang",
+                "DistrictCode": "042"
+               },
+               {
+                "Code": "01300",
+                "FullName": "Xã Vĩnh Quang",
+                "DistrictCode": "042"
+               },
+               {
+                "Code": "01303",
+                "FullName": "Xã Quảng Lâm",
+                "DistrictCode": "042"
+               },
+               {
+                "Code": "01304",
+                "FullName": "Xã Thạch Lâm",
+                "DistrictCode": "042"
+               },
+               {
+                "Code": "01309",
+                "FullName": "Xã Vĩnh Phong",
+                "DistrictCode": "042"
+               },
+               {
+                "Code": "01312",
+                "FullName": "Xã Mông Ân",
+                "DistrictCode": "042"
+               },
+               {
+                "Code": "01315",
+                "FullName": "Xã Thái Học",
+                "DistrictCode": "042"
+               },
+               {
+                "Code": "01316",
+                "FullName": "Xã Thái Sơn",
+                "DistrictCode": "042"
+               },
+               {
+                "Code": "01318",
+                "FullName": "Xã Yên Thổ",
+                "DistrictCode": "042"
+               }
+              ]
+             },
+             {
+              "Code": "043",
+              "FullName": "Huyện Bảo Lạc",
+              "ProvinceCode": "04",
+              "Ward": [
+               {
+                "Code": "01321",
+                "FullName": "Thị trấn Bảo Lạc",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01324",
+                "FullName": "Xã Cốc Pàng",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01327",
+                "FullName": "Xã Thượng Hà",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01330",
+                "FullName": "Xã Cô Ba",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01333",
+                "FullName": "Xã Bảo Toàn",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01336",
+                "FullName": "Xã Khánh Xuân",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01339",
+                "FullName": "Xã Xuân Trường",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01342",
+                "FullName": "Xã Hồng Trị",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01343",
+                "FullName": "Xã Kim Cúc",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01345",
+                "FullName": "Xã Phan Thanh",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01348",
+                "FullName": "Xã Hồng An",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01351",
+                "FullName": "Xã Hưng Đạo",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01352",
+                "FullName": "Xã Hưng Thịnh",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01354",
+                "FullName": "Xã Huy Giáp",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01357",
+                "FullName": "Xã Đình Phùng",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01359",
+                "FullName": "Xã Sơn Lập",
+                "DistrictCode": "043"
+               },
+               {
+                "Code": "01360",
+                "FullName": "Xã Sơn Lộ",
+                "DistrictCode": "043"
+               }
+              ]
+             },
+             {
+              "Code": "045",
+              "FullName": "Huyện Hà Quảng",
+              "ProvinceCode": "04",
+              "Ward": [
+               {
+                "Code": "01363",
+                "FullName": "Thị trấn Thông Nông",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01366",
+                "FullName": "Xã Cần Yên",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01367",
+                "FullName": "Xã Cần Nông",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01372",
+                "FullName": "Xã Lương Thông",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01375",
+                "FullName": "Xã Đa Thông",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01378",
+                "FullName": "Xã Ngọc Động",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01381",
+                "FullName": "Xã Yên Sơn",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01384",
+                "FullName": "Xã Lương Can",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01387",
+                "FullName": "Xã Thanh Long",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01392",
+                "FullName": "Thị trấn Xuân Hòa",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01393",
+                "FullName": "Xã Lũng Nặm",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01399",
+                "FullName": "Xã Trường Hà",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01402",
+                "FullName": "Xã Cải Viên",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01411",
+                "FullName": "Xã Nội Thôn",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01414",
+                "FullName": "Xã Tổng Cọt",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01417",
+                "FullName": "Xã Sóc Hà",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01420",
+                "FullName": "Xã Thượng Thôn",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01429",
+                "FullName": "Xã Hồng Sỹ",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01432",
+                "FullName": "Xã Quý Quân",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01435",
+                "FullName": "Xã Mã Ba",
+                "DistrictCode": "045"
+               },
+               {
+                "Code": "01438",
+                "FullName": "Xã Ngọc Đào",
+                "DistrictCode": "045"
+               }
+              ]
+             },
+             {
+              "Code": "047",
+              "FullName": "Huyện Trùng Khánh",
+              "ProvinceCode": "04",
+              "Ward": [
+               {
+                "Code": "01447",
+                "FullName": "Thị trấn Trà Lĩnh",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01453",
+                "FullName": "Xã Tri Phương",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01456",
+                "FullName": "Xã Quang Hán",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01462",
+                "FullName": "Xã Xuân Nội",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01465",
+                "FullName": "Xã Quang Trung",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01468",
+                "FullName": "Xã Quang Vinh",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01471",
+                "FullName": "Xã Cao Chương",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01477",
+                "FullName": "Thị trấn Trùng Khánh",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01480",
+                "FullName": "Xã Ngọc Khê",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01481",
+                "FullName": "Xã Ngọc Côn",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01483",
+                "FullName": "Xã Phong Nậm",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01489",
+                "FullName": "Xã Đình Phong",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01495",
+                "FullName": "Xã Đàm Thuỷ",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01498",
+                "FullName": "Xã Khâm Thành",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01501",
+                "FullName": "Xã Chí Viễn",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01504",
+                "FullName": "Xã Lăng Hiếu",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01507",
+                "FullName": "Xã Phong Châu",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01516",
+                "FullName": "Xã Trung Phúc",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01519",
+                "FullName": "Xã Cao Thăng",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01522",
+                "FullName": "Xã Đức Hồng",
+                "DistrictCode": "047"
+               },
+               {
+                "Code": "01525",
+                "FullName": "Xã Đoài Dương",
+                "DistrictCode": "047"
+               }
+              ]
+             },
+             {
+              "Code": "048",
+              "FullName": "Huyện Hạ Lang",
+              "ProvinceCode": "04",
+              "Ward": [
+               {
+                "Code": "01534",
+                "FullName": "Xã Minh Long",
+                "DistrictCode": "048"
+               },
+               {
+                "Code": "01537",
+                "FullName": "Xã Lý Quốc",
+                "DistrictCode": "048"
+               },
+               {
+                "Code": "01540",
+                "FullName": "Xã Thắng Lợi",
+                "DistrictCode": "048"
+               },
+               {
+                "Code": "01543",
+                "FullName": "Xã Đồng Loan",
+                "DistrictCode": "048"
+               },
+               {
+                "Code": "01546",
+                "FullName": "Xã Đức Quang",
+                "DistrictCode": "048"
+               },
+               {
+                "Code": "01549",
+                "FullName": "Xã Kim Loan",
+                "DistrictCode": "048"
+               },
+               {
+                "Code": "01552",
+                "FullName": "Xã Quang Long",
+                "DistrictCode": "048"
+               },
+               {
+                "Code": "01555",
+                "FullName": "Xã An Lạc",
+                "DistrictCode": "048"
+               },
+               {
+                "Code": "01558",
+                "FullName": "Thị trấn Thanh Nhật",
+                "DistrictCode": "048"
+               },
+               {
+                "Code": "01561",
+                "FullName": "Xã Vinh Quý",
+                "DistrictCode": "048"
+               },
+               {
+                "Code": "01564",
+                "FullName": "Xã Thống Nhất",
+                "DistrictCode": "048"
+               },
+               {
+                "Code": "01567",
+                "FullName": "Xã Cô Ngân",
+                "DistrictCode": "048"
+               },
+               {
+                "Code": "01573",
+                "FullName": "Xã Thị Hoa",
+                "DistrictCode": "048"
+               }
+              ]
+             },
+             {
+              "Code": "049",
+              "FullName": "Huyện Quảng Hòa",
+              "ProvinceCode": "04",
+              "Ward": [
+               {
+                "Code": "01474",
+                "FullName": "Xã Quốc Toản",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01576",
+                "FullName": "Thị trấn Quảng Uyên",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01579",
+                "FullName": "Xã Phi Hải",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01582",
+                "FullName": "Xã Quảng Hưng",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01594",
+                "FullName": "Xã Độc Lập",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01597",
+                "FullName": "Xã Cai Bộ",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01603",
+                "FullName": "Xã Phúc Sen",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01606",
+                "FullName": "Xã Chí Thảo",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01609",
+                "FullName": "Xã Tự Do",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01615",
+                "FullName": "Xã Hồng Quang",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01618",
+                "FullName": "Xã Ngọc Động",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01624",
+                "FullName": "Xã Hạnh Phúc",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01627",
+                "FullName": "Thị trấn Tà Lùng",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01630",
+                "FullName": "Xã Bế Văn Đàn",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01636",
+                "FullName": "Xã Cách Linh",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01639",
+                "FullName": "Xã Đại Sơn",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01645",
+                "FullName": "Xã Tiên Thành",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01648",
+                "FullName": "Thị trấn Hoà Thuận",
+                "DistrictCode": "049"
+               },
+               {
+                "Code": "01651",
+                "FullName": "Xã Mỹ Hưng",
+                "DistrictCode": "049"
+               }
+              ]
+             },
+             {
+              "Code": "051",
+              "FullName": "Huyện Hoà An",
+              "ProvinceCode": "04",
+              "Ward": [
+               {
+                "Code": "01654",
+                "FullName": "Thị trấn Nước Hai",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01657",
+                "FullName": "Xã Dân Chủ",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01660",
+                "FullName": "Xã Nam Tuấn",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01666",
+                "FullName": "Xã Đại Tiến",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01669",
+                "FullName": "Xã Đức Long",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01672",
+                "FullName": "Xã Ngũ Lão",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01675",
+                "FullName": "Xã Trương Lương",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01687",
+                "FullName": "Xã Hồng Việt",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01696",
+                "FullName": "Xã Hoàng Tung",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01699",
+                "FullName": "Xã Nguyễn Huệ",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01702",
+                "FullName": "Xã Quang Trung",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01708",
+                "FullName": "Xã Bạch Đằng",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01711",
+                "FullName": "Xã Bình Dương",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01714",
+                "FullName": "Xã Lê Chung",
+                "DistrictCode": "051"
+               },
+               {
+                "Code": "01723",
+                "FullName": "Xã Hồng Nam",
+                "DistrictCode": "051"
+               }
+              ]
+             },
+             {
+              "Code": "052",
+              "FullName": "Huyện Nguyên Bình",
+              "ProvinceCode": "04",
+              "Ward": [
+               {
+                "Code": "01726",
+                "FullName": "Thị trấn Nguyên Bình",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01729",
+                "FullName": "Thị trấn Tĩnh Túc",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01732",
+                "FullName": "Xã Yên Lạc",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01735",
+                "FullName": "Xã Triệu Nguyên",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01738",
+                "FullName": "Xã Ca Thành",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01744",
+                "FullName": "Xã Vũ Nông",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01747",
+                "FullName": "Xã Minh Tâm",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01750",
+                "FullName": "Xã Thể Dục",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01756",
+                "FullName": "Xã Mai Long",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01762",
+                "FullName": "Xã Vũ Minh",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01765",
+                "FullName": "Xã Hoa Thám",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01768",
+                "FullName": "Xã Phan Thanh",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01771",
+                "FullName": "Xã Quang Thành",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01774",
+                "FullName": "Xã Tam Kim",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01777",
+                "FullName": "Xã Thành Công",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01780",
+                "FullName": "Xã Thịnh Vượng",
+                "DistrictCode": "052"
+               },
+               {
+                "Code": "01783",
+                "FullName": "Xã Hưng Đạo",
+                "DistrictCode": "052"
+               }
+              ]
+             },
+             {
+              "Code": "053",
+              "FullName": "Huyện Thạch An",
+              "ProvinceCode": "04",
+              "Ward": [
+               {
+                "Code": "01786",
+                "FullName": "Thị trấn Đông Khê",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01789",
+                "FullName": "Xã Canh Tân",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01792",
+                "FullName": "Xã Kim Đồng",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01795",
+                "FullName": "Xã Minh Khai",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01801",
+                "FullName": "Xã Đức Thông",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01804",
+                "FullName": "Xã Thái Cường",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01807",
+                "FullName": "Xã Vân Trình",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01810",
+                "FullName": "Xã Thụy Hùng",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01813",
+                "FullName": "Xã Quang Trọng",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01816",
+                "FullName": "Xã Trọng Con",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01819",
+                "FullName": "Xã Lê Lai",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01822",
+                "FullName": "Xã Đức Long",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01828",
+                "FullName": "Xã Lê Lợi",
+                "DistrictCode": "053"
+               },
+               {
+                "Code": "01831",
+                "FullName": "Xã Đức Xuân",
+                "DistrictCode": "053"
+               }
+              ]
+             }
+            ]
+           }
+    ]
+    
+    
+      
 }
