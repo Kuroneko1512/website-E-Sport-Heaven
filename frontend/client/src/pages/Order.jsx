@@ -1,29 +1,32 @@
-import React, { useEffect, useState } from 'react'
-import instanceAxios from '../config/db';
+import React, { useEffect, useState } from "react";
+import instanceAxios from "../config/db";
 
-import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 
 const Order = () => {
-  
-  
- const {data,isLoading,isError} = useQuery({
-  queryKey: ["order"],
-  queryFn: async () => {
-    const res = await instanceAxios.get("/api/v1/order/2");
-    return res.data;
-  },
- })
- console.log(data?.data?.order_items)
-    
-  
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["order"],
+    queryFn: async () => {
+      const res = await instanceAxios.get("/api/v1/order/2");
+      return res.data;
+    },
+  });
+  console.log(data?.data?.order_items);
+
   // Calculate subtotal
   const calculateSubtotal = () => {
-    return data?.data?.order_items.reduce((total, item) => total + parseFloat(item.product_variant.price) * item.quantity, 0).toFixed(2);
+    return data?.data?.order_items
+      .reduce(
+        (total, item) =>
+          total + parseFloat(item.product_variant.price) * item.quantity,
+        0
+      )
+      .toFixed(2);
   };
 
   // Render error message if data fails to load
-  
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -59,7 +62,9 @@ const Order = () => {
               <span className="mt-2 text-sm">Order</span>
             </div>
           </div>
-          <h2 className="text-xl font-semibold mb-4">Estimated delivery: 22 Feb 2024</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Estimated delivery: 22 Feb 2024
+          </h2>
           <div className="space-y-4">
             <table className="w-full">
               <thead>
@@ -73,7 +78,7 @@ const Order = () => {
                 </tr>
               </thead>
               <tbody>
-                {data?.data?.order_items.map(item => (
+                {data?.data?.order_items.map((item) => (
                   <tr key={item.id} className="border-b border-gray-200">
                     <td className="py-4">
                       <img
@@ -86,15 +91,18 @@ const Order = () => {
                     </td>
                     <td className="py-4">
                       <div>
-                        <h2 className="text-lg font-semibold">{item.product.name}</h2>
-                        <p className="text-gray-600">Size: {item.
-product_variant
-.sku}</p>
+                        <h2 className="text-lg font-semibold">
+                          {item.product.name}
+                        </h2>
+                        <p className="text-gray-600">
+                          Size: {item.product_variant.sku}
+                        </p>
                       </div>
                     </td>
                     <td className="py-4">
-                      <span className="text-lg">${parseFloat(item.product_variant
-.                        price).toFixed(2)}</span>
+                      <span className="text-lg">
+                        ${parseFloat(item.product_variant.price).toFixed(2)}
+                      </span>
                     </td>
                     <td className="py-4">
                       <div className="flex items-center border-gray-300 rounded w-fit">
@@ -102,7 +110,13 @@ product_variant
                       </div>
                     </td>
                     <td className="py-4">
-                      <span className="text-lg">${(parseFloat(item.product_variant.price) * parseFloat(item.quantity)).toFixed(2)}</span>
+                      <span className="text-lg">
+                        $
+                        {(
+                          parseFloat(item.product_variant.price) *
+                          parseFloat(item.quantity)
+                        ).toFixed(2)}
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -110,7 +124,6 @@ product_variant
             </table>
           </div>
         </div>
-        
 
         {/* Order Summary */}
         <div className="w-full lg:w-1/3 mt-8 lg:mt-0">
@@ -121,7 +134,10 @@ product_variant
             </div>
             <div className="flex-grow border-t border-black"></div>
             <div className="mb-4">
-              <label className="block text-gray-600 mb-2" htmlFor="discount-code">
+              <label
+                className="block text-gray-600 mb-2"
+                htmlFor="discount-code"
+              >
                 Enter Discount Code
               </label>
               <div className="flex">
@@ -143,35 +159,42 @@ product_variant
             <div className="flex-grow border-t border-black"></div>
             <div className="flex justify-between mb-4">
               <span className="text-lg font-bold">Grand Total</span>
-              <span className="text-lg font-bold">${(parseFloat(calculateSubtotal()) + 5.00).toFixed(2)}</span>
+              <span className="text-lg font-bold">
+                ${(parseFloat(calculateSubtotal()) + 5.0).toFixed(2)}
+              </span>
             </div>
-            <button className="bg-black text-white w-full py-3 rounded"> <Link to={`/order`}>Place Order</Link> </button>
+            <button className="bg-black text-white w-full py-3 rounded">
+              {" "}
+              <Link to={`/order`}>Place Order</Link>{" "}
+            </button>
           </div>
         </div>
       </div>
       {/* review address + payment */}
       <div className="mb-8">
-            <h2 className="font-semibold mb-4">Shipping Address</h2>
-            <div className="flex justify-between  items-center">
-              <div>
-                <p className="font-semibold">Robert Fox</p>
-                <p className="text-gray-600">4517 Washington Ave. Manchester, Kentucky 39495</p>
-              </div>
-              <i className="fas fa-edit text-gray-600"></i>
-            </div>
+        <h2 className="font-semibold mb-4">Shipping Address</h2>
+        <div className="flex justify-between  items-center">
+          <div>
+            <p className="font-semibold">Robert Fox</p>
+            <p className="text-gray-600">
+              4517 Washington Ave. Manchester, Kentucky 39495
+            </p>
           </div>
-          <div className="flex-grow border-t border-gray-300 "></div>
-          <div className="mb-8">
-            <h2 className="font-semibold mb-4">Payment Method</h2>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-semibold">Debit Card (.... .... .... 89)</p>
-              </div>
-              <i className="fas fa-edit text-gray-600"></i>
-            </div>
+          <i className="fas fa-edit text-gray-600"></i>
+        </div>
+      </div>
+      <div className="flex-grow border-t border-gray-300 "></div>
+      <div className="mb-8">
+        <h2 className="font-semibold mb-4">Payment Method</h2>
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="font-semibold">Debit Card (.... .... .... 89)</p>
           </div>
+          <i className="fas fa-edit text-gray-600"></i>
+        </div>
+      </div>
     </main>
-  )
-}
+  );
+};
 
 export default Order;

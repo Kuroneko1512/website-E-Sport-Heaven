@@ -1,22 +1,25 @@
 import { useQuery } from '@tanstack/react-query';
-import React from 'react'
+import React from 'react';
 import { useParams } from 'react-router-dom';
-
+import instanceAxios from '../../config/db';
+import { Skeleton, Alert } from 'antd';
 
 const Description = () => {
+  const { id } = useParams();
 
-  const {id} = useParams()
-
-  const {data, isLoading, isError} = useQuery({
-    queryKey: ["product", id],
-    queryFn: async () => {
-      return await instanceAxios.get(`/products/${id}`);
-    }
-  })
-
-    const {description} = data?.data
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => instanceAxios.get(`/api/v1/product/${id}`),
+    select: (response) => response.data.data, // Lấy trực tiếp dữ liệu cần thiết
+  });
+  
   return (
-    <div>{description}</div>
-  )
-}
-export default Description
+    <div>
+      <Skeleton loading={isLoading} active>
+        {data?.description || 'Không có mô tả sản phẩm'}
+      </Skeleton>
+    </div>
+  );
+};
+
+export default Description;
