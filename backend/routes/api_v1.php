@@ -11,6 +11,7 @@ Route::prefix('v1')->group(function (){
     Route::apiResource('/attribute',AttributeController::class);
     Route::apiResource('/category',CategoryController::class);
     Route::apiResource('/product',ProductController::class);
+    Route::get('/product/{id}/Detail',[ProductController::class,'showForDetails']);
     Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
     Route::apiResource('/attributeValue',AttributeValueController::class)->except(['index']);
     Route::apiResource('/order',OrderController::class);

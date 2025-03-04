@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Product\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\ProductStoreRequest;
 use App\Http\Requests\Product\ProductUpdateRequest;
+use App\Http\Resources\ProductDetails\ProductResource;
 use App\Services\Product\ProductService;
 use App\Services\Product\ProductVariantService;
 use Exception;
@@ -84,6 +85,25 @@ class ProductController extends Controller
             return response()->json([
                 'message' => 'lấy thành công', // Thông báo thành công
                 'data' => $product, // Dữ liệu thuộc tính chi tiết
+                'status' => 200 // Trả về mã trạng thái 200 (OK)
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi xử lý dữ liệu.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function showForDetails(string $id)
+    {
+        try {
+            // Gọi service để lấy thông tin chi tiết thuộc tính
+            $product = $this->productService->getProductForDetail($id);
+            // $att = $this->productService->handelAttribteForDetail($product);
+            return response()->json([
+                'message' => 'lấy thành công', // Thông báo thành công
+                'data' => new ProductResource($product), // Dữ liệu thuộc tính chi tiết
+                // 'data' => $product, // Dữ liệu thuộc tính chi tiết
                 'status' => 200 // Trả về mã trạng thái 200 (OK)
             ], 200);
         } catch (Exception $e) {

@@ -2,6 +2,7 @@
 
 namespace App\Services\Product;
 
+use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\Product;
 use App\Services\BaseService;
@@ -21,9 +22,42 @@ class ProductService extends BaseService
     }
     public function getProduct($id)
     {
+        // return $this->model->with([
+        //     'variants.productAttributes.attributeValue:id,value', // Lấy giá trị thuộc tính
+        // ])->findOrFail($id);
         return $this->model->with([
             'variants.productAttributes.attributeValue:id,value', // Lấy giá trị thuộc tính
         ])->findOrFail($id);
+    }
+    public function getProductForDetail($id)
+    {
+        $products = $this->model->with([
+            'category',
+            'variants.productAttributes',
+            'reviews'
+        ])->findOrFail($id);
+        return $products;
+    }
+    public function handelAttribteForDetail($products)
+    {
+        $attributes = [];
+        foreach ($products as $product) {
+            foreach ($product->variants as $variant) {
+                foreach ($variant->attributes as $attribute) {
+                    $attributeName = $attribute->attribute->name;
+                    $attributeValue = $attribute->attributeValue->value;
+
+                    if (!isset($attributes[$attributeName])) {
+                        $attributes[$attributeName] = [];
+                    }
+
+                    if (!in_array($attributeValue, $attributes[$attributeName])) {
+                        $attributes[$attributeName][] = $attributeValue;
+                    }
+                }
+            }
+        }
+        return $attributes;
     }
     public function createProduct($data)
     {
