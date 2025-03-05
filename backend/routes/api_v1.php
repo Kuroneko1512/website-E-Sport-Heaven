@@ -13,6 +13,7 @@ Route::prefix('v1')->group(function (){
     Route::apiResource('/product',ProductController::class);
     Route::get('/product/{id}/Detail',[ProductController::class,'showForDetails']);
     Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
+    Route::post('/attribute/filter', [AttributeController::class, 'getAttributeForIds']);
     Route::apiResource('/attributeValue',AttributeValueController::class)->except(['index']);
     Route::apiResource('/order',OrderController::class);
     Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
