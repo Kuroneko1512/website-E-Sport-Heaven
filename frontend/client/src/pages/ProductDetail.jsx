@@ -15,6 +15,9 @@ const ProductDetail = () => {
   const [displayImage, setDisplayImage] = useState(""); // Ảnh hiển thị
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [drag, setDrag] = useState({ isDown: false, startX: 0, scrollLeft: 0 });
+  const [product, setProduct] = useState([]);
+  const sliderRef = useRef(null);
 
   // Lấy thông tin sản phẩm từ API
   const { data: productDetailData, isLoading } = useQuery({
@@ -24,6 +27,8 @@ const ProductDetail = () => {
       return res?.data;
     },
   });
+
+  // console.log("productDetailData", productDetailData);
 
   // Khi dữ liệu thay đổi, đặt biến thể mặc định là biến thể đầu tiên
   useEffect(() => {
@@ -73,22 +78,22 @@ const ProductDetail = () => {
   };
 
   // Tính rating trung bình
-  const totalVotes = data?.data
-    ? data.data.fiveStart +
-      data.data.fourStart +
-      data.data.threeStart +
-      data.data.twoStart +
-      data.data.oneStart
-    : 0;
-  const averageRating =
-    totalVotes > 0
-      ? (data?.data.fiveStart * 5 +
-          data?.data.fourStart * 4 +
-          data?.data.threeStart * 3 +
-          data?.data.twoStart * 2 +
-          data?.data.oneStart * 1) /
-        totalVotes
-      : "N/A";
+  // const totalVotes = data?.data
+  //   ? data.data.fiveStart +
+  //     data.data.fourStart +
+  //     data.data.threeStart +
+  //     data.data.twoStart +
+  //     data.data.oneStart
+  //   : 0;
+  // const averageRating =
+  //   totalVotes > 0
+  //     ? (data?.data.fiveStart * 5 +
+  //         data?.data.fourStart * 4 +
+  //         data?.data.threeStart * 3 +
+  //         data?.data.twoStart * 2 +
+  //         data?.data.oneStart * 1) /
+  //       totalVotes
+  //     : "N/A";
 
   // Thay đổi trạng thái yêu thích
   const handleFav = () => {
@@ -171,8 +176,14 @@ const ProductDetail = () => {
             </div>
             {/* Thông tin chi tiết */}
             <div className="md:w-1/2 md:pl-8">
-              <h1 className="text-2xl font-bold mb-2">{productDetailData?.data?.name}</h1>
-              <p className="text-lg text-gray-600 mb-2">{productDetailData?.data?.status}</p>
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold mb-2">
+                {productDetailData?.data?.name}
+              </h1>
+              <span className={`${productDetailData?.data?.status === "active" ? "text-green-700 bg-green-100" : "text-red-700 bg-red-100"} px-2 py-1 rounded`}>
+                {productDetailData?.data?.status}
+              </span>
+              </div>
 
               {/* Rating */}
               {/* <div className="flex items-center mb-4 text-yellow-500">
@@ -198,7 +209,7 @@ const ProductDetail = () => {
                   ${data?.data?.originalPrice}
                 </span> */}
               </div>
-              <p className="text-gray-600 mb-4">{data?.data?.description}</p>
+              <p className="text-gray-600 mb-4">{productDetailData?.data?.description}</p>
 
               {/* Chọn biến thể (Variant) */}
               <div className="mb-4">

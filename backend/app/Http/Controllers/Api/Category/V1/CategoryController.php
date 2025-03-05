@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Category\V1;
 
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Category\CategoryStoreRequest;
 use App\Http\Requests\Category\CategoryUpdateRequest;
-use App\Services\CategoryService;
+use App\Services\Category\CategoryService;
 use Exception;
 use Illuminate\Database\QueryException;
 
