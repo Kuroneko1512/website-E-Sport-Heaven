@@ -4,34 +4,97 @@ import axios from "axios";
 const API_URL = "http://127.0.0.1:8000/api/v1/product";
 
 // Interface định nghĩa dữ liệu của một sản phẩm
+export interface AttributeSelection {
+  attribute_id: number;
+  attribute_value_id: number;
+}
+
+export interface Variant {
+  price: number;
+  stock: number;
+  image?: File | string | null;
+  attributes: AttributeSelection[];
+}
+
 export interface Product {
   id?: number;
   name: string;
   description?: string;
   price: number;
   discount_percent?: string;
-  sku: string;
   product_type: "simple" | "variable";
   status: "active" | "inactive";
   category_id: string;
   stock: number;
   image?: File | null;
+  selected_attributes: AttributeSelection[];  // 🟢 Định nghĩa cụ thể
+  variants: Variant[];  // 🟢 Định nghĩa cụ thể
 }
 
 // Tạo sản phẩm mới
-export const createProduct = async (product: FormData): Promise<Product> => {
+export const createProduct = async (product: Product): Promise<Product> => {
   try {
-    const response = await axios.post<Product>(API_URL, product, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    const formData = new FormData();
+    console.log(product);
+
+    // 🟢 Kiểm tra và thêm các trường bắt buộc
+    formData.append("name", product.name);
+    formData.append("price", String(product.price));
+    if (product.discount_percent) formData.append("discount_percent", String(product.discount_percent));
+    formData.append("product_type", product.product_type);
+    formData.append("status", product.status);
+    formData.append("category_id", String(product.category_id));
+    formData.append("stock", String(product.stock));
+
+    // 🟢 Truyền mảng trực tiếp thay vì JSON chuỗi
+    if (Array.isArray(product.selected_attributes)) {
+      product.selected_attributes.forEach((attr) => {
+        formData.append("selected_attributes[]", String(attr)); // Gửi từng phần tử trong mảng
+      });
+    }
+    if (product.description) {
+      formData.append("description", product.description);
+    }
+
+    if (Array.isArray(product.variants)) {
+      product.variants.forEach((variant, index) => {
+        formData.append(`variants[${index}][price]`, String(variant.price));
+        formData.append(`variants[${index}][stock]`, String(variant.stock));
+        if (variant.image) {
+          formData.append(`variants[${index}][image]`, variant.image);
+        }
+        variant.attributes.forEach((attribute, attrIndex) => {
+          formData.append(`variants[${index}][attributes][${attrIndex}][attribute_id]`, String(attribute.attribute_id));
+          formData.append(`variants[${index}][attributes][${attrIndex}][attribute_value_id]`, String(attribute.attribute_value_id));
+        });
+      });
+    }
+
+    // 🟢 Kiểm tra hình ảnh
+    if (product.image) {
+      formData.append("image", product.image);
+    }
+
+    // Log dữ liệu trước khi gửi lên API
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}:`, pair[1]);
+    }
+
+    // 🟢 Gửi API
+    const response = await axios.post<Product>(API_URL, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
+
     return response.data;
   } catch (error) {
-    console.error("Lỗi khi tạo sản phẩm:", error);
+    console.error("❌ Lỗi khi tạo sản phẩm:", error);
     throw error;
   }
 };
+
+
+
+
 
 // Lấy danh sách sản phẩm
 export const getProducts = async () => {
