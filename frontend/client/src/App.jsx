@@ -21,6 +21,8 @@ import ShippingAddress from './pages/ShippingAddress'
 import PaymentMethod from './pages/PaymentMethod'
 
 import Order from './pages/Order'
+import Profile from './pages/Profile'
+import InfoProfile from './components/elementProfile/InfoProfile'
 
 
 function App() {
@@ -34,12 +36,19 @@ function App() {
           <Route path='home' element={<Navigate to={'/'} />} />
           <Route index element={<Home />} />
           <Route path='shop' element={<Shop />} />
+
           <Route path='product-detail/:id' element={<ProductDetail />} >
             <Route path="descriptions" element={<Description />} />
             <Route index element={<Description />} />
             <Route path="information" element={<AdditionalInformation />} />
             <Route path="reviews" element={<Review />} />
           </Route>
+
+          <Route path='my-profile' element={<Profile />} >
+            <Route index element={<InfoProfile />} />
+            <Route path="info" element={<InfoProfile />} />
+          </Route>
+
           <Route path='blog' element={<Blog />} />
           <Route path='story' element={<Story />} />
           <Route path='contact' element={<Contact />}/>
