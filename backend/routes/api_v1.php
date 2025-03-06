@@ -1,6 +1,8 @@
 <?php
 use App\Http\Controllers\Api\Attribute\V1\AttributeController;
 use App\Http\Controllers\Api\Attribute\V1\AttributeValueController ;
+use App\Http\Controllers\Api\Blog\V1\BlogCategoryController;
+use App\Http\Controllers\Api\Blog\V1\BlogController;
 use App\Http\Controllers\Api\Order\V1\OrderController;
 use App\Http\Controllers\Api\Product\V1\ProductController;
 use App\Http\Controllers\Api\Category\V1\CategoryController;
@@ -18,4 +20,6 @@ Route::prefix('v1')->group(function (){
     Route::apiResource('/order',OrderController::class);
     Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
     Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
+    Route::apiResource('/blog-categories', BlogCategoryController::class);
+    Route::apiResource('/blogs', BlogController::class);
 }); 
