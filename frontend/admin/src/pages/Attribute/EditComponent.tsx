@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams,useNavigate  } from "react-router-dom";
-import { getAttributeById, updateAttribute } from "@app/services/Attribute/Api";
+import { getAttributeById, updateAttribute } from "@app/services/Attribute/ApiAttribute";
 
 const EditComponent = () => {
     const { id } = useParams<{ id: string }>(); // Lấy id từ URL

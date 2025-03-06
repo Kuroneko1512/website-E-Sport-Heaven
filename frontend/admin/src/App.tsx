@@ -25,8 +25,13 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useAppDispatch, useAppSelector } from "./store/store";
 import { Loading } from "./components/Loading";
 import EditComponent from '@pages/Attribute/EditComponent';
+import AttributeForm from "./pages/Product/AttributeForm";
+import ValueProduct from "./pages/Product/ValueProduct";
+
 import Order from "./pages/Order/Order";
 import DetailOrder from "./pages/Order/DetailOrder";
+import AttributeProduct from "./pages/Product/AttributeProduct";
+import VariantProduct from "./pages/Product/VariantProduct";
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {
@@ -97,8 +102,17 @@ const App = () => {
           <Route path="blank" element={<Blank />} />
           <Route path="profile" element={<Profile />} />
           {/* route sản phẩm  */}
-          <Route path="product" element={<Product />} />
-          <Route path="add-product" element={<Store />} />
+          <Route path="product" element={<Product />} /> 
+           
+    
+       
+          <Route path="add-product" element={<Store />} >
+           <Route path="AttributeForm" element={<AttributeForm />} /> 
+           <Route path="ValueProduct" element={<ValueProduct />} /> 
+           <Route path="Attibute" element={<AttributeProduct />} /> 
+           <Route path="Variant" element={<VariantProduct />} /> 
+           <Route index element={<ValueProduct />} />
+          </Route>
           {/*Route attribute*/}
           <Route path="Attribute" element={<Attribute />} />
          
