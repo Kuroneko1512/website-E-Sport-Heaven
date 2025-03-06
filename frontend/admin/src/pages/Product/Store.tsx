@@ -32,7 +32,9 @@ import Select, { SingleValue } from "react-select";
   selected_attributes: AttributeSelection[];  // 🟢 Định nghĩa cụ thể
   variants: Variant[];  // 🟢 Định nghĩa cụ thể
 }
+
 const Store = () => {
+  
   const navigate = useNavigate();
   const [image, setImage] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -58,7 +60,7 @@ const Store = () => {
   const [selectedProduct, setSelectedProduct] = useState<{
     value: string;
     label: string;
-  } | null>(ProductOptions[1]);
+  } | null>(ProductOptions[0]);
 
 
   const handleOptionChange = (
@@ -67,16 +69,26 @@ const Store = () => {
     if (!newValue) return; // Kiểm tra nếu null thì không làm gì
     setSelectedProduct(newValue);
   
+   
+  
+    if (newValue.value === "simple") {
+      let confirm =  window.confirm('Bạn có chắc muốn chuyển không');
+      if(confirm){
+        product.selected_attributes = [];
+        product.variants = [];
+      }else{
+        newValue.value = "variable";
+      }
+     
+      navigate("/add-product/ValueProduct");
+    }
+     else {
+      navigate("/add-product/Attribute");
+    }
     setProduct((prev) => ({
       ...prev, // Giữ lại tất cả các trường cũ
       product_type: newValue.value as "simple" | "variable", // Cast to correct type
     }));
-  
-    if (newValue.value === "simple") {
-      navigate("/add-product/ValueProduct");
-    } else {
-      navigate("/add-product/Variant");
-    }
   };
 
   const handleChange = (
@@ -88,7 +100,7 @@ const Store = () => {
       ...prev,
       [name]: name === "price" || name === "stock" ? Number(value) : value,
     }));
-  console.log(product);
+
   };
 
   // Xử lý thay đổi mô tả (ReactQuill)
@@ -187,9 +199,9 @@ const Store = () => {
                           </Link>
                         </li>
                       ))
-                    : ["Variant", "Attibute"].map((item, index) => (
+                    : [ "Attribute","Variant"].map((item, index) => (
                         <li key={index} className="my-2">
-                          <Link to={item} className="text-black mx-4">
+                          <Link to={item}  className={`text-black mx-4 `} style={item != 'Attribute' && product.selected_attributes.length === 0 ? { display: 'none' } : {}}>
                             {item}
                           </Link>
                         </li>
