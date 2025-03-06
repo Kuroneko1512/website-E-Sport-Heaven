@@ -5,7 +5,11 @@ const API_URL = 'http://127.0.0.1:8000/api/v1/attribute';
 
 
 
-
+export interface AttributeAndValue {
+  id: number;
+  name: string;
+  values: { id: number; value: string }[];
+}
 
 // Interface định nghĩa dữ liệu của một attribute
 export interface Attribute {
@@ -81,6 +85,22 @@ export const getAttributes = async (page: number = 1, limit: number = 5): Promis
   }
 
   
+};
+export const getAttributesByIds = async (attributeIds: number[]): Promise<AttributeAndValue[]> => {
+  try {
+    const response = await axios.post<{ status: number; data: AttributeAndValue[] }>(`${API_URL}/filter`, {
+      attribute_ids: attributeIds,
+    });
+
+    if (response.data.status === 200) {
+      return response.data.data; // ✅ Trả về danh sách thuộc tính
+    } else {
+      throw new Error("Lấy dữ liệu thất bại");
+    }
+  } catch (error) {
+    console.error("Lỗi khi gọi API getAttributeForIds:", error);
+    throw error;
+  }
 };
 
 export const deleteAttribute = async (id: number): Promise<void> => {

@@ -6,18 +6,41 @@ import NoImage from "../../../public/img/default-image-icon-vector-missing-pictu
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { createProduct } from "@app/services/Product/Api";
 import Select, { SingleValue } from "react-select";
+ interface AttributeSelection {
+  attribute_id: number;
+  attribute_value_id: number;
+}
 
+ interface Variant {
+  price: number;
+  stock: number;
+  image?: File | string | null;
+  attributes: AttributeSelection[];
+}
+
+ interface Product {
+  id?: number;
+  name: string;
+  description?: string;
+  price: number;
+  discount_percent?: string;
+  product_type: "simple" | "variable";
+  status: "active" | "inactive";
+  category_id: string;
+  stock: number;
+  image?: File | null;
+  selected_attributes: AttributeSelection[];  // 🟢 Định nghĩa cụ thể
+  variants: Variant[];  // 🟢 Định nghĩa cụ thể
+}
 const Store = () => {
   const navigate = useNavigate();
   const [image, setImage] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [product, setProduct] = useState({
+ 
+  const [product, setProduct] = useState<Product>({
     name: "",
     price: 0,
     discount_percent: "",
-    sku: "",
     product_type: "simple",
     status: "active",
     category_id: "",  
@@ -30,24 +53,25 @@ const Store = () => {
 
   const ProductOptions = [
     { value: "simple", label: "simple" },
-    { value: "variant", label: "variant" },
+    { value: "variable", label: "variable" },
   ];
   const [selectedProduct, setSelectedProduct] = useState<{
     value: string;
     label: string;
   } | null>(ProductOptions[1]);
 
+
   const handleOptionChange = (
     newValue: SingleValue<{ value: string; label: string }>
   ) => {
     if (!newValue) return; // Kiểm tra nếu null thì không làm gì
     setSelectedProduct(newValue);
+  
     setProduct((prev) => ({
-      ...prev,
-      product_type: newValue.value, // ✅ Chỉ cập nhật product_type
+      ...prev, // Giữ lại tất cả các trường cũ
+      product_type: newValue.value as "simple" | "variable", // Cast to correct type
     }));
-   
-
+  
     if (newValue.value === "simple") {
       navigate("/add-product/ValueProduct");
     } else {
@@ -92,14 +116,14 @@ const Store = () => {
 
   // Gọi API lấy danh mục
   const fetchData = async () => {
-    setLoading(true);
+    
     try {
       const response = await getCategory();
       setCategories(response.data.data.data);
     } catch (error) {
       console.error("Lỗi khi lấy danh mục:", error);
     }
-    setLoading(false);
+ 
   };
 
   useEffect(() => {
@@ -107,28 +131,20 @@ const Store = () => {
   }, []);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
-
+  
     try {
-      const formData = new FormData();
-      Object.entries(product).forEach(([key, value]) => {
-        if (value !== null) {
-          formData.append(key, value as any);
-        }
-      });
-      if (image) {
-        formData.append("image", image);
-      }
-
-      const newProduct = await createProduct(formData);
+     
+      // Gửi API tạo sản phẩm
+      const newProduct = await createProduct(product);
       console.log(newProduct);
       alert("Tạo sản phẩm thành công!");
     } catch (error) {
       alert("Lỗi khi tạo sản phẩm!");
     }
-
-    setSubmitting(false);
+  
+  
   };
+  
 
   return (
     <div className="container-fluid bg-white p-4">

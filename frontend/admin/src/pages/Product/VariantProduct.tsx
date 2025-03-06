@@ -1,12 +1,11 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
 import { useOutletContext } from "react-router-dom";
+import axios from "axios";
 import NoImage from "../../../public/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
+import { getAttributesByIds } from "@app/services/Attribute/ApiAttribute";
 
-// Dữ liệu demo thuộc tính từ API
-const demoAttributes = [
-  { id: 1, name: "Màu sắc", values: [{ id: 1, value: "Đỏ" }, { id: 2, value: "Xanh" }] },
-  { id: 2, name: "Kích thước", values: [{ id: 6, value: "M" }, { id: 7, value: "L" }] },
-];
+// API để lấy danh sách thuộc tính
+
 
 const VariantProduct = () => {
   const { product, setProduct } = useOutletContext<{
@@ -14,12 +13,31 @@ const VariantProduct = () => {
     setProduct: React.Dispatch<React.SetStateAction<any>>;
   }>();
 
+  const [attributes, setAttributes] = useState<any[]>([]);
   const [selectedAttributes, setSelectedAttributes] = useState<Record<number, number>>({});
   const [variants, setVariants] = useState<any[]>([]);
   const [allVariants, setAllVariants] = useState<any[]>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  // 🌟 Khi vào form, lấy variants từ product nếu có
+  // 🌟 Lấy dữ liệu từ API khi component mount
+  useEffect(() => {
+    const fetchAttributes = async () => {
+      try {
+        if (!product.selected_attributes || product.selected_attributes.length === 0) return;
+        console.log("Gọi API với selected_attributes:", product.selected_attributes);
+  
+        const response = await getAttributesByIds(product.selected_attributes);
+        console.log(response);
+
+          setAttributes(response);
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách thuộc tính:", error);
+      }
+    };
+  
+    fetchAttributes();
+  }, [product.selected_attributes]); 
+
   useEffect(() => {
     if (product.variants) {
       setVariants(product.variants);
@@ -100,7 +118,7 @@ const VariantProduct = () => {
       <div className="p-3 border rounded shadow-sm bg-white">
         <h4 className="mb-3">Chọn thuộc tính</h4>
         <div className="row g-2 align-items-end">
-          {demoAttributes.map((attribute) => (
+          {attributes.map((attribute) => (
             <div key={attribute.id} className="col-md-auto">
               <label className="form-label">{attribute.name}:</label>
               <select
@@ -108,7 +126,7 @@ const VariantProduct = () => {
                 onChange={(e) => handleAttributeChange(attribute.id, Number(e.target.value))}
               >
                 <option value="">Chọn {attribute.name}</option>
-                {attribute.values.map((value) => (
+                {attribute.values.map((value: any) => (
                   <option key={value.id} value={value.id}>
                     {value.value}
                   </option>
@@ -148,9 +166,9 @@ const VariantProduct = () => {
                   <td>{variant.stock}</td>
                   <td>
                     {variant.attributes
-                      .map((attr:any) => {
-                        const attrData = demoAttributes.find((a) => a.id === attr.attribute_id);
-                        const attrValue = attrData?.values.find((v) => v.id === attr.attribute_value_id);
+                      .map((attr: any) => {
+                        const attrData = attributes.find((a) => a.id === attr.attribute_id);
+                        const attrValue = attrData?.values.find((v: any) => v.id === attr.attribute_value_id);
                         return `${attrData?.name}: ${attrValue?.value}`;
                       })
                       .join(", ")} 
