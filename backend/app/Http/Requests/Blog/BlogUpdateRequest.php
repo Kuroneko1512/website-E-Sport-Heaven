@@ -29,7 +29,8 @@ class BlogUpdateRequest extends FormRequest
         $rules = [
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'category_id' => 'required|exists:blog_categories,id'
+            'category_id' => 'required|exists:blog_categories,id',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
 
         // Chỉ kiểm tra unique nếu title có thay đổi
@@ -54,7 +55,10 @@ class BlogUpdateRequest extends FormRequest
             'content.required' => 'Nội dung không được để trống.',
             'content.string' => 'Nội dung phải là chuỗi.',
             'category_id.required' => 'Danh mục không được để trống.',
-            'category_id.exists' => 'Danh mục không tồn tại.'
+            'category_id.exists' => 'Danh mục không tồn tại.',
+            'thumbnail.image' => 'Thumbnail phải là hình ảnh.',
+            'thumbnail.mimes' => 'Ảnh thumbnail phải có định dạng: jpeg, png, jpg, gif.',
+            'thumbnail.max' => 'Kích thước ảnh tối đa là 2MB.',
         ];
     }
 

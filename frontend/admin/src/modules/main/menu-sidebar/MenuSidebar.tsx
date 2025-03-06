@@ -25,6 +25,21 @@ export const MENU: IMenuItem[] = [
     path: '/blank',
   },
   {
+    name: 'Product',
+    icon: 'fas fa-box nav-icon',
+    path: '/Product',
+  },
+  {
+    name: 'Attribute',
+    icon: 'fas fa-box nav-icon',
+    path: '/Attribute',
+  },
+  {
+    name: 'Order',
+    icon: 'fas fa-box nav-icon',
+    path: '/Order',
+  },
+  {
     name: i18n.t('menusidebar.label.mainMenu'),
     icon: 'far fa-caret-square-down nav-icon',
     children: [
@@ -90,6 +105,7 @@ const MenuSidebar = () => {
             <Link to={'/profile'} className="d-block">
               {currentUser?.email}
             </Link>
+           
           </div>
         </div>
 
@@ -110,6 +126,7 @@ const MenuSidebar = () => {
                 menuItem={menuItem}
               />
             ))}
+            
           </ul>
         </nav>
       </div>

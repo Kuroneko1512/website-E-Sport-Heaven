@@ -16,8 +16,9 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedBigInteger('parent_id')->nullable(); // Trường lưu cate cha
             $table->foreign('parent_id')->references('id')->on('categories')->onDelete('cascade'); // Khóa ngoại tham chiếu đến bảng categories
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

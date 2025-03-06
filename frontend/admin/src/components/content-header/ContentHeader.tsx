@@ -14,6 +14,7 @@ const ContentHeader = ({ title }: { title: string }) => {
                 <a href="/">Home</a>
               </li>
               <li className="breadcrumb-item active">{title}</li>
+              
             </ol>
           </div>
         </div>

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Blog\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Blog\BlogStoreRequest;
@@ -43,6 +43,11 @@ class BlogController extends Controller
             // $data['user_id'] = auth()->id(); // Gán user_id từ user đang đăng nhập
             $data = $request->validated();
             $data['slug'] = Str::slug($data['title']); // Tạo slug tự động
+            if ($request->hasFile('thumbnail')) {
+                $file = $request->file('thumbnail');
+                $path = $file->store('thumbnails', 'public');
+                $data['thumbnail'] = $path;
+            }
             $blog = $this->blogService->create($data);
 
             return response()->json([
@@ -72,6 +77,11 @@ class BlogController extends Controller
             // Nếu title thay đổi thì cập nhật slug
             if (isset($data['title']) && $data['title'] !== $blog->title) {
                 $data['slug'] = Str::slug($data['title']);
+            }
+            if ($request->hasFile('thumbnail')) {
+                $file = $request->file('thumbnail');
+                $path = $file->store('thumbnails', 'public');
+                $data['thumbnail'] = $path;
             }
 
             $blog = $this->blogService->update($id, $data);

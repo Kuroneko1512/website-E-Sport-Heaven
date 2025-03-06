@@ -24,6 +24,7 @@ class BlogFactory extends Factory
             'title' => $title,
             'slug' => Str::slug($title), // Tạo slug từ tiêu đề
             'content' => $this->faker->paragraphs(5, true), // Tạo nội dung giả
+            'thumbnail' => $this->faker->imageUrl(640, 480, 'sports', true, 'blog'), // Tạo URL ảnh giả
             'category_id' => BlogCategory::factory(), // Tạo danh mục ngẫu nhiên
             'created_at' => now(),
             'updated_at' => now(),
