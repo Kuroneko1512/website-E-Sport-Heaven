@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {createAttribute} from '../../services/Attribute/Api';
+import {createAttribute} from '../../services/Attribute/ApiAttribute';
 export const FormComponent = () => {
   const [attribute, setAttribute] = useState<{
     name: string;

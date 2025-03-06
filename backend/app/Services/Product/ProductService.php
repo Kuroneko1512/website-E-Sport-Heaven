@@ -15,11 +15,11 @@ class ProductService extends BaseService
     {
         parent::__construct($product);
     }
-    public function getProductAll()
+    public function getProductAll($paginate = 10)
     {
         return $this->model->with([
-            'variants.productAttributes.attributeValue:id,value', // Lấy giá trị thuộc tính
-        ])->get();
+            'variants.productAttributes.attributeValue:id,value', 
+        ])->paginate($paginate);
     }
     public function getProduct($id)
     {
