@@ -61,10 +61,7 @@ const ValueProduct = () => {
               </select>
             </div>
           </div>
-          <div className="col-md-12">
-            <label>Sku</label>
-            <input type="text" className="form-control" name="sku" value={product.sku} onChange={handleChange} />
-          </div>
+          
         </div>
       </div>
     </div>

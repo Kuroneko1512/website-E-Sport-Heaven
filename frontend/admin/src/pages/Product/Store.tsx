@@ -3,10 +3,12 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { getCategory, Category } from "@app/services/Category/ApiCategory";
 import NoImage from "../../../public/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { createProduct } from "@app/services/Product/Api";
+import Select, { SingleValue } from "react-select";
 
 const Store = () => {
+  const navigate = useNavigate();
   const [image, setImage] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
@@ -20,17 +22,49 @@ const Store = () => {
     status: "active",
     category_id: "",
     stock: 1,
-    image: null as File | null, 
+    image: null as File | null,
     description: "",
+    selected_attributes: [],
+    variants: [],
   });
 
-  // Xử lý thay đổi dữ liệu form
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const ProductOptions = [
+    { value: "simple", label: "simple" },
+    { value: "variant", label: "variant" },
+  ];
+  const [selectedProduct, setSelectedProduct] = useState<{
+    value: string;
+    label: string;
+  } | null>(ProductOptions[1]);
+
+  const handleOptionChange = (
+    newValue: SingleValue<{ value: string; label: string }>
+  ) => {
+    if (!newValue) return; // Kiểm tra nếu null thì không làm gì
+    setSelectedProduct(newValue);
+    setProduct((prev) => ({
+      ...prev,
+      product_type: newValue.value, // ✅ Chỉ cập nhật product_type
+    }));
+   
+
+    if (newValue.value === "simple") {
+      navigate("/add-product/ValueProduct");
+    } else {
+      navigate("/add-product/Variant");
+    }
+  };
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
+
     setProduct((prev) => ({
       ...prev,
       [name]: name === "price" || name === "stock" ? Number(value) : value,
     }));
+  console.log(product);
   };
 
   // Xử lý thay đổi mô tả (ReactQuill)
@@ -47,7 +81,7 @@ const Store = () => {
     const file = event.target.files?.[0];
     if (file) {
       setImage(URL.createObjectURL(file)); // Hiển thị ảnh xem trước
-  
+
       // Cập nhật product.image với file để gửi API
       setProduct((prev) => ({
         ...prev,
@@ -55,7 +89,6 @@ const Store = () => {
       }));
     }
   };
-  
 
   // Gọi API lấy danh mục
   const fetchData = async () => {
@@ -119,22 +152,43 @@ const Store = () => {
               onChange={handleDescriptionChange}
             />
             <div className="Choose mt-5">
-              <h3>Select Option</h3>
+              <Select
+                options={ProductOptions}
+                defaultValue={ProductOptions[0]}
+                onChange={handleOptionChange}
+              />
             </div>
 
             {/* Chọn sản phẩm */}
             <div className="row align-items-stretch my-3">
               <div className="col-3 p-3 bg-light border rounded">
                 <ul>
-                  <li className="my-2">
-                    <Link to="ValueProduct" className="text-black mx-4">ValueProduct</Link>
-                  </li>
+                  {selectedProduct?.value === "simple"
+                    ? ["ValueProduct"].map((item, index) => (
+                        <li key={index} className="my-2">
+                          <Link to={item} className="text-black mx-4">
+                            {item}
+                          </Link>
+                        </li>
+                      ))
+                    : ["Variant", "Attibute"].map((item, index) => (
+                        <li key={index} className="my-2">
+                          <Link to={item} className="text-black mx-4">
+                            {item}
+                          </Link>
+                        </li>
+                      ))}
                 </ul>
               </div>
               <div className="col-9 p-3 bg-light border">
-                <Outlet context={{ product, setProduct }} />
+                <Outlet context={{ product, setProduct }}  />
               </div>
             </div>
+          </div>
+          <div>
+            {/* Select Box */}
+
+            {/* Chọn sản phẩm */}
           </div>
 
           {/* Cột upload ảnh & chọn danh mục */}
@@ -151,7 +205,12 @@ const Store = () => {
               onChange={handleImageChange}
               accept="image/*"
             />
-            <select name="category_id" className="form-control mt-2" value={product.category_id} onChange={handleChange}>
+            <select
+              name="category_id"
+              className="form-control mt-2"
+              value={product.category_id}
+              onChange={handleChange}
+            >
               <option value="">Chọn danh mục</option>
               {categories.map((value) => (
                 <option key={value.id} value={value.id}>
@@ -159,7 +218,9 @@ const Store = () => {
                 </option>
               ))}
             </select>
-            <button type="submit"  className="btn btn-primary my-3">Create</button>
+            <button type="submit" className="btn btn-primary my-3">
+              Create
+            </button>
           </div>
         </div>
       </form>

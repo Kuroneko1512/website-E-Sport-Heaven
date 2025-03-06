@@ -1,7 +1,10 @@
 const AttributeForm = () => {
     return(
-            <h1>Atribute</h1>
+    
+  
+      <h1>aiaa</h1>
     );
+       
 }
 
 export default AttributeForm;
