@@ -77,6 +77,7 @@ class ProductService extends BaseService
             'description' => $data['description'] ?? null,
             'product_type' => $data['product_type'],
             'status' => 'draft', // Sản phẩm sẽ là bản nháp ban đầu
+            'category_id'=>$data['category_id'] ?? null
         ]);
         if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
             $imagePath = $data['image']->store('products', 'public');
