@@ -148,12 +148,12 @@ const VariantProduct = () => {
                   <td>{variant.stock}</td>
                   <td>
                     {variant.attributes
-                      .map((attr) => {
+                      .map((attr:any) => {
                         const attrData = demoAttributes.find((a) => a.id === attr.attribute_id);
                         const attrValue = attrData?.values.find((v) => v.id === attr.attribute_value_id);
                         return `${attrData?.name}: ${attrValue?.value}`;
                       })
-                      .join(", ")}
+                      .join(", ")} 
                   </td>
                 </tr>
 

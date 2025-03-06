@@ -20,7 +20,7 @@ const Store = () => {
     sku: "",
     product_type: "simple",
     status: "active",
-    category_id: "",
+    category_id: "",  
     stock: 1,
     image: null as File | null,
     description: "",
