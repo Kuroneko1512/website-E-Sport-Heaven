@@ -3,10 +3,10 @@ import {
   getAttributes,
   Attribute,
   Pagination,
-} from "@app/services/Attribute/Api";
+} from "@app/services/Attribute/ApiAttribute";
 import { useNavigate } from "react-router-dom";
 
-import { deleteAttribute } from "@app/services/Attribute/Api"; // Import API xóa
+import { deleteAttribute } from "@app/services/Attribute/ApiAttribute"; // Import API xóa
 const TableComponent = () => {
   const navigate = useNavigate();
   // State lưu thông tin phân trang

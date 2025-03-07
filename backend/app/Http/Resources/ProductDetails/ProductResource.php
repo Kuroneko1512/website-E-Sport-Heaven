@@ -42,7 +42,6 @@ class ProductResource extends JsonResource
                     'attribute_id' => $attr->attribute_id,
                     'value_id' => $attr->attribute_value_id,
                 ]),
-
             ]),
             'used_attributes' => $this->variants
                 ->flatMap(fn ($variant) => $variant->productAttributes->pluck('attribute_id'))

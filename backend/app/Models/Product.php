@@ -28,4 +28,8 @@ class Product extends Model
     {
         return $this->hasMany(Review::class);
     }
+    public function selectedAttributes()
+{
+    return $this->hasMany(ProductAttribute::class);
+}
 }

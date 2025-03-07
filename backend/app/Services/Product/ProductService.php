@@ -6,7 +6,8 @@ use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\Product;
 use App\Services\BaseService;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ProductService extends BaseService
 {
@@ -14,11 +15,11 @@ class ProductService extends BaseService
     {
         parent::__construct($product);
     }
-    public function getProductAll()
+    public function getProductAll($paginate = 10)
     {
         return $this->model->with([
-            'variants.productAttributes.attributeValue:id,value', // Lấy giá trị thuộc tính
-        ])->get();
+            'variants.productAttributes.attributeValue:id,value', 
+        ])->paginate($paginate);
     }
     public function getProduct($id)
     {
@@ -63,37 +64,28 @@ class ProductService extends BaseService
     {
         $isVariable = $data['product_type'] === 'variable';
         // Gọi service để tạo mới thuộc tính
-        $product = $this->model->create($data);
+        $productSku = $data['sku'] ?? $this->generateSKU($data['name']);
+
+        // Tạo sản phẩm
+        $product = $this->model->create([
+            'name' => $data['name'],
+            'sku' => $productSku,
+            'price' => $isVariable ? null : $data['price'],
+            'discount_percent' => $data['discount_percent'] ?? null,
+            'discount_start' => $data['discount_start'] ?? null,
+            'discount_end' => $data['discount_end'] ?? null,
+            'description' => $data['description'] ?? null,
+            'product_type' => $data['product_type'],
+            'status' => 'draft', // Sản phẩm sẽ là bản nháp ban đầu
+            'category_id'=>$data['category_id'] ?? null
+        ]);
         if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
             $imagePath = $data['image']->store('products', 'public');
             $product->update(['image' => $imagePath]);
         }
         if ($isVariable) {
-
-            // Kiểm tra và tạo biến thể cho sản phẩm
-            if (isset($data['variants']) && is_array($data['variants'])) {
-
-                foreach ($data['variants'] as $variantData) {
-                    // Tạo biến thể
-                    $variant = $product->variants()->create([
-                        'sku' => $variantData['sku'],
-                        'price' => $variantData['price'],
-                        'stock' => $variantData['stock'],
-                    ]);
-
-                    // Tạo thuộc tính cho biến thể
-                    if (isset($variantData['attributes']) && is_array($variantData['attributes'])) {
-
-                        foreach ($variantData['attributes'] as $attributeData) {
-                            $variant->productAttributes()->create([
-                                'variant_attribute_id' => $attributeData['attribute_id'],
-                                'attribute_value_id' => $attributeData['attribute_value_id'],
-                                'attribute_id' => $attributeData['attribute_id'],
-                            ]);
-                        }
-                    }
-                }
-            }
+            $this->handelVariant($isVariable, $product, $data);
+           
         }
         return true;
     }
@@ -152,5 +144,70 @@ class ProductService extends BaseService
         }
 
         return $product->fresh(); // Trả về dữ liệu mới nhất của sản phẩm
+    }
+    private function handelVariant($isVariable, $product, $data)
+    {
+        foreach ($data['selected_attributes'] as $attributeId) {
+            $product->selectedAttributes()->create(['attribute_id' => $attributeId]);
+        }
+
+        $requiredAttributes = $product->selectedAttributes->pluck('attribute_id')->toArray();
+
+        foreach ($data['variants'] as $variantData) {
+            $variantAttributeIds = collect($variantData['attributes'])->pluck('attribute_id')->toArray();
+            if (array_diff($requiredAttributes, $variantAttributeIds)) {
+                return response()->json([
+                    'message' => 'Biến thể thiếu một hoặc nhiều thuộc tính bắt buộc!',
+                    'missing_attributes' => array_diff($requiredAttributes, $variantAttributeIds)
+                ], 422);
+            }
+
+            // Tự động tạo SKU nếu chưa có
+            $variantSku = $variantData['sku'] ?? $this->generateSKU($data['name'], $variantData['attributes']);
+
+            // Lưu biến thể
+            $variant = $product->variants()->create([
+                'sku' => $variantSku,
+                'price' => $variantData['price'],
+                'discount_percent' => $variantData['discount_percent'] ?? null,
+                'discount_start' => $variantData['discount_start'] ?? null,
+                'discount_end' => $variantData['discount_end'] ?? null,
+                'stock' => $variantData['stock'],
+            ]);
+
+            // Lưu thuộc tính của biến thể
+            foreach ($variantData['attributes'] as $attributeData) {
+                $variant->productAttributes()->create([
+                    'attribute_id' => $attributeData['attribute_id'],
+                    'attribute_value_id' => $attributeData['attribute_value_id'],
+                ]);
+            }
+        }
+    }
+    private function generateSKU($productName, $attributes = [])
+    {
+        // Chuyển tên sản phẩm thành slug
+        $slug = Str::slug($productName);
+
+        // Nếu có thuộc tính (biến thể), nối chúng lại
+        if (!empty($attributes)) {
+            $attrPart = collect($attributes)->map(fn($attr) => $attr['attribute_value_id'])->implode('-');
+            $sku = strtoupper($slug . '-' . $attrPart);
+        } else {
+            $sku = strtoupper($slug);
+        }
+
+        // Đảm bảo SKU là duy nhất
+        $originalSKU = $sku;
+        $count = 1;
+        while (
+            DB::table('product_variants')->where('sku', $sku)->exists() ||
+            DB::table('products')->where('sku', $sku)->exists()
+        ) {
+            $sku = $originalSKU . '-' . $count;
+            $count++;
+        }
+
+        return $sku;
     }
 }
