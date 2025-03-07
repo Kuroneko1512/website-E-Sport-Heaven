@@ -109,7 +109,7 @@ const App = () => {
           <Route path="add-product" element={<Store />} >
            <Route path="AttributeForm" element={<AttributeForm />} /> 
            <Route path="ValueProduct" element={<ValueProduct />} /> 
-           <Route path="Attibute" element={<AttributeProduct />} /> 
+           <Route path="Attribute" element={<AttributeProduct />} /> 
            <Route path="Variant" element={<VariantProduct />} /> 
            <Route index element={<ValueProduct />} />
           </Route>

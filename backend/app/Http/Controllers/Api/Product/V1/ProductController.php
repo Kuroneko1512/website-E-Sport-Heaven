@@ -48,7 +48,7 @@ class ProductController extends Controller
      */
     public function store(ProductStoreRequest $request)
     {
-       
+    //    return $request->validated();
         DB::beginTransaction();
         try {
 

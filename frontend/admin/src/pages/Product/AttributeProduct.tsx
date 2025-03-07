@@ -1,20 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Select, { MultiValue } from "react-select";
 import { useOutletContext } from "react-router-dom";
 import { toast } from "react-toastify";
+
+import { getAttributes } from "@app/services/Attribute/ApiAttribute";
+
+// API URL (thay thế bằng API thực tế của bạn)
+// const API_URL = "https://your-api.com/api/attributes";
+
 // Định nghĩa kiểu dữ liệu cho thuộc tính
 interface AttributeOption {
   value: number;
   label: string;
 }
 
-// Danh sách thuộc tính gốc
-const allAttributes: AttributeOption[] = [
-  { value: 1, label: "Màu sắc" },
-  { value: 2, label: "Kích thước" },
-  { value: 3, label: "Chất liệu" },
-  { value: 4, label: "Kiểu dáng" },
-];
+// Hàm lấy thuộc tính từ API
+const fetchAttributes = async (): Promise<AttributeOption[]> => {
+
+  try {
+    const response = await getAttributes();
+    return response.data.data.map((attr: any) => ({
+      value: attr.id,
+      label: attr.name,
+    }));
+  } catch (error) {
+    console.error("Lỗi khi tải thuộc tính:", error);
+    throw error;
+  }
+};
 
 const AttributeProduct = () => {
   const { product, setProduct } = useOutletContext<{
@@ -22,12 +35,26 @@ const AttributeProduct = () => {
     setProduct: React.Dispatch<React.SetStateAction<any>>;
   }>();
 
-  // State tạm để lưu giá trị chọn trước khi submit
-  const [tempAttributes, setTempAttributes] = useState<AttributeOption[]>(
-    allAttributes.filter((attr) =>
-      product.selected_attributes.includes(attr.value)
-    )
-  );
+  // State để lưu danh sách thuộc tính từ API
+  const [allAttributes, setAllAttributes] = useState<AttributeOption[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // State tạm lưu giá trị thuộc tính đã chọn
+  const [tempAttributes, setTempAttributes] = useState<AttributeOption[]>([]);
+
+  // Gọi API khi component mount
+  useEffect(() => {
+    fetchAttributes()
+      .then((data) => {
+        setAllAttributes(data);
+        // Nếu product đã có thuộc tính, cập nhật vào state tạm
+        setTempAttributes(
+          data.filter((attr) => product.selected_attributes.includes(attr.value))
+        );
+      })
+      .catch(() => toast.error("Không thể tải danh sách thuộc tính"))
+      .finally(() => setLoading(false));
+  }, [product.selected_attributes]);
 
   // Cập nhật state tạm khi thay đổi Select
   const handleChange = (selectedOptions: MultiValue<AttributeOption>) => {
@@ -35,11 +62,11 @@ const AttributeProduct = () => {
   };
 
   // Khi nhấn Submit, lưu vào product
-  const handleSubmitAttibute = () => {
+  const handleSubmitAttribute = () => {
     const selectedValues = tempAttributes.map((option) => option.value);
     setProduct((prev: any) => ({
       ...prev,
-      selected_attributes: selectedValues, // ✅ Chỉ cập nhật khi nhấn Submit
+      selected_attributes: selectedValues,
     }));
     toast.success("Lưu thuộc tính thành công!");
   };
@@ -50,19 +77,22 @@ const AttributeProduct = () => {
         <h3 className="card-title">Thêm thuộc tính</h3>
       </div>
       <div className="card-body">
-        <Select
-          isMulti
-          options={allAttributes} // ✅ Hiển thị tất cả thuộc tính
-          value={tempAttributes} // ✅ Dùng state tạm để lưu giá trị chọn
-          getOptionLabel={(e) => e.label}
-          getOptionValue={(e) => e.value.toString()}
-          onChange={handleChange}
-        />
-      
-        <span className="btn btn-primary mt-3" onClick={handleSubmitAttibute}>
-  Lưu thuộc tính
-</span>
+        {loading ? (
+          <p>Đang tải thuộc tính...</p>
+        ) : (
+          <Select
+            isMulti
+            options={allAttributes} // ✅ Hiển thị tất cả thuộc tính từ API
+            value={tempAttributes} // ✅ Dùng state tạm để lưu giá trị chọn
+            getOptionLabel={(e) => e.label}
+            getOptionValue={(e) => e.value.toString()}
+            onChange={handleChange}
+          />
+        )}
 
+        <span className="btn btn-primary mt-3" onClick={handleSubmitAttribute}>
+          Lưu thuộc tính
+        </span>
       </div>
     </div>
   );
