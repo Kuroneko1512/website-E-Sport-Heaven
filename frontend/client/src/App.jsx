@@ -23,6 +23,8 @@ import PaymentMethod from './pages/PaymentMethod'
 import Order from './pages/Order'
 import Profile from './pages/Profile'
 import InfoProfile from './components/elementProfile/InfoProfile'
+import MyOrder from './components/elementProfile/MyOrder'
+import Setting from './components/elementProfile/Setting'
 
 
 function App() {
@@ -47,6 +49,8 @@ function App() {
           <Route path='my-profile' element={<Profile />} >
             <Route index element={<InfoProfile />} />
             <Route path="info" element={<InfoProfile />} />
+            <Route path="settings" element={<Setting />} />
+            <Route path="orders" element={<MyOrder />} />
           </Route>
 
           <Route path='blog' element={<Blog />} />
