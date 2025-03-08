@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState } from "react"; 
 import { Link } from "react-router-dom";
 
 // Tạo component cho mỗi mục menu
-const NavItem = ({ link,icon, label, isActive, onClick }) => (
+const NavItem = ({ link, icon, label, isActive, onClick }) => (
   <Link
-    className={`flex items-center space-x-2 px-4 py-3 ${isActive ? 'bg-black text-white' : 'text-gray-600 hover:text-white hover:bg-black'}`}
+    className={`flex items-center space-x-2 px-4 py-3 
+      ${isActive 
+        ? 'bg-black text-white dark:bg-gray-700 dark:text-gray-200' 
+        : 'text-gray-600 dark:text-gray-300 hover:text-white hover:bg-black dark:hover:bg-gray-600'}`}
     to={`${link}`}
     onClick={onClick}
   >
@@ -33,8 +36,8 @@ const LeftNavbar = () => {
 
   return (
     <aside className="w-full md:w-1/4 md:mb-0">
-      <div className="bg-white border border-gray-200">
-        <div className="flex items-center space-x-4 px-4 py-4 border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
+        <div className="flex items-center space-x-4 px-4 py-4 border-b border-gray-200 dark:border-gray-700">
           <img
             alt="User profile picture"
             className="h-10 w-10 rounded-full"
@@ -43,8 +46,8 @@ const LeftNavbar = () => {
             width="40"
           />
           <div>
-            <p className="font-semibold">Hello 👋</p>
-            <p className="font-semibold">Robert Fox</p>
+            <p className="font-semibold text-gray-800 dark:text-gray-200">Hello 👋</p>
+            <p className="font-semibold text-gray-900 dark:text-gray-300">Robert Fox</p>
           </div>
         </div>
         <nav>
