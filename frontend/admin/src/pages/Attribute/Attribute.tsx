@@ -1,7 +1,6 @@
-import { useParams } from "react-router-dom";
+
 import {FormComponent} from '../Attribute/FormComponent';
 import TableComponent from '../Attribute/TableComponent';
-import EditComponent from '../Attribute/EditComponent';
 const Attribute = () => {
    // Lấy id từ URL// Lấy đường dẫn hiện tại
     return (

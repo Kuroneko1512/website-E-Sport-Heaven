@@ -32,6 +32,8 @@ import Order from "./pages/Order/Order";
 import DetailOrder from "./pages/Order/DetailOrder";
 import AttributeProduct from "./pages/Product/AttributeProduct";
 import VariantProduct from "./pages/Product/VariantProduct";
+
+import  Category  from "@pages/Categories/Category";
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {
@@ -121,6 +123,10 @@ const App = () => {
 
 
           <Route path="Attribute/attribute/edit/:id"  element={<EditComponent/>} />
+
+
+            {/*Route Category*/}
+            <Route path="category" element={<Category/>}/>
         </Route>
       </Route>
     </Routes>
