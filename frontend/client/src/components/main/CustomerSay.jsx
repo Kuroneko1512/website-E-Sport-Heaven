@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react"; 
 
 const testimonials = [
   { name: "Leslie Alexander", role: "Model", img: "https://placehold.co/40x40", text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", rating: 5 },
@@ -25,14 +25,22 @@ const CustomerSay = () => {
   };
 
   return (
-    <div className="container mx-auto py-16 px-4">
+    <div className="container mx-auto py-16 px-4 bg-gray-50 dark:bg-gray-800">
       <div className="flex flex-col md:flex-row justify-between items-center mb-12">
-        <h2 className="text-2xl md:text-4xl font-bold text-center md:text-left">What our Customers Say</h2>
+        <h2 className="text-2xl md:text-4xl font-bold text-center md:text-left text-gray-900 dark:text-gray-100">
+          What our Customers Say
+        </h2>
         <div className="flex space-x-4 mt-4 md:mt-0">
-          <button onClick={prevSlide} className="bg-white text-black hover:bg-black hover:text-white px-3 py-2 border rounded-lg shadow-md z-10">
+          <button 
+            onClick={prevSlide} 
+            className="bg-white dark:bg-gray-700 text-black dark:text-white hover:bg-black dark:hover:bg-gray-600 hover:text-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-md z-10"
+          >
             ←
           </button>
-          <button onClick={nextSlide} className="bg-white text-black hover:bg-black hover:text-white px-3 py-2 border rounded-lg shadow-md z-10">
+          <button 
+            onClick={nextSlide} 
+            className="bg-white dark:bg-gray-700 text-black dark:text-white hover:bg-black dark:hover:bg-gray-600 hover:text-white px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-md z-10"
+          >
             →
           </button>
         </div>
@@ -43,7 +51,7 @@ const CustomerSay = () => {
           ref={sliderRef} 
           className="flex gap-6 overflow-x-auto scroll-smooth scrollbar-hide snap-x snap-mandatory p-4">
           {testimonials.map((item, index) => (
-            <div key={index} className="relative flex-shrink-0 w-3/4 sm:w-1/2 md:w-1/2 lg:w-1/3 xl:w-1/3 snap-center bg-white p-6 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+            <div key={index} className="relative flex-shrink-0 w-3/4 sm:w-1/2 md:w-1/2 lg:w-1/3 xl:w-1/3 snap-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg dark:shadow-gray-700 transition-transform transform hover:scale-105">
               <div className="flex items-center mb-4">
                 <div className="flex text-yellow-500">
                   {[...Array(item.rating)].map((_, starIndex) => (
@@ -51,12 +59,12 @@ const CustomerSay = () => {
                   ))}
                 </div>
               </div>
-              <p className="text-gray-700 mb-4">{item.text}</p>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">{item.text}</p>
               <div className="flex items-center">
                 <img className="w-10 h-10 rounded-full mr-4" src={item.img} alt={item.name} />
                 <div>
-                  <p className="font-bold">{item.name}</p>
-                  <p className="text-sm text-gray-500">{item.role}</p>
+                  <p className="font-bold text-gray-900 dark:text-gray-100">{item.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{item.role}</p>
                 </div>
               </div>
             </div>

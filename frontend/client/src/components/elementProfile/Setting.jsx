@@ -1,37 +1,47 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import ThemeContext from "../../contexts/ThemeContext";
 
 // Component tái sử dụng cho từng mục thiết lập
 const SettingOption = ({ title, description, children }) => (
-  <div className="flex justify-between items-center mt-3 pb-3 border-b border-gray-200">
+  <div className="flex justify-between items-center mt-3 pb-3 border-b border-gray-200 dark:border-gray-700">
     <div>
-      <h2 className="font-semibold">{title}</h2>
-      <p className="text-gray-600">{description}</p>
+      <h2 className="font-semibold text-gray-900 dark:text-gray-200">{title}</h2>
+      <p className="text-gray-600 dark:text-gray-400">{description}</p>
     </div>
     <div>{children}</div>
   </div>
 );
 
 const Setting = () => {
-  const [theme, setTheme] = useState("Light");
-  const [is2FAEnabled, setIs2FAEnabled] = useState(true);
+  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   const [isPushNotificationsEnabled, setIsPushNotificationsEnabled] = useState(true);
   const [isDesktopNotificationsEnabled, setIsDesktopNotificationsEnabled] = useState(true);
   const [isEmailNotificationsEnabled, setIsEmailNotificationsEnabled] = useState(true);
 
+  // Hàm xử lý thay đổi theme từ select
+  const handleThemeChange = (event) => {
+    const selectedTheme = event.target.value;
+    if (selectedTheme === 'Dark' && !isDarkMode) {
+      toggleTheme();
+    } else if (selectedTheme === 'Light' && isDarkMode) {
+      toggleTheme();
+    }
+  };
+
   return (
-    <>
+    <div className="p-6 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg shadow-md">
       {/* Appearance */}
       <SettingOption
         title="Appearance"
         description="Customize how your theme looks on your device"
       >
         <select
-          className="bg-gray-100 rounded px-4 py-2"
-          value={theme}
-          onChange={(e) => setTheme(e.target.value)}
+          className="bg-gray-100 dark:bg-gray-700 dark:text-white rounded px-4 py-2"
+          value={isDarkMode ? "Dark" : "Light"} // Thiết lập giá trị của select
+          onChange={handleThemeChange} // Gọi hàm khi thay đổi
         >
-          <option>Light</option>
-          <option>Dark</option>
+          <option value="Light">Light</option>
+          <option value="Dark">Dark</option>
         </select>
       </SettingOption>
 
@@ -40,25 +50,10 @@ const Setting = () => {
         title="Language"
         description="Select your language"
       >
-        <select className="bg-gray-100 rounded px-4 py-2">
+        <select className="bg-gray-100 dark:bg-gray-700 dark:text-white rounded px-4 py-2">
           <option>English</option>
           <option>Spanish</option>
         </select>
-      </SettingOption>
-
-      {/* Two-factor Authentication */}
-      <SettingOption
-        title="Two-factor Authentication"
-        description="Keep your account secure by enabling 2FA via mail"
-      >
-        <label className="switch">
-          <input
-            type="checkbox"
-            checked={is2FAEnabled}
-            onChange={() => setIs2FAEnabled(!is2FAEnabled)}
-          />
-          <span className="slider round"></span>
-        </label>
       </SettingOption>
 
       {/* Push Notifications */}
@@ -105,7 +100,7 @@ const Setting = () => {
           <span className="slider round"></span>
         </label>
       </SettingOption>
-    </>
+    </div>
   );
 };
 
