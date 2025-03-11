@@ -3,6 +3,7 @@ import Cookies from "js-cookie";
 
 const initialState = {
   isLogin: Cookies.get("isLogin") === "true" ? true : false,
+  
 };
 
 const authSide = createSlice({

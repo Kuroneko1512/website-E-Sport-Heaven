@@ -21,6 +21,8 @@ import ShippingAddress from './pages/ShippingAddress'
 import PaymentMethod from './pages/PaymentMethod'
 
 import Order from './pages/Order'
+import Forgot_Password from './pages/Forgot_Password'
+import Enter_otp from './pages/Enter_otp'
 
 
 function App() {
@@ -29,6 +31,8 @@ function App() {
     <>
       <Routes>
         <Route path='/login' element={<Login />} />
+        <Route path='/reset-password' element={<Forgot_Password />} />
+        <Route path='/enter-email' element={<Enter_otp />} />
         <Route path='/register' element={<Register />} />
         <Route path='/' element={<Layout />} >
           <Route path='home' element={<Navigate to={'/'} />} />

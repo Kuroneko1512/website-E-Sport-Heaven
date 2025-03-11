@@ -78,7 +78,7 @@ const Login = () => {
                     <Form.Item className="w-full">
                         <div className="flex justify-between items-center w-full">
                             <span>Don't have an account yet? <Link to={'/register'} className="text-gray-700">Register</Link></span>
-                            <Link className="text-sm text-blue-600 hover:underline">Forgot Password?</Link>
+                            <Link to={'/reset-password'} className="text-sm text-blue-600 hover:underline">Forgot Password?</Link>
                         </div>
                     </Form.Item>
 
