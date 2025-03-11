@@ -30,7 +30,8 @@ class ReviewStoreRequest extends FormRequest
         return [
             'product_id' => 'required|exists:products,id',
             'user_id' => 'required|exists:users,id',
-            'rating' => 'required',
+            'rating' => 'required|min:1|max:5',
+            'title' => 'nullable|string|max:255',
             'comment' => 'nullable|string|max:1000',
         ];
     }
@@ -42,6 +43,7 @@ class ReviewStoreRequest extends FormRequest
             'user_id.required' => 'Người mua không được để trống.',
             'user_id.exists'   => 'Người mua không tồn tại trong hệ thống.',
             'rating.required' => 'Đánh giá không được để trống.',
+            'title.max' => 'Tiêu đề không được vượt quá 255 ký tự.',
             'comment.max' => 'Bình luận không được vượt quá 1000 ký tự.',
         ];
     }
