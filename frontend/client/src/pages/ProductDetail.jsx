@@ -6,46 +6,94 @@ import instanceAxios from "../config/db";
 import { Skeleton } from "antd";
 
 const ProductDetail = () => {
+  // Lấy ID sản phẩm từ URL
   const { id } = useParams();
-  const [quantity, setQuantity] = useState(1);
-  const [product, setProduct] = useState({});
-  const [selectedSize, setSelectedSize] = useState(null);
-  const sliderRef = useRef(null);
-  const [drag, setDrag] = useState({ isDown: false, startX: 0, scrollLeft: 0 });
-  const location = useLocation();
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["product", id],
+  // State quản lý sản phẩm, biến thể, thuộc tính, số lượng, và yêu thích
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedAttribute, setSelectedAttribute] = useState(null);
+  const [displayImage, setDisplayImage] = useState(""); // Ảnh hiển thị
+  const [quantity, setQuantity] = useState(1);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [drag, setDrag] = useState({ isDown: false, startX: 0, scrollLeft: 0 });
+  const [product, setProduct] = useState([]);
+  const sliderRef = useRef(null);
+
+  // Lấy thông tin sản phẩm từ API
+  const { data: productDetailData, isLoading } = useQuery({
+    queryKey: ["productDetailData", id],
     queryFn: async () => {
-      return await instanceAxios.get(`/products/${id}`);
+      const res = await instanceAxios.get(`/api/v1/product/${id}`);
+      return res?.data;
     },
   });
 
-  useEffect(() => {
-    if (data?.data) {
-      setProduct(data.data);
-    }
-  }, []);
+  // console.log("productDetailData", productDetailData);
 
-  console.log("product", product);
+  // Khi dữ liệu thay đổi, đặt biến thể mặc định là biến thể đầu tiên
+  useEffect(() => {
+    if (productDetailData?.data?.variants?.length > 0) {
+      const defaultVariant = productDetailData.data.variants[0]; // Mặc định chọn biến thể đầu tiên
+      setSelectedVariant(defaultVariant);
+      setDisplayImage(defaultVariant.image || productDetailData?.data?.image); // Ảnh biến thể hoặc ảnh mặc định sản phẩm
+    }
+  }, [productDetailData]);
+
+  // Lấy danh sách tất cả biến thể của sản phẩm
+  const variants = productDetailData?.data?.variants || [];
+
+  // Lấy tất cả các thuộc tính của sản phẩm
+  const allAttributes = productDetailData?.data?.variants?.reduce(
+    (acc, variant) => {
+      variant.product_attributes.forEach((attr) => {
+        if (!acc.some((a) => a.attribute_value.id === attr.attribute_value.id)) {
+          acc.push(attr);
+        }
+      });
+      return acc;
+    },
+    []
+  ) || [];
+
+  // Khi chọn một biến thể, cập nhật selectedVariant và ảnh hiển thị
+  const handleVariantSelect = (variant) => {
+    setSelectedVariant(variant);
+    setSelectedAttribute(null); // Reset lựa chọn thuộc tính khi đổi biến thể
+    setDisplayImage(variant.image || productDetailData?.data?.image); // Cập nhật ảnh hiển thị
+  };
+
+  // Khi chọn một thuộc tính, cập nhật selectedAttribute
+  const handleAttributeSelect = (attribute) => {
+    setSelectedAttribute(attribute);
+  };
+
+  // Xử lý thay đổi số lượng
+  const handleQuantityChange = (delta) => {
+    setQuantity((prev) => Math.max(1, prev + delta));
+  };
+
+  // Xử lý thay đổi trạng thái yêu thích
+  const handleFavoriteToggle = () => {
+    setIsFavorite((prev) => !prev);
+  };
 
   // Tính rating trung bình
-  const totalVotes = data?.data
-    ? data.data.fiveStart +
-      data.data.fourStart +
-      data.data.threeStart +
-      data.data.twoStart +
-      data.data.oneStart
-    : 0;
-  const averageRating =
-    totalVotes > 0
-      ? (data?.data.fiveStart * 5 +
-          data?.data.fourStart * 4 +
-          data?.data.threeStart * 3 +
-          data?.data.twoStart * 2 +
-          data?.data.oneStart * 1) /
-        totalVotes
-      : "N/A";
+  // const totalVotes = data?.data
+  //   ? data.data.fiveStart +
+  //     data.data.fourStart +
+  //     data.data.threeStart +
+  //     data.data.twoStart +
+  //     data.data.oneStart
+  //   : 0;
+  // const averageRating =
+  //   totalVotes > 0
+  //     ? (data?.data.fiveStart * 5 +
+  //         data?.data.fourStart * 4 +
+  //         data?.data.threeStart * 3 +
+  //         data?.data.twoStart * 2 +
+  //         data?.data.oneStart * 1) /
+  //       totalVotes
+  //     : "N/A";
 
   // Thay đổi trạng thái yêu thích
   const handleFav = () => {
@@ -54,10 +102,6 @@ const ProductDetail = () => {
 
   // Chọn size sản phẩm
   const handleSize = (size) => setSelectedSize(size);
-
-  // Tăng / Giảm số lượng sản phẩm
-  const handleQuantityChange = (delta) =>
-    setQuantity((prev) => Math.max(1, prev + delta));
 
   // Xử lý sự kiện kéo slider
   const handleMouseDown = useCallback((e) => {
@@ -102,19 +146,20 @@ const ProductDetail = () => {
     <Skeleton loading={isLoading} active>
       <section className="mx-10">
         <main className="container mx-auto py-8 px-4 md:px-0">
-          <div className="text-sm text-gray-500 mb-4">
+        <div className="text-sm text-gray-500 mb-4">
             <Link to="/home">Home</Link> &gt; <Link to="/shop">Shop</Link> &gt;{" "}
-            {data?.data?.name}
+            {productDetailData?.data?.name}
           </div>
           <div className="flex flex-col md:flex-row">
             {/* Hình ảnh sản phẩm */}
             <div className="md:w-1/2">
-              <img
-                alt={data?.data?.name}
+            <img
+                alt={productDetailData?.data?.name}
                 className="w-full mb-4"
-                src={data?.data?.image}
+                src={displayImage} // Hiển thị ảnh biến thể hoặc ảnh mặc định
               />
-              <div
+
+              {/* <div
                 className="flex overflow-x-auto gap-x-2 scrollbar-hide select-none"
                 ref={sliderRef}
               >
@@ -127,13 +172,21 @@ const ProductDetail = () => {
                     draggable={false}
                   />
                 ))}
-              </div>
+              </div> */}
             </div>
             {/* Thông tin chi tiết */}
             <div className="md:w-1/2 md:pl-8">
-              <h1 className="text-2xl font-bold mb-2">{data?.data?.brand}</h1>
-              <p className="text-lg text-gray-600 mb-2">{data?.data?.name}</p>
-              <div className="flex items-center mb-4 text-yellow-500">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold mb-2">
+                {productDetailData?.data?.name}
+              </h1>
+              <span className={`${productDetailData?.data?.status === "active" ? "text-green-700 bg-green-100" : "text-red-700 bg-red-100"} px-2 py-1 rounded`}>
+                {productDetailData?.data?.status}
+              </span>
+              </div>
+
+              {/* Rating */}
+              {/* <div className="flex items-center mb-4 text-yellow-500">
                 {Array.from({ length: Math.round(averageRating) }, (_, i) => (
                   <i key={i} className="fas fa-star"></i>
                 ))}
@@ -146,48 +199,71 @@ const ProductDetail = () => {
                 <span className="text-gray-600 ml-2">
                   ({totalVotes} Reviews)
                 </span>
-              </div>
+              </div> */}
+
               <div className="flex items-center mb-4">
                 <span className="text-2xl font-bold text-gray-800">
-                  ${data?.data?.price}
+                ${parseFloat(selectedVariant?.price).toFixed(2) || parseFloat(productDetailData?.data?.price).toFixed(2)}
                 </span>
-                <span className="text-lg line-through text-gray-500 ml-4">
+                {/* <span className="text-lg line-through text-gray-500 ml-4">
                   ${data?.data?.originalPrice}
-                </span>
+                </span> */}
               </div>
-              <p className="text-gray-600 mb-4">{data?.data?.description}</p>
+              <p className="text-gray-600 mb-4">{productDetailData?.data?.description}</p>
 
-              {/* Chọn màu */}
+              {/* Chọn biến thể (Variant) */}
               <div className="mb-4">
-                <span className="text-gray-600">Color</span>
+                <span className="text-gray-600">Choose Variant:</span>
                 <div className="flex space-x-2 mt-2">
-                  {data?.data?.color.map((color) => (
-                    <div
-                      key={color}
-                      className="w-6 h-6 rounded-full shadow-md"
-                      style={{ backgroundColor: color }}
-                    ></div>
+                  {variants.map((variant) => (
+                    <button
+                      key={variant.sku}
+                      onClick={() => handleVariantSelect(variant)}
+                      className={`px-4 py-2 border rounded ${
+                        selectedVariant?.sku === variant.sku
+                          ? "bg-black text-white"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {variant.sku}
+                    </button>
                   ))}
                 </div>
               </div>
 
-              {/* Chọn size */}
+              {/* Hiển thị số lượng tồn kho của biến thể */}
+              <p className="text-gray-600 mb-2">
+                <strong>Stock:</strong> {selectedVariant?.stock} items
+              </p>
+
+              {/* Chọn thuộc tính của biến thể */}
               <div className="mb-4">
-                <span className="text-gray-600">Size</span>
+                <span className="text-gray-600">Choose Attributes:</span>
                 <div className="flex space-x-2 mt-2">
-                  {data?.data?.size.map((size) => (
-                    <button
-                      key={size}
-                      className={`px-4 py-2 border rounded ${
-                        selectedSize === size
-                          ? "bg-black text-white"
-                          : "border-gray-300"
-                      }`}
-                      onClick={() => handleSize(size)}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                  {allAttributes.map((attr) => {
+                    const isDisabled = !selectedVariant?.product_attributes.some(
+                      (variantAttr) => variantAttr.attribute_value.id === attr.attribute_value.id
+                    );
+                    const isSelected =
+                      selectedAttribute?.attribute_value.id === attr.attribute_value.id;
+
+                    return (
+                      <button
+                        key={attr.attribute_value.id}
+                        onClick={() => !isDisabled && handleAttributeSelect(attr)}
+                        className={`px-4 py-2 border rounded ${
+                          isSelected
+                            ? "bg-black text-white"
+                            : isDisabled
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "border-gray-300"
+                        }`}
+                        disabled={isDisabled}
+                      >
+                        {attr.attribute_value.value}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -209,10 +285,7 @@ const ProductDetail = () => {
                       <i className="fa-solid fa-plus"></i>
                     </button>
                   </div>
-                  {/* <button className="bg-black text-white rounded-lg px-16 py-2">Add to Cart</button>
-              <button className="border border-gray-300 rounded-lg px-3 py-2">
-                <FaHeart className="text-gray-600" />
-              </button> */}
+
                   <button className="bg-black text-white rounded-lg px-16 py-2">
                     Add to Cart
                   </button>
