@@ -52,7 +52,7 @@ const ProductBestseller = () => {
         {fakeData.map((item) => (
           <div
             key={item.id}
-            className="group bg-white dark:bg-gray-800 shadow-md dark:shadow-gray-700 h-max rounded-lg overflow-hidden hover:shadow-xl duration-300 transition-transform transform hover:scale-105"
+            className="group bg-white dark:bg-gray-800 shadow-md dark:shadow-gray-700 rounded-lg overflow-hidden hover:shadow-xl duration-300 transition-transform transform hover:scale-105"
           >
             {/* Image section */}
             <div className="relative h-3/4">

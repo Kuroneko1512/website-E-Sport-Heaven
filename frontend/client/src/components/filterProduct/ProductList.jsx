@@ -17,7 +17,7 @@ const ProductList = ({ products }) => {
         {selectedProducts.map((item) => (
           <div
           key={item.id}
-          className="group bg-white shadow-md h-max rounded-lg overflow-hidden hover:shadow-xl duration-300 transition-transform transform hover:scale-105"
+          className="group bg-white shadow-md rounded-lg overflow-hidden hover:shadow-xl duration-300 transition-transform transform hover:scale-105"
         >
           {/* Image section */}
           <div className="relative h-3/4">
