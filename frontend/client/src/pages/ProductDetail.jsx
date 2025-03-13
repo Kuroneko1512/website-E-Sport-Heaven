@@ -147,6 +147,19 @@ const ProductDetail = () => {
     setQuantity((prev) => Math.max(1, prev + delta));
   };
 
+  const [cartItems, setCartItems] = useState([])
+
+  const handleAddToCart = () => {
+    if (selectedVariant) {
+      const cartItem = {
+        product_id: product.id,
+        variant_id: selectedVariant.id,
+        quantity: quantity,
+      };
+      localStorage.setItem('cartItems', JSON.stringify([...cartItems, cartItem]));
+    }
+  };
+
   // Tính rating trung bình
   // const totalVotes = data?.data
   //   ? data.data.fiveStart +
@@ -206,22 +219,41 @@ const ProductDetail = () => {
                 </span>
               </div> */}
 
-                <div className="flex items-center mb-4">
-                {parseFloat(product?.discount?.percent) >= 0 ? (
-                  <div>
-                    <span className="text-2xl font-bold text-gray-800">
-                    ${parseFloat(selectedVariant?.price).toFixed(2) || parseFloat(product?.price).toFixed(2)}
-                </span>
-                <span className="text-lg line-through text-gray-500 ml-4">
-                  ${((parseFloat(selectedVariant?.price)) - (parseFloat(selectedVariant?.price)*parseFloat(product?.discount?.percent))/100).toFixed(2)}
-                </span>
-                  </div>
+                {(product.product_type === "simple") ? (
+                   <div className="flex items-center mb-4">
+                   {parseFloat(product?.discount?.percent) >= 0 ? (
+                     <div>
+                       <span className="text-xl font-bold text-gray-800">
+                       ${parseFloat(product?.price).toFixed(2)}
+                   </span>
+                   <span className="text-lg line-through text-gray-500 ml-4">
+                     ${((parseFloat(product?.price)) - (parseFloat(product?.price)*parseFloat(product?.discount?.percent))/100).toFixed(2)}
+                   </span>
+                     </div>
+                   ): (
+                   <span className="text-xl font-bold text-gray-800">
+                     ${parseFloat(product?.price).toFixed(2)}
+                   </span> 
+                   )}
+                 </div>
                 ): (
-                <span className="text-2xl font-bold text-gray-800">
-                  ${parseFloat(selectedVariant?.price).toFixed(2) || parseFloat(product?.price).toFixed(2)}
-                </span> 
+                  <div className="flex items-center mb-4">
+                  {parseFloat(product?.discount?.percent) >= 0 ? (
+                    <div>
+                      <span className="text-xl font-bold text-gray-800">
+                      ${parseFloat(selectedVariant?.price).toFixed(2)}
+                  </span>
+                  <span className="text-lg line-through text-gray-500 ml-4">
+                    ${((parseFloat(selectedVariant?.price)) - (parseFloat(selectedVariant?.price)*parseFloat(product?.discount?.percent))/100).toFixed(2)}
+                  </span>
+                    </div>
+                  ): (
+                  <span className="text-xl font-bold text-gray-800">
+                    ${parseFloat(selectedVariant?.price).toFixed(2)}
+                  </span> 
+                  )}
+                </div>
                 )}
-              </div>
               <p className="text-gray-600 mb-4">{product?.description}</p>
 
               {/* Chọn thuộc tính */}
@@ -249,7 +281,7 @@ const ProductDetail = () => {
 
               {/* Hiển thị số lượng tồn kho của biến thể */}
               <p className="text-gray-600 mb-2">
-                <strong>Stock:</strong> {selectedVariant?.stock} items
+                <strong>Stock:</strong> {selectedVariant?.stock || 0} items
               </p>
 
               <div className="flex space-x-4 mt-8">
@@ -270,7 +302,7 @@ const ProductDetail = () => {
                     </button>
                   </div>
 
-                  <button className="bg-black text-white rounded-lg px-16 py-2">
+                  <button className="bg-black text-white rounded-lg px-16 py-2" onClick={handleAddToCart}>
                     Add to Cart
                   </button>
                   <button
