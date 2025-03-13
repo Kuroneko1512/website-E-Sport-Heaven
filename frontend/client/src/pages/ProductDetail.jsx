@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Skeleton } from "antd";
+import { message, Skeleton } from "antd";
 import React, { useEffect, useState } from "react";
 import { Link, Outlet, useParams } from "react-router-dom";
 import instanceAxios from "../config/db";
@@ -147,18 +147,51 @@ const ProductDetail = () => {
     setQuantity((prev) => Math.max(1, prev + delta));
   };
 
-  const [cartItems, setCartItems] = useState([])
-
   const handleAddToCart = () => {
+    let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+  
     if (selectedVariant) {
-      const cartItem = {
+      let cartItem = {
         product_id: product.id,
         variant_id: selectedVariant.id,
         quantity: quantity,
       };
-      localStorage.setItem('cartItems', JSON.stringify([...cartItems, cartItem]));
+  
+      // Kiểm tra xem sản phẩm cùng variant đã có trong giỏ hàng chưa
+      const existingIndex = cartItems.findIndex(
+        (item) => item.product_id === cartItem.product_id && item.variant_id === cartItem.variant_id
+      );
+  
+      if (existingIndex !== -1) {
+        // Nếu đã có, cập nhật số lượng
+        cartItems[existingIndex].quantity += cartItem.quantity;
+      } else {
+        // Nếu chưa có, thêm vào giỏ hàng
+        cartItems.push(cartItem);
+      }
+    } else {
+      let cartItem = {
+        product_id: product.id,
+        quantity: quantity,
+      };
+  
+      // Kiểm tra nếu sản phẩm cùng ID đã tồn tại (không có variant)
+      const existingIndex = cartItems.findIndex(
+        (item) => item.product_id === cartItem.product_id && !item.variant_id
+      );
+  
+      if (existingIndex !== -1) {
+        cartItems[existingIndex].quantity += cartItem.quantity;
+      } else {
+        cartItems.push(cartItem);
+      }
     }
+  
+    // Lưu lại giỏ hàng vào localStorage
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    message.success("Thêm thành công")
   };
+  
 
   // Tính rating trung bình
   // const totalVotes = data?.data
@@ -219,7 +252,7 @@ const ProductDetail = () => {
                 </span>
               </div> */}
 
-                {(product.product_type === "simple") ? (
+                {(product?.product_type === "simple") ? (
                    <div className="flex items-center mb-4">
                    {parseFloat(product?.discount?.percent) >= 0 ? (
                      <div>
@@ -302,9 +335,16 @@ const ProductDetail = () => {
                     </button>
                   </div>
 
-                  <button className="bg-black text-white rounded-lg px-16 py-2" onClick={handleAddToCart}>
+                  {(product?.status === "inactive") ? (
+                      <button className="bg-black text-white rounded-lg px-16 py-2 disabled:bg-gray-800 disabled:cursor-not-allowed" onClick={handleAddToCart} disabled>
+                      Add to Cart
+                    </button>
+                  ): (
+                    <button className="bg-black text-white rounded-lg px-16 py-2" onClick={handleAddToCart}>
                     Add to Cart
                   </button>
+                  ) }
+                  
                   <button
                     onClick={()=>setFav(!fav)}
                     className="border rounded-lg px-3 py-2"
