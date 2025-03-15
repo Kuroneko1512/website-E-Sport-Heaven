@@ -76,7 +76,7 @@ class ProductService extends BaseService
             'discount_end' => $data['discount_end'] ?? null,
             'description' => $data['description'] ?? null,
             'product_type' => $data['product_type'],
-            'status' => 'draft', // Sản phẩm sẽ là bản nháp ban đầu
+            'status' => 'active', // Sản phẩm sẽ là bản nháp ban đầu
             'category_id'=>$data['category_id'] ?? null
         ]);
         if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {

@@ -57,6 +57,7 @@ const ProductDetail = () => {
   useEffect(() => {
     if (product?.used_attributes?.length > 0) {
       fetchAttributes.mutate();
+    
     }
   }, [product]);
 
@@ -119,7 +120,7 @@ const ProductDetail = () => {
         }
       });
     });
-
+    console.log(newValidOptions);
     setValidOptions(newValidOptions);
   };
 
@@ -132,13 +133,14 @@ const ProductDetail = () => {
     const matchingVariant = variants.find(variant =>
       variant.attributes.every(attr => updatedAttributes[attr.attribute_id] === attr.value_id)
     );
-
+console.log(matchingVariant);
     if (matchingVariant) {
       setSelectedVariant(matchingVariant);
       setDisplayImage(matchingVariant.image || product?.image);
     }
 
     // Cập nhật danh sách giá trị hợp lệ
+    console.log(updatedAttributes);
     updateValidOptions(updatedAttributes);
   };
 
@@ -149,14 +151,19 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-  
+    const generateId = () => Date.now() + Math.random().toString(36).substr(2, 9);
     if (selectedVariant) {
+      console.log(selectedVariant);
       let cartItem = {
+        id: generateId(), 
         product_id: product.id,
         variant_id: selectedVariant.id,
+        price:selectedVariant.price,
+        name:product.name,
+        sku:selectedVariant.sku,
         quantity: quantity,
       };
-  
+    
       // Kiểm tra xem sản phẩm cùng variant đã có trong giỏ hàng chưa
       const existingIndex = cartItems.findIndex(
         (item) => item.product_id === cartItem.product_id && item.variant_id === cartItem.variant_id
@@ -172,9 +179,12 @@ const ProductDetail = () => {
     } else {
       let cartItem = {
         product_id: product.id,
+        price:product.price,
+        name:product.name,
+        sku:product.sku,
         quantity: quantity,
       };
-  
+      console.log(cartItem);
       // Kiểm tra nếu sản phẩm cùng ID đã tồn tại (không có variant)
       const existingIndex = cartItems.findIndex(
         (item) => item.product_id === cartItem.product_id && !item.variant_id
@@ -189,6 +199,7 @@ const ProductDetail = () => {
   
     // Lưu lại giỏ hàng vào localStorage
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    console.log(cartItems);
     message.success("Thêm thành công")
   };
   

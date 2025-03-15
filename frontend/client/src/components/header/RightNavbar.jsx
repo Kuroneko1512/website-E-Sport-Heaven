@@ -107,7 +107,10 @@ const RightNavbar = () => {
 
       {/* Cart */}
       <div ref={cartDropdownRef}>
-        <i className="fas fa-shopping-cart text-gray-700 dark:text-gray-300 cursor-pointer" onClick={toggleCart}></i>
+           <Link to="/cart" className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
+           <i className="fas fa-shopping-cart text-gray-700 dark:text-gray-300 cursor-pointer" ></i>
+                  </Link>
+      
         <div className="absolute top-[6rem] right-4 md:right-16 w-72 md:w-80 z-50 transition-transform transform ease-in-out duration-300">
           {cartVisible && (
             <div className="p-4 bg-white dark:bg-gray-800 shadow-md rounded-lg">

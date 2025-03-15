@@ -26,6 +26,9 @@ import InfoProfile from "./components/elementProfile/InfoProfile";
 import MyOrder from "./components/elementProfile/MyOrder";
 import Setting from "./components/elementProfile/Setting";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import Cart from "./pages/Cart";
+import NewCheckout from "./pages/NewCheckout";
+import ThankYou from "./pages/ThankYou";
 
 function App() {
   return (
@@ -58,6 +61,9 @@ function App() {
             <Route path="contact" element={<Contact />} />
             <Route path="*" element={<Notfound />} />
             <Route path="checkout" element={<Checkout />} />
+            <Route path="cart" element={<Cart />} />
+            <Route path="newcheckout" element={<NewCheckout />} />
+            <Route path="thankyou" element={<ThankYou />} />
             <Route path="address" element={<ShippingAddress />} />
             <Route path="payment" element={<PaymentMethod />} />
             <Route path="order" element={<Order />} />

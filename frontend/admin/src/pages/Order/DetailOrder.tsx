@@ -100,12 +100,17 @@ const DetailOrder: React.FC = () => {
               <p><strong>Trạng thái:</strong> <span className="badge badge-info">{order.status}</span></p>
 
               {/* Nút cập nhật trạng thái */}
-              <button className="btn btn-success mr-2"  onClick={nextStatus}>
-                Tiến đến trạng thái tiếp theo
-              </button>
-              <button className="btn btn-danger" onClick={failDelivery}>
-                Giao hàng thất bại
-              </button>
+              {order.status !== "đã hủy" && order.status !== "hoàn thành" && (
+                <>
+                  <button className="btn btn-success mr-2" onClick={nextStatus}>
+                    Tiến đến trạng thái tiếp theo
+                  </button>
+
+                  <button className="btn btn-danger" onClick={failDelivery}>
+                    Giao hàng thất bại
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Cột danh sách sản phẩm */}
