@@ -120,7 +120,15 @@ catch(error) {
 }
 
 };
-
+export const getProductById = async (id: number): Promise<Product> => {
+  try {
+    const response = await axios.get<Product>(`${API_URL}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    throw error;
+  }
+};
 // Cập nhật sản phẩm theo ID
 export const updateProduct = async (
   id: number,

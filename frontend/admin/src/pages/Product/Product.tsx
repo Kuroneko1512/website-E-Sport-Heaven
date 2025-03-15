@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getProducts, deleteProduct, Pagination } from "@app/services/Product/Api";
 import { useEffect, useState } from "react";
+
 
 interface Product {
   id?: number;
@@ -18,6 +19,7 @@ interface Product {
 }
 
 const Product = () => {
+  const navigate = useNavigate();
   const [pagination, setPagination] = useState<Pagination>({
     current_page: 1,
     last_page: 1,
@@ -42,10 +44,12 @@ const Product = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
       }
+      
+      
     };
 
     fetchData();
-  }, [pagination.current_page]); // 🔥 Chỉ gọi khi current_page thay đổi
+  }, [pagination.current_page]); 
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-100">
@@ -81,6 +85,7 @@ const Product = () => {
                   <th>Type</th>
                   <th>Status</th>
                   <th>Stock</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -96,6 +101,13 @@ const Product = () => {
                       </span>
                     </td>
                     <td>{product.stock}</td>
+                    <td> <button
+                      className="btn btn-warning btn-sm"
+                      onClick={() => navigate(`detail/${product.id}`)}
+                    >
+                      Detail
+                    </button></td>
+
                   </tr>
                 ))}
               </tbody>

@@ -34,6 +34,8 @@ import AttributeProduct from "./pages/Product/AttributeProduct";
 import VariantProduct from "./pages/Product/VariantProduct";
 
 import  Category  from "@pages/Categories/Category";
+import DetailProductComponent from "@app/pages/Product/DetailProductComponent";
+import EditComponents from "./pages/Product/EditComponents";
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {
@@ -104,10 +106,13 @@ const App = () => {
           <Route path="blank" element={<Blank />} />
           <Route path="profile" element={<Profile />} />
           {/* route sản phẩm  */}
-          <Route path="product" element={<Product />} /> 
-           
+          <Route path="Product" element={<Product />} >
+          
+          </Route> 
+          <Route path="Product/detail/:id" element={<DetailProductComponent/>} />
     
-       
+          <Route path="Product/edit/:id" element={<EditComponents/>} />
+    
           <Route path="add-product" element={<Store />} >
            <Route path="AttributeForm" element={<AttributeForm />} /> 
            <Route path="ValueProduct" element={<ValueProduct />} /> 
@@ -117,12 +122,12 @@ const App = () => {
           </Route>
           {/*Route attribute*/}
           <Route path="Attribute" element={<Attribute />} />
-         
+          <Route path="Attribute/attribute/edit/:id"  element={<EditComponent/>} />
           <Route path="Order" element={<Order />} />
           <Route path="Order/Details/:id" element={<DetailOrder />} />
 
 
-          <Route path="Attribute/attribute/edit/:id"  element={<EditComponent/>} />
+        
 
 
             {/*Route Category*/}
