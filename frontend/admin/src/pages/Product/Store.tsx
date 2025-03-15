@@ -150,6 +150,7 @@ const Store = () => {
       const newProduct = await createProduct(product);
       console.log(newProduct);
       alert("Tạo sản phẩm thành công!");
+      navigate("/product");
     } catch (error) {
       alert("Lỗi khi tạo sản phẩm!");
     }

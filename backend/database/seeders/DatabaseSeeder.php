@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AttributeValueSeeder::class,
             CategorySeeder::class, // Chạy Seeder cho categories trước
-            ProductSeeder::class,  // Sau đó mới chạy ProductSeeder
+            // ProductSeeder::class,  // Sau đó mới chạy ProductSeeder
         ]);
     }
 }

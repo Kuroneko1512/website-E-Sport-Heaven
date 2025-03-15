@@ -27,6 +27,7 @@ class ProductStoreRequest extends FormRequest
         return [
             'name'             => ['nullable', 'string', 'max:255'],
             'price'            => ['nullable', 'numeric', 'between:0,99999999.99'],
+            'stock'            => ['nullable', 'numeric', 'between:0,99999999.99'],
             'selected_attributes' => 'required_if:product_type,variable|array',
             // 'sku'              => ['required', 'string', Rule::unique('products', 'sku')],
             'description'      => ['nullable', 'string'],

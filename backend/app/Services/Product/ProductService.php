@@ -71,6 +71,7 @@ class ProductService extends BaseService
             'name' => $data['name'],
             'sku' => $productSku,
             'price' => $isVariable ? null : $data['price'],
+            'stock' => $isVariable ? null : $data['stock'],
             'discount_percent' => $data['discount_percent'] ?? null,
             'discount_start' => $data['discount_start'] ?? null,
             'discount_end' => $data['discount_end'] ?? null,
