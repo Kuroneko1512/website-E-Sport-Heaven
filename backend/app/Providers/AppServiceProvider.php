@@ -2,19 +2,20 @@
 
 namespace App\Providers;
 
-use App\Models\AttributeValue;
-use App\Models\Attribute;
-use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Category;
+use App\Models\Attribute;
+use App\Models\AttributeValue;
 use App\Models\ProductVariant;
-use App\Services\Attribute\AttributeService;
-use App\Services\Attribute\AttributeValueService;
-use App\Services\Category\CategoryService;
+use Laravel\Passport\Passport;
 use App\Services\Order\OrderService;
-use App\Services\Product\ProductService;
-use App\Services\Product\ProductVariantService;
 use Illuminate\Support\ServiceProvider;
+use App\Services\Product\ProductService;
+use App\Services\Category\CategoryService;
+use App\Services\Attribute\AttributeService;
+use App\Services\Product\ProductVariantService;
+use App\Services\Attribute\AttributeValueService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -49,5 +50,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        Passport::enablePasswordGrant();
     }
 }

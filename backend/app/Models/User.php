@@ -66,4 +66,20 @@ class User extends Authenticatable
     {
         return $this->hasOne(Customer::class);
     }
+
+
+    /**
+     *
+     * @param string $username
+     * @return Customer|null
+     * Cái này cần thiết vì nếu không dùng email để đăng nhập
+     * Ta cần function này trả về Customer và có thể lựa chọn thêm các trường để đăng nhập như email, phone, username, ...
+     */
+    // public function findForPassport(string $username): ?Customer
+    // {
+    //     return $this->where('email', $username)
+    //         // ->orWhere('username', $username)
+    //         ->orWhere('phone', $username)
+    //         ->first();
+    // }
 }
