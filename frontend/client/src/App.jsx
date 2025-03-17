@@ -27,6 +27,9 @@ import MyOrder from "./components/elementProfile/MyOrder";
 import Setting from "./components/elementProfile/Setting";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Notification from "./components/elementProfile/Notification";
+import ManageAddress from "./components/elementProfile/ManageAddress";
+import PaymentCards from "./components/elementProfile/PaymentCards";
+import Whishlist from "./components/elementProfile/Whishlist";
 
 function App() {
   return (
@@ -53,6 +56,9 @@ function App() {
               <Route path="settings" element={<Setting />} />
               <Route path="orders" element={<MyOrder />} />
               <Route path="notifications" element={<Notification />} />
+              <Route path="manage-address" element={<ManageAddress />} />
+              <Route path="saved-cards" element={<PaymentCards />} />
+              <Route path="wishlists" element={<Whishlist />} />
             </Route>
 
             <Route path="blog" element={<Blog />} />
