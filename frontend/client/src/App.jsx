@@ -26,6 +26,7 @@ import InfoProfile from "./components/elementProfile/InfoProfile";
 import MyOrder from "./components/elementProfile/MyOrder";
 import Setting from "./components/elementProfile/Setting";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import Notification from "./components/elementProfile/Notification";
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
               <Route path="info" element={<InfoProfile />} />
               <Route path="settings" element={<Setting />} />
               <Route path="orders" element={<MyOrder />} />
+              <Route path="notifications" element={<Notification />} />
             </Route>
 
             <Route path="blog" element={<Blog />} />

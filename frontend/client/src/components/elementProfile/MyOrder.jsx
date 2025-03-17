@@ -8,7 +8,7 @@ const OrderItem = ({ product, status, price, buttons }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 grid grid-cols-4 gap-4 items-center border-b border-gray-200 dark:border-gray-700 pb-3 rounded-lg shadow-md">
+    <div className="bg-white dark:bg-gray-800 grid grid-cols-4 gap-4 items-center border-b border-gray-200 dark:border-gray-700 pb-3">
       <div className="col-span-2 space-y-3">
         <div className="flex items-center space-x-4">
           <img
@@ -73,7 +73,7 @@ const MyOrder = () => {
   ];
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-800 min-h-screen p-6">
+    <div className="dark:bg-gray-800 min-h-screen p-6">
       <div className="flex justify-between items-center mb-6">
         <input className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg p-2 w-1/2" placeholder="Search" type="text" />
         <button className="bg-black dark:bg-gray-700 text-white dark:text-gray-300 rounded-lg p-2 ml-2 flex items-center">
