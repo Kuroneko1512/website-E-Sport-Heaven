@@ -68,7 +68,7 @@ const Checkout = () => {
   }
 
   return (
-    <div className="bg-white text-gray-800 dark:bg-gray-800 dark:text-white m-10">
+    <div className="bg-white text-gray-800">
       <main className="max-w-6xl mx-auto p-6">
         <h1 className="text-3xl font-bold mb-6">Checkout</h1>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

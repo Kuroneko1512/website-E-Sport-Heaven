@@ -28,7 +28,7 @@ const CustomerSay = () => {
     <div className="container mx-auto py-16 px-4 bg-gray-50 dark:bg-gray-800">
       <div className="flex flex-col md:flex-row justify-between items-center mb-12">
         <h2 className="text-2xl md:text-4xl font-bold text-center md:text-left text-gray-900 dark:text-gray-100">
-          What our Customers Say
+        Khách hàng của chúng tôi nói gì?
         </h2>
         <div className="flex space-x-4 mt-4 md:mt-0">
           <button 

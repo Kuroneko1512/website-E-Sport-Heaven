@@ -15,19 +15,19 @@ const Navbar = () => {
         {/* Navigation Links */}
         <nav className="hidden md:flex space-x-6">
           <Link to="/" className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
-            Home
+            Trang chủ
           </Link>
           <Link to="/shop" className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
-            Shop
+            Cửa hàng
           </Link>
           <Link to="/blog" className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
             Blog
           </Link>
           <Link to="/story" className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
-            Story
+            Tiểu sử
           </Link>
           <Link to="/contact" className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
-            Contact
+            Liên hệ
           </Link>
         </nav>
 
