@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         // \App\Models\User::factory(10)->create();
         Attribute::factory(10)->create();
-       
+
         // \App\Models\User::factory()->create([
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
@@ -26,6 +26,8 @@ class DatabaseSeeder extends Seeder
             AttributeValueSeeder::class,
             CategorySeeder::class, // Chạy Seeder cho categories trước
             ProductSeeder::class,  // Sau đó mới chạy ProductSeeder
+            AdminSeeder::class,
+            RoleAndPermissionSeeder::class,
         ]);
     }
 }
