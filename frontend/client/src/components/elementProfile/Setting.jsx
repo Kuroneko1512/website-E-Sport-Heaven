@@ -14,9 +14,9 @@ const SettingOption = ({ title, description, children }) => (
 
 const Setting = () => {
   const { isDarkMode, toggleTheme } = useContext(ThemeContext);
-  const [isPushNotificationsEnabled, setIsPushNotificationsEnabled] = useState(true);
-  const [isDesktopNotificationsEnabled, setIsDesktopNotificationsEnabled] = useState(true);
-  const [isEmailNotificationsEnabled, setIsEmailNotificationsEnabled] = useState(true);
+  const [isPushNotificationsEnabled, setIsPushNotificationsEnabled] = useState(false);
+  const [isDesktopNotificationsEnabled, setIsDesktopNotificationsEnabled] = useState(false);
+  const [isEmailNotificationsEnabled, setIsEmailNotificationsEnabled] = useState(false);
 
   // Hàm xử lý thay đổi theme từ select
   const handleThemeChange = (event) => {

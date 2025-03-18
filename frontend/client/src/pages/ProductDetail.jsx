@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Link, Outlet, useParams } from "react-router-dom";
 import instanceAxios from "../config/db";
 import RelatedProducts from "../components/elementProduct/RelatedProducts";
+import ScrollToTop from "../config/ScrollToTop";
 
 
 const ProductDetail = () => {
@@ -66,7 +67,7 @@ const ProductDetail = () => {
     if (attributes.length > 0 && hasVariants) {
       updateValidOptions(selectedAttributes);
     }
-  }, [attributes]);
+  }, [attributes, variants]); // Thêm `variants` vào dependency để cập nhật khi có biến thể mới.  
 
   // Xử lý biến thể mặc định
   useEffect(() => {
@@ -92,37 +93,32 @@ const ProductDetail = () => {
   // **Sửa lỗi lọc giá trị hợp lệ**
   const updateValidOptions = (selectedAttrs) => {
     if (!hasVariants || attributes.length === 0) return;
-
+  
     const newValidOptions = {};
-
-    // Lưu tất cả giá trị hợp lệ ban đầu cho mỗi thuộc tính
+  
+    // Khởi tạo validOptions với tất cả giá trị có trong biến thể
     attributes.forEach(attr => {
-      newValidOptions[attr.id] = attr.values.map(value => value.id);
+      newValidOptions[attr.id] = new Set();
     });
-
-    // Lọc lại danh sách giá trị hợp lệ dựa trên các biến thể còn lại
-    Object.entries(selectedAttrs).forEach(([attrId, valueId]) => {
-      const matchingVariants = variants.filter(variant =>
-        variant.attributes.some(a => a.attribute_id == attrId && a.value_id == valueId)
-      );
-
-      attributes.forEach(attr => {
-        if (parseInt(attrId) !== attr.id) {
-          const validValues = new Set();
-          matchingVariants.forEach(variant => {
-            variant.attributes.forEach(a => {
-              if (a.attribute_id === attr.id) {
-                validValues.add(a.value_id);
-              }
-            });
-          });
-          newValidOptions[attr.id] = Array.from(validValues);
+  
+    // Duyệt tất cả biến thể để lấy giá trị thuộc tính tồn tại
+    variants.forEach(variant => {
+      variant.attributes.forEach(attr => {
+        if (newValidOptions[attr.attribute_id]) {
+          newValidOptions[attr.attribute_id].add(attr.value_id);
         }
       });
     });
-    console.log(newValidOptions);
+  
+    // Chuyển Set thành mảng để tránh trùng lặp
+    Object.keys(newValidOptions).forEach(attrId => {
+      newValidOptions[attrId] = Array.from(newValidOptions[attrId]);
+    });
+  
+    console.log("Updated Valid Options:", newValidOptions);
     setValidOptions(newValidOptions);
   };
+  
 
   // Khi chọn thuộc tính
   const handleAttributeSelect = (attributeId, valueId) => {
@@ -146,62 +142,68 @@ console.log(matchingVariant);
 
   // Xử lý thay đổi số lượng
   const handleQuantityChange = (delta) => {
-    setQuantity((prev) => Math.max(1, prev + delta));
+    setQuantity((prev) => {
+      const stock = selectedVariant ? selectedVariant.stock : product?.stock || 0;
+      let newQuantity = prev + delta;
+  
+      if (newQuantity > stock) {
+        return stock; // Không cho phép vượt quá tồn kho
+      }
+  
+      if (newQuantity < 1) {
+        return 1; // Không cho phép giảm dưới 1
+      }
+  
+      return newQuantity;
+    });
   };
+  
 
   const handleAddToCart = () => {
-    let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-    const generateId = () => Date.now() + Math.random().toString(36).substr(2, 9);
-    if (selectedVariant) {
-      console.log(selectedVariant);
-      let cartItem = {
-        id: generateId(), 
-        product_id: product.id,
-        variant_id: selectedVariant.id,
-        price:selectedVariant.price,
-        name:product.name,
-        sku:selectedVariant.sku,
-        quantity: quantity,
-      };
-    
-      // Kiểm tra xem sản phẩm cùng variant đã có trong giỏ hàng chưa
-      const existingIndex = cartItems.findIndex(
-        (item) => item.product_id === cartItem.product_id && item.variant_id === cartItem.variant_id
-      );
-  
-      if (existingIndex !== -1) {
-        // Nếu đã có, cập nhật số lượng
-        cartItems[existingIndex].quantity += cartItem.quantity;
-      } else {
-        // Nếu chưa có, thêm vào giỏ hàng
-        cartItems.push(cartItem);
-      }
-    } else {
-      let cartItem = {
-        product_id: product.id,
-        price:product.price,
-        name:product.name,
-        sku:product.sku,
-        quantity: quantity,
-      };
-      console.log(cartItem);
-      // Kiểm tra nếu sản phẩm cùng ID đã tồn tại (không có variant)
-      const existingIndex = cartItems.findIndex(
-        (item) => item.product_id === cartItem.product_id && !item.variant_id
-      );
-  
-      if (existingIndex !== -1) {
-        cartItems[existingIndex].quantity += cartItem.quantity;
-      } else {
-        cartItems.push(cartItem);
-      }
+    if (!isAllAttributesSelected) {
+      message.error("Vui lòng chọn đầy đủ thuộc tính trước khi thêm vào giỏ hàng.");
+      return;
     }
   
-    // Lưu lại giỏ hàng vào localStorage
+    const stock = selectedVariant ? selectedVariant.stock : product?.stock || 0;
+  
+    if (quantity > stock) {
+      message.error("Số lượng không được vượt quá tồn kho!");
+      return;
+    }
+  
+    let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+    let cartItem = {
+      product_id: product.id,
+      variant_id: selectedVariant?.id,
+      quantity: quantity,
+      image: product.image,
+      name: product.name,
+      price: selectedVariant?.price || product.price,
+      discount: product.discount?.percent,
+      ...add,
+    };
+  
+    const existingIndex = cartItems.findIndex(
+      (item) =>
+        item.product_id === cartItem.product_id &&
+        item.variant_id === cartItem.variant_id
+    );
+  
+    if (existingIndex !== -1) {
+      if (cartItems[existingIndex].quantity + quantity > stock) {
+        message.error("Không thể thêm vào giỏ hàng vì vượt quá số lượng tồn kho!");
+        return;
+      }
+      cartItems[existingIndex].quantity += cartItem.quantity;
+    } else {
+      cartItems.push(cartItem);
+    }
+  
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
-    console.log(cartItems);
-    message.success("Thêm thành công")
+    message.success("Thêm thành công");
   };
+  
   
 
   // Tính rating trung bình
@@ -224,6 +226,7 @@ console.log(matchingVariant);
 
   return (
     <Skeleton loading={isLoading} active>
+      <ScrollToTop />
       <section className="mx-10">
         <main className="container mx-auto py-8 px-4 md:px-0">
           <div className="text-sm text-gray-500 mb-4">
@@ -298,30 +301,41 @@ console.log(matchingVariant);
                   )}
                 </div>
                 )}
-              <p className="text-gray-600 mb-4">{product?.description}</p>
+              {/* <p className="text-gray-600 mb-4" dangerouslySetInnerHTML={{__html:product?.description}}></p>  Mô tả ngăn*/}
 
               {/* Chọn thuộc tính */}
-              {hasVariants && attributes.length > 0 && attributes.map(attr => (
-                <div key={attr.id} className="mb-4">
-                  <span className="text-gray-600">{attr.name}:</span>
-                  <div className="flex space-x-2 mt-2">
-                    {attr.values.map(value => (
-                      <button
-                        key={value.id}
-                        onClick={() => handleAttributeSelect(attr.id, value.id)}
-                        className={`px-4 py-2 border rounded ${
-                          selectedAttributes[attr.id] === value.id ? "bg-black text-white" : "border-gray-300"
-                        } ${
-                          validOptions[attr.id]?.includes(value.id) ? "" : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        }`}
-                        disabled={!validOptions[attr.id]?.includes(value.id)}
-                      >
-                        {value.value}
-                      </button>
-                    ))}
+              {hasVariants && attributes.length > 0 && attributes.map(attr => {
+                // Kiểm tra xem có giá trị hợp lệ nào không
+                const validValues = validOptions[attr.id] || [];
+
+                // Nếu không có giá trị hợp lệ nào, không hiển thị thuộc tính
+                if (validValues.length === 0) return null;
+
+                return (
+                  <div key={attr.id} className="mb-4">
+                    <span className="text-gray-600">{attr.name}:</span>
+                    <div className="flex space-x-2 mt-2">
+                      {attr.values.map(value => {
+                        // Chỉ hiển thị các giá trị hợp lệ
+                        if (!validValues.includes(value.id)) return null;
+                        
+                        return (
+                          <button
+                            key={value.id}
+                            onClick={() => handleAttributeSelect(attr.id, value.id)}
+                            className={`px-4 py-2 border rounded ${
+                              selectedAttributes[attr.id] === value.id ? "bg-black text-white" : "border-gray-300"
+                            }`}
+                          >
+                            {value.value}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
+
 
               {/* Hiển thị số lượng tồn kho của biến thể */}
               <p className="text-gray-600 mb-2">
@@ -337,7 +351,23 @@ console.log(matchingVariant);
                     >
                       <i className="fa-solid fa-minus"></i>
                     </button>
-                    <span className="mx-2 text-gray-800">{quantity}</span>
+                    <input
+                      type="text"
+                      value={quantity}
+                      min={1}
+                      max={selectedVariant ? selectedVariant.stock : product?.stock || 0}
+                      onChange={(e) => {
+                        let value = parseInt(e.target.value, 10);
+                        const stock = selectedVariant ? selectedVariant.stock : product?.stock || 0;
+
+                        if (isNaN(value) || value < 1) value = 1;
+                        if (value > stock) value = stock;
+
+                        setQuantity(value);
+                      }}
+                      className="text-center"
+                      style={{ width: `${quantity.toString().length + 1}ch` }}
+                    />
                     <button
                       onClick={() => handleQuantityChange(1)}
                       className="text-gray-600"
@@ -406,7 +436,7 @@ console.log(matchingVariant);
               </Link>
             </ul>
           </div>
-          <Outlet />
+          <Outlet context={{product}}/>
         </div>
         <div>
           {/* Sản phẩm gần đây */}

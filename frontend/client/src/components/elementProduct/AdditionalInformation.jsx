@@ -1,28 +1,14 @@
-import React from 'react'
-import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { Alert, Skeleton } from 'antd';
+import { useOutletContext } from "react-router-dom";
 
 const AdditionalInformation = () => {
 
-  const { id } = useParams();
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['product', id],
-    queryFn: () => instanceAxios.get(`/api/v1/product/${id}`),
-    select: (response) => response.data.data, // Lấy trực tiếp dữ liệu cần thiết
-  });
-  console.log("data", data);
-  console.log("test:",data?.variants.flatMap((variant) => variant.product_attributes).map((item)=> item.attribute_value.value));
-  console.log("sku:",data?.variants.flatMap((variant) => variant.sku));
+  const { product } = useOutletContext();
   
   return (
     <div>
-      <Skeleton loading={isLoading} active>
-        <span className='font-bold'>Thuộc tính:</span> {data?.variants.flatMap((variant) => variant.product_attributes).map((item)=> item.attribute_value.value).join(', ')}
+        <span className='font-bold'>Thuộc tính:</span> {product?.variants.flatMap((variant) => variant?.product_attributes).map((item)=> item?.attribute_value?.value).join(', ')}
         <br/>
-        <span className='font-bold'>Sku:</span>{data?.variants.flatMap((variant) => variant.sku).join(', ')}
-      </Skeleton>
+        <span className='font-bold'>Sku:</span>{product?.variants.flatMap((variant) => variant?.sku).join(', ')}
     </div>
   )
 }

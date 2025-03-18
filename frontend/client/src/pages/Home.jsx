@@ -9,15 +9,15 @@ import DealsOfTheMonth from "../components/main/DealsOfThMonth";
 const Home = () => {
   return (
     <div className="bg-gray-50 dark:bg-gray-800 min-h-screen text-black dark:text-white">
-      {/* Banner */}
+      <div className="container mx-auto space-y-16">
+        
       <Banner />
-
-      {/* Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+      <div className="px-4 sm:px-6 lg:px-8">
         <CategorySlider />
         <ProductBestseller />
         <DealsOfTheMonth />
         <CustomerSay />
+      </div>
       </div>
 
       <TopFooter />
