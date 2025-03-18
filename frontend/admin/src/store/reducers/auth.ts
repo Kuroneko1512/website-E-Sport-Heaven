@@ -1,5 +1,4 @@
 import { IUser } from '@app/types/user';
-import { User } from '@firebase/auth';
 import { createSlice } from '@reduxjs/toolkit';
 
 export interface AuthState {
@@ -16,7 +15,7 @@ export const authSlice = createSlice({
   reducers: {
     setCurrentUser: (
       state: AuthState,
-      { payload }: { payload: User | null }
+      { payload }: { payload: IUser | null }
     ) => {
       state.currentUser = payload;
     },

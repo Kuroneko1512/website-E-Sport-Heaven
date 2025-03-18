@@ -30,6 +30,11 @@ export const MENU: IMenuItem[] = [
     path: '/Product',
   },
   {
+    name: 'Category',
+    icon: 'fas fa-box nav-icon',
+    path: '/Category',
+  },
+  {
     name: 'Attribute',
     icon: 'fas fa-box nav-icon',
     path: '/Attribute',

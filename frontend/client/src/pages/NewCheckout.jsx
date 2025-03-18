@@ -76,7 +76,7 @@ const NewCheckout = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-       
+
 
         // Tạo địa chỉ giao hàng từ tỉnh/thành, quận/huyện, phường/xã
         const shippingAddressParts = [
@@ -84,9 +84,9 @@ const NewCheckout = () => {
             districts.find(d => d.code === Number(selectedDistrict))?.name,
             provinces.find(p => p.code === Number(selectedProvince))?.name
         ].filter(Boolean).join(', '); // Lọc các giá trị rỗng và nối chuỗi bằng dấu ", "
-        
+
         // console.log("Address:", shippingAddressParts);
-        
+
         // console.log([selectedWard, selectedDistrict, selectedProvince]);
         // Kiểm tra nếu thiếu thông tin quan trọng
         if (!order.customer_name || !order.customer_phone || !shippingAddressParts) {
@@ -97,7 +97,7 @@ const NewCheckout = () => {
 
         const orderData = {
             customer_name: order.customer_name,
-            customer_email: order.customer_email || "cuong@example.com", // Có thể lấy từ auth
+            customer_email: order.customer_email, // Có thể lấy từ auth
             customer_phone: order.customer_phone,
             shipping_address: shippingAddressParts,
             order_items: cartItems.map(item => ({
@@ -109,6 +109,7 @@ const NewCheckout = () => {
         };
 
         try {
+
             const response = await axios.post("http://127.0.0.1:8000/api/v1/order", orderData, {
                 headers: { "Content-Type": "application/json" }
             });
@@ -263,11 +264,41 @@ const NewCheckout = () => {
                                 <button className="bg-black text-white px-4 py-2 rounded-r" onClick={handleApplyDiscount}>Áp dụng</button>
                             </div>
                         </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-600 mb-2">Chọn phương thức thanh toán</label>
+                            <div className="flex flex-col gap-2">
+                                {/* Thanh toán khi nhận hàng */}
+                                <label className="flex items-center">
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        value="cod"
+                                        // checked={paymentMethod === "cod"}
+                                        // onChange={() => setPaymentMethod("cod")}
+                                        className="mr-2"
+                                    />
+                                    Thanh toán khi nhận hàng (COD)
+                                </label>
+
+                                {/* Thanh toán VNPay */}
+                                <label className="flex items-center">
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        value="vnpay"
+                                        // checked={paymentMethod === "vnpay"}
+                                        // onChange={() => setPaymentMethod("vnpay")}
+                                        className="mr-2"
+                                    />
+                                    Thanh toán qua VNPay
+                                </label>
+                            </div></div>
 
                         <div className="flex justify-between mb-4">
                             <span className="text-lg">Phí vận chuyển</span>
                             <span className="text-lg">$5.00</span>
                         </div>
+
 
                         <div className="flex justify-between mb-4">
                             <span className="text-lg font-bold">Tổng cộng</span>

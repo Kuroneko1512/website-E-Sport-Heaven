@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('order_code')->unique();
             $table->decimal('total_amount', 10, 2);
             $table->enum('status', ['đang xử lý', 'đã xác nhận', 'đang giao', 'hoàn thành', 'đã hủy'])->default('đang xử lý');
+            $table->enum('payment-status',['đã thanh toán','chưa thanh toán'])->default('chưa thanh toán');
             $table->timestamps();
             $table->softDeletes();
         });

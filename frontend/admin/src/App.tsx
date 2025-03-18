@@ -32,6 +32,7 @@ import Order from "./pages/Order/Order";
 import DetailOrder from "./pages/Order/DetailOrder";
 import AttributeProduct from "./pages/Product/AttributeProduct";
 import VariantProduct from "./pages/Product/VariantProduct";
+import Category from "./pages/Category/Category";
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {
@@ -41,26 +42,43 @@ const App = () => {
   const location = useLocation();
 
   const [isAppLoading, setIsAppLoading] = useState(true);
-
+  // const fakeUser = {
+  //   id: '123',
+  //   name: 'Ngô Thanh Cường',
+  //   email: 'cuong@example.com',
+  //   avatar: 'https://via.placeholder.com/150',
+  //   role: 'admin',
+  // };
+  // useEffect(() => {
+  
+      
+  //         dispatch(setCurrentUser(fakeUser));
+      
+  //         dispatch(setCurrentUser(null));
+      
+  //       setIsAppLoading(false);
+  //     },
+  //     (e) => {
+  //       console.log(e);
+  //       dispatch(setCurrentUser(null));
+  //       setIsAppLoading(false);
+  //     }
+  //   );
+  // }, []);
   useEffect(() => {
-    onAuthStateChanged(
-      firebaseAuth,
-      (user) => {
-        if (user) {
-          dispatch(setCurrentUser(user));
-        } else {
-          dispatch(setCurrentUser(null));
-        }
-        setIsAppLoading(false);
-      },
-      (e) => {
-        console.log(e);
-        dispatch(setCurrentUser(null));
-        setIsAppLoading(false);
-      }
-    );
+    const fakeUser = {
+      id: '123',
+      name: 'Ngô Thanh Cường',
+      email: 'cuong@example.com',
+      avatar: 'https://via.placeholder.com/150',
+      role: 'admin',
+    };
+  
+    setTimeout(() => {
+      dispatch(setCurrentUser(fakeUser)); // Giả lập đăng nhập thành công
+      setIsAppLoading(false);
+    }, 1000); // Giả lập độ trễ của API
   }, []);
-
   useEffect(() => {
     const size = calculateWindowSize(windowSize.width);
     if (screenSize !== size) {
@@ -115,6 +133,7 @@ const App = () => {
           </Route>
           {/*Route attribute*/}
           <Route path="Attribute" element={<Attribute />} />
+          <Route path="Category" element={<Category />} />
          
           <Route path="Order" element={<Order />} />
           <Route path="Order/Details/:id" element={<DetailOrder />} />

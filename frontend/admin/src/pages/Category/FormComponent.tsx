@@ -1,78 +1,97 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { CategoryService, Category } from "@app/services/Category/CategoryApi";
 
-export const FormComponent = () => {
-  const [attribute, setAttribute] = useState<{
-    name: string;
-    description: string;
-  }>({
-    name: "",
-    description: "",
-  });
+interface CategoryFormProps {
+  categories: Category[];
+  onCategoryAdded: () => void;
+  editingCategory?: Category | null;
+  setEditingCategory: (category: Category | null) => void;
+}
 
-  // Hàm thay đổi state
-  const handleChange = (key: keyof typeof attribute, value: string) => {
-    setAttribute((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+const CategoryForm = ({ categories, onCategoryAdded, editingCategory, setEditingCategory }: CategoryFormProps) => {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [parentId, setParentId] = useState<number | null>(null);
 
+  useEffect(() => {
+    if (editingCategory) {
+      setName(editingCategory.name);
+      setDescription(editingCategory.description);
+      setParentId(editingCategory.parent_id || null);
+    }
+  }, [editingCategory]);
 
-  };
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Ngăn chặn reload trang
-    const formData = new FormData();
-    formData.append("name", attribute.name);
-    formData.append("description", attribute.description);
+    e.preventDefault();
     try {
-      // const response = await createAttribute(formData);
-      // console.log("Dữ liệu đã gửi:", response.data);
-      // alert("Thêm thành công!");
-
-      // Reset form sau khi gửi thành công
-      setAttribute({ name: "", description: "" });
+      if (editingCategory) {
+        await CategoryService.update(editingCategory.id, { name, description, parent_id: parentId });
+        alert("Cập nhật danh mục thành công!");
+        setEditingCategory(null);
+      } else {
+        await CategoryService.create({ name, description, parent_id: parentId });
+        alert("Thêm danh mục thành công!");
+      }
+      setName("");
+      setDescription("");
+      setParentId(null);
+      onCategoryAdded();
     } catch (error) {
-      console.error("Lỗi khi gửi dữ liệu:", error);
-      alert("Có lỗi xảy ra khi gửi dữ liệu!");
+      console.error("Lỗi khi lưu danh mục:", error);
     }
   };
+
   return (
-    <div className="card card-primary">
+    <div className="card">
       <div className="card-header">
-        <h3 className="card-title">Quick Example</h3>
+        <h3 className="card-title">{editingCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục"}</h3>
       </div>
-      {/* Form start */}
-      <form onSubmit={handleSubmit}>
-        <div className="card-body">
+      <div className="card-body">
+        <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="exampleInputEmail1">Name</label>
-            <input
-              className="form-control"
-              type="text"
-              placeholder="Nhập tên"
-              value={attribute.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="exampleInputPassword1">Description</label>
+            <label>Tên danh mục</label>
             <input
               type="text"
               className="form-control"
-              placeholder="Nhập mô tả"
-              value={attribute.description}
-              onChange={(e) => handleChange("description", e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
             />
           </div>
-        </div>
-        {/* Form footer */}
-        <div className="card-footer">
+          <div className="form-group">
+            <label>Mô tả</label>
+            <textarea
+              className="form-control"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Danh mục cha</label>
+            <select className="form-control" value={parentId ?? ""} onChange={(e) => setParentId(Number(e.target.value) || null)}>
+              <option value="">Không có</option>
+              {categories
+                .filter((cat) => !editingCategory || cat.id !== editingCategory.id) // Không cho chọn chính nó
+                .map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+            </select>
+          </div>
           <button type="submit" className="btn btn-primary">
-            Submit
+            {editingCategory ? "Cập nhật" : "Thêm mới"}
           </button>
-        </div>
-      </form>
+          {editingCategory && (
+            <button type="button" className="btn btn-secondary ml-2" onClick={() => setEditingCategory(null)}>
+              Hủy
+            </button>
+          )}
+        </form>
+      </div>
     </div>
   );
 };
 
-//  FormComponent;
+export default CategoryForm;

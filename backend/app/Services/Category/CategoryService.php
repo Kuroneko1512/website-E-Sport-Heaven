@@ -9,7 +9,7 @@ class CategoryService extends BaseService {
     public function __construct(Category $category){
         parent::__construct($category);
     }
-    public function getCategories($paginate = 10){
+    public function getCategories($paginate = 5){
         return $this->getAll($paginate);
     }
    
