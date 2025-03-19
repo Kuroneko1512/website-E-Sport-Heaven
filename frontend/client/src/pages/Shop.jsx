@@ -61,7 +61,7 @@ export default function Shop() {
     <div className="bg-white text-gray-800 m-10">
       <main className="container mx-auto py-8 grid grid-cols-1">
         <span className="text-sm text-gray-500 mb-4">
-          Home &gt; <Link to={'/shop'}>Shop</Link>
+          Trang chủ &gt; <Link to={'/shop'}>Cửa hàng</Link>
         </span>
         <div className="flex flex-col md:flex-row">
           <FilterSidebar
