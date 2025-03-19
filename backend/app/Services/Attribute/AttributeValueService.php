@@ -13,7 +13,7 @@ class AttributeValueService extends BaseService {
     }
     // Phương thức lấy tất cả thuộc tính với phân trang
     // Nếu không truyền $paginate, mặc định sẽ phân trang 10 bản ghi
-    public function getAttributeValues($attribute_id,$paginate = 10){
+    public function getAttributeValues($attribute_id,$paginate = 5){
          // Gọi phương thức getAll trong lớp BaseService để lấy danh sách thuộc tính, với phân trang
         return Attribute::findOrFail($attribute_id)->attributeValues()->paginate($paginate);
     }

@@ -13,9 +13,10 @@ export interface AttributeAndValue {
 
 // Interface định nghĩa dữ liệu của một attribute
 export interface Attribute {
-  id?: number;
+  id: number;
   name: string;
   description?: string;
+  attribute_values_count: number;
 }
 
 // Interface định nghĩa dữ liệu trả về từ API, bao gồm thông tin phân trang

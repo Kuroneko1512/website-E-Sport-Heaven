@@ -10,7 +10,7 @@ class AttributeService extends BaseService {
         parent::__construct($attribute);
     }
     public function getAttributes($paginate = 5){
-        return $this->getAll($paginate);
+        return  $this -> model-> withCount('attributeValues')->paginate($paginate);
     }
     public function getAttributesForId($data){
         $attributeIds = $data;

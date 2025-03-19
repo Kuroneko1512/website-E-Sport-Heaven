@@ -10,7 +10,8 @@ class CategoryService extends BaseService {
         parent::__construct($category);
     }
     public function getCategories($paginate = 5){
-        return $this->getAll($paginate);
+        return $this->model->withCount(['products', 'subcategories'])->paginate(5);
     }
+
    
 }

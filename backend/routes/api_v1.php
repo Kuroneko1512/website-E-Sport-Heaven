@@ -9,9 +9,11 @@ use App\Http\Controllers\Api\Category\V1\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::prefix('v1')->group(function (){
+Route::prefix('v1')->group(callback: function (){
     Route::apiResource('/attribute',AttributeController::class);
+    Route::get('/category/indexNoPagination', [CategoryController::class, 'indexNoPagination']);
     Route::apiResource('/category',CategoryController::class);
+ 
     Route::apiResource('/product',ProductController::class);
     Route::get('/product/{id}/Detail',[ProductController::class,'showForDetails']);
     Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
