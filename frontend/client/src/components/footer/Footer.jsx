@@ -82,24 +82,30 @@ const Footer = () => {
       </div>
       
       {/* Phần dưới cùng của Footer */}
-      <div className="flex flex-col sm:flex-row justify-between items-center border-t border-gray-700 pt-4 mt-6 text-center">
-        <div className="flex space-x-4">
-          <i className="fab fa-cc-visa text-2xl"></i>
-          <i className="fab fa-cc-mastercard text-2xl"></i>
-          <i className="fab fa-cc-amex text-2xl"></i>
-          <i className="fab fa-cc-paypal text-2xl"></i>
+      <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-center mt-1">
+        <div>
+          <div className="flex space-x-4">
+            <i className="fab fa-cc-visa text-2xl"></i>
+            <i className="fab fa-cc-mastercard text-2xl"></i>
+            <i className="fab fa-cc-amex text-2xl"></i>
+            <i className="fab fa-cc-paypal text-2xl"></i>
+          </div>
         </div>
-        <p className="text-sm mt-4 sm:mt-0">© {new Date().getFullYear()} Sport Heaven. All rights reserved.</p>
-        <div className="flex space-x-4 mt-4 sm:mt-0">
-          {[
-            { icon: "fab fa-facebook-f", link: "#" },
-            { icon: "fab fa-twitter", link: "#" },
-            { icon: "fab fa-instagram", link: "#" },
-          ].map((social, index) => (
-            <a key={index} href={social.link} className="text-gray-400 hover:text-white text-lg">
-              <i className={social.icon}></i>
-            </a>
-          ))}
+        <div className="text-center">
+          <p className="text-sm mt-4 sm:mt-0">© {new Date().getFullYear()} Sport Heaven. All rights reserved.</p>
+        </div>
+        <div className="flex flex-row-reverse">
+          <div className="flex space-x-4 mt-4 sm:mt-0">
+            {[
+              { icon: "fab fa-facebook-f", link: "#" },
+              { icon: "fab fa-twitter", link: "#" },
+              { icon: "fab fa-instagram", link: "#" },
+            ].map((social, index) => (
+              <a key={index} href={social.link} className="text-gray-400 hover:text-white text-lg">
+                <i className={social.icon}></i>
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
