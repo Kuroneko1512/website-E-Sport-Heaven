@@ -14,20 +14,20 @@ const Navbar = () => {
 
         {/* Navigation Links */}
         <nav className="hidden md:flex space-x-6">
-          <Link to="/" className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
+          <Link to="/" className={`${ location.pathname === "/" ||location.pathname.includes("home")? "border-b-2 border-black" : ""} text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white`}>
             Trang chủ
           </Link>
-          <Link to="/shop" className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
+          <Link to="/shop" className={`${location.pathname.includes("shop")? "border-b-2 border-black" : ""} text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white`}>
             Cửa hàng
           </Link>
-          <Link to="/blog" className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
+          <Link to="/blog" className={`${location.pathname.includes("blog")? "border-b-2 border-black" : ""} text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white`}>
             Blog
           </Link>
-          <Link to="/story" className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
-            Tiểu sử
-          </Link>
-          <Link to="/contact" className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
+          <Link to="/contact" className={`${location.pathname.includes("contact")? "border-b-2 border-black" : ""} text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white`}>
             Liên hệ
+          </Link>
+          <Link to="/transaction-history" className={`${location.pathname.includes("transaction-history")? "border-b-2 border-black" : ""} text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white`}>
+            Đơn hàng giao dịch
           </Link>
         </nav>
 
