@@ -18,8 +18,10 @@ class ProductService extends BaseService
     public function getProductAll($paginate = 10)
     {
         return $this->model->with([
-            'variants.productAttributes.attributeValue:id,value', 
-        ])->paginate($paginate);
+            'variants.productAttributes.attributeValue:id,value',
+        ])
+        ->orderBy('created_at', 'DESC') // Sắp xếp theo thời gian mới nhất
+        ->paginate($paginate);
     }
     public function getProduct($id)
     {
