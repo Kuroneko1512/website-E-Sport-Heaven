@@ -170,13 +170,14 @@ const ProductDetail = () => {
         return;
       }
     }
-
+    const generateId = () => Date.now() + Math.random().toString(36).substr(2, 9);
     let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
     let cartItem = {
+      id: generateId(), 
       product_id: product.id,
       variant_id: selectedVariant?.id,
       quantity: quantity,
-      image: product.image,
+      image: product.image, 
       name: product.name,
       price: selectedVariant?.price || product.price,
       discount: product.discount?.percent,
