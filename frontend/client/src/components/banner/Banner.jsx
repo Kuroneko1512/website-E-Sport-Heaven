@@ -1,26 +1,39 @@
 import React from "react";
-import anhBanner from '../../assets/banner.jpg';
+import Banner1 from "../../assets/banner.jpg";
+import Banner2 from "../../assets/Banner2.png";
+import Banner3 from "../../assets/Banner3.png";
+import Banner4 from "../../assets/Banner4.png";
+import Banner5 from "../../assets/Banner5.png";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
+
+const images = [Banner1, Banner2, Banner3, Banner4, Banner5];
 
 const Banner = () => {
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    adaptiveHeight: true,
+    autoplay: true, // ✅ Bật chế độ tự chuyển ảnh
+    autoplaySpeed: 3000, // ⏳ Thời gian mỗi slide (3000ms = 3 giây)
+  };
+
   return (
-    <section className="relative mx-auto">
-      <img
-        alt="Women's Collection"
-        className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-cover"
-        src={anhBanner}
-        loading="lazy"
-      />
-      <div className="absolute inset-0 flex flex-col justify-center items-start p-6 sm:p-12 md:p-16 bg-black bg-opacity-50 dark:bg-opacity-70">
-        <h2 className="text-lg text-gray-200 dark:text-gray-300">Classic Exclusive</h2>
-        <h1 className="text-3xl md:text-5xl font-bold text-white dark:text-gray-100 mt-2">
-          Women's Collection
-        </h1>
-        <p className="text-lg text-gray-200 dark:text-gray-300 mt-2">UPTO 40% OFF</p>
-        <a className="inline-block bg-white dark:bg-gray-800 text-black dark:text-white px-6 py-3 mt-6 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-          Shop Now →
-        </a>
-      </div>
-    </section>
+    <Slider {...settings} className="mx-auto">
+      {images.map((src, index) => (
+        <div key={index} className="flex justify-center">
+          <img
+            src={src}
+            alt={`slide-${index}`}
+            className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-cover mx-auto"
+          />
+        </div>
+      ))}
+    </Slider>
   );
 };
 

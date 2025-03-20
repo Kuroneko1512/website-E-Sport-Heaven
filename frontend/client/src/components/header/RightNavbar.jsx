@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import { Dropdown, Menu, Badge, Input, Popover } from "antd";
-import { SearchOutlined, HeartOutlined, ShoppingCartOutlined, UserOutlined } from "@ant-design/icons";
+import { SearchOutlined, HeartOutlined, ShoppingCartOutlined, UserOutlined, DeleteOutlined } from "@ant-design/icons";
 import { logout } from "../../redux/AuthSide";
 import LoginAlert from "../popupmodal/LoginAlert";
 
@@ -15,9 +15,11 @@ const RightNavbar = () => {
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [cartVisible, setCartVisible] = useState(false);
+  const isDark = document.documentElement.classList.contains('dark');
+
 
   const searchRef = useRef(null);
-  const miniCartData = useMemo(() => JSON.parse(localStorage.getItem("cartItems")) || [], []);
+  const [miniCartData, setMiniCartData] = useState(JSON.parse(localStorage.getItem("cartItems")) || []);
 
   // Click outside search box to close
   useEffect(() => {
@@ -29,6 +31,35 @@ const RightNavbar = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  //Auto cập nhật giỏ hàng ngay lập tức.
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setMiniCartData(JSON.parse(localStorage.getItem("cartItems")) || []);
+    };
+  
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("cartUpdated", handleStorageChange);
+  
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("cartUpdated", handleStorageChange);
+    };
+  }, []);
+  
+
+  const updateCart = (newCart) => {
+    localStorage.setItem("cartItems", JSON.stringify(newCart));
+    setMiniCartData(newCart);
+    window.dispatchEvent(new Event("cartUpdated")); // Kích hoạt cập nhật ngay lập tức
+  };
+  
+
+  const removeFromCart = (id, vid) => {
+    const newCart = miniCartData.filter(item => !(item.product_id === id && item.variant_id === vid));
+    updateCart(newCart);
+  };
+  
 
   // Logout handler
   const handleLogout = useCallback(() => {
@@ -51,50 +82,59 @@ const RightNavbar = () => {
   const userMenu = useMemo(
     () => (
       <Menu
+        className="dark:bg-gray-800 dark:text-white"
         items={[
           {
             key: "profile",
-            label: <Link to="/my-profile">My Profile</Link>,
+            label: <Link to="/my-profile" className="dark:!text-white">My Profile</Link>,
           },
           {
             key: "logout",
-            label: <span onClick={handleLogout}>Logout</span>,
+            label: <span onClick={handleLogout} className="dark:!text-white">Logout</span>,
           },
         ]}
       />
     ),
     [handleLogout]
   );
-
+  
   // Mini cart content
-  const cartContent = useMemo(
-    () => (
-      <div className="w-72 max-h-80 overflow-y-auto">
+  const cartContent = (
+      <div className="w-72 max-h-80 overflow-y-auto bg-white dark:bg-gray-800 dark:text-white">
         <h2 className="font-semibold mb-3">You have {miniCartData.length} items</h2>
         {miniCartData.map((item, idx) => (
           <div className="flex items-center mb-3" key={idx}>
-            <img src={item.image} alt={item.name} className="w-12 h-16 object-cover mr-3" />
-            <div>
+            <div className="flex items-center">
+              <img src={item.image} alt={item.name} className="w-12 h-16 object-cover mr-3" />
               <h3 className="text-sm font-medium">{item.name}</h3>
             </div>
+            <i
+              className="text-red-500 cursor-pointer ml-auto"
+              onClick={() => removeFromCart(item.product_id, item.variant_id)}
+            >
+              <DeleteOutlined />
+            </i>
           </div>
         ))}
-        <Link to="/checkout" className="block text-center bg-black text-white py-2 rounded mt-4">
+        <Link
+          to="/checkout"
+          className="block text-center bg-black text-white dark:bg-blue-600 dark:text-white py-2 rounded mt-4"
+        >
           View Cart
         </Link>
-      </div>
-    ),
-    [miniCartData]
-  );
-
+      </div>)
+   
   return (
     <div className="flex items-center space-x-6">
       {/* Search */}
       <div ref={searchRef} className="relative">
-        <SearchOutlined className="text-lg cursor-pointer" onClick={() => setSearchVisible(!searchVisible)} />
+        <SearchOutlined
+          className="text-lg cursor-pointer dark:text-white"
+          onClick={() => setSearchVisible(!searchVisible)}
+        />
         {searchVisible && (
           <Input
-            className="absolute top-0 right-0 w-64 md:w-96 shadow-lg"
+            className="absolute top-0 right-0 w-64 md:w-96 shadow-lg dark:bg-gray-800 dark:border-gray-600 dark:text-white"
             placeholder="Search..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
@@ -103,32 +143,48 @@ const RightNavbar = () => {
           />
         )}
       </div>
-
+  
       {/* Wishlist */}
-      <HeartOutlined className="text-lg cursor-pointer" />
-
+      <HeartOutlined className="text-lg cursor-pointer dark:text-white" />
+  
       {/* Cart */}
-      <Popover content={cartContent} trigger="click" open={cartVisible} onOpenChange={setCartVisible} getPopupContainer={(triggerNode) => triggerNode.parentNode}>
+      <Popover
+        content={cartContent}
+        trigger="click"
+        open={cartVisible}
+        onOpenChange={setCartVisible}
+        getPopupContainer={(triggerNode) => triggerNode.parentNode}
+        overlayInnerStyle={isDark ? { backgroundColor: '#1f2937', color: '#fff' } : {}}
+      >
         <Badge count={miniCartData.length} showZero>
-          <ShoppingCartOutlined className="text-lg cursor-pointer" />
+          <ShoppingCartOutlined className="text-lg cursor-pointer dark:text-white" />
         </Badge>
       </Popover>
-
+  
       {/* User */}
       {!isLogin ? (
-        <Link to="/login" className="bg-black text-white px-4 py-2 rounded">
+        <Link
+          to="/login"
+          className="bg-black text-white dark:bg-blue-600 dark:text-white px-4 py-2 rounded"
+        >
           Login
         </Link>
       ) : (
-        <Dropdown overlay={userMenu} trigger={["hover"]} getPopupContainer={(triggerNode) => triggerNode.parentNode}>
-          <UserOutlined className="text-2xl cursor-pointer" />
+        <Dropdown
+          overlay={userMenu}
+          trigger={["hover"]}
+          getPopupContainer={(triggerNode) => triggerNode.parentNode}
+          overlayClassName="dark:bg-gray-800 dark:text-white"
+        >
+          <UserOutlined className="text-2xl cursor-pointer dark:text-white" />
         </Dropdown>
       )}
-
+  
       {/* Login Alert */}
       {alertLogin && <LoginAlert />}
     </div>
   );
+  
 };
 
 export default RightNavbar;
