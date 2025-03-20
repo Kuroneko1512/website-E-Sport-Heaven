@@ -29,6 +29,8 @@ import Notification from "./components/elementProfile/Notification";
 import ManageAddress from "./components/elementProfile/ManageAddress";
 import PaymentCards from "./components/elementProfile/PaymentCards";
 import Whishlist from "./components/elementProfile/Whishlist";
+import NewCheckout from "./pages/NewCheckout";
+import ReviewOrder from "./pages/ReviewOrder";
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
@@ -70,6 +72,8 @@ function App() {
               <Route path="checkout" element={<Checkout />} />
               <Route path="address" element={<ShippingAddress />} />
               <Route path="payment" element={<PaymentMethod />} />
+              <Route path="newcheckout" element={<NewCheckout />} />
+              <Route path="review-order" element={<ReviewOrder />} />
             </Route>
           </Routes>
         </CSSTransition>

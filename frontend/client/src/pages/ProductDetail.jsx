@@ -159,8 +159,7 @@ const ProductDetail = () => {
       return newQuantity;
     });
   };
-
-  // console.log("add", add);
+  
 
   const handleAddToCart = () => {
     if (product?.variants?.length > 0) {
@@ -181,7 +180,7 @@ const ProductDetail = () => {
       name: product.name,
       price: selectedVariant?.price || product.price,
       discount: product.discount?.percent,
-      ...add,
+      
     };
 
     const existingIndex = cartItems.findIndex(
