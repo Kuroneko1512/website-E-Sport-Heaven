@@ -1,173 +1,189 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import instanceAxios from '../config/db';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
 
 const Checkout = () => {
-  const queryClient = useQueryClient();
   const [cartItems, setCartItems] = useState([]);
-  const [discountCode, setDiscountCode] = useState('');
+  const [selectedItems, setSelectedItems] = useState([]);
 
-  // Fetch data using React Query
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['order'],
-    queryFn: async () => {
-      const res = await instanceAxios.get('/api/v1/order');
-      return res.data;
-    },
-  });
-
-  // Update cartItems when data changes
+  const miniCartData = useMemo(() => JSON.parse(localStorage.getItem("cartItems")) || [], []);
   useEffect(() => {
-    if (data?.data) {
-      setCartItems(data?.data.flatMap((item) => item.order_items));
-    }
-  }, [data]);
+    setCartItems(miniCartData);
+  }, [miniCartData]);
 
-  // Handle quantity change
   const handleQuantityChange = (id, delta) => {
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === id
+    setCartItems(
+      cartItems.map((item) =>
+        item.variant_id === id
           ? { ...item, quantity: Math.max(1, item.quantity + delta) }
           : item
       )
     );
   };
 
-  // Handle removing item
   const handleRemoveItem = (id) => {
-   
     if (window.confirm('Are you sure you want to remove this item?')) {
-      setCartItems(prevItems => prevItems.filter(item => item.id !== id));
-      
+      setCartItems(cartItems.filter((item) => item.variant_id !== id));
+      setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
     }
   };
 
-  // Calculate subtotal
-  const calculateSubtotal = () => {
-    return cartItems.reduce((total, item) => total+  parseFloat(item.product?.price) * parseFloat(item.quantity), 0).toFixed(2);
-  };
-
-  // Handle discount code application
-  const handleApplyDiscount = () => {
-    if (discountCode === 'FLAT50') {
-      alert('Discount applied');
-      // Apply discount logic here (e.g., reduce the total)
+  const handleSelectItem = (variantId) => {
+    if (selectedItems.includes(variantId)) {
+      setSelectedItems(selectedItems.filter((id) => id !== variantId));
     } else {
-      alert('Invalid discount code');
+      setSelectedItems([...selectedItems, variantId]);
     }
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const handleSelectAllByProductId = (productId) => {
+    // Kiểm tra xem đã chọn tất cả các variant của sản phẩm này chưa
+    const selectedVariants = cartItems
+      .filter((item) => item.product_id === productId)
+      .map((item) => item.variant_id);
 
-  if (isError) {
-    return <div>Error loading order data.</div>;
-  }
+    const areAllSelected = selectedVariants.every((variantId) =>
+      selectedItems.includes(variantId)
+    );
+
+    if (areAllSelected) {
+      // Nếu tất cả các variant đã chọn, bỏ chọn tất cả
+      setSelectedItems(selectedItems.filter((id) => !selectedVariants.includes(id)));
+    } else {
+      // Nếu chưa chọn tất cả, chọn tất cả variant của sản phẩm này
+      setSelectedItems([...selectedItems, ...selectedVariants]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    const allVariantIds = cartItems.map((item) => item.variant_id);
+    if (selectedItems.length === allVariantIds.length) {
+      setSelectedItems([]); // Deselect all
+    } else {
+      setSelectedItems(allVariantIds); // Select all
+    }
+  };
+
+  const calculateSubtotal = () => {
+    return cartItems
+      .filter((item) => selectedItems.includes(item.variant_id))
+      .reduce((total, item) => total + item.price * item.quantity, 0)
+      .toFixed(2);
+  };
 
   return (
-    <div className="bg-white text-gray-800">
-      <main className="max-w-6xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">Checkout</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="col-span-2">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left">
-                  <th className="pb-4">Products</th>
-                  <th className="pb-4"></th>
-                  <th className="pb-4">Price</th>
-                  <th className="pb-4">Quantity</th>
-                  <th className="pb-4">Subtotal</th>
-                  <th className="pb-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {cartItems.map((item) => (
-                  <tr key={item.id} className="border-b border-gray-200">
-                    <td className="py-4">
-                      {item.product?.image && (
-                        <img
-                          src={item.product.image}
-                          alt={item.product.name || 'Product Image'}
-                          className="h-16"
-                          width="50"
-                          height="50"
-                        />
-                      )}
-                    </td>
-                    <td className="py-4">
-                      <div>
-                        <h2 className="text-lg font-semibold">{item.product?.name || 'Product Name'}</h2>
-                        <p className="text-gray-600">Size: {item.product?.sku || 'N/A'}</p>
-                      </div>
-                    </td>
-                    <td className="py-4">
-                      <span className="text-lg">${parseFloat(item.product?.price || 0).toFixed(2)}</span>
-                    </td>
-                    <td className="py-4">
-                      <div className="flex items-center border border-gray-300 rounded w-fit">
-                        <button className="px-2 py-1" onClick={() => handleQuantityChange(item.id, -1)}>
-                          −
-                        </button>
-                        <span className="px-4 py-1">{item.quantity}</span>
-                        <button className="px-2 py-1" onClick={() => handleQuantityChange(item.id, 1)}>
-                          +
-                        </button>
-                      </div>
-                    </td>
-                    <td className="py-4">
-                      <span className="text-lg">${(parseFloat(item.product?.price) * parseFloat(item.quantity)).toFixed(2)}</span>
-                    </td>
-                    <td className="py-4">
-                      <button className="text-red-500" onClick={() => handleRemoveItem(item.id)}>
-                        <i className="fas fa-trash-alt"></i>
+    <div className="bg-gray-100">
+      <div className="container mx-auto p-4">
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h1 className="text-2xl font-bold mb-4">GIỎ HÀNG</h1>
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b">
+                <th className="pb-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.length === cartItems.map((item) => item.variant_id).length}
+                    onChange={handleSelectAll}
+                  />
+                </th>
+                <th className="pb-2">Hình ảnh</th>
+                <th className="pb-2">Tên sản phẩm</th>
+                <th className="pb-2">Đơn giá</th>
+                <th className="pb-2">Số lượng</th>
+                <th className="pb-2">Thành tiền</th>
+                <th className="pb-2">Xóa</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cartItems.map((item) => (
+                <tr key={item.variant_id} className="border-b">
+                  <td className="py-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(item.variant_id)}
+                      onChange={() => handleSelectItem(item.variant_id)}
+                    />
+                  </td>
+                  <td className="py-4">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-20 h-20 object-cover"
+                    />
+                  </td>
+                  <td className="py-4">
+                    <p>{item.name}</p>
+                    <p>Size: {item.variant_id}</p>
+                  </td>
+                  <td className="py-4">
+                  {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(parseFloat(item.price).toFixed(0))}
+                  </td>
+                  <td className="py-4">
+                    <div className="flex items-center">
+                      <button
+                        className="px-2 py-1 border rounded-l"
+                        onClick={() => handleQuantityChange(item.variant_id, -1)}
+                      >
+                        −
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="border border-gray-200 p-6 rounded-lg">
-            <div className="flex justify-between mb-4">
-              <span className="text-lg">Subtotal</span>
-              <span className="text-lg">${calculateSubtotal()}</span>
+                      <input
+                        className="w-12 text-center border-t border-b"
+                        type="number"
+                        value={item.quantity}
+                        readOnly
+                      />
+                      <button
+                        className="px-2 py-1 border rounded-r"
+                        onClick={() => handleQuantityChange(item.variant_id, 1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </td>
+                  <td className="py-4">
+                    {/* ${(item.price * item.quantity).toFixed(2)} */}
+                    {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(parseFloat(item.price * item.quantity).toFixed(0))}
+                  </td>
+                  <td className="py-4 text-red-500 cursor-pointer">
+                    <button onClick={() => handleRemoveItem(item.variant_id)}>
+                      Xóa
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {/*  */}
+          <div className="flex flex-col flex-wrap content-end justify-end space-y-4   mt-4">
+            <div className="text-lg">
+              <span className="font-bold">Tổng tiền:</span>
+              <span className="text-red-500 font-bold">
+                {/* ${calculateSubtotal()} */}
+                {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(parseFloat(calculateSubtotal()).toFixed(0))}
+              </span>
             </div>
-            <div className="mb-4">
-              <label className="block text-gray-600 mb-2" htmlFor="discount-code">
-                Enter Discount Code
-              </label>
-              <div className="flex">
-                <input
-                  type="text"
-                  id="discount-code"
-                  className="border border-gray-300 rounded-l px-4 py-2 w-full"
-                  value={discountCode}
-                  onChange={(e) => setDiscountCode(e.target.value)}
-                />
-                <button
-                  className="bg-black text-white px-4 py-2 rounded-r"
-                  onClick={handleApplyDiscount}
-                >
-                  Apply
-                </button>
-              </div>
+            <div className='w-1/3'>
+              <button className="bg-gray-300 text-gray-700 text-lg px-4 py-2 rounded mr-2 w-1/2">
+                Tiếp tục mua hàng
+              </button>
+              <button
+                className="bg-gray-600 hover:bg-gray-800 text-white text-lg px-4 py-2 rounded w-2/5"
+                disabled={selectedItems.length === 0}
+              >
+                Đặt hàng
+              </button>
             </div>
-            <div className="flex justify-between mb-4">
-              <span className="text-lg">Delivery Charge</span>
-              <span className="text-lg">$5.00</span>
-            </div>
-            <div className="flex justify-between mb-4">
-              <span className="text-lg font-bold">Grand Total</span>
-              <span className="text-lg font-bold">${(parseFloat(calculateSubtotal()) + 5.00).toFixed(2)}</span>
-            </div>
-            <button className="bg-black text-white w-full py-3 rounded"> <Link to={`/address`}>Proceed to Checkout</Link> </button>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
