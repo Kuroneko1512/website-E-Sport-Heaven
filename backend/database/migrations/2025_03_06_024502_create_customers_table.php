@@ -28,7 +28,10 @@ return new class extends Migration
 
             // Thông tin hoạt động
             $table->timestamp('last_login_at')->nullable();
+            $table->string('last_login_ip')->nullable();
             $table->timestamp('rank_updated_at')->nullable();
+            $table->integer('failed_login_attempts')->default(0);
+            $table->timestamp('account_locked_until')->nullable();
             $table->json('preferences')->nullable(); // Các tùy chọn cá nhân
             $table->timestamps();
 

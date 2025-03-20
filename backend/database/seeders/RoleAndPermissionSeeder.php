@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Admin;
 use App\Enums\RolesEnum;
 use App\Enums\PermissionsEnum;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
@@ -48,28 +49,19 @@ class RoleAndPermissionSeeder extends Seeder
         $this->createVipCustomer();
         $this->createWholesaler();
 
-        Admin::where('user_name', 'SuperAdmin')->first()?->assignRole(RolesEnum::SuperAdmin->value);
-        Admin::where('user_name', 'admin')->first()?->assignRole(RolesEnum::Admin->value);
-        // // Tạo tài khoản Super Admin mặc định
-        // $superAdmin = Admin::where('email', 'superadmin@example.com')->first();
-        // if ($superAdmin) {
-        //     $superAdmin->assignRole(RolesEnum::SuperAdmin->value);
-        // }
+        $superAdmin = User::where('name', 'SuperAdmin')
+            ->where('account_type', 'admin')
+            ->first();
+        if ($superAdmin) {
+            $superAdmin->assignRole(RolesEnum::SuperAdmin->value, 'admin');
+        }
 
-        // $admin = Admin::firstOrCreate(
-        //     [
-        //         'email' => 'admin@beetech.com',
-        //         'user_name' => 'admin'
-        //     ],
-        //     [
-        //         'password' => Hash::make('password'),
-        //         'first_name' => 'System',
-        //         'last_name' => 'Admin',
-        //         'birthday' => '1998-10-04',
-        //         'status' => 'active'
-        //     ]
-        // );
-        // $admin->assignRole(RolesEnum::Admin->value);
+        $admin = User::where('name', 'admin')
+            ->where('account_type', 'admin')
+            ->first();
+        if ($admin) {
+            $admin->assignRole(RolesEnum::Admin->value, 'admin');
+        }
     }
 
     /**

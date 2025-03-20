@@ -22,6 +22,7 @@ class AdminSeeder extends Seeder
             'password' => Hash::make('password'),
             'account_type' => 'admin',
             'is_active' => true,
+            'email_verified_at' => now(),
         ]);
 
         // Tạo thông tin chi tiết cho super admin trong bảng admins
@@ -41,6 +42,7 @@ class AdminSeeder extends Seeder
             'password' => Hash::make('password'),
             'account_type' => 'admin',
             'is_active' => true,
+            'email_verified_at'=> now(),
         ]);
 
         // Tạo thông tin chi tiết cho admin trong bảng admins

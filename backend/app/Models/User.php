@@ -67,7 +67,11 @@ class User extends Authenticatable
     {
         return $this->hasOne(Customer::class);
     }
-
+    // Phương thức helper để lấy guard phù hợp
+    public function getGuardNameAttribute()
+    {
+        return $this->account_type; // 'admin' hoặc 'customer'
+    }
 
     /**
      *
@@ -76,11 +80,11 @@ class User extends Authenticatable
      * Cái này cần thiết vì nếu không dùng email để đăng nhập
      * Ta cần function này trả về Customer và có thể lựa chọn thêm các trường để đăng nhập như email, phone, username, ...
      */
-    // public function findForPassport(string $username): ?Customer
-    // {
-    //     return $this->where('email', $username)
-    //         // ->orWhere('username', $username)
-    //         ->orWhere('phone', $username)
-    //         ->first();
-    // }
+    public function findForPassport(string $username): ?User
+    {
+        return $this->where('email', $username)
+            // ->orWhere('username', $username)
+            ->orWhere('phone', $username)
+            ->first();
+    }
 }
