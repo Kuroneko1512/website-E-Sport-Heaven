@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Api\Order\V1;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Order\OrderStoreRequest;
-use App\Services\Order\OrderService;
 use Exception;
 use Illuminate\Http\Request;
+use App\Mail\Order\AdminOrderMail;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Services\Order\OrderService;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\Order\CustomerOrderMail;
+use App\Http\Requests\Order\OrderStoreRequest;
 
 class OrderController extends Controller
 {
@@ -16,7 +19,6 @@ class OrderController extends Controller
     public function __construct(OrderService $orderService)
     {
         $this->orderService = $orderService;
-       
     }
     public function index()
     {
@@ -31,22 +33,33 @@ class OrderController extends Controller
             // Trường hợp có lỗi xảy ra khi lấy dữ liệu
             return response()->json([
                 'errnor' => 'lấy thất bại',
-                'mess'=>$th,
+                'mess' => $th,
                 'status' => 500
             ], 500); // Trả về mã lỗi 500 (Internal Server Error)
         }
     }
     public function store(OrderStoreRequest $request)
     {
-       
+
         DB::beginTransaction();
         try {
 
             // Validate và lấy dữ liệu từ request
             $data = $request->validated();
-             //tạo sp
+            //tạo sp
             $Order = $this->orderService->createOrder($data);
-           
+
+            // Tải lại đơn hàng với các quan hệ để gửi email
+            $orderWithRelations = $this->orderService->getOrderById($Order->id);
+
+            // Gửi email cho khách hàng
+            if ($orderWithRelations->customer_email) {
+                Mail::to($orderWithRelations->customer_email)->send(new CustomerOrderMail($orderWithRelations));
+            }
+
+            // Gửi email cho admin
+            Mail::to('sportheavenwd66@gmail.com')->send(new AdminOrderMail($orderWithRelations));
+
             DB::commit();
             return response()->json([
                 'message' => 'Order đã được tạo thành công!', // Thông báo thành công
@@ -114,5 +127,4 @@ class OrderController extends Controller
             'data' => $result['data']
         ]);
     }
-
 }
