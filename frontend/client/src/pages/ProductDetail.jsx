@@ -211,7 +211,7 @@ const ProductDetail = () => {
       <section className="mx-10">
         <main className="container mx-auto py-8 px-4 md:px-0">
           <div className="text-sm text-gray-500 mb-4">
-            <Link to="/home">Home</Link> &gt; <Link to="/shop">Shop</Link> &gt;{" "}
+            <Link to="/home">Trang chủ</Link> &gt; <Link to="/shop">Cửa hàng</Link> &gt;{" "}
             {product?.name}
           </div>
 
@@ -236,7 +236,7 @@ const ProductDetail = () => {
                       : "text-red-700 bg-red-100"
                   } px-2 py-1 rounded`}
                 >
-                  {product?.status}
+                  {product?.status === "active" ? "Còn hàng" : "Hết hàng"}
                 </span>
               </div>
 
@@ -265,21 +265,23 @@ const ProductDetail = () => {
                         {new Intl.NumberFormat("vi-VN", {
                           style: "currency",
                           currency: "VND",
-                        }).format(parseFloat(product?.price).toFixed(0))}
+                        }).format(
+                          (
+                            parseFloat(product?.price) -
+                            ((parseFloat(product?.price) *
+                              parseFloat(product?.discount?.percent)) /
+                              100)
+                          ).toFixed(0)
+                        )}
                       </span>
+
                       <span className="text-lg line-through text-gray-500 ml-4">
                         {new Intl.NumberFormat("vi-VN", {
                           style: "currency",
                           currency: "VND",
-                        }).format(
-                          (
-                            parseFloat(product?.price) -
-                            (parseFloat(product?.price) *
-                              parseFloat(product?.discount?.percent)) /
-                              100
-                          ).toFixed(0)
-                        )}
+                        }).format(parseFloat(product?.price).toFixed(0))}
                       </span>
+                      
                     </div>
                   ) : (
                     <span className="text-xl font-bold text-gray-800">
@@ -299,22 +301,24 @@ const ProductDetail = () => {
                           style: "currency",
                           currency: "VND",
                         }).format(
-                          parseFloat(selectedVariant?.price).toFixed(0)
+                          (
+                            parseFloat(selectedVariant?.price) -
+                            ((parseFloat(selectedVariant?.price) *
+                              parseFloat(product?.discount?.percent)) /
+                              100)
+                          ).toFixed(0)
                         )}
                       </span>
-                      <span className="text-lg line-through text-gray-500 ml-4">
+
+                      <span className="text-lg line-through text-gray-500 ml-4 ">
                         {new Intl.NumberFormat("vi-VN", {
                           style: "currency",
                           currency: "VND",
                         }).format(
-                          (
-                            parseFloat(selectedVariant?.price) -
-                            (parseFloat(selectedVariant?.price) *
-                              parseFloat(product?.discount?.percent)) /
-                              100
-                          ).toFixed(0)
+                          parseFloat(selectedVariant?.price).toFixed(0)
                         )}
                       </span>
+                      
                     </div>
                   ) : (
                     <span className="text-xl font-bold text-gray-800">
@@ -363,11 +367,10 @@ const ProductDetail = () => {
 
               {/* Hiển thị số lượng tồn kho của biến thể */}
               <p className="text-gray-600 mb-2">
-                <strong>Stock:</strong>{" "}
+                <strong>Kho:</strong>{" "}
                 {product?.stock > 0
                   ? product?.stock
                   : selectedVariant?.stock || 0}{" "}
-                items
               </p>
 
               <div className="flex space-x-4 mt-8">
@@ -418,7 +421,7 @@ const ProductDetail = () => {
                         className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
                         onClick={handleAddToCart}
                       >
-                        Add to Cart
+                        Thêm vào giỏ hàng
                       </button>
                     ) : (
                       <button
@@ -426,7 +429,7 @@ const ProductDetail = () => {
                         onClick={handleAddToCart}
                         disabled={!isAllAttributesSelected}
                       >
-                        Add to Cart
+                        Thêm vào giỏ hàng
                       </button>
                     )}
                   </div>
@@ -436,7 +439,7 @@ const ProductDetail = () => {
                     onClick={handleAddToCart}
                     disabled={true}
                   >
-                    Add to Cart
+                    Thêm vào giỏ hàng
                   </button>
                 )}
 
@@ -463,7 +466,7 @@ const ProductDetail = () => {
                       : ""
                   }`}
                 >
-                  Descriptions
+                  Mô tả
                 </Link>
                 <Link
                   to="information"
@@ -473,7 +476,7 @@ const ProductDetail = () => {
                       : ""
                   }`}
                 >
-                  Additional Information
+                  Thông tin bổ sung
                 </Link>
                 <Link
                   to="reviews"
@@ -483,7 +486,7 @@ const ProductDetail = () => {
                       : ""
                   }`}
                 >
-                  Reviews
+                  Đánh giá
                 </Link>
               </ul>
             </div>
@@ -492,7 +495,7 @@ const ProductDetail = () => {
 
           {/* Sản phẩm gần đây */}
           <div className="my-8">
-            <h2 className="text-2xl font-bold mb-4">Related Products</h2>
+            <h2 className="text-2xl font-bold mb-4">Các sản phẩm liên quan</h2>
             <RelatedProducts />
           </div>
         </main>
