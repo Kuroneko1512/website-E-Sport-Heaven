@@ -182,7 +182,7 @@ const ProductDetail = () => {
       name: product.name,
       price: selectedVariant?.price || product.price,
       discount: product.discount?.percent,
-      
+      stock: selectedVariant?.stock || product.stock,
     };
 
     const existingIndex = cartItems.findIndex(
@@ -199,6 +199,8 @@ const ProductDetail = () => {
 
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
     message.success("Thêm thành công");
+    const event = new CustomEvent("cartUpdated", { detail: cartItems });
+    window.dispatchEvent(event);
   };
 
   const handleSelett = (name, value) => {
@@ -207,42 +209,51 @@ const ProductDetail = () => {
   };
 
   return (
-    <Skeleton loading={isLoading} active>
-      <ScrollToTop />
-      <section className="mx-10">
-        <main className="container mx-auto py-8 px-4 md:px-0">
-          <div className="text-sm text-gray-500 mb-4">
-            <Link to="/home">Trang chủ</Link> &gt; <Link to="/shop">Cửa hàng</Link> &gt;{" "}
-            {product?.name}
+    <div>
+      {isLoading ? (
+        <div className="h-screen flex justify-center items-center">
+          <div className="text-center text-gray-500 flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-500"></div>
+            <p>Đang tải sản phẩm...</p>
           </div>
-
-          <div className="flex flex-col md:flex-row">
-            {/* Hình ảnh sản phẩm */}
-            <div className="md:w-1/3">
-              <img
-                alt={product?.name}
-                className="w-full mb-4"
-                src={displayImage}
-              />
-            </div>
-
-            {/* Thông tin sản phẩm */}
-            <div className="md:w-1/2 md:pl-8">
-              <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold mb-2">{product?.name}</h1>
-                <span
-                  className={`${
-                    product?.status === "active"
-                      ? "text-green-700 bg-green-100"
-                      : "text-red-700 bg-red-100"
-                  } px-2 py-1 rounded`}
-                >
-                  {product?.status === "active" ? "Còn hàng" : "Hết hàng"}
-                </span>
+        </div>
+      ) : (
+        <div>
+          <ScrollToTop />
+          <section className="mx-10">
+            <main className="container mx-auto py-8 px-4 md:px-0">
+              <div className="text-sm text-gray-500 mb-4">
+                <Link to="/home">Trang chủ</Link> &gt;{" "}
+                <Link to="/shop">Cửa hàng</Link> &gt; {product?.name}
               </div>
 
-              {/* Rating */}
-              {/* <div className="flex items-center mb-4 text-yellow-500">
+              <div className="flex flex-col md:flex-row">
+                {/* Hình ảnh sản phẩm */}
+                <div className="md:w-1/3">
+                  <img
+                    alt={product?.name}
+                    className="w-full mb-4"
+                    src={displayImage}
+                  />
+                </div>
+
+                {/* Thông tin sản phẩm */}
+                <div className="md:w-1/2 md:pl-8">
+                  <div className="flex justify-between items-center">
+                    <h1 className="text-2xl font-bold mb-2">{product?.name}</h1>
+                    <span
+                      className={`${
+                        product?.status === "active"
+                          ? "text-green-700 bg-green-100"
+                          : "text-red-700 bg-red-100"
+                      } px-2 py-1 rounded`}
+                    >
+                      {product?.status === "active" ? "Còn hàng" : "Hết hàng"}
+                    </span>
+                  </div>
+
+                  {/* Rating */}
+                  {/* <div className="flex items-center mb-4 text-yellow-500">
                 {Array.from({ length: Math.round(averageRating) }, (_, i) => (
                   <i key={i} className="fas fa-star"></i>
                 ))}
@@ -257,218 +268,230 @@ const ProductDetail = () => {
                 </span>
               </div> */}
 
-              {/* Giá sản phẩm */}
-              {product?.product_type === "simple" ? (
-                <div className="flex items-center mb-4">
-                  {parseFloat(product?.discount?.percent) > 0 ? (
-                    <div>
-                      <span className="text-xl font-bold text-gray-800">
-                      {FomatVND(parseFloat(product?.price) -
-                            ((parseFloat(product?.price) *
-                              parseFloat(product?.discount?.percent)) /
-                              100))}
-                      </span>
-                      <span className="text-lg line-through text-gray-500 ml-4">
-                      {FomatVND(product?.price)}
-                      </span>
+                  {/* Giá sản phẩm */}
+                  {product?.product_type === "simple" ? (
+                    <div className="flex items-center mb-4">
+                      {parseFloat(product?.discount?.percent) > 0 ? (
+                        <div>
+                          <span className="text-xl font-bold text-gray-800">
+                            {FomatVND(
+                              parseFloat(product?.price) -
+                                (parseFloat(product?.price) *
+                                  parseFloat(product?.discount?.percent)) /
+                                  100
+                            )}
+                          </span>
+                          <span className="text-lg line-through text-gray-500 ml-4">
+                            {FomatVND(product?.price)}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xl font-bold text-gray-800">
+                          {FomatVND(product?.price)}
+                        </span>
+                      )}
                     </div>
                   ) : (
-                    <span className="text-xl font-bold text-gray-800">
-                      {FomatVND(product?.price)}
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center mb-4">
-                  {parseFloat(product?.discount?.percent) > 0 ? (
-                    <div>
-                      <span className="text-xl font-bold text-gray-800">
-                      {FomatVND((parseFloat(selectedVariant?.price) *
-                              parseFloat(product?.discount?.percent)) /
-                              100)}
-                      </span>
-                      <span className="text-lg line-through text-gray-500 ml-4 ">
-                      {FomatVND(selectedVariant?.price)}
-                      </span>
+                    <div className="flex items-center mb-4">
+                      {parseFloat(product?.discount?.percent) > 0 ? (
+                        <div>
+                          <span className="text-xl font-bold text-gray-800">
+                            {FomatVND(
+                              (parseFloat(selectedVariant?.price) *
+                                parseFloat(product?.discount?.percent)) /
+                                100
+                            )}
+                          </span>
+                          <span className="text-lg line-through text-gray-500 ml-4 ">
+                            {FomatVND(selectedVariant?.price)}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xl font-bold text-gray-800">
+                          {FomatVND(selectedVariant?.price)}
+                        </span>
+                      )}
                     </div>
-                  ) : (
-                    <span className="text-xl font-bold text-gray-800">
-                      {FomatVND(selectedVariant?.price)}
-                    </span>
                   )}
-                </div>
-              )}
 
-              {/* Mô tả ngắn */}
-              {/* <p className="text-gray-600 mb-4">{product?.description}</p> */}
+                  {/* Mô tả ngắn */}
+                  {/* <p className="text-gray-600 mb-4">{product?.description}</p> */}
 
-              {/* Chọn thuộc tính */}
-              {hasVariants &&
-                attributes.map((attr) => (
-                  <div key={attr.id} className="mb-4">
-                    <span>{attr.name}:</span>
-                    <div className="flex space-x-2 mt-2">
-                      {attr.values.map((value) => (
-                        <button
-                          key={value.id}
-                          onClick={() => (
-                            handleAttributeSelect(attr.id, value.id),
-                            handleSelett(attr.name, value.value)
-                          )}
-                          className={`px-4 py-2 border rounded ${
-                            selectedAttributes[attr.id] === value.id
-                              ? "bg-black text-white"
-                              : "border-gray-300"
-                          } ${
-                            validOptions[attr.id]?.includes(value.id)
-                              ? ""
-                              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          }`}
-                          disabled={!validOptions[attr.id]?.includes(value.id)}
-                        >
-                          {value.value}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  {/* Chọn thuộc tính */}
+                  {hasVariants &&
+                    attributes.map((attr) => (
+                      <div key={attr.id} className="mb-4">
+                        <span>{attr.name}:</span>
+                        <div className="flex space-x-2 mt-2">
+                          {attr.values.map((value) => (
+                            <button
+                              key={value.id}
+                              onClick={() => (
+                                handleAttributeSelect(attr.id, value.id),
+                                handleSelett(attr.name, value.value)
+                              )}
+                              className={`px-4 py-2 border rounded ${
+                                selectedAttributes[attr.id] === value.id
+                                  ? "bg-black text-white"
+                                  : "border-gray-300"
+                              } ${
+                                validOptions[attr.id]?.includes(value.id)
+                                  ? ""
+                                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                              }`}
+                              disabled={
+                                !validOptions[attr.id]?.includes(value.id)
+                              }
+                            >
+                              {value.value}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
 
-              {/* Hiển thị số lượng tồn kho của biến thể */}
-              <p className="text-gray-600 mb-2">
-                <strong>Kho:</strong>{" "}
-                {product?.stock > 0
-                  ? product?.stock
-                  : selectedVariant?.stock || 0}{" "}
-              </p>
+                  {/* Hiển thị số lượng tồn kho của biến thể */}
+                  <p className="text-gray-600 mb-2">
+                    <strong>Kho:</strong>{" "}
+                    {product?.stock > 0
+                      ? product?.stock
+                      : selectedVariant?.stock || 0}{" "}
+                  </p>
 
-              <div className="flex space-x-4 mt-8">
-                <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 space-x-4">
-                  <button
-                    onClick={() => handleQuantityChange(-1)}
-                    className="text-gray-600"
-                  >
-                    <i className="fa-solid fa-minus"></i>
-                  </button>
-                  <input
-                    type="text"
-                    value={quantity}
-                    min={1}
-                    max={
-                      selectedVariant
-                        ? selectedVariant.stock
-                        : product?.stock || 0
-                    }
-                    onChange={(e) => {
-                      let value = parseInt(e.target.value, 10);
-                      const stock = selectedVariant
-                        ? selectedVariant.stock
-                        : product?.stock || 0;
-
-                      if (isNaN(value) || value < 1) value = 1;
-                      if (value > stock) value = stock;
-
-                      setQuantity(value);
-                    }}
-                    className="text-center"
-                    style={{ width: `${quantity.toString().length + 1}ch` }}
-                  />
-                  <button
-                    onClick={() => handleQuantityChange(1)}
-                    className="text-gray-600"
-                  >
-                    <i className="fa-solid fa-plus"></i>
-                  </button>
-                </div>
-
-                {/* Thêm vào giỏ hàng */}
-                {product?.status === "active" &&
-                (product?.stock > 0 || selectedVariant?.stock > 0) ? (
-                  <div>
-                    {product?.product_type === "simple" ? (
+                  <div className="flex space-x-4 mt-8">
+                    <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 space-x-4">
                       <button
-                        className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                        onClick={handleAddToCart}
+                        onClick={() => handleQuantityChange(-1)}
+                        className="text-gray-600"
                       >
-                        Thêm vào giỏ hàng
+                        <i className="fa-solid fa-minus"></i>
                       </button>
+                      <input
+                        type="text"
+                        value={quantity}
+                        min={1}
+                        max={
+                          selectedVariant
+                            ? selectedVariant.stock
+                            : product?.stock || 0
+                        }
+                        onChange={(e) => {
+                          let value = parseInt(e.target.value, 10);
+                          const stock = selectedVariant
+                            ? selectedVariant.stock
+                            : product?.stock || 0;
+
+                          if (isNaN(value) || value < 1) value = 1;
+                          if (value > stock) value = stock;
+
+                          setQuantity(value);
+                        }}
+                        className="text-center"
+                        style={{ width: `${quantity.toString().length + 1}ch` }}
+                      />
+                      <button
+                        onClick={() => handleQuantityChange(1)}
+                        className="text-gray-600"
+                      >
+                        <i className="fa-solid fa-plus"></i>
+                      </button>
+                    </div>
+
+                    {/* Thêm vào giỏ hàng */}
+                    {product?.status === "active" &&
+                    (product?.stock > 0 || selectedVariant?.stock > 0) ? (
+                      <div>
+                        {product?.product_type === "simple" ? (
+                          <button
+                            className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                            onClick={handleAddToCart}
+                          >
+                            Thêm vào giỏ hàng
+                          </button>
+                        ) : (
+                          <button
+                            className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                            onClick={handleAddToCart}
+                            disabled={!isAllAttributesSelected}
+                          >
+                            Thêm vào giỏ hàng
+                          </button>
+                        )}
+                      </div>
                     ) : (
                       <button
                         className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
                         onClick={handleAddToCart}
-                        disabled={!isAllAttributesSelected}
+                        disabled={true}
                       >
                         Thêm vào giỏ hàng
                       </button>
                     )}
+
+                    <button
+                      onClick={() => setFav(!fav)}
+                      className="border rounded-lg px-3 py-2"
+                    >
+                      <i
+                        className={`fa${fav === true ? "s" : "r"} fa-heart`}
+                      ></i>
+                    </button>
                   </div>
-                ) : (
-                  <button
-                    className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                    onClick={handleAddToCart}
-                    disabled={true}
-                  >
-                    Thêm vào giỏ hàng
-                  </button>
-                )}
-
-                <button
-                  onClick={() => setFav(!fav)}
-                  className="border rounded-lg px-3 py-2"
-                >
-                  <i className={`fa${fav === true ? "s" : "r"} fa-heart`}></i>
-                </button>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Bộ 3 mô tả, thông tin , đánh giá */}
-          <div className="mt-8">
-            <div className="border-b border-gray-200 mb-4">
-              <ul className="flex space-x-4">
-                <Link
-                  to="descriptions"
-                  className={`pb-2 ${
-                    location.pathname === `/product-detail/${id}` ||
-                    location.pathname.includes("descriptions")
-                      ? "border-b-2 border-black"
-                      : ""
-                  }`}
-                >
-                  Mô tả
-                </Link>
-                <Link
-                  to="information"
-                  className={`pb-2 ${
-                    location.pathname.includes("information")
-                      ? "border-b-2 border-black"
-                      : ""
-                  }`}
-                >
-                  Thông tin bổ sung
-                </Link>
-                <Link
-                  to="reviews"
-                  className={`pb-2 ${
-                    location.pathname.includes("reviews")
-                      ? "border-b-2 border-black"
-                      : ""
-                  }`}
-                >
-                  Đánh giá
-                </Link>
-              </ul>
-            </div>
-            <Outlet context={{ product }} />
-          </div>
+              {/* Bộ 3 mô tả, thông tin , đánh giá */}
+              <div className="mt-8">
+                <div className="border-b border-gray-200 mb-4">
+                  <ul className="flex space-x-4">
+                    <Link
+                      to="descriptions"
+                      className={`pb-2 ${
+                        location.pathname === `/product-detail/${id}` ||
+                        location.pathname.includes("descriptions")
+                          ? "border-b-2 border-black"
+                          : ""
+                      }`}
+                    >
+                      Mô tả
+                    </Link>
+                    <Link
+                      to="information"
+                      className={`pb-2 ${
+                        location.pathname.includes("information")
+                          ? "border-b-2 border-black"
+                          : ""
+                      }`}
+                    >
+                      Thông tin bổ sung
+                    </Link>
+                    <Link
+                      to="reviews"
+                      className={`pb-2 ${
+                        location.pathname.includes("reviews")
+                          ? "border-b-2 border-black"
+                          : ""
+                      }`}
+                    >
+                      Đánh giá
+                    </Link>
+                  </ul>
+                </div>
+                <Outlet context={{ product }} />
+              </div>
 
-          {/* Sản phẩm gần đây */}
-          <div className="my-8">
-            <h2 className="text-2xl font-bold mb-4">Các sản phẩm liên quan</h2>
-            <RelatedProducts />
-          </div>
-        </main>
-      </section>
-    </Skeleton>
+              {/* Sản phẩm gần đây */}
+              <div className="my-8">
+                <h2 className="text-2xl font-bold mb-4">
+                  Các sản phẩm liên quan
+                </h2>
+                <RelatedProducts />
+              </div>
+            </main>
+          </section>
+        </div>
+      )}
+    </div>
   );
 };
 
