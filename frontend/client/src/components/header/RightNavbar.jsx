@@ -117,7 +117,7 @@ const RightNavbar = () => {
           </div>
         ))}
         <Link
-          to="/checkout"
+          to="/cart"
           className="block text-center bg-black text-white dark:bg-blue-600 dark:text-white py-2 rounded mt-4"
         >
           View Cart
