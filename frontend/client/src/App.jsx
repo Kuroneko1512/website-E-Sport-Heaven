@@ -32,6 +32,8 @@ import Whishlist from "./components/elementProfile/Whishlist";
 import NewCheckout from "./pages/NewCheckout";
 import ReviewOrder from "./pages/ReviewOrder";
 import ThankYou from "./pages/ThankYou";
+import ForgotPassword from "./pages/ForgotPassword";
+import OtpVerification from "./pages/OtpVerification";
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
@@ -43,6 +45,8 @@ function App() {
           <Routes location={location}>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/otp-enter" element={<OtpVerification />} />
             <Route path="/" element={<Layout />}>
               <Route path="home" element={<Navigate to={"/"} />} />
               <Route index element={<Home />} />
