@@ -38,7 +38,7 @@ const NewCheckout = () => {
             .catch(error => console.error('Lỗi khi tải tỉnh/thành phố:', error));
 
         // Lấy giỏ hàng từ localStorage
-        const cartItems = localStorage.getItem('cartItems');
+        const cartItems = localStorage.getItem('checkoutItems');
         const cartTotal = localStorage.getItem('cartTotal');
 
         if (cartItems) setCartItems(JSON.parse(cartItems));
