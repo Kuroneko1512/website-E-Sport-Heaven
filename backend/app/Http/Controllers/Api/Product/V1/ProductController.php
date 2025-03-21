@@ -8,6 +8,7 @@ use App\Http\Requests\Product\ProductUpdateRequest;
 use App\Http\Resources\ProductDetails\ProductResource;
 use App\Services\Product\ProductService;
 use App\Services\Product\ProductVariantService;
+
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +49,7 @@ class ProductController extends Controller
      */
     public function store(ProductStoreRequest $request)
     {
-    //    return $request->validated();
+     
         DB::beginTransaction();
         try {
 
@@ -165,4 +166,5 @@ class ProductController extends Controller
             ], 500);// Trả về mã lỗi 500 (Internal Server Error)
         }
     }
+  
 }

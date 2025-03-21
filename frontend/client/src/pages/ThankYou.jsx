@@ -1,35 +1,47 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Import useLocation để xử lý URL
 
 const ThankYou = () => {
     const [orderCode, setOrderCode] = useState("");
+    const location = useLocation(); // Lấy thông tin URL hiện tại
 
     useEffect(() => {
-        // Lấy mã đơn hàng từ localStorage
-        const storedOrderCode = localStorage.getItem("orderCode");
-        if (storedOrderCode) {
-            setOrderCode(storedOrderCode);
-            // Xóa orderCode sau khi hiển thị để tránh lưu trữ lâu dài
-            localStorage.removeItem("orderCode");
+        // Truy xuất query param "orderCode" từ URL
+        const queryParams = new URLSearchParams(location.search);
+        const orderCodeFromURL = queryParams.get("orderCode"); // Lấy mã đơn hàng từ URL
+
+        if (orderCodeFromURL) {
+            setOrderCode(orderCodeFromURL);
+        } else {
+            // Nếu không tìm thấy trên URL, kiểm tra trong localStorage
+            const storedOrderCode = localStorage.getItem("orderCode");
+            if (storedOrderCode) {
+                setOrderCode(storedOrderCode);
+                localStorage.removeItem("orderCode"); // Xóa sau khi sử dụng
+            }
         }
-    }, []);
+    }, [location.search]);
 
     return (
         <div style={styles.container}>
             <div style={styles.card}>
-                <img src="https://cdn-icons-png.flaticon.com/512/5290/5290058.png" alt="Success" style={styles.image} />
+                <img
+                    src="https://cdn-icons-png.flaticon.com/512/5290/5290058.png"
+                    alt="Success"
+                    style={styles.image}
+                />
                 <h1 style={styles.title}>🎉 Cảm ơn bạn đã đặt hàng! 🎉</h1>
                 <p style={styles.text}>Đơn hàng của bạn đang được xử lý. Chúng tôi sẽ sớm liên hệ với bạn.</p>
-                
+
                 {orderCode && (
                     <div style={styles.orderCodeBox}>
                         <h2 style={styles.orderCodeText}>
-                            <span style={styles.checkIcon}>✅</span> Mã đơn hàng của bạn:  
+                            <span style={styles.checkIcon}>✅</span> Mã đơn hàng của bạn:{" "}
                             <strong style={styles.orderCode}>{orderCode}</strong>
                         </h2>
                     </div>
                 )}
-                
+
                 <Link to="/" style={styles.button}>
                     🏠 Quay về trang chủ
                 </Link>
@@ -38,7 +50,7 @@ const ThankYou = () => {
     );
 };
 
-// Styles nâng cấp giao diện
+// Styles hoàn chỉnh cho giao diện
 const styles = {
     container: {
         display: "flex",
@@ -59,7 +71,9 @@ const styles = {
     image: {
         width: "120px",
         marginBottom: "20px",
-        marginLeft: "158px"
+        marginLeft: "auto",
+        marginRight: "auto",
+        display: "block",
     },
     title: {
         fontSize: "24px",

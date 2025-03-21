@@ -72,69 +72,68 @@ class ProductStoreRequest extends FormRequest
             'variants.*.attributes.*.attribute_value_id' => [
                 'required_if:product_type,variable',
                 'exists:attribute_values,id',
-            //     function ($attribute, $value, $fail) {
-            //         $variantIndex = explode('.', $attribute)[1];
+                //     function ($attribute, $value, $fail) {
+                //         $variantIndex = explode('.', $attribute)[1];
 
-            //         // Lấy giá trị attribute_value
-            //         $attributeValue = \App\Models\AttributeValue::find($value);
-            //         if (!$attributeValue) {
-            //             return $fail("Giá trị thuộc tính không hợp lệ.");
-            //         }
+                //         // Lấy giá trị attribute_value
+                //         $attributeValue = \App\Models\AttributeValue::find($value);
+                //         if (!$attributeValue) {
+                //             return $fail("Giá trị thuộc tính không hợp lệ.");
+                //         }
 
-            //         $attributeId = $attributeValue->attribute_id;
-            //         $variantAttributes = $this->input("variants.{$variantIndex}.attributes", []);
+                //         $attributeId = $attributeValue->attribute_id;
+                //         $variantAttributes = $this->input("variants.{$variantIndex}.attributes", []);
 
-            //         // 🛑 Kiểm tra một biến thể có nhiều giá trị của cùng một thuộc tính không
-            //         $existingAttributes = collect($variantAttributes)->pluck('attribute_id');
-            //         if ($existingAttributes->duplicates()->isNotEmpty()) {
-            //             return $fail("Biến thể không thể có hai giá trị cho cùng một thuộc tính.");
-            //         }
+                //         // 🛑 Kiểm tra một biến thể có nhiều giá trị của cùng một thuộc tính không
+                //         $existingAttributes = collect($variantAttributes)->pluck('attribute_id');
+                //         if ($existingAttributes->duplicates()->isNotEmpty()) {
+                //             return $fail("Biến thể không thể có hai giá trị cho cùng một thuộc tính.");
+                //         }
 
-            //         // 🛑 Kiểm tra trùng giá trị thuộc tính giữa các biến thể trong request
-            //         $variants = $this->input('variants', []);
-            //         foreach ($variants as $index => $variant) {
-            //             if ($index != $variantIndex) { // Loại trừ biến thể hiện tại
-            //                 foreach ($variant['attributes'] ?? [] as $attr) {
-            //                     if ($attr['attribute_id'] == $attributeId && $attr['attribute_value_id'] == $value) {
-            //                         return $fail("Giá trị thuộc tính này đã tồn tại trong một biến thể khác của sản phẩm.");
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //     }
-            // ],
-            function ($attribute, $value, $fail) {
-                $variantIndex = explode('.', $attribute)[1];
-            
-                // Lấy danh sách biến thể từ request
-                $variants = $this->input('variants', []);
-                
-                // Tạo danh sách tổ hợp thuộc tính của tất cả biến thể
-                $variantCombinations = [];
-            
-                foreach ($variants as $index => $variant) {
-                    $sortedAttributes = collect($variant['attributes'] ?? [])
-                        ->sortBy('attribute_id') // Sắp xếp để đảm bảo thứ tự giống nhau
-                        ->pluck('attribute_value_id')
-                        ->toArray();
-            
-                    $combinationKey = implode('-', $sortedAttributes); // Ghép thành chuỗi duy nhất
-            
-                    if ($index != $variantIndex && in_array($combinationKey, $variantCombinations)) {
-                        return $fail("Biến thể với tổ hợp thuộc tính này đã tồn tại.");
+                //         // 🛑 Kiểm tra trùng giá trị thuộc tính giữa các biến thể trong request
+                //         $variants = $this->input('variants', []);
+                //         foreach ($variants as $index => $variant) {
+                //             if ($index != $variantIndex) { // Loại trừ biến thể hiện tại
+                //                 foreach ($variant['attributes'] ?? [] as $attr) {
+                //                     if ($attr['attribute_id'] == $attributeId && $attr['attribute_value_id'] == $value) {
+                //                         return $fail("Giá trị thuộc tính này đã tồn tại trong một biến thể khác của sản phẩm.");
+                //                     }
+                //                 }
+                //             }
+                //         }
+                //     }
+                // ],
+                function ($attribute, $value, $fail) {
+                    $variantIndex = explode('.', $attribute)[1];
+
+                    // Lấy danh sách biến thể từ request
+                    $variants = $this->input('variants', []);
+
+                    // Tạo danh sách tổ hợp thuộc tính của tất cả biến thể
+                    $variantCombinations = [];
+
+                    foreach ($variants as $index => $variant) {
+                        $sortedAttributes = collect($variant['attributes'] ?? [])
+                            ->sortBy('attribute_id') // Sắp xếp để đảm bảo thứ tự giống nhau
+                            ->pluck('attribute_value_id')
+                            ->toArray();
+
+                        $combinationKey = implode('-', $sortedAttributes); // Ghép thành chuỗi duy nhất
+
+                        if ($index != $variantIndex && in_array($combinationKey, $variantCombinations)) {
+                            return $fail("Biến thể với tổ hợp thuộc tính này đã tồn tại.");
+                        }
+
+                        $variantCombinations[] = $combinationKey;
                     }
-            
-                    $variantCombinations[] = $combinationKey;
-                }
-            },
-        ],
+                },
+            ],
             // 🚀 Kiểm tra ảnh của biến thể
-            'variants.*.images' => ['nullable', 'array', 'max:5'], // Tối đa 5 ảnh trên mỗi biến thể
-            'variants.*.images.*' => [
+            'variants.*.image' => [
                 'nullable',
                 'image',
                 'mimes:jpeg,png,jpg,gif,svg',
-                'max:5120'
+                'max:5120' // Giới hạn 5MB
             ],
         ];
     }

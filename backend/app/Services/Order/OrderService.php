@@ -64,6 +64,25 @@ class OrderService extends BaseService
             'data' => $order
         ];
     }
+    public function deleteOrder($orderCode)
+    {
+        // Tìm và xóa đơn hàng dựa trên order_code
+        $order =  $this->model->where('order_code', $orderCode)->first();
+        
+        if ($order) {
+            // Xóa tất cả order_items liên quan (nếu có)
+            $order->orderItems()->delete(); 
+            
+            // Xóa đơn hàng
+            $order->delete(); 
+        }
+    }
+    public function updatePaymentStatus($orderCode, $status)
+{
+    // Tìm đơn hàng theo order_code và cập nhật trạng thái thanh toán
+    return $this->model->where('order_code', $orderCode)->update(['payment-status' => $status]);
+}
+
 
     /**
      * Lấy đơn hàng theo mã order_code

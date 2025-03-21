@@ -9,16 +9,16 @@ export const apiClient = axios.create({
 
 export const apiService = {
   get: async <T>(url: string): Promise<T> => {
-    const response = await apiClient.get(url);
-    return response.data;
+    // const response = await apiClient.get(url);
+    return await apiClient.get(url);
   },
   post: async <T>(url: string, data: unknown): Promise<T> => {
     const response = await apiClient.post(url, data);
-    return response.data;
+    return await apiClient.post(url, data);
   },
   put: async <T>(url: string, data: unknown): Promise<T> => {
     const response = await apiClient.put(url, data);
-    return response.data;
+    return await apiClient.put(url, data);
   },
   delete: async (url: string): Promise<void> => {
     await apiClient.delete(url);

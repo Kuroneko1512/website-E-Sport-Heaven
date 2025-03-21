@@ -18,7 +18,7 @@ class ProductService extends BaseService
     public function getProductAll($paginate = 10)
     {
         return $this->model->with([
-            'variants.productAttributes.attributeValue:id,value', 
+            'variants.productAttributes.attributeValue:id,value',
         ])->paginate($paginate);
     }
     public function getProduct($id)
@@ -78,7 +78,7 @@ class ProductService extends BaseService
             'description' => $data['description'] ?? null,
             'product_type' => $data['product_type'],
             'status' => 'active', // Sản phẩm sẽ là bản nháp ban đầu
-            'category_id'=>$data['category_id'] ?? null
+            'category_id' => $data['category_id'] ?? null
         ]);
         if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
             $imagePath = $data['image']->store('products', 'public');
@@ -86,7 +86,6 @@ class ProductService extends BaseService
         }
         if ($isVariable) {
             $this->handelVariant($isVariable, $product, $data);
-           
         }
         return true;
     }
@@ -165,6 +164,10 @@ class ProductService extends BaseService
 
             // Tự động tạo SKU nếu chưa có
             $variantSku = $variantData['sku'] ?? $this->generateSKU($data['name'], $variantData['attributes']);
+            $variantImage = null;
+            if (isset($variantData['image'])) {
+                $variantImage = $variantData['image']->store('variants', 'public');
+            }
 
             // Lưu biến thể
             $variant = $product->variants()->create([
@@ -174,6 +177,7 @@ class ProductService extends BaseService
                 'discount_start' => $variantData['discount_start'] ?? null,
                 'discount_end' => $variantData['discount_end'] ?? null,
                 'stock' => $variantData['stock'],
+                'image' => $variantImage,
             ]);
 
             // Lưu thuộc tính của biến thể

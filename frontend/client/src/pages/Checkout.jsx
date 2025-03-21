@@ -21,9 +21,20 @@ const Checkout = () => {
   };
 
   const handleRemoveItem = (id) => {
-    if (window.confirm('Are you sure you want to remove this item?')) {
-      setCartItems(cartItems.filter((item) => item.variant_id !== id));
-      setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
+    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+      const updatedCart = cartItems.filter((item) => item.id !== id);
+      const updatedSelectedItems = selectedItems.filter((itemId) => itemId !== id);
+  console.log(id);
+      setCartItems(updatedCart);
+      setSelectedItems(updatedSelectedItems);
+  
+      // Lưu giỏ hàng vào localStorage (nếu đang sử dụng)
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+  
+      // Kiểm tra nếu giỏ hàng trống
+      if (updatedCart.length === 0) {
+        alert("Giỏ hàng của bạn hiện đang trống!");
+      }
     }
   };
 
@@ -100,7 +111,7 @@ const Checkout = () => {
                     <input
                       type="checkbox"
                       checked={selectedItems.includes(item.variant_id)}
-                      onChange={() => handleSelectItem(item.variant_id)}
+                      onChange={() => handleSelectItem(item.id)}
                     />
                   </td>
                   <td className="py-4">

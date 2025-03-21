@@ -21,6 +21,8 @@ const NewCheckout = () => {
         shipping_address: '',
         order_items: []
     });
+    const [paymentMethod, setPaymentMethod] = useState("cod"); // Mặc định là COD
+
     const handleChange = (e) => {
         const { id, value } = e.target;
         setOrder(prevOrder => ({
@@ -76,67 +78,71 @@ const NewCheckout = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-
+    
         // Tạo địa chỉ giao hàng từ tỉnh/thành, quận/huyện, phường/xã
         const shippingAddressParts = [
             wards.find(w => w.code === Number(selectedWard))?.name,
             districts.find(d => d.code === Number(selectedDistrict))?.name,
             provinces.find(p => p.code === Number(selectedProvince))?.name
-        ].filter(Boolean).join(', '); // Lọc các giá trị rỗng và nối chuỗi bằng dấu ", "
-
-        // console.log("Address:", shippingAddressParts);
-
-        // console.log([selectedWard, selectedDistrict, selectedProvince]);
-        // Kiểm tra nếu thiếu thông tin quan trọng
+        ].filter(Boolean).join(', ');
+    
         if (!order.customer_name || !order.customer_phone || !shippingAddressParts) {
-            console.log(order);
             alert("Vui lòng điền đầy đủ thông tin!");
             return;
         }
-
+    
         const orderData = {
             customer_name: order.customer_name,
-            customer_email: order.customer_email, // Có thể lấy từ auth
+            customer_email: order.customer_email,
             customer_phone: order.customer_phone,
             shipping_address: shippingAddressParts,
+            amount: calculateGrandTotal(),
             order_items: cartItems.map(item => ({
                 product_id: item.product_id,
                 product_variant_id: item.variant_id || null,
                 quantity: item.quantity,
                 price: item.price
-            }))
+            })),
+            payment_method: paymentMethod // "vnpay" hoặc "cod"
         };
-
+    
         try {
-
+            // Gọi API tạo đơn hàng (xử lý chung cho cả VNPay và COD)
             const response = await axios.post("http://127.0.0.1:8000/api/v1/order", orderData, {
                 headers: { "Content-Type": "application/json" }
             });
-
-            console.log("Đặt hàng thành công:", response.data);
-            alert("Đặt hàng thành công!");
-            localStorage.setItem("orderCode", response.data.data.order_code);
-
-            // Xóa giỏ hàng sau khi đặt hàng
-            localStorage.removeItem('cartItems');
-            localStorage.removeItem('cartTotal');
-            setCartItems([]);
-            setCartTotal(0);
-            setOrder({
-                customer_name: '',
-                customer_email: '',
-                customer_phone: '',
-                shipping_address: '',
-                order_items: []
-            });
-            navigate("/thankyou");
-
+    
+            if (paymentMethod === "vnpay" && response.data.vnpUrl) {
+                // Nếu là VNPay, chuyển hướng người dùng đến URL thanh toán
+                window.location.href = response.data.vnpUrl;
+            } else {
+                // Nếu là COD hoặc thanh toán thành công, xử lý hoàn tất đơn hàng
+                console.log("Đặt hàng thành công:", response.data);
+                alert("Đặt hàng thành công!");
+                localStorage.setItem("orderCode", response.data.data.order_code);
+    
+                // Xóa giỏ hàng sau khi đặt hàng
+                localStorage.removeItem('cartItems');
+                localStorage.removeItem('cartTotal');
+                setCartItems([]);
+                setCartTotal(0);
+                setOrder({
+                    customer_name: '',
+                    customer_email: '',
+                    customer_phone: '',
+                    shipping_address: '',
+                    order_items: []
+                });
+    
+                navigate("/thankyou");
+            }
         } catch (error) {
             console.error("Lỗi khi đặt hàng:", error);
             alert("Có lỗi xảy ra, vui lòng thử lại!");
         }
     };
+    
+    
 
     return (
         <div className="bg-white text-gray-800">
@@ -273,8 +279,8 @@ const NewCheckout = () => {
                                         type="radio"
                                         name="payment"
                                         value="cod"
-                                        // checked={paymentMethod === "cod"}
-                                        // onChange={() => setPaymentMethod("cod")}
+                                        checked={paymentMethod === "cod"}
+                                        onClick={() => setPaymentMethod("cod")}
                                         className="mr-2"
                                     />
                                     Thanh toán khi nhận hàng (COD)
@@ -286,8 +292,8 @@ const NewCheckout = () => {
                                         type="radio"
                                         name="payment"
                                         value="vnpay"
-                                        // checked={paymentMethod === "vnpay"}
-                                        // onChange={() => setPaymentMethod("vnpay")}
+                                        checked={paymentMethod === "vnpay"}
+                                        onClick={() => setPaymentMethod("vnpay")}
                                         className="mr-2"
                                     />
                                     Thanh toán qua VNPay
@@ -305,7 +311,7 @@ const NewCheckout = () => {
                             <span className="text-lg font-bold">${calculateGrandTotal()}</span>
                         </div>
 
-                        <a onClick={handleSubmit} className="bg-black text-white w-full py-3 rounded text-center block">Tiếp tục thanh toán</a>
+                        <p onClick={handleSubmit} className="bg-black text-white w-full py-3 rounded text-center block">Tiếp tục thanh toán</p>
                     </div>
                 </div>
             </main>

@@ -21,5 +21,5 @@ require __DIR__.'/api_v1.php';
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::get('/vnpay-payment', [PaymentController::class, 'createPayment']);
+Route::post('/vnpay-payment', [PaymentController::class, 'createPayment']);
 Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);

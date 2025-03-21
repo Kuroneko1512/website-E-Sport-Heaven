@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('sku')->unique();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
-            $table->integer('stock')->default(0);
+            $table->integer('stock')->default(0)->nullable();
             $table->enum('product_type', ['simple', 'variable'])->default('simple');
             $table->enum('status',['active','inactive'])->default('active');
             $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
