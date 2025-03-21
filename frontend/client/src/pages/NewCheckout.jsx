@@ -122,7 +122,7 @@ const NewCheckout = () => {
                 localStorage.setItem("orderCode", response.data.data.order_code);
     
                 // Xóa giỏ hàng sau khi đặt hàng
-                localStorage.removeItem('cartItems');
+                localStorage.removeItem('checkoutItems');
                 localStorage.removeItem('cartTotal');
                 setCartItems([]);
                 setCartTotal(0);
