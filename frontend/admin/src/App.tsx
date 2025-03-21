@@ -27,7 +27,8 @@ import { Loading } from "./components/Loading";
 import EditComponent from '@pages/Attribute/EditComponent';
 import AttributeForm from "./pages/Product/AttributeForm";
 import ValueProduct from "./pages/Product/ValueProduct";
-
+import DetailProductComponent from "./pages/Product/DetailProductComponent";
+import EditComponents from "./pages/Product/EditComponents";
 import Order from "./pages/Order/Order";
 import DetailOrder from "./pages/Order/DetailOrder";
 import AttributeProduct from "./pages/Product/AttributeProduct";
@@ -121,10 +122,13 @@ const App = () => {
           <Route path="blank" element={<Blank />} />
           <Route path="profile" element={<Profile />} />
           {/* route sản phẩm  */}
-          <Route path="product" element={<Product />} /> 
-           
+          <Route path="Product" element={<Product />} >
+          
+          </Route> 
+          <Route path="Product/detail/:id" element={<DetailProductComponent/>} />
     
-       
+          <Route path="Product/edit/:id" element={<EditComponents/>} />
+    
           <Route path="add-product" element={<Store />} >
            <Route path="AttributeForm" element={<AttributeForm />} /> 
            <Route path="ValueProduct" element={<ValueProduct />} /> 
@@ -140,7 +144,11 @@ const App = () => {
           <Route path="Order/Details/:id" element={<DetailOrder />} />
 
 
-          <Route path="Attribute/attribute/edit/:id"  element={<EditComponent/>} />
+        
+
+
+            {/*Route Category*/}
+            <Route path="category" element={<Category/>}/>
         </Route>
       </Route>
     </Routes>

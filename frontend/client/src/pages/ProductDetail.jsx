@@ -5,6 +5,7 @@ import { Link, Outlet, useParams } from "react-router-dom";
 import instanceAxios from "../config/db";
 import RelatedProducts from "../components/elementProduct/RelatedProducts";
 import ScrollToTop from "../config/ScrollToTop";
+import FomatVND from "../utils/FomatVND";
 
 const ProductDetail = () => {
   const [isAllAttributesSelected, setIsAllAttributesSelected] = useState(false);
@@ -262,33 +263,18 @@ const ProductDetail = () => {
                   {parseFloat(product?.discount?.percent) > 0 ? (
                     <div>
                       <span className="text-xl font-bold text-gray-800">
-                        {new Intl.NumberFormat("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }).format(
-                          (
-                            parseFloat(product?.price) -
+                      {FomatVND(parseFloat(product?.price) -
                             ((parseFloat(product?.price) *
                               parseFloat(product?.discount?.percent)) /
-                              100)
-                          ).toFixed(0)
-                        )}
+                              100))}
                       </span>
-
                       <span className="text-lg line-through text-gray-500 ml-4">
-                        {new Intl.NumberFormat("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }).format(parseFloat(product?.price).toFixed(0))}
+                      {FomatVND(product?.price)}
                       </span>
-                      
                     </div>
                   ) : (
                     <span className="text-xl font-bold text-gray-800">
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(parseFloat(product?.price).toFixed(0))}
+                      {FomatVND(product?.price)}
                     </span>
                   )}
                 </div>
@@ -297,35 +283,17 @@ const ProductDetail = () => {
                   {parseFloat(product?.discount?.percent) > 0 ? (
                     <div>
                       <span className="text-xl font-bold text-gray-800">
-                        {new Intl.NumberFormat("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }).format(
-                          (
-                            parseFloat(selectedVariant?.price) -
-                            ((parseFloat(selectedVariant?.price) *
+                      {FomatVND((parseFloat(selectedVariant?.price) *
                               parseFloat(product?.discount?.percent)) /
-                              100)
-                          ).toFixed(0)
-                        )}
+                              100)}
                       </span>
-
                       <span className="text-lg line-through text-gray-500 ml-4 ">
-                        {new Intl.NumberFormat("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }).format(
-                          parseFloat(selectedVariant?.price).toFixed(0)
-                        )}
+                      {FomatVND(selectedVariant?.price)}
                       </span>
-                      
                     </div>
                   ) : (
                     <span className="text-xl font-bold text-gray-800">
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(parseFloat(selectedVariant?.price).toFixed(0))}
+                      {FomatVND(selectedVariant?.price)}
                     </span>
                   )}
                 </div>

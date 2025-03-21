@@ -70,7 +70,7 @@ function App() {
               <Route path="story" element={<Story />} />
               <Route path="contact" element={<Contact />} />
               <Route path="*" element={<Notfound />} />
-              <Route path="checkout" element={<Checkout />} />
+              <Route path="cart" element={<Checkout />} />
               <Route path="address" element={<ShippingAddress />} />
               <Route path="payment" element={<PaymentMethod />} />
               <Route path="newcheckout" element={<NewCheckout />} />

@@ -18,7 +18,7 @@ const Footer = () => {
             <i className="fas fa-envelope mr-2"></i>sportheaven@gmail.com
           </p>
           <p className="text-sm text-gray-400 flex items-center">
-            <i className="fas fa-map-marker-alt mr-2"></i>Mễ Trì, Nam Từ Liêm, TP. Hà Nộ
+            <i className="fas fa-map-marker-alt mr-2"></i>Mễ Trì, Nam Từ Liêm, TP. Hà Nội
           </p>
         </div>
         

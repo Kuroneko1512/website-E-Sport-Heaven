@@ -19,7 +19,9 @@ class ProductService extends BaseService
     {
         return $this->model->with([
             'variants.productAttributes.attributeValue:id,value',
-        ])->paginate($paginate);
+        ])
+        ->orderBy('created_at', 'DESC') // Sắp xếp theo thời gian mới nhất
+        ->paginate($paginate);
     }
     public function getProduct($id)
     {

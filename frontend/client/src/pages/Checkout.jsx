@@ -1,84 +1,100 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import instanceAxios from '../config/db';
+import { useNavigate } from 'react-router-dom';
+import FomatVND from '../utils/FomatVND';
 
-const Checkout = () => {
+const Chekout = () => {
   const [cartItems, setCartItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [checkoutItems, setCheckoutItems] = useState([]);
+  const nav = useNavigate()
 
   const miniCartData = useMemo(() => JSON.parse(localStorage.getItem("cartItems")) || [], []);
   useEffect(() => {
     setCartItems(miniCartData);
   }, [miniCartData]);
 
-  const handleQuantityChange = (id, delta) => {
+  // Hàm thay đổi số lượng sản phẩm
+  const handleQuantityChange = (productId, variantId, delta) => {
     setCartItems(
       cartItems.map((item) =>
-        item.variant_id === id
+        item.product_id === productId && (!variantId || item.variant_id === variantId)
           ? { ...item, quantity: Math.max(1, item.quantity + delta) }
           : item
       )
     );
   };
 
-  const handleRemoveItem = (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
-      const updatedCart = cartItems.filter((item) => item.id !== id);
-      const updatedSelectedItems = selectedItems.filter((itemId) => itemId !== id);
-  console.log(id);
-      setCartItems(updatedCart);
-      setSelectedItems(updatedSelectedItems);
-  
-      // Lưu giỏ hàng vào localStorage (nếu đang sử dụng)
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-  
-      // Kiểm tra nếu giỏ hàng trống
-      if (updatedCart.length === 0) {
-        alert("Giỏ hàng của bạn hiện đang trống!");
-      }
+  // Hàm xóa sản phẩm khỏi giỏ hàng
+  const handleRemoveItem = (productId, variantId) => {
+    if (window.confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+      const updatedCartItems = cartItems.filter((item) => 
+        item.product_id !== productId || (variantId && item.variant_id !== variantId)
+      );
+      setCartItems(updatedCartItems);
+      setSelectedItems(selectedItems.filter((itemId) => itemId.product_id !== productId || (variantId && itemId.variant_id !== variantId)));
+      localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
     }
   };
 
-  const handleSelectItem = (variantId) => {
-    if (selectedItems.includes(variantId)) {
-      setSelectedItems(selectedItems.filter((id) => id !== variantId));
+  // Hàm chọn sản phẩm
+  const handleSelectItem = (productId, variantId) => {
+    let updatedSelectedItems;
+    const itemKey = { product_id: productId, variant_id: variantId };
+    const isSelected = selectedItems.some((item) => item.product_id === productId && (!variantId || item.variant_id === variantId));
+    if (isSelected) {
+      updatedSelectedItems = selectedItems.filter((item) => item.product_id !== productId || (variantId && item.variant_id !== variantId));
     } else {
-      setSelectedItems([...selectedItems, variantId]);
+      updatedSelectedItems = [...selectedItems, itemKey];
     }
+    setSelectedItems(updatedSelectedItems);
   };
 
+  // Hàm chọn tất cả các biến thể của sản phẩm
   const handleSelectAllByProductId = (productId) => {
-    // Kiểm tra xem đã chọn tất cả các variant của sản phẩm này chưa
     const selectedVariants = cartItems
       .filter((item) => item.product_id === productId)
-      .map((item) => item.variant_id);
-
-    const areAllSelected = selectedVariants.every((variantId) =>
-      selectedItems.includes(variantId)
+      .map((item) => ({ product_id: item.product_id, variant_id: item.variant_id }));
+  
+    const areAllSelected = selectedVariants.every((variant) =>
+      selectedItems.some((item) => item.product_id === variant.product_id && item.variant_id === variant.variant_id)
     );
-
+  
+    let updatedSelectedItems;
     if (areAllSelected) {
-      // Nếu tất cả các variant đã chọn, bỏ chọn tất cả
-      setSelectedItems(selectedItems.filter((id) => !selectedVariants.includes(id)));
+      updatedSelectedItems = selectedItems.filter((item) => !selectedVariants.some((variant) => item.product_id === variant.product_id && item.variant_id === variant.variant_id));
     } else {
-      // Nếu chưa chọn tất cả, chọn tất cả variant của sản phẩm này
-      setSelectedItems([...selectedItems, ...selectedVariants]);
+      updatedSelectedItems = [...selectedItems, ...selectedVariants];
     }
+    setSelectedItems(updatedSelectedItems);
   };
 
+  // Hàm chọn tất cả sản phẩm
   const handleSelectAll = () => {
-    const allVariantIds = cartItems.map((item) => item.variant_id);
-    if (selectedItems.length === allVariantIds.length) {
-      setSelectedItems([]); // Deselect all
+    const allItems = cartItems.map((item) => ({ product_id: item.product_id, variant_id: item.variant_id }));
+    let updatedSelectedItems;
+    if (selectedItems.length === allItems.length) {
+      updatedSelectedItems = []; // Bỏ chọn tất cả
     } else {
-      setSelectedItems(allVariantIds); // Select all
+      updatedSelectedItems = allItems; // Chọn tất cả
     }
+    setSelectedItems(updatedSelectedItems);
   };
 
+  // Hàm tính tổng tiền
   const calculateSubtotal = () => {
     return cartItems
-      .filter((item) => selectedItems.includes(item.variant_id))
+      .filter((item) => selectedItems.some((selected) => selected.product_id === item.product_id && (!item.variant_id || selected.variant_id === item.variant_id)))
       .reduce((total, item) => total + item.price * item.quantity, 0)
       .toFixed(2);
+  };
+
+  // Hàm xử lý thanh toán
+  const handleCheckout = () => {
+    const selectedCartItems = cartItems.filter((item) => selectedItems.some((selected) => selected.product_id === item.product_id && (!item.variant_id || selected.variant_id === item.variant_id)));
+    setCheckoutItems(selectedCartItems);
+    localStorage.setItem("checkoutItems", JSON.stringify(selectedCartItems));
+    nav('/newcheckout')
   };
 
   return (
@@ -92,7 +108,7 @@ const Checkout = () => {
                 <th className="pb-2">
                   <input
                     type="checkbox"
-                    checked={selectedItems.length === cartItems.map((item) => item.variant_id).length}
+                    checked={selectedItems.length === cartItems.length}
                     onChange={handleSelectAll}
                   />
                 </th>
@@ -105,13 +121,13 @@ const Checkout = () => {
               </tr>
             </thead>
             <tbody>
-              {cartItems.map((item) => (
-                <tr key={item.variant_id} className="border-b">
+              {cartItems.map((item, index) => (
+                <tr key={index} className="border-b">
                   <td className="py-4">
                     <input
                       type="checkbox"
-                      checked={selectedItems.includes(item.variant_id)}
-                      onChange={() => handleSelectItem(item.id)}
+                      checked={selectedItems.some((selected) => selected.product_id === item.product_id && (!item.variant_id || selected.variant_id === item.variant_id))}
+                      onChange={() => handleSelectItem(item.product_id, item.variant_id)}
                     />
                   </td>
                   <td className="py-4">
@@ -126,16 +142,13 @@ const Checkout = () => {
                     <p>Size: {item.variant_id}</p>
                   </td>
                   <td className="py-4">
-                  {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(parseFloat(item.price).toFixed(0))}
+                    {FomatVND(item.price)}
                   </td>
                   <td className="py-4">
                     <div className="flex items-center">
                       <button
                         className="px-2 py-1 border rounded-l"
-                        onClick={() => handleQuantityChange(item.variant_id, -1)}
+                        onClick={() => handleQuantityChange(item.product_id, item.variant_id, -1)}
                       >
                         −
                       </button>
@@ -147,21 +160,17 @@ const Checkout = () => {
                       />
                       <button
                         className="px-2 py-1 border rounded-r"
-                        onClick={() => handleQuantityChange(item.variant_id, 1)}
+                        onClick={() => handleQuantityChange(item.product_id, item.variant_id, 1)}
                       >
                         +
                       </button>
                     </div>
                   </td>
                   <td className="py-4">
-                    {/* ${(item.price * item.quantity).toFixed(2)} */}
-                    {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(parseFloat(item.price * item.quantity).toFixed(0))}
+                    {FomatVND(parseFloat(item.price * item.quantity).toFixed(0))}
                   </td>
                   <td className="py-4 text-red-500 cursor-pointer">
-                    <button onClick={() => handleRemoveItem(item.variant_id)}>
+                    <button onClick={() => handleRemoveItem(item.product_id, item.variant_id)}>
                       Xóa
                     </button>
                   </td>
@@ -169,16 +178,11 @@ const Checkout = () => {
               ))}
             </tbody>
           </table>
-          {/*  */}
-          <div className="flex flex-col flex-wrap content-end justify-end space-y-4   mt-4">
+          <div className="flex flex-col flex-wrap content-end justify-end space-y-4 mt-4">
             <div className="text-lg">
               <span className="font-bold">Tổng tiền:</span>
               <span className="text-red-500 font-bold">
-                {/* ${calculateSubtotal()} */}
-                {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(parseFloat(calculateSubtotal()).toFixed(0))}
+              {FomatVND(calculateSubtotal())}
               </span>
             </div>
             <div className='w-1/3'>
@@ -188,6 +192,7 @@ const Checkout = () => {
               <button
                 className="bg-gray-600 hover:bg-gray-800 text-white text-lg px-4 py-2 rounded w-2/5"
                 disabled={selectedItems.length === 0}
+                onClick={handleCheckout}
               >
                 Đặt hàng
               </button>
@@ -199,4 +204,4 @@ const Checkout = () => {
   );
 };
 
-export default Checkout;
+export default Chekout;
