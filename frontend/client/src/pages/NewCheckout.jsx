@@ -19,6 +19,7 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 
 const NewCheckout = () => {
+
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
@@ -105,6 +106,7 @@ const NewCheckout = () => {
         price: item.price
       })),
       payment_method: paymentMethod
+
     };
 
     try {

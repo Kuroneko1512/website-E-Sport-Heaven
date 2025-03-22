@@ -108,7 +108,7 @@ const Login = () => {
                   Đăng ký
                 </Link>
               </span>
-              <Link className="text-sm text-blue-600 hover:underline">
+              <Link  to={`/forgot-password`} className="text-sm text-blue-600 hover:underline">
                 Quên mật khẩu?
               </Link>
             </div>
