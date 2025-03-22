@@ -128,6 +128,7 @@ class PaymentController extends Controller
             if ($request->query('vnp_ResponseCode') === "00") {
                 // Giao dịch thành công
                 $this->orderService->updatePaymentStatus($orderCode, 'đã thanh toán'); // Cập nhật trạng thái thành công
+                $this->orderService->updateStockForOrder($orderCode);
 
                 // Chuyển hướng đến trang "ThankYou" với orderCode
                 return redirect()->away(env('FRONTEND_URL') . "/thankyou?orderCode={$orderCode}");

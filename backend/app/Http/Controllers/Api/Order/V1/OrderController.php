@@ -58,6 +58,7 @@ class OrderController extends Controller
                 ], 200); // Trả về 200 OK với URL VNPay
             }
             DB::commit();
+            $this->orderService->updateStockForOrder($Order->order_code);
             return response()->json([
                 'message' => 'Order đã được tạo thành công!', // Thông báo thành công
                 'data' => $Order

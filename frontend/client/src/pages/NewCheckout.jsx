@@ -121,8 +121,14 @@ const NewCheckout = () => {
                 alert("Đặt hàng thành công!");
                 localStorage.setItem("orderCode", response.data.data.order_code);
     
-                // Xóa giỏ hàng sau khi đặt hàng
-                localStorage.removeItem('checkoutItems');
+                let checkoutItems = JSON.parse(localStorage.getItem('checkoutItems')) || [];
+                let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+                
+                // Lọc các item trong cartItems, giữ lại những item không trùng với checkoutItems
+                cartItems = cartItems.filter(item => !checkoutItems.some(checkoutItem => checkoutItem.id === item.id));
+                
+                // Cập nhật lại localStorage sau khi đã loại bỏ các item trùng
+                localStorage.setItem('cartItems', JSON.stringify(cartItems));
                 localStorage.removeItem('cartTotal');
                 setCartItems([]);
                 setCartTotal(0);

@@ -12,6 +12,14 @@ const ThankYou = () => {
 
         if (orderCodeFromURL) {
             setOrderCode(orderCodeFromURL);
+            let checkoutItems = JSON.parse(localStorage.getItem('checkoutItems')) || [];
+            let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+            
+            // Lọc các item trong cartItems, giữ lại những item không trùng với checkoutItems
+            cartItems = cartItems.filter(item => !checkoutItems.some(checkoutItem => checkoutItem.id === item.id));
+            
+            // Cập nhật lại localStorage sau khi đã loại bỏ các item trùng
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
         } else {
             // Nếu không tìm thấy trên URL, kiểm tra trong localStorage
             const storedOrderCode = localStorage.getItem("orderCode");
