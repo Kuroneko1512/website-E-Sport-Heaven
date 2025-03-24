@@ -16,12 +16,14 @@ const Login = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
 
-  useEffect(()=> {
-    const authTokens = document.cookie.split(";").find((item) => item.includes("isLogin"));
+  useEffect(() => {
+    const authTokens = document.cookie
+      .split(";")
+      .find((item) => item.includes("isLogin"));
     if (authTokens) {
       nav("/");
     }
-  },[])
+  }, []);
 
   const mutation = useMutation({
     mutationFn: async (dataUser) => {
@@ -70,16 +72,34 @@ const Login = () => {
 
         <Form layout="vertical" onFinish={onFinish} className="space-y-4">
           <Form.Item
-            label={<span className="text-gray-700">Email</span>}
+            label={<span className="text-gray-700">Email / Số điện thoại</span>}
             name="email"
             rules={[
-              { required: true, message: "Hãy nhập Email của bạn!" },
-              { type: "email", message: "Không đúng định dạng Email!" },
+              {
+                required: true,
+                message: "Hãy nhập Email hoặc Số điện thoại của bạn!",
+              },
+              {
+                validator: (_, value) => {
+                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  const phoneRegex = /^(0|\+84)[0-9]{9,11}$/;
+                  if (
+                    !value ||
+                    emailRegex.test(value) ||
+                    phoneRegex.test(value)
+                  ) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    "Vui lòng nhập đúng định dạng Email hoặc Số điện thoại!"
+                  );
+                },
+              },
             ]}
             className="w-full"
           >
             <Input
-              placeholder="robertfox@example.com"
+              placeholder="robertfox@example.com hoặc 0987654321"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </Form.Item>
@@ -108,7 +128,7 @@ const Login = () => {
                   Đăng ký
                 </Link>
               </span>
-              <Link  to={`/forgot-password`} className="text-sm text-blue-600 hover:underline">
+              <Link to={`/forgot-password`} className="text-sm text-blue-600 hover:underline">
                 Quên mật khẩu?
               </Link>
             </div>
@@ -121,7 +141,7 @@ const Login = () => {
               className="w-full bg-black text-white py-2 rounded-lg  hover:!bg-gray-800"
               loading={mutation.isPending}
             >
-              Đăng ký
+              Đăng nhập
             </Button>
           </Form.Item>
         </Form>
