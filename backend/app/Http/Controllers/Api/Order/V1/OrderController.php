@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Api\Order\V1;
 
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Order\OrderStoreRequest;
-use App\Models\Order;
 use App\Services\Order\OrderService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use App\Mail\Order\AdminOrderMail;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\Order\CustomerOrderMail;
 
 class OrderController extends Controller
 {
@@ -18,7 +20,6 @@ class OrderController extends Controller
     public function __construct(OrderService $orderService)
     {
         $this->orderService = $orderService;
-       
     }
     public function index()
     {
@@ -33,30 +34,42 @@ class OrderController extends Controller
             // Trường hợp có lỗi xảy ra khi lấy dữ liệu
             return response()->json([
                 'errnor' => 'lấy thất bại',
-                'mess'=>$th,
+                'mess' => $th,
                 'status' => 500
             ], 500); // Trả về mã lỗi 500 (Internal Server Error)
         }
     }
     public function store(OrderStoreRequest $request)
     {
-       
+
         DB::beginTransaction();
         try {
 
             // Validate và lấy dữ liệu từ request
             $data = $request->validated();
-             //tạo sp
+            //tạo sp
             $Order = $this->orderService->createOrder($data);
             if ($data['payment_method'] === 'vnpay') {
-                $vnpUrl = $this->payment($Order,$request->ip());
-    
+                $vnpUrl = $this->payment($Order, $request->ip());
+
                 DB::commit();
                 return response()->json([
                     'message' => 'URL thanh toán VNPay đã được tạo thành công!',
                     'vnpUrl'  => $vnpUrl, // Trả về URL để chuyển hướng người dùng
                 ], 200); // Trả về 200 OK với URL VNPay
             }
+
+            // Tải lại đơn hàng với các quan hệ để gửi email
+            $orderWithRelations = $this->orderService->getOrderById($Order->id);
+
+            // Gửi email cho khách hàng
+            if ($orderWithRelations->customer_email) {
+                Mail::to($orderWithRelations->customer_email)->send(new CustomerOrderMail($orderWithRelations));
+            }
+
+            // Gửi email cho admin
+            Mail::to('sportheavenwd66@gmail.com')->send(new AdminOrderMail($orderWithRelations));
+
             DB::commit();
             $this->orderService->updateStockForOrder($Order->order_code);
             return response()->json([
@@ -74,14 +87,14 @@ class OrderController extends Controller
             ], 500); // Trả về mã lỗi 500 (Internal Server Error)
         }
     }
- 
+
 
     public function show(string $id)
     {
         try {
             // Gọi service để lấy thông tin chi tiết thuộc tính
             $order = $this->orderService->getOrderById($id);
-            
+
             return response()->json([
                 'message' => 'lấy thành công', // Thông báo thành công
                 'data' => $order, // Dữ liệu thuộc tính chi tiết
@@ -128,7 +141,8 @@ class OrderController extends Controller
             'data' => $result['data']
         ]);
     }
-    private function payment($data,$ip){
+    private function payment($data, $ip)
+    {
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl =  env('VNP_RETURN_URL');
         $vnp_TmnCode = "NJJ0R8FS"; // Merchant code at VNPAY
@@ -195,5 +209,4 @@ class OrderController extends Controller
 
         return $vnp_Url;
     }
-
 }
