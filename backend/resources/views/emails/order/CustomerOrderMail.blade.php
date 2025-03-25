@@ -9,9 +9,13 @@
     <div class="order-info">
         <h2>Thông Tin Đơn Hàng #{{ $order->order_code }}</h2>
         <p><strong>Ngày đặt hàng:</strong> {{ $order->created_at->format('d/m/Y H:i') }}</p>
-        <p><strong>Trạng thái:</strong> {{ $order->status }}</p>
+        <p><strong>Trạng thái:</strong> 
+            <span style="color: {{ $order->status === 'đã hoàn thành' ? '#28a745' : ($order->status === 'đang xử lý' ? '#ffc107' : '#dc3545') }}">
+                {{ $order->status }}
+            </span>
+        </p>
     </div>
-    
+
     <div class="customer-info">
         <h2>Thông Tin Khách Hàng</h2>
         <p><strong>Tên:</strong> {{ $order->customer_name }}</p>
@@ -19,7 +23,7 @@
         <p><strong>Số điện thoại:</strong> {{ $order->customer_phone }}</p>
         <p><strong>Địa chỉ giao hàng:</strong> {{ $order->shipping_address }}</p>
     </div>
-    
+
     <h2>Chi Tiết Đơn Hàng</h2>
     <table class="product-table">
         <thead>
@@ -31,26 +35,40 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($order->orderItems as $item)
-            <tr>
-                <td>
-                    {{ $item->product->name ?? 'Sản phẩm không xác định' }}
-                    @if($item->productVariant)
-                        ({{ $item->productVariant->name ?? 'Biến thể' }})
-                    @endif
-                </td>
-                <td>{{ $item->quantity }}</td>
-                <td>{{ number_format($item->price) }} VNĐ</td>
-                <td>{{ number_format($item->subtotal) }} VNĐ</td>
-            </tr>
+            @foreach ($order->orderItems as $item)
+                <tr>
+                    <td>
+                        {{ $item->product->name ?? 'Sản phẩm không xác định' }}
+                        @if ($item->productVariant)
+                            <br>
+                            <small>
+                                <strong>SKU: {{ $item->productVariant->sku }}</strong><br>
+                                @php
+                                    $attributes = [];
+                                    foreach ($item->productVariant->productAttributes as $attribute) {
+                                        $attributeName = $attribute->attribute->name;
+                                        $attributeValue = $attribute->attributeValue->value;
+                                        $attributes[] = "$attributeName: $attributeValue";
+                                    }
+                                @endphp
+                                @if (!empty($attributes))
+                                    ({{ implode(', ', $attributes) }})
+                                @endif
+                            </small>
+                        @endif
+                    </td>
+                    <td>{{ $item->quantity }}</td>
+                    <td>{{ number_format($item->price) }} VNĐ</td>
+                    <td>{{ number_format(num: $item->price * $item->quantity) }} VNĐ</td>
+                </tr>
             @endforeach
         </tbody>
     </table>
-    
+
     <div class="total">
         <p><strong>Tổng thanh toán:</strong> {{ number_format($order->total_amount) }} VNĐ</p>
     </div>
-    
+
     <div class="tracking">
         <h2>Theo Dõi Đơn Hàng</h2>
         <p>Bạn có thể theo dõi trạng thái đơn hàng của mình bằng mã đơn hàng: <strong>{{ $order->order_code }}</strong></p>

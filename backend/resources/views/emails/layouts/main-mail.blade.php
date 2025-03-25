@@ -80,7 +80,7 @@
         <div class="footer">
             @yield('footer-content')
             <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email support@esportheaven.com hoặc số điện thoại 1900 1234.</p>
-            <p>&copy; {{ date('Y') }} Sport Heaven. Tất cả các quyền được bảo lưu.</p>
+            <p>&copy; {{ date('Y') }} Sport Heaven. All rights reserved.</p>
         </div>
     </div>
 </body>

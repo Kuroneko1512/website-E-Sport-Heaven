@@ -40,6 +40,9 @@ class AdminOrderMail extends Mailable
     {
         return new Content(
             view: 'emails.order.AdminOrderMail',
+            with: [
+                'order' => $this->order
+            ]
         );
     }
 
