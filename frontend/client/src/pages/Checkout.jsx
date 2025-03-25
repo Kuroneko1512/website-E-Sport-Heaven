@@ -1,25 +1,22 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { DeleteOutlined } from "@ant-design/icons";
 import {
-  Table,
-  Checkbox,
   Button,
-  InputNumber,
+  Checkbox,
+  Col,
   Image,
   Modal,
-  Typography,
   Row,
-  Col,
   Space,
-  Input,
+  Table,
+  Typography
 } from "antd";
-import { DeleteOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import instanceAxios from "../config/db";
 import FomatVND from "../utils/FomatVND";
 
 const { Title, Text } = Typography;
 
-const Checkout = () => {
+const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [checkoutItems, setCheckoutItems] = useState([]);
@@ -55,6 +52,7 @@ const Checkout = () => {
     Modal.confirm({
       title: "Xác nhận xóa sản phẩm",
       content: "Bạn có chắc muốn xóa sản phẩm này?",
+      cancelText: "Hủy",
       onOk: () => {
         const updatedCartItems = cartItems.filter(
           (item) =>
@@ -111,18 +109,25 @@ const Checkout = () => {
             (!item.variant_id || selected.variant_id === item.variant_id)
         )
       )
-      .reduce((total, item) => total + item.price * item.quantity, 0)
+      .reduce((total, item) => total + (item.price - (item.price * item.discount / 100)) * item.quantity, 0)
       .toFixed(2);
   };
 
   const handleCheckout = () => {
-    const selectedCartItems = cartItems.filter((item) =>
-      selectedItems.some(
-        (selected) =>
-          selected.product_id === item.product_id &&
-          (!item.variant_id || selected.variant_id === item.variant_id)
+    const selectedCartItems = cartItems
+      .filter((item) =>
+        selectedItems.some(
+          (selected) =>
+            selected.product_id === item.product_id &&
+            (!item.variant_id || selected.variant_id === item.variant_id)
+        )
       )
-    );
+      .map((item) => ({
+        ...item,
+        price: item.price,
+        discount: item.discount,
+      }));
+  
     setCheckoutItems(selectedCartItems);
     localStorage.setItem("checkoutItems", JSON.stringify(selectedCartItems));
     nav("/newcheckout");
@@ -288,4 +293,4 @@ const Checkout = () => {
   );
 };
 
-export default Checkout;
+export default Cart;

@@ -9,8 +9,7 @@ const CLOUDINARY_CLOUD_NAME = "dxrhxyhl8";
 const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
 const data = {
-  firstName: "Robert",
-  lastName: "Fox",
+  fullname: "Fox",
   phoneNumber: "0123456789",
   birthDate: "1990-01-01",
   email: "roberfox@example.com",
@@ -82,39 +81,36 @@ const InfoProfile = () => {
           </div>
         </div>
         {isEditing ? (
-          <Button type="primary" onClick={handleSaveProfile} icon={<EditOutlined />}>Save</Button>
+          <Button type="primary" onClick={handleSaveProfile} icon={<EditOutlined />}>Lưu</Button>
         ) : (
-          <Button onClick={handleEditProfile} icon={<EditOutlined />}>Edit Profile</Button>
+          <Button onClick={handleEditProfile} icon={<EditOutlined />}>Chỉnh sửa hồ sơ</Button>
         )}
       </div>
 
       <Form form={form} layout="vertical" disabled={!isEditing} initialValues={data}>
-        <div className="grid grid-cols-2 gap-4">
-          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">First Name</span>} name="firstName" rules={[{ required: true, message: "Please enter your first name" }]}>
-            <Input className="bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600"/>
-          </Form.Item>
-          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Last Name</span>} name="lastName" rules={[{ required: true, message: "Please enter your last name" }]}>
+        <div className="grid gap-4">
+          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Họ Tên</span>} name="fullname" rules={[{ required: true, message: "Hãy nhập họ tên" }]}>
             <Input className="bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600"/>
           </Form.Item>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Phone Number</span>} name="phoneNumber" rules={[{ required: true, message: "Please enter your phone number" }]}>
+          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Số điện thoại</span>} name="phoneNumber" rules={[{ required: true, message: "Hãy nhập số điện thoại" }]}>
             <Input className="bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600"/>
           </Form.Item>
-          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Date of Birth</span>} name="birthDate" rules={[{ required: true, message: "Please enter your birth date" }]}>
+          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Ngày sinh</span>} name="birthDate" rules={[{ required: true, message: "Hãy nhập ngày sinh" }]}>
             <Input type="date" className="bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600"/>
           </Form.Item>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Email</span>} name="email" rules={[{ required: true, type: "email", message: "Please enter a valid email" }]}>
+          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Email</span>} name="email" rules={[{ required: true, type: "email", message: "Hãy nhập email" }]}>
             <Input className="bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600"/>
           </Form.Item>
-          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Gender</span>} name="gender" rules={[{ required: true, message: "Please select your gender" }]}>
+          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Giới tính</span>} name="gender" rules={[{ required: true, message: "Hãy chọn giới tính" }]}>
             <Select className="bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600">
-              <Option value="Male">Male</Option>
-              <Option value="Female">Female</Option>
+              <Option value="Male">Nam</Option>
+              <Option value="Female">Nữ</Option>
             </Select>
           </Form.Item>
         </div>
@@ -122,19 +118,19 @@ const InfoProfile = () => {
 
       {/* Modal Upload Avatar */}
       <Modal 
-        title="Change Avatar" 
+        title="Thay đổi ảnh đại diện" 
         open={isAvatarModalOpen} 
         onCancel={() => setIsAvatarModalOpen(false)} 
         footer={[
-          <Button key="cancel" onClick={() => setIsAvatarModalOpen(false)}>Cancel</Button>,
-          <Button key="confirm" type="primary" onClick={handleConfirmAvatar} disabled={uploading}>Confirm</Button>,
+          <Button key="cancel" onClick={() => setIsAvatarModalOpen(false)}>Hủy</Button>,
+          <Button key="confirm" type="primary" onClick={handleConfirmAvatar} disabled={uploading}>Xác nhận</Button>,
         ]}
       >
         <div className="flex justify-center mb-4">
           <img alt="Preview Avatar" className="w-32 h-32 rounded-full object-cover" src={previewAvatar} />
         </div>
         <Upload showUploadList={false} customRequest={handleUpload}>
-          <Button icon={<UploadOutlined />} loading={uploading}>Upload New Avatar</Button>
+          <Button icon={<UploadOutlined />} loading={uploading}>Tải lên ảnh đại diện</Button>
         </Upload>
       </Modal>
     </>
