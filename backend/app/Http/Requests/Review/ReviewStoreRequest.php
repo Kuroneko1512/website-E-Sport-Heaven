@@ -33,6 +33,7 @@ class ReviewStoreRequest extends FormRequest
             'rating' => 'required|min:1|max:5',
             'title' => 'nullable|string|max:255',
             'comment' => 'nullable|string|max:1000',
+            'images' => 'nullable|string|max:5000',
         ];
     }
     public function messages()
@@ -45,6 +46,7 @@ class ReviewStoreRequest extends FormRequest
             'rating.required' => 'Đánh giá không được để trống.',
             'title.max' => 'Tiêu đề không được vượt quá 255 ký tự.',
             'comment.max' => 'Bình luận không được vượt quá 1000 ký tự.',
+            'images.max' => 'Ảnh không được vượt quá 5000 ký tự.',
         ];
     }
     protected function failedValidation(ValidationValidator $validator)
