@@ -99,7 +99,7 @@ const Contact = () => {
           <ul className="space-y-4">
             <li className="flex items-start dark:text-gray-300 text-sm md:text-base">
               <EnvironmentOutlined className="text-lg mr-2 mt-1" />
-              <p>Mễ Trì, Nam Từ Liêm, TP. Hà Nộii</p>
+              <p>Mễ Trì, Nam Từ Liêm, TP. Hà Nội</p>
             </li>
             <li className="flex items-start dark:text-gray-300 text-sm md:text-base">
               <PhoneOutlined className="text-lg mr-2 mt-1" />

@@ -1,119 +1,286 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
-import Swal from 'sweetalert2';
+import { Button, Form, Input, Modal, Select, Typography } from "antd";
+import { useEffect, useState } from "react";
+
+const { Title } = Typography;
+const { Option } = Select;
 
 const ManageAddress = () => {
+  const [addresses, setAddresses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editAddress, setEditAddress] = useState(null);
-  const queryClient = useQueryClient();
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedWard, setSelectedWard] = useState("");
+  const [form] = Form.useForm();
 
-  const { data: addresses, isLoading, isError } = useQuery({
-    queryKey: ['addresses'],
-    queryFn: async () => {
-      const res = await axios.get('http://localhost:3000/address');
-      return res.data;
-    },
-  });
+  useEffect(() => {
+    const loadData = async () => {
+      const provincesData = await fetch("/data/provinces.json").then((res) =>
+        res.json()
+      );
+      const districtsData = await fetch("/data/districts.json").then((res) =>
+        res.json()
+      );
+      const wardsData = await fetch("/data/wards.json").then((res) =>
+        res.json()
+      );
 
-  console.log("addresses", addresses);
+      setProvinces(provincesData);
+      setDistricts(districtsData);
+      setWards(wardsData);
+    };
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id) => axios.delete(`http://localhost:3000/address/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['addresses']);
-    },
-  });
+    loadData();
+  }, []);
 
-  const setDefaultMutation = useMutation({
-    mutationFn: async (id) => {
-      const updatedAddresses = addresses.map((addr) => ({
-        ...addr,
-        defaultAddress: addr.id === id,
-      }));
-      await axios.put(`http://localhost:3000/address/${id}`, { defaultAddress: true });
-      queryClient.setQueryData(['addresses'], updatedAddresses);
-    },
-  });
+  // console.log(wards);
 
-  const handleDelete = (id) => {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deleteMutation.mutate(id);
-      }
-    });
+  useEffect(() => {
+    setAddresses(JSON.parse(localStorage.getItem('addresses')) || []);
+  }, []);  
+
+  const saveAddresses = (updated) => {
+    localStorage.setItem("addresses", JSON.stringify(updated));
+    setAddresses(updated);
   };
 
-  const handleEdit = (address) => {
-    setEditAddress(address);
+  const handleDelete = (id) => {
+    Modal.confirm({
+      title: "Xác nhận xóa điểm giao hàng",
+      content: "Bạn có chắc muốn xóa điểm giao hàng nay?",
+      cancelText: "Hủy",
+      onOk: () => {
+        const updated = addresses.filter((addr) => addr.id !== id);
+        saveAddresses(updated);
+      },
+    })
+  };
+
+  const handleSetDefault = (id) => {
+    const updated = addresses.map((addr) => ({
+      ...addr,
+      defaultAddress: addr.id === id,
+    }));
+    saveAddresses(updated);
+  };
+
+  const openAddModal = () => {
+    setIsEditMode(false);
+    form.resetFields();
+    setSelectedProvince("");
+    setSelectedDistrict("");
+    setSelectedWard("");
     setIsModalOpen(true);
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div className="text-red-500">⚠️ Failed to load addresses.</div>;
+  const openEditModal = (address) => {
+    console.log("address", address);
+    setIsEditMode(true);
+    setEditingAddress(address);
+    form.setFieldsValue(address);
+    setSelectedProvince(
+      provinces.find((p) => p.name === address.province)?.code || ""
+    );
+    setSelectedDistrict(
+      districts.find((d) => d.name === address.district)?.code || ""
+    );
+    setSelectedWard(wards.find((w) => w.name === address.ward)?.code || "");
+    setIsModalOpen(true);
+  };
+
+  const handleFinish = (values) => {
+    const provinceName = provinces.find(
+      (p) => Number(p.code) === Number(selectedProvince)
+    )?.name;
+    const districtName = districts.find(
+      (d) => Number(d.code) === Number(selectedDistrict)
+    )?.name;
+    const wardName = wards.find((w) => Number(w.code) === Number(selectedWard))?.name;
+
+    if (isEditMode) {
+      const updated = addresses.map((addr) =>
+        addr.id === editingAddress.id
+          ? {
+              ...editingAddress,
+              ...values,
+              province: provinceName,
+              district: districtName,
+              ward: wardName,
+            }
+          : addr
+      );
+      saveAddresses(updated);
+    } else {
+      const updated = [
+        ...addresses,
+        {
+          ...values,
+          id: Date.now(),
+          province: provinceName,
+          district: districtName,
+          ward: wardName,
+          defaultAddress: addresses.length === 0,
+        },
+      ];
+      saveAddresses(updated);
+    }
+
+    setIsModalOpen(false);
+    form.resetFields();
+    setSelectedProvince("");
+    setSelectedDistrict("");
+    setSelectedWard("");
+  };
 
   return (
-    <div className="bg-white dark:bg-gray-900 px-10 py-6">
-      <div className="max-w-4xl mx-auto">
-        <button 
-          onClick={() => setIsModalOpen(true)} 
-          className="bg-black dark:bg-gray-800 text-white py-2 px-4 rounded mb-6 hover:bg-gray-800 dark:hover:bg-gray-700"
-        >
-          + Add New Address
-        </button>
-        <div className="space-y-6">
-          {addresses.map((address) => (
-            <div key={address.id} className="border-b border-gray-300 dark:border-gray-700 pb-4">
-              <div className="grid grid-cols-4 gap-4 items-center">
-                <div className="col-span-2">
-                  <h2 className="font-bold text-lg text-black dark:text-white">
-                    {address.name}{' '}
-                    <span className="ml-4 font-normal text-gray-500 dark:text-gray-400 text-base">{address.mobile}</span>
-                  </h2>
-                  <p className="mt-2 text-gray-500 dark:text-gray-400 text-base">
-                    {address.specificAddress}, {address.ward}, {address.district}, {address.province}
-                  </p>
-                </div>
-                <div className="col-span-1">
-                  {address.defaultAddress ? (
-                    <span className="text-black dark:text-white">Default</span>
-                  ) : (
-                    <button 
-                      className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-gray-300" 
-                      onClick={() => setDefaultMutation.mutate(address.id)}
-                    >
-                      Set default
-                    </button>
-                  )}
-                </div>
-                <div className="col-span-1 flex flex-col space-y-2 items-end">
-                  <button 
-                    onClick={() => handleEdit(address)}
-                    className="flex items-center space-x-1 text-black dark:text-white bg-gray-100 dark:bg-gray-800 py-1 px-2 rounded w-20 hover:bg-gray-200 dark:hover:bg-gray-700"
+    <div className="p-6 dark:bg-gray-800 px-10 py-6">
+      <Title className="text-black dark:text-white" level={3}>Quản lý địa chỉ</Title>
+      <Button type="primary" onClick={openAddModal} className="mb-4 bg-black dark:bg-gray-800 text-white py-2 px-4 rounded hover:!bg-white hover:!border-gray-800 hover:!text-black dark:hover:bg-gray-700">
+        + Thêm địa chỉ
+      </Button>
+
+      <div className="space-y-6">
+        {addresses.map((address) => (
+          <div
+            key={address.id}
+            className="border-b border-gray-300 dark:border-gray-700 pb-4"
+          >
+            <div className="grid grid-cols-4 gap-4 items-center">
+              <div className="col-span-2">
+                <h2 className="font-bold text-lg text-black dark:text-white">
+                  {address.fullname}
+                  <span className="ml-4 font-normal text-gray-500 dark:text-gray-400 text-base">
+                    {address.mobile}
+                  </span>
+                </h2>
+                <p className="mt-2 text-gray-500 dark:text-gray-400 text-base">
+                  {address.specificAddress}, {address.ward}, {address.district},{" "}
+                  {address.province}
+                </p>
+              </div>
+              <div className="col-span-1">
+                {address.defaultAddress ? (
+                  <span className="text-black dark:text-white">Mặc định</span>
+                ) : (
+                  <Button
+                    type="link"
+                    className="!text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-gray-300"
+                    onClick={() => handleSetDefault(address.id)}
                   >
-                    <i className="fas fa-edit"></i>
-                    <span>Edit</span>
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(address.id)}
-                    className="flex items-center space-x-1 text-red-500 dark:text-red-400 bg-red-100 dark:bg-red-900 dark:border-red-700 py-1 px-2 rounded w-20 hover:bg-red-200 dark:hover:bg-red-800"
-                  >
-                    <i className="fas fa-trash"></i>
-                    <span>Delete</span>
-                  </button>
-                </div>
+                    Cài mặc định
+                  </Button>
+                )}
+              </div>
+              <div className="col-span-1 flex flex-col space-y-2 items-end">
+                <Button
+                  onClick={() => openEditModal(address)}
+                  className="bg-gray-200  hover:!bg-white hover:!border-gray-800 hover:!text-black dark:hover:bg-gray-700"
+                >
+                  Chỉnh sửa
+                </Button>
+                <Button
+                  onClick={() => handleDelete(address.id)}
+                  className="bg-red-200 text-red-600  hover:!bg-white hover:!border-gray-800 hover:!text-black dark:hover:bg-gray-700"
+                >
+                  Xóa
+                </Button>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
+
+      <Modal
+        title={isEditMode ? "Cập nhật địa chỉ" : "Thêm địa chỉ"}
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+      >
+        <Form form={form} layout="vertical" onFinish={handleFinish}>
+          <Form.Item
+            name="fullname"
+            label="Tên"
+            rules={[{ required: true, message: "Hãy nhập tên" }]}
+          >
+            <Input placeholder="Tên" />
+          </Form.Item>
+          <Form.Item
+            name="mobile"
+            label="Số điện thoại"
+            rules={[
+              { required: true, message: "Hãy nhập số diện thoại" },
+              {
+                pattern: /^[0-9]{10,11}$/,
+                message: "Số điện thoại không hợp lệ",
+              },
+            ]}
+          >
+            <Input placeholder="Mobile" maxLength={11} />
+          </Form.Item>
+
+          <Form.Item label="Tỉnh/Thành phố">
+            <Select
+              placeholder="Chọn Tỉnh/Thành phố"
+              value={selectedProvince}
+              onChange={(val) => setSelectedProvince(val)}
+            >
+              {provinces.map((p) => (
+                <Option key={p.code} value={p.code}>
+                  {p.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item label="Quận/Huyện">
+            <Select
+              placeholder="Chọn Quận/Huyện"
+              value={selectedDistrict}
+              onChange={(val) => setSelectedDistrict(val)}
+              disabled={!selectedProvince}
+            >
+              {districts.map((d) => (
+                <Option key={d.code} value={d.code}>
+                  {d.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item label="Phường/Xã">
+            <Select
+              placeholder="Chọn Phường/Xã"
+              value={selectedWard}
+              onChange={(val) => setSelectedWard(val)}
+              disabled={!selectedDistrict}
+            >
+              {wards.map((w) => (
+                <Option key={w.code} value={w.code}>
+                  {w.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="specificAddress"
+            label="Địa chỉ cụ thể"
+            rules={[{ required: true, message: "Hãy nhập điểm chỉ cụ thể" }]}
+          >
+            <Input placeholder="Địa chỉ cụ thể" />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" block>
+              {isEditMode ? "Cập nhật" : "Thêm mới"}
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
