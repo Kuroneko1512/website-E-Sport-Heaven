@@ -57,18 +57,10 @@ const Register = () => {
                 <Form layout="vertical" onFinish={onFinish} className="space-y-4">
             <Form.Item
                 label={<span className="text-gray-700">Tên</span>}
-                name="firstName"
+                name="fullname"
                 rules={[{ required: true, message: 'Please enter your first name!' }]}
             >
                 <Input placeholder="Robert" className="px-4 py-2 border rounded-md" />
-            </Form.Item>
-            
-            <Form.Item
-                label={<span className="text-gray-700">Họ</span>}
-                name="lastName"
-                rules={[{ required: true, message: 'Please enter your last name!' }]}
-            >
-                <Input placeholder="Fox" className="px-4 py-2 border rounded-md" />
             </Form.Item>
             
             <Form.Item
