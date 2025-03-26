@@ -154,7 +154,7 @@ const ManageAddress = () => {
                 <h2 className="font-bold text-lg text-black dark:text-white">
                   {address.fullname}
                   <span className="ml-4 font-normal text-gray-500 dark:text-gray-400 text-base">
-                    {address.mobile}
+                    {address.mobile} - {address.email}
                   </span>
                 </h2>
                 <p className="mt-2 text-gray-500 dark:text-gray-400 text-base">
@@ -222,7 +222,11 @@ const ManageAddress = () => {
             <Input placeholder="Mobile" maxLength={11} />
           </Form.Item>
 
-          <Form.Item label="Tỉnh/Thành phố">
+          <Form.Item name="email" label="Email" rules={[{ required: true, type: "email", message: "Email không hợp lệ" }]}>
+            <Input placeholder="Email" />
+          </Form.Item>
+
+          <Form.Item label="Tỉnh/Thành phố" name="province" rules={[{ required: true, message: "Hãy chọn tỉnh/thành phố" }]}>
             <Select
               placeholder="Chọn Tỉnh/Thành phố"
               value={selectedProvince}
@@ -236,7 +240,7 @@ const ManageAddress = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item label="Quận/Huyện">
+          <Form.Item label="Quận/Huyện" name="district" rules={[{ required: true, message: "Hãy chọn quận/huyện" }]}>
             <Select
               placeholder="Chọn Quận/Huyện"
               value={selectedDistrict}
@@ -251,7 +255,7 @@ const ManageAddress = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item label="Phường/Xã">
+          <Form.Item label="Phường/Xã" name="ward" rules={[{ required: true, message: "Hãy chọn phường/xã" }]}>
             <Select
               placeholder="Chọn Phường/Xã"
               value={selectedWard}
