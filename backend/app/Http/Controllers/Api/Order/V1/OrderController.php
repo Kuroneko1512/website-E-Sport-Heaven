@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Mail\Order\AdminOrderMail;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Jobs\Mail\Order\NewOrderJob;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Order\CustomerOrderMail;
 
@@ -62,13 +63,15 @@ class OrderController extends Controller
             // Tải lại đơn hàng với các quan hệ để gửi email
             $orderWithRelations = $this->orderService->getOrderById($Order->id);
 
-            // Gửi email cho khách hàng
-            if ($orderWithRelations->customer_email) {
-                Mail::to($orderWithRelations->customer_email)->send(new CustomerOrderMail($orderWithRelations));
-            }
+            NewOrderJob::dispatch($orderWithRelations);
 
-            // Gửi email cho admin
-            Mail::to('sportheavenwd66@gmail.com')->send(new AdminOrderMail($orderWithRelations));
+            // // Gửi email cho khách hàng
+            // if ($orderWithRelations->customer_email) {
+            //     Mail::to($orderWithRelations->customer_email)->send(new CustomerOrderMail($orderWithRelations));
+            // }
+
+            // // Gửi email cho admin
+            // Mail::to('sportheavenwd66@gmail.com')->send(new AdminOrderMail($orderWithRelations));
 
             DB::commit();
             $this->orderService->updateStockForOrder($Order->order_code);
