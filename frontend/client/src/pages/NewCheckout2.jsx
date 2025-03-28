@@ -106,7 +106,7 @@ const NewCheckout = () => {
 
     if (cartItems) setCartItems(JSON.parse(cartItems));
     if (cartTotal) setCartTotal(JSON.parse(cartTotal));
-  }, []);
+  }, [ selectedProvince, selectedDistrict, selectedWard]);
 
   const handleDeleteAddress = (id) => {
     Modal.confirm({
@@ -250,15 +250,7 @@ const NewCheckout = () => {
   useEffect(() => {
     const defaultAdd = addresses.find((addr) => addr.id === selectedAddress);
     setDefaultAddr(
-      defaultAdd || {
-        fullname: "",
-        mobile: "",
-        specificAddress: "",
-        email: "",
-        ward: "",
-        district: "",
-        province: "",
-      }
+      defaultAdd
     );
     setOrder({
       ...order,
