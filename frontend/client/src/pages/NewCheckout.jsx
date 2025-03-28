@@ -22,6 +22,8 @@ const { Option } = Select;
 
 const NewCheckout = () => {
   const isLogin = useSelector((state) => state.auth.isLogin);
+  const [useNewAddress, setUseNewAddress] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [form] = Form.useForm();
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -35,14 +37,9 @@ const NewCheckout = () => {
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
-  const [order, setOrder] = useState({
-    customer_name: "",
-    customer_email: "",
-    customer_phone: "",
-    shipping_address: "",
-    order_items: [],
-  });
+  const [order, setOrder] = useState({});
   const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [submit, setSubmit] = useState(false);
 
   // useEffect(() => {
   //   axios.get('https://provinces.open-api.vn/api/p/')
@@ -72,7 +69,9 @@ const NewCheckout = () => {
   //   }
   // }, [selectedDistrict]);
 
-  const handleSelectAddress = (id) => setSelectedAddress(id);
+  const handleSelectAddress = (id) => {
+    if (id) setSelectedAddress(id);
+  };
 
   useEffect(() => {
     if (isLogin) {
@@ -111,15 +110,38 @@ const NewCheckout = () => {
     if (cartTotal) setCartTotal(JSON.parse(cartTotal));
   }, [selectedProvince, selectedDistrict, selectedWard]);
 
+  // const handleDeleteAddress = (id) => {
+  //   Modal.confirm({
+  //     title: "Xác nhận xóa địa chỉ",
+  //     content: "Bạn có chắc muốn xóa địa chỉ này?",
+  //     cancelText: "Hủy",
+  //     onOk: () => {
+  //       const updated = addresses.filter((addr) => addr.id !== id);
+  //       setAddresses(updated);
+  //       localStorage.setItem("addresses", JSON.stringify(updated));
+
+  //       // Nếu địa chỉ bị xóa là địa chỉ đang chọn, đặt lại selectedAddress
+  //       if (selectedAddress === id) {
+  //         setSelectedAddress(updated.length > 0 ? updated[0].id : null);
+  //       }
+
+  //       message.success("Đã xóa địa chỉ");
+  //     },
+  //   });
+  // };
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setOrder((prev) => ({ ...prev, [id]: value }));
   };
 
+  console.log("order", order);
+
   const calculateGrandTotal = () => {
     const subtotal = cartItems.reduce(
       (total, item) =>
-        total + (item.price - (item.price * item.discount) / 100) * item.quantity,
+        total +
+        (item.price - (item.price * item.discount) / 100) * item.quantity,
       0
     );
     const shippingFee = 5000;
@@ -132,6 +154,7 @@ const NewCheckout = () => {
   };
 
   const handleSubmit = async () => {
+    setSubmit(true);
     const shippingAddressParts = [
       wards.find((w) => parseFloat(w.code) === parseFloat(selectedWard))?.name,
       districts.find((d) => parseFloat(d.code) === parseFloat(selectedDistrict))
@@ -149,6 +172,7 @@ const NewCheckout = () => {
       !shippingAddressParts
     ) {
       message.error("Vui lòng điền đầy đủ thông tin!");
+      setSubmit(false);
       return;
     }
 
@@ -203,240 +227,314 @@ const NewCheckout = () => {
       console.error("Lỗi khi đặt hàng:", error);
       message.error("Có lỗi xảy ra, vui lòng thử lại!");
     }
+    setSubmit(false);
   };
 
-  const handleSuccess = (id) => {
-    const dataform = addresses.find((addr) => addr.id === id);
+  const dataform = addresses.find((addr) => addr.id === selectedAddress);
+
+  // console.log("email:",dataform?.email);
+
+  useEffect(() => {
+    // setDefaultAddr(dataform);
     if (dataform) {
       form.setFieldsValue({
-        fullname: dataform.fullname,
-        mobile: dataform.mobile,
-        specificAddress: dataform.specificAddress,
-        ward: dataform.ward,
-        district: dataform.district,
-        province: dataform.province,
+        fullname: dataform?.fullname,
+        mobile: dataform?.mobile,
+        email: dataform?.email,
+        specificAddress: dataform?.specificAddress,
+        ward: dataform?.ward,
+        district: dataform?.district,
+        province: dataform?.province,
       });
       setSelectedProvince(
-        provinces.find((p) => p.name === dataform.province)?.code || ""
+        provinces?.find((p) => p.name === dataform.province)?.code || ""
       );
       setSelectedDistrict(
-        districts.find((d) => d.name === dataform.district)?.code || ""
+        districts?.find((d) => d.name === dataform.district)?.code || ""
       );
-      setSelectedWard(wards.find((w) => w.name === dataform.ward)?.code || "");
+      setSelectedWard(wards?.find((w) => w.name === dataform.ward)?.code || "");
+
+      setOrder((prev) => ({
+        ...prev,
+        customer_name: dataform?.fullname,
+        customer_phone: dataform?.mobile,
+        customer_email: dataform?.email,
+        shipping_address:
+          dataform?.specificAddress +
+          ", " +
+          dataform?.ward +
+          ", " +
+          dataform?.district +
+          ", " +
+          dataform?.province,
+        order_items: cartItems?.map((item) => ({
+          product_id: item.product_id,
+          product_variant_id: item.variant_id || null,
+          quantity: item.quantity,
+          price: item.price,
+          discount: item.discount,
+        })),
+      }));
     }
-    setOrder((prev) => ({
-      ...prev,
-      customer_name: dataform.lastName + " " + dataform.firstName,
-      customer_phone: dataform.mobile,
-      shipping_address:
-        dataform.specificAddress +
-        ", " +
-        dataform.ward +
-        ", " +
-        dataform.district +
-        ", " +
-        dataform.province,
-      order_items: cartItems.map((item) => ({
-        product_id: item.product_id,
-        product_variant_id: item.variant_id || null,
-        quantity: item.quantity,
-        price: item.price,
-        discount: item.discount,
-      })),
-    }));
-  };
+  }, [selectedAddress, addresses]);
 
   return (
     <div className="p-6 bg-white">
-      {/* Thanh toán */}
       <Title level={2}>Thanh toán</Title>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2">
-          {/* Địa chỉ giao hàng theo user*/}
-          {isLogin && (
-            <div className="p-6 bg-white">
-              <Title level={3}>Chọn địa chỉ giao hàng</Title>
-
-              <div className="space-y-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-end">
-                {addresses.map((address) => (
-                  <div
-                    key={address.id}
-                    onClick={() => handleSelectAddress(address.id)}
-                    className={`border w-full h-full p-4 rounded ${
-                      selectedAddress === address.id
-                        ? "border-black border-2"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="cursor-pointer w-full">
-                        <h2 className="font-bold text-lg">
-                          {address.fullname} - {address.mobile}
-                        </h2>
-                        <p>
-                          {address.specificAddress}, {address.ward},{" "}
-                          {address.district}, {address.province}
-                        </p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          size="small"
-                          danger
-                          onClick={() => handleDelete(address.id)}
-                        >
-                          Xóa
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Button
-                type="primary"
-                block
-                className="mt-6"
-                disabled={!selectedAddress}
-                onClick={() => handleSuccess(selectedAddress)}
-              >
-                Giao đến địa chỉ này
+          <div className="mb-4">
+            <Text strong>Địa chỉ giao hàng:</Text>{" "}
+            {dataform
+              ? `${dataform?.fullname} - ${dataform?.mobile} - ${dataform?.specificAddress}, ${dataform?.ward}, ${dataform?.district}, ${dataform?.province}`
+              : "Chưa có địa chỉ"}
+            {isLogin && addresses.length > 0 && (
+              <Button type="link" onClick={() => setShowAddressModal(true)}>
+                Thay đổi
               </Button>
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Thêm địa chỉ giao hàng */}
-          <Card title="Địa chỉ giao hàng">
+          <Card
+            title={isLogin && addresses.length > 0 ? "Địa chi" : "Địa chỉ mới"}
+          >
             <Form layout="vertical" form={form}>
-              <Form.Item label="Tên" name="fullname" rules={[{ required: true, message: "Vui lòng nhập tên" }]}>
+              <Form.Item label="Tên" name={"fullname"} required>
                 <Input
                   id="customer_name"
                   value={order.customer_name}
                   onChange={handleInputChange}
+                  disabled={dataform?.fullname}
+                  className="!bg-white !border !border-gray-300 !text-black"
                 />
               </Form.Item>
-              <Form.Item label="Số điện thoại" name="mobile" rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}>
+              <Form.Item label="Số điện thoại" name={"mobile"} required>
                 <Input
                   id="customer_phone"
                   value={order.customer_phone}
                   onChange={handleInputChange}
+                  disabled={dataform?.mobile}
+                  className="!bg-white !border !border-gray-300 !text-black"
                 />
               </Form.Item>
-              <Form.Item label="Email" name="email" rules={[{ required: true, type: "email", message: "Email không hợp lệ" }]}>
+              <Form.Item label="Email" name={"email"} required>
                 <Input
                   id="customer_email"
                   value={order.customer_email}
                   onChange={handleInputChange}
+                  disabled={dataform?.email}
+                  className="!bg-white !border !border-gray-300 !text-black"
                 />
               </Form.Item>
-              <Form.Item label="Tỉnh/Thành phố" name="province" rules={[{ required: true, message: "Vui lòng chọn tỉnh/thành phố" }]}>
-                <Select
-                  placeholder="Chọn Tỉnh/Thành phố"
-                  value={selectedProvince}
-                  onChange={(value) => {
-                    setSelectedProvince(value);
-                    setDistricts([]);
-                    setWards([]);
-                    setSelectedDistrict("");
-                    setSelectedWard("");
-                  }}
-                >
-                  {provinces.map((province) => (
-                    <Option key={province.code} value={province.code}>
-                      {province.name}
-                    </Option>
-                  ))}
-                </Select>
+
+              <Form.Item
+                label="Tỉnh/Thành phố"
+                name="province"
+                rules={[
+                  { required: true, message: "Vui lòng chọn tỉnh/thành phố" },
+                ]}
+              >
+                {dataform?.province ? (
+                  <Input
+                    value={dataform?.province}
+                    disabled
+                    className="!bg-white !border !border-gray-300 !text-black"
+                  />
+                ) : (
+                  <Select
+                    placeholder="Chọn Tỉnh/Thành phố"
+                    value={selectedProvince}
+                    onChange={(value) => {
+                      setSelectedProvince(value);
+                      setDistricts([]);
+                      setWards([]);
+                      setSelectedDistrict("");
+                      setSelectedWard("");
+                    }}
+                    disabled={dataform?.province}
+                  >
+                    {provinces?.map((province) => (
+                      <Option key={province.code} value={province.code}>
+                        {province.name}
+                      </Option>
+                    ))}
+                  </Select>
+                )}
               </Form.Item>
-              <Form.Item label="Quận/Huyện" name="district" rules={[{ required: true, message: "Vui lòng chọn quận/huyện" }]}>
-                <Select
-                  placeholder="Chọn Quận/Huyện"
-                  value={selectedDistrict}
-                  onChange={(value) => {
-                    setSelectedDistrict(value);
-                    setWards([]);
-                    setSelectedWard("");
-                  }}
-                  disabled={!selectedProvince}
-                >
-                  {districts.map((d) => (
-                    <Option key={d.code} value={d.code}>
-                      {d.name}
-                    </Option>
-                  ))}
-                </Select>
+              <Form.Item
+                label="Quận/Huyện"
+                name="district"
+                rules={[
+                  { required: true, message: "Vui lòng chọn quận/huyện" },
+                ]}
+              >
+                {dataform?.district ? (
+                  <Input
+                    value={dataform?.district}
+                    disabled
+                    className="!bg-white !border !border-gray-300 !text-black"
+                  />
+                ) : (
+                  <Select
+                    placeholder="Chọn Quận/Huyện"
+                    value={selectedDistrict}
+                    onChange={(value) => {
+                      setSelectedDistrict(value);
+                      setWards([]);
+                      setSelectedWard("");
+                    }}
+                    disabled={!selectedProvince}
+                  >
+                    {districts?.map((d) => (
+                      <Option key={d.code} value={d.code}>
+                        {d.name}
+                      </Option>
+                    ))}
+                  </Select>
+                )}
               </Form.Item>
-              <Form.Item label="Phường/Xã" name="ward" rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}>
-                <Select
-                  placeholder="Chọn Phường/Xã"
-                  value={selectedWard}
-                  onChange={setSelectedWard}
-                  disabled={!selectedDistrict}
-                >
-                  {wards.map((w) => (
-                    <Option key={w.code} value={w.code}>
-                      {w.name}
-                    </Option>
-                  ))}
-                </Select>
+              <Form.Item
+                label="Phường/Xã"
+                name="ward"
+                rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
+              >
+                {dataform?.ward ? (
+                  <Input
+                    value={dataform?.ward}
+                    disabled
+                    className="!bg-white !border !border-gray-300 !text-black"
+                  />
+                ) : (
+                  <Select
+                    placeholder="Chọn Phường/Xã"
+                    value={selectedWard}
+                    onChange={setSelectedWard}
+                    disabled={!selectedDistrict}
+                  >
+                    {wards?.map((w) => (
+                      <Option key={w.code} value={w.code}>
+                        {w.name}
+                      </Option>
+                    ))}
+                  </Select>
+                )}
+              </Form.Item>
+              <Form.Item
+                label="Địa chỉ cụ thể"
+                name={"specificAddress"}
+                required
+              >
+                <Input
+                  value={order?.specificAddress}
+                  onChange={(e) =>
+                    setOrder({ ...order, specificAddress: e.target.value })
+                  }
+                  className="!bg-white !border !border-gray-300 !text-black"
+                  disabled={dataform?.specificAddress}
+                />
               </Form.Item>
             </Form>
           </Card>
         </div>
 
-        <Card title="Thông tin đơn hàng">
-          <List
-            dataSource={cartItems}
-            renderItem={(item) => (
-              <List.Item>
-                <List.Item.Meta
-                  title={`${item.name} (x${item.quantity})`}
-                  description={`SKU: ${item.sku}`}
-                />
-                <Text>
-                  {FomatVND(
-                    (item.price - (item.price * item.discount) / 100) *
-                      item.quantity
-                  )}
-                </Text>
-              </List.Item>
-            )}
-          />
+        <div>
+          <Card title="Thông tin đơn hàng">
+            <List
+              dataSource={cartItems}
+              renderItem={(item) => (
+                <List.Item>
+                  <List.Item.Meta
+                    title={`${item.name} (x${item.quantity})`}
+                    description={`SKU: ${item.sku}`}
+                  />
+                  <Text>
+                    {FomatVND(
+                      (item.price - (item.price * item.discount) / 100) *
+                        item.quantity
+                    )}
+                  </Text>
+                </List.Item>
+              )}
+            />
 
-          <Divider />
+            <Divider />
 
-          <Input
-            placeholder="Nhập mã giảm giá"
-            value={discountCode}
-            onChange={(e) => setDiscountCode(e.target.value)}
-            addonAfter={<Button onClick={handleApplyDiscount}>Áp dụng</Button>}
-          />
+            <Input
+              placeholder="Nhập mã giảm giá"
+              value={discountCode}
+              onChange={(e) => setDiscountCode(e.target.value)}
+              addonAfter={
+                <Button onClick={handleApplyDiscount}>Áp dụng</Button>
+              }
+            />
 
-          <Divider />
+            <Divider />
 
-          <Radio.Group
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            value={paymentMethod}
-          >
-            <Radio value="cod">Thanh toán khi nhận hàng (COD)</Radio>
-            <Radio value="vnpay">Thanh toán qua VNPay</Radio>
-          </Radio.Group>
+            <Radio.Group
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              value={paymentMethod}
+            >
+              <Radio value="cod">Thanh toán khi nhận hàng (COD)</Radio>
+              <Radio value="vnpay">Thanh toán qua VNPay</Radio>
+            </Radio.Group>
 
-          <Divider />
+            <Divider />
 
-          <div className="flex justify-between mb-2">
-            <Text>Phí vận chuyển</Text>
-            <Text>{FomatVND(5000)}</Text>
-          </div>
-          <div className="flex justify-between font-bold">
-            <Text strong>Tổng cộng</Text>
-            <Text strong>{FomatVND(calculateGrandTotal())}</Text>
-          </div>
+            <div className="flex justify-between mb-2">
+              <Text>Phí vận chuyển</Text>
+              <Text>{FomatVND(5000)}</Text>
+            </div>
+            <div className="flex justify-between font-bold">
+              <Text strong>Tổng cộng</Text>
+              <Text strong>{FomatVND(calculateGrandTotal())}</Text>
+            </div>
 
-          <Button type="primary" block className="mt-4" onClick={handleSubmit}>
-            Tiếp tục thanh toán
-          </Button>
-        </Card>
+            <Button
+              type="primary"
+              block
+              className="mt-4"
+              onClick={handleSubmit}
+              disabled={submit || (order && order?.order_items?.length === 0)}
+            >
+              Tiếp tục thanh toán
+            </Button>
+          </Card>
+        </div>
       </div>
+
+      <Modal
+        open={showAddressModal}
+        onCancel={() => setShowAddressModal(false)}
+        footer={null}
+        title="Chọn địa chỉ giao hàng"
+      >
+        {addresses.map((addr) => (
+          <Card key={addr.id} className="mb-2">
+            <div className="flex justify-between">
+              <div>
+                <p>
+                  {addr.fullname} - {addr.mobile}
+                </p>
+                <p>
+                  {addr.specificAddress}, {addr.ward}, {addr.district},{" "}
+                  {addr.province}
+                </p>
+              </div>
+              <div className="flex items-center">
+                <Button
+                  type="link"
+                  onClick={() => handleSelectAddress(addr.id)}
+                >
+                  Chọn
+                </Button>
+                {/* <Button danger onClick={() => handleDeleteAddress(addr.id)}>
+                  Xóa
+                </Button> */}
+              </div>
+            </div>
+          </Card>
+        ))}
+      </Modal>
     </div>
   );
 };
