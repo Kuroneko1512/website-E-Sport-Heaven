@@ -21,9 +21,9 @@ const CategoryForm = ({  onCategoryAdded, editingCategory, setEditingCategory }:
   const fetchCategories = async (page = 1) => {
     try {
       const response  = await CategoryService.getAllNoPagination();
-      setCategories(response.data as Category); // Giả sử API trả về `data.data` là danh sách category
-  
-      console.log(categories);
+      // setCategories(response.data as Category); // Giả sử API trả về `data.data` là danh sách category
+      setCategories(response.data.data); 
+      console.log('data:',categories);
     } catch (error) {
       console.error("Lỗi khi lấy danh mục:", error);
     }

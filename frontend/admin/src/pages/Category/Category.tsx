@@ -23,7 +23,7 @@ const CategoryPage = () => {
       const response  = await CategoryService.getAll(page, pagination.per_page);
       setCategories(response.data.data); // Giả sử API trả về `data.data` là danh sách category
       setPagination(response.data); // Cập nhật phân trang
-      console.log(categories);
+      console.log('categories :',categories);
     } catch (error) {
       console.error("Lỗi khi lấy danh mục:", error);
     }

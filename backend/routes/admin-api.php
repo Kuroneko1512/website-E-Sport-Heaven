@@ -10,14 +10,12 @@ Route::prefix('v1')->group(function () {
         });
 
         // Authentication routes
-        Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
-            Route::post('/login', [AdminAuthController::class, 'login'])->name('login');
-            Route::post('/refresh', [AdminAuthController::class, 'refreshToken'])->name('refresh');
+        Route::post('/login', [AdminAuthController::class, 'login'])->name('login');
+        Route::post('/refresh', [AdminAuthController::class, 'refreshToken'])->name('refresh');
 
-            // Protected routes - yêu cầu đăng nhập
-            Route::middleware('auth:admin')->group(function () {
-                Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
-            });
+        // Protected routes - yêu cầu đăng nhập
+        Route::middleware('auth:admin')->group(function () {
+            Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         });
     });
 });

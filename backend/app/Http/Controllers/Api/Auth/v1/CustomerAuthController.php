@@ -96,7 +96,20 @@ class CustomerAuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $result = $this->customerAuthService->logout($request->user());
+        $result = $this->customerAuthService->logout($request);
+
+        return $this->responseJson(
+            $result['success'],
+            $result['message'],
+            $result['data'],
+            $result['code']
+        );
+    }
+
+    // Cập nhật thông tin tài khoản
+    public function updateAccount(Request $request)
+    {
+        $result = $this->customerAuthService->updateUser($request);
 
         return $this->responseJson(
             $result['success'],

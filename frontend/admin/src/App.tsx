@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import Main from "@modules/main/Main";
 import Login from "@modules/login/Login";
+import { AuthService } from "./services/auth.service";
 import Register from "@modules/register/Register";
 import ForgetPassword from "@modules/forgot-password/ForgotPassword";
 import RecoverPassword from "@modules/recover-password/RecoverPassword";
@@ -20,8 +21,6 @@ import PublicRoute from "./routes/PublicRoute";
 import PrivateRoute from "./routes/PrivateRoute";
 import { setCurrentUser } from "./store/reducers/auth";
 import  Store  from "@pages/Product/Store";
-import { firebaseAuth } from "./firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import { useAppDispatch, useAppSelector } from "./store/store";
 import { Loading } from "./components/Loading";
 import EditComponent from '@pages/Attribute/EditComponent';
@@ -44,61 +43,40 @@ const App = () => {
   const location = useLocation();
 
   const [isAppLoading, setIsAppLoading] = useState(true);
-  // const fakeUser = {
-  //   id: '123',
-  //   name: 'Ngô Thanh Cường',
-  //   email: 'cuong@example.com',
-  //   avatar: 'https://via.placeholder.com/150',
-  //   role: 'admin',
-  // };
-  // useEffect(() => {
-  
-      
-  //         dispatch(setCurrentUser(fakeUser));
-      
-  //         dispatch(setCurrentUser(null));
-      
-  //       setIsAppLoading(false);
-  //     },
-  //     (e) => {
-  //       console.log(e);
-  //       dispatch(setCurrentUser(null));
-  //       setIsAppLoading(false);
-  //     }
-  //   );
-  // }, []);
-  useEffect(() => {
-    const fakeUser = {
-      id: '123',
-      name: 'Ngô Thanh Cường',
-      email: 'cuong@example.com',
-      avatar: 'https://via.placeholder.com/150',
-      role: 'admin',
-    };
-  
-    setTimeout(() => {
-      dispatch(setCurrentUser(fakeUser)); // Giả lập đăng nhập thành công
-      setIsAppLoading(false);
-    }, 1000); // Giả lập độ trễ của API
-  }, []);
-  useEffect(() => {
-    const size = calculateWindowSize(windowSize.width);
-    if (screenSize !== size) {
-      dispatch(setWindowSize(size));
-    }
-  }, [windowSize]);
 
   useEffect(() => {
-    if (location && location.pathname && VITE_NODE_ENV === "production") {
-      ReactGA.send({
-        hitType: "pageview",
-        page: location.pathname,
-      });
-    }
+      const token = localStorage.getItem("token");
+      if (token) {
+          AuthService.getUser()
+              .then((response) => {
+                  dispatch(setCurrentUser(response.user));
+              })
+              .catch(() => {
+                  localStorage.removeItem("token");
+                  window.location.href = "/login";
+              });
+      }
+      setIsAppLoading(false);
+  }, [dispatch]);
+
+  useEffect(() => {
+      const size = calculateWindowSize(windowSize.width);
+      if (screenSize !== size) {
+          dispatch(setWindowSize(size));
+      }
+  }, [windowSize.width, dispatch, screenSize]);
+
+  useEffect(() => {
+      if (location && location.pathname && VITE_NODE_ENV === "production") {
+          ReactGA.send({
+              hitType: "pageview",
+              page: location.pathname,
+          });
+      }
   }, [location]);
 
   if (isAppLoading) {
-    return <Loading />;
+      return <Loading />;
   }
 
   return (
@@ -114,7 +92,7 @@ const App = () => {
       </Route>
 
       {/* Private Routes */}
-      <Route element={<PrivateRoute />}>
+      <Route  element={<PrivateRoute />}>
         <Route path="/" element={<Main />}>
           <Route index element={<Dashboard />} />
           <Route path="sub-menu-2" element={<Blank />} />

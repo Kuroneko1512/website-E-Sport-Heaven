@@ -63,15 +63,7 @@ class OrderController extends Controller
             // Tải lại đơn hàng với các quan hệ để gửi email
             $orderWithRelations = $this->orderService->getOrderById($Order->id);
 
-            NewOrderJob::dispatch($orderWithRelations);
-
-            // // Gửi email cho khách hàng
-            // if ($orderWithRelations->customer_email) {
-            //     Mail::to($orderWithRelations->customer_email)->send(new CustomerOrderMail($orderWithRelations));
-            // }
-
-            // // Gửi email cho admin
-            // Mail::to('sportheavenwd66@gmail.com')->send(new AdminOrderMail($orderWithRelations));
+            NewOrderJob::dispatch($orderWithRelations);// gửi mail với jobs và queue
 
             DB::commit();
             $this->orderService->updateStockForOrder($Order->order_code);
