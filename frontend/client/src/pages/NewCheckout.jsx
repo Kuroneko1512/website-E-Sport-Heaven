@@ -34,6 +34,7 @@ const NewCheckout = () => {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
+  const [specificAddress, setSpecificAddress] = useState("");
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
@@ -41,50 +42,9 @@ const NewCheckout = () => {
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submit, setSubmit] = useState(false);
 
-  // useEffect(() => {
-  //   axios.get('https://provinces.open-api.vn/api/p/')
-  //     .then(response => setProvinces(response.data))
-  //     .catch(error => console.error('Lỗi khi tải tỉnh/thành phố:', error));
+  console.log(order);
 
-  //   const cartItems = localStorage.getItem('checkoutItems');
-  //   const cartTotal = localStorage.getItem('cartTotal');
-
-  //   if (cartItems) setCartItems(JSON.parse(cartItems));
-  //   if (cartTotal) setCartTotal(JSON.parse(cartTotal));
-  // }, []);
-
-  // useEffect(() => {
-  //   if (selectedProvince) {
-  //     axios.get(`https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`)
-  //       .then(response => setDistricts(response.data.districts))
-  //       .catch(error => console.error('Lỗi khi tải quận/huyện:', error));
-  //   }
-  // }, [selectedProvince]);
-
-  // useEffect(() => {
-  //   if (selectedDistrict) {
-  //     axios.get(`https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`)
-  //       .then(response => setWards(response.data.wards))
-  //       .catch(error => console.error('Lỗi khi tải phường/xã:', error));
-  //   }
-  // }, [selectedDistrict]);
-
-  const handleSelectAddress = (id) => {
-    if (id) setSelectedAddress(id);
-  };
-
-  useEffect(() => {
-    if (isLogin) {
-      const savedAddresses =
-        JSON.parse(localStorage.getItem("addresses")) || [];
-      setAddresses(savedAddresses);
-      const defaultAddr = savedAddresses.find((addr) => addr.defaultAddress);
-      if (defaultAddr) {
-        setSelectedAddress(defaultAddr.id);
-      }
-    }
-  }, [isLogin]);
-
+  // Load dữ liệu provinces, districts, wards một lần khi mount
   useEffect(() => {
     const loadData = async () => {
       const provincesData = await fetch("/data/provinces.json").then((res) =>
@@ -110,32 +70,108 @@ const NewCheckout = () => {
     if (cartTotal) setCartTotal(JSON.parse(cartTotal));
   }, [selectedProvince, selectedDistrict, selectedWard]);
 
-  // const handleDeleteAddress = (id) => {
-  //   Modal.confirm({
-  //     title: "Xác nhận xóa địa chỉ",
-  //     content: "Bạn có chắc muốn xóa địa chỉ này?",
-  //     cancelText: "Hủy",
-  //     onOk: () => {
-  //       const updated = addresses.filter((addr) => addr.id !== id);
-  //       setAddresses(updated);
-  //       localStorage.setItem("addresses", JSON.stringify(updated));
-
-  //       // Nếu địa chỉ bị xóa là địa chỉ đang chọn, đặt lại selectedAddress
-  //       if (selectedAddress === id) {
-  //         setSelectedAddress(updated.length > 0 ? updated[0].id : null);
-  //       }
-
-  //       message.success("Đã xóa địa chỉ");
-  //     },
-  //   });
-  // };
-
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setOrder((prev) => ({ ...prev, [id]: value }));
   };
 
-  console.log("order", order);
+  // Khi đăng nhập, load địa chỉ từ localStorage
+  useEffect(() => {
+    if (isLogin) {
+      const savedAddresses =
+        JSON.parse(localStorage.getItem("addresses")) || [];
+      setAddresses(savedAddresses);
+      if (savedAddresses.length > 0) {
+        const defaultAddr = savedAddresses.find((addr) => addr.defaultAddress);
+        setSelectedAddress(defaultAddr ? defaultAddr.id : savedAddresses[0].id);
+        setUseNewAddress(false);
+      } else {
+        setUseNewAddress(true);
+      }
+    } else {
+      setUseNewAddress(true);
+    }
+  }, [isLogin]);
+
+  // Cập nhật form và order khi có địa chỉ đã lưu được chọn
+  const dataform = addresses.find((addr) => addr.id === selectedAddress);
+  useEffect(() => {
+    if (dataform) {
+      // Đang dùng địa chỉ đã lưu => disabled các trường nhập
+      form.setFieldsValue({
+        fullname: dataform.fullname,
+        mobile: dataform.mobile,
+        email: dataform.email,
+        specificAddress: dataform.specificAddress,
+        province: dataform.province,
+        district: dataform.district,
+        ward: dataform.ward,
+      });
+      // Tìm mã code từ dữ liệu đã load
+      const provinceCode =
+        provinces.find((p) => p.name === dataform.province)?.code || "";
+      const districtCode =
+        districts.find((d) => d.name === dataform.district)?.code || "";
+      const wardCode =
+        wards.find((w) => w.name === dataform.ward)?.code || "";
+
+      setSelectedProvince(provinceCode);
+      setSelectedDistrict(districtCode);
+      setSelectedWard(wardCode);
+
+      setOrder((prev) => ({
+        ...prev,
+        customer_name: dataform.fullname,
+        customer_phone: dataform.mobile,
+        customer_email: dataform.email,
+        shipping_address:
+          dataform.specificAddress +
+          ", " +
+          dataform.ward +
+          ", " +
+          dataform.district +
+          ", " +
+          dataform.province,
+        order_items: cartItems.map((item) => ({
+          product_id: item.product_id,
+          product_variant_id: item.variant_id || null,
+          quantity: item.quantity,
+          price: item.price,
+          discount: item.discount,
+        })),
+      }));
+    } else {
+      // Nếu không có địa chỉ lưu, cho phép nhập mới
+      setUseNewAddress(true);
+      // Nếu có dữ liệu từ form nhập mới, cập nhật order
+      const shippingAddress =
+        specificAddress +
+        ", " +
+        (wards.find((w) => w.code === selectedWard)?.name || "") +
+        ", " +
+        (districts.find((d) => d.code === selectedDistrict)?.name || "") +
+        ", " +
+        (provinces.find((p) => p.code === selectedProvince)?.name || "");
+      setOrder((prev) => ({
+        ...prev,
+        shipping_address: shippingAddress,
+        order_items: cartItems.map((item) => ({
+          product_id: item.product_id,
+          product_variant_id: item.variant_id || null,
+          quantity: item.quantity,
+          price: item.price,
+          discount: item.discount,
+        })),
+      }));
+    }
+  }, [selectedAddress, addresses, specificAddress, selectedProvince, selectedDistrict, selectedWard, form, cartItems, provinces, districts, wards]);
+
+  // Xử lý chọn địa chỉ từ modal
+  const handleSelectAddress = (id) => {
+    setSelectedAddress(id);
+    setShowAddressModal(false);
+    setUseNewAddress(false);
+  };
 
   const calculateGrandTotal = () => {
     const subtotal = cartItems.reduce(
@@ -153,44 +189,31 @@ const NewCheckout = () => {
     message.info("Mã giảm giá chưa được hỗ trợ!");
   };
 
+  // Xử lý submit đơn hàng
   const handleSubmit = async () => {
-    setSubmit(true);
-    const shippingAddressParts = [
-      wards.find((w) => parseFloat(w.code) === parseFloat(selectedWard))?.name,
-      districts.find((d) => parseFloat(d.code) === parseFloat(selectedDistrict))
-        ?.name,
-      provinces.find((p) => parseFloat(p.code) === parseFloat(selectedProvince))
-        ?.name,
-    ]
-      .filter(Boolean)
-      .join(", ");
-
-    if (
-      !order.customer_name ||
-      !order.customer_phone ||
-      !order.customer_email ||
-      !shippingAddressParts
-    ) {
-      message.error("Vui lòng điền đầy đủ thông tin!");
-      setSubmit(false);
-      return;
-    }
-
-    const orderData = {
-      ...order,
-      shipping_address: shippingAddressParts,
-      amount: calculateGrandTotal(),
-      order_items: cartItems.map((item) => ({
-        product_id: item.product_id,
-        product_variant_id: item.variant_id || null,
-        quantity: item.quantity,
-        price: item.price,
-        discount: item.discount,
-      })),
-      payment_method: paymentMethod,
-    };
-
     try {
+      // Dùng validateFields của form nếu dùng nhập mới
+      if (useNewAddress) {
+        await form.validateFields();
+      }
+      // Kiểm tra thông tin bắt buộc
+      if (
+        !order.customer_name ||
+        !order.customer_phone ||
+        !order.customer_email ||
+        !order.shipping_address
+      ) {
+        message.error("Vui lòng điền đầy đủ thông tin!");
+        return;
+      }
+      setSubmit(true);
+      const orderData = {
+        ...order,
+        amount: calculateGrandTotal(),
+        payment_method: paymentMethod,
+      };
+
+      console.log("orderData",orderData);
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/order",
         orderData
@@ -200,83 +223,28 @@ const NewCheckout = () => {
       } else {
         message.success("Đặt hàng thành công!");
         localStorage.setItem("orderCode", response.data.data.order_code);
-        let checkoutItems =
+        // Xử lý cập nhật lại giỏ hàng
+        const checkoutItems =
           JSON.parse(localStorage.getItem("checkoutItems")) || [];
-        let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-
-        // Lọc các item trong cartItems, giữ lại những item không trùng với checkoutItems
-        cartItems = cartItems.filter(
+        let storedCartItems =
+          JSON.parse(localStorage.getItem("cartItems")) || [];
+        storedCartItems = storedCartItems.filter(
           (item) =>
             !checkoutItems.some((checkoutItem) => checkoutItem.id === item.id)
         );
-
-        // Cập nhật lại localStorage sau khi đã loại bỏ các item trùng
-        localStorage.setItem("cartItems", JSON.stringify(cartItems));
+        localStorage.setItem("cartItems", JSON.stringify(storedCartItems));
         setCartItems([]);
         setCartTotal(0);
-        setOrder({
-          customer_name: "",
-          customer_email: "",
-          customer_phone: "",
-          shipping_address: "",
-          order_items: [],
-        });
+        setOrder({});
         navigate("/thankyou");
       }
     } catch (error) {
       console.error("Lỗi khi đặt hàng:", error);
       message.error("Có lỗi xảy ra, vui lòng thử lại!");
+    } finally {
+      setSubmit(false);
     }
-    setSubmit(false);
   };
-
-  const dataform = addresses.find((addr) => addr.id === selectedAddress);
-
-  // console.log("email:",dataform?.email);
-
-  useEffect(() => {
-    // setDefaultAddr(dataform);
-    if (dataform) {
-      form.setFieldsValue({
-        fullname: dataform?.fullname,
-        mobile: dataform?.mobile,
-        email: dataform?.email,
-        specificAddress: dataform?.specificAddress,
-        ward: dataform?.ward,
-        district: dataform?.district,
-        province: dataform?.province,
-      });
-      setSelectedProvince(
-        provinces?.find((p) => p.name === dataform.province)?.code || ""
-      );
-      setSelectedDistrict(
-        districts?.find((d) => d.name === dataform.district)?.code || ""
-      );
-      setSelectedWard(wards?.find((w) => w.name === dataform.ward)?.code || "");
-
-      setOrder((prev) => ({
-        ...prev,
-        customer_name: dataform?.fullname,
-        customer_phone: dataform?.mobile,
-        customer_email: dataform?.email,
-        shipping_address:
-          dataform?.specificAddress +
-          ", " +
-          dataform?.ward +
-          ", " +
-          dataform?.district +
-          ", " +
-          dataform?.province,
-        order_items: cartItems?.map((item) => ({
-          product_id: item.product_id,
-          product_variant_id: item.variant_id || null,
-          quantity: item.quantity,
-          price: item.price,
-          discount: item.discount,
-        })),
-      }));
-    }
-  }, [selectedAddress, addresses]);
 
   return (
     <div className="p-6 bg-white">
@@ -427,7 +395,8 @@ const NewCheckout = () => {
                 <Input
                   value={order?.specificAddress}
                   onChange={(e) =>
-                    setOrder({ ...order, specificAddress: e.target.value })
+                    // setOrder({ ...order, specificAddress: e.target.value })
+                    setSpecificAddress(e.target.value)
                   }
                   className="!bg-white !border !border-gray-300 !text-black"
                   disabled={dataform?.specificAddress}
