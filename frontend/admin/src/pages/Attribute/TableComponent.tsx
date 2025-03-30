@@ -1,19 +1,29 @@
 import { Attribute, Pagination } from "@app/services/Attribute/ApiAttribute";
 import { deleteAttribute } from "@app/services/Attribute/ApiAttribute";
-
+interface TableComponentProps {
+  attributes: Attribute[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    prev_page_url: string | null;
+    next_page_url: string | null;
+    total: number;
+    per_page: number;
+    data: Attribute[];
+  };
+  setEditingAttribute: (attribute: Attribute | null) => void;
+  refreshAttributes: (page?: number) => void;
+  loading: boolean;
+  onSelectAttribute: (attributeId: number | null) => void;
+}
 const TableComponent = ({
   attributes,
   pagination,
   setEditingAttribute,
   refreshAttributes,
   onSelectAttribute,
-}: {
-  attributes: Attribute[];
-  pagination: Pagination;
-  setEditingAttribute: (attr: Attribute | null) => void;
-  refreshAttributes: (page?: number) => void;
-  onSelectAttribute: (attributeId: number | null) => void; // Thêm tham số page cho đúng logic
-}) => {
+  loading,
+}:TableComponentProps) => {
   
   const handleDelete = async (id: number) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa không?")) return;

@@ -24,7 +24,7 @@ export const AttributeValueFormComponent = ({ attributeId ,setSelectedAttributeI
 
   useEffect(() => {
     fetchAttributeValues();
-  }, [attributeId]);
+  }, );
 
   const fetchAttributeValues = async (page = 1) => {
     try {

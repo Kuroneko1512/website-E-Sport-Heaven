@@ -59,12 +59,12 @@ if (!validate()) return;
       if (editingAttribute) {
         // Nếu đang chỉnh sửa -> gọi API cập nhật
         await updateAttribute(editingAttribute.id, attribute);
-        alert("Cập nhật thành công!");
+        toast.success("Cập nhật thành công!");
         setEditingAttribute(null); // Xóa trạng thái chỉnh sửa
       } else {
         // Nếu không có editingAttribute -> gọi API tạo mới
         await createAttribute(attribute);
-        alert("Thêm thành công!");
+       toast.success("Thêm thành công!");
       }
       refreshAttributes();
       // Reset form sau khi gửi thành công

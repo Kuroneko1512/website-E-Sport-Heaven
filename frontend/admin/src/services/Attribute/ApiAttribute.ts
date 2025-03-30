@@ -29,6 +29,11 @@ export interface Pagination {
   per_page: number; // Số records trên mỗi trang
   data: Attribute[]; // Mảng dữ liệu attributes
 }
+export interface ApiResponse<T> {
+  data: any;
+  message?: string;
+  status?: number;
+}
 
 export const createAttribute = async (attribute: FormData): Promise<Attribute> => {
   try {
@@ -44,7 +49,7 @@ export const createAttribute = async (attribute: FormData): Promise<Attribute> =
   }
 };
 export const getAttributeById = async (id: string | number) => {
-  return await axios.get(`${API_URL}/${id}`);
+  return await axios.get<ApiResponse<Attribute>>(`${API_URL}/${id}`);
 };
 // Hàm cập nhật một thuộc tính dựa vào ID
 export const updateAttribute = async (
@@ -75,10 +80,10 @@ export const updateAttribute = async (
 };
 
 // Hàm gọi API lấy danh sách attributes với phân trang
-export const getAttributes = async (page: number = 1, limit: number = 5): Promise<Pagination> => {
+export const getAttributes = async (page: number = 1, limit: number = 5): Promise<ApiResponse<Pagination>> => {
   try {
     // Gửi request đến API Laravel với tham số page và limit
-    const response = await axios.get<Pagination>(`${API_URL}?page=${page}&limit=${limit}`);
+    const response = await axios.get<ApiResponse<Pagination>>(`${API_URL}?page=${page}&limit=${limit}`);
     return response.data; // Trả về dữ liệu nhận được
   } catch (error) {
     console.error("Error fetching attributes:", error);
