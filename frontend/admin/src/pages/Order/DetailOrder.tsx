@@ -97,6 +97,8 @@ const DetailOrder: React.FC = () => {
               <p><strong>Điện thoại:</strong> {order.customer_phone}</p>
               <p><strong>Địa chỉ:</strong> {order.shipping_address}</p>
               <p><strong>Tổng tiền:</strong> {order.total_amount} VND</p>
+              <p><strong>trạng thái thanh toán:</strong> {order['payment-status']}</p>
+
               <p><strong>Trạng thái:</strong> <span className="badge badge-info">{order.status}</span></p>
 
               {/* Nút cập nhật trạng thái */}
@@ -123,6 +125,7 @@ const DetailOrder: React.FC = () => {
                     <th>Sản phẩm</th>
                     <th>Biến thể</th>
                     <th>Số lượng</th>
+                 
                     <th>Giá</th>
                   </tr>
                 </thead>
@@ -132,12 +135,13 @@ const DetailOrder: React.FC = () => {
                       <tr key={item.id}>
                         <td>
                           {item.product?.image && (
-                            <img src={item.product.image} alt={item.product.name} width="50" />
+                            <img src={`http://127.0.0.1:8000/storage/${item.product.image}`} alt={item.product.name} width="50" />
                           )}
                         </td>
                         <td>{item.product?.name || "Không có dữ liệu"}</td>
                         <td>{item.product_variant?.sku || "N/A"}</td>
                         <td>{item.quantity}</td>
+                       
                         <td>{item.price} VND</td>
                       </tr>
                     ))

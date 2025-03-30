@@ -29,8 +29,8 @@ export const AttributeValueFormComponent = ({ attributeId ,setSelectedAttributeI
   const fetchAttributeValues = async (page = 1) => {
     try {
       const response = await AttributeValueService.getAll(attributeId, page, pagination.per_page);
-      setAttributeValues(response.data.data);
-      setPagination(response.data);
+      setAttributeValues(response.data.data.data);
+      setPagination(response.data.data);
     } catch (error) {
       console.error("Lỗi khi tải danh sách:", error);
     }

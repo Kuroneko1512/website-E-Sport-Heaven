@@ -7,6 +7,8 @@ export type Category = {
   parent_id?:number;
   products_count: number;
   subcategories_count: number;
+  created_at: string;
+  updated_at: string;
 };
 
 export interface Pagination {
