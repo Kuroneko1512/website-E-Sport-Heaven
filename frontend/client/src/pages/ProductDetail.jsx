@@ -183,6 +183,7 @@ const ProductDetail = () => {
       price: selectedVariant?.price || product.price,
       discount: product.discount?.percent,
       stock: selectedVariant?.stock || product.stock,
+      sku: selectedVariant?.sku || product.sku,
     };
 
     const existingIndex = cartItems.findIndex(

@@ -1,12 +1,17 @@
-import React, { useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Form, Input, Button, Typography, Space } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
+import { Button, Form, Input, Space, Typography } from "antd";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Error from "../components/popupmodal/Error";
+import { PasswordChangedSS } from "../components/popupmodal/PasswordChangedSS";
 
 const { Title, Text } = Typography;
 
 const OtpVerification = () => {
   const inputsRef = useRef([]);
+  const navigate = useNavigate();
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleInputChange = (index, e) => {
     const value = e.target.value;
@@ -15,7 +20,7 @@ const OtpVerification = () => {
     }
 
     if (index === inputsRef.current.length - 1 && value.length === 1) {
-      handleSubmit();
+      setTimeout(() => handleSubmit(), 0);
     }
   };
 
@@ -27,9 +32,15 @@ const OtpVerification = () => {
   };
 
   const handleSubmit = () => {
-    const otpValue = inputsRef.current.map((input) => input.value).join("");
+    const otpValue = inputsRef.current.map((input) => input?.value || "").join("");
     console.log("OTP nhập vào:", otpValue);
     // Call API verify here
+    setSuccess(true);
+    // message.success("Login successful!");
+    setTimeout(() => {
+      // navigate("/login");
+      setSuccess(false);
+    }, 2000);
   };
 
   return (
@@ -48,10 +59,14 @@ const OtpVerification = () => {
       {/* Right Form Section */}
       <div className="w-full md:w-1/2 flex items-center justify-center bg-white">
         <div className="max-w-md w-full p-8">
-          <Link className="flex items-center mb-6" to="/forgot-password">
+          <Space
+            className="mb-6 cursor-pointer"
+            onClick={() => navigate(-1)}
+            align="center"
+          >
             <LeftOutlined />
             <span className="ml-2 text-gray-500">Trở lại</span>
-          </Link>
+          </Space>
 
           <Title level={3}>Enter OTP</Title>
           <Text type="secondary">
@@ -63,15 +78,17 @@ const OtpVerification = () => {
             <Space size="middle" className="mb-6">
               {[...Array(6)].map((_, index) => (
                 <Input
-                  key={index}
-                  ref={(el) => (inputsRef.current[index] = el)}
-                  maxLength={1}
-                  className="text-center text-2xl"
-                  style={{ width: 56, height: 56, borderRadius: 8 }}
-                  onChange={(e) => handleInputChange(index, e)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  autoComplete="off"
-                />
+                name={`otp-${index}`}
+                key={index}
+                ref={(el) => (inputsRef.current[index] = el?.input)}
+                maxLength={1}
+                className="text-center text-2xl"
+                style={{ width: 56, height: 56, borderRadius: 8 }}
+                onChange={(e) => handleInputChange(index, e)}
+                onKeyDown={(e) => handleKeyDown(index, e)}
+                autoComplete="off"
+                autoFocus={index === 0}
+              />
               ))}
             </Space>
 
@@ -86,6 +103,8 @@ const OtpVerification = () => {
           </Form>
         </div>
       </div>
+      {success && <PasswordChangedSS />}
+      {error && <Error />}
     </div>
   );
 };

@@ -69,6 +69,14 @@
       "confirmPassword": "12345678",
       "terms": true,
       "id": 5
+    },
+    {
+      "email": "toanpd564@gmail.com",
+      "password": "$2a$10$Hi9U42W6MIF.pcB3n9bKx.oUC55oLsEOR71/gO5a/f8rfXSSH9Zw.",
+      "fullname": "Phùng Đức Toàn",
+      "confirmPassword": "11111111",
+      "terms": true,
+      "id": 6
     }
   ],
   "products": [

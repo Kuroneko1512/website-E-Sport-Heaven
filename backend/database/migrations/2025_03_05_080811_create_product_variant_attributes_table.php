@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_variant_attibutes', function (Blueprint $table) {
+        Schema::create('product_variant_attributes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_variant_id')->constrained('product_variants');
             $table->foreignId('attribute_value_id')->constrained('attribute_values'); 
             $table->foreignId('attribute_id')->constrained('attributes');
             $table->timestamps();
-            $table->unique(['product_variant_id', 'attribute_id']);
+            $table->unique(['product_variant_id', 'attribute_id'], 'product_variant_attribute_unique');
         });
     }
 
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_variant_attibutes');
+        Schema::dropIfExists('product_variant_attributes');
     }
 };

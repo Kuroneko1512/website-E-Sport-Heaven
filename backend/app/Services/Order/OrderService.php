@@ -47,52 +47,53 @@ class OrderService extends BaseService
     {
         return $this->model->with([
             'orderItems.product',
-            'orderItems.productVariant'
+            'orderItems.productVariant.productAttributes.attribute',
+            'orderItems.productVariant.productAttributes.attributeValue'
         ])->findOrFail($id);
     }
 
     public function updateStatus($id, $status)
     {
         $order = $this->model->find($id);
-    
+
         if (!$order) {
             return ['success' => false, 'message' => 'Order not found'];
         }
-    
+
         // Cập nhật trạng thái của đơn hàng
         $order->status = $status;
         $order->save();
-    
+
         // Nếu status được cập nhật là "đã hủy", hoàn trả lại stock
         if ($status === 'đã hủy') {
             $this->returnStockForOrder($order->order_code);
         }
-    
+
         return [
             'success' => true,
             'message' => 'Order status updated successfully',
             'data' => $order
         ];
     }
-    
+
     public function deleteOrder($orderCode)
     {
         // Tìm và xóa đơn hàng dựa trên order_code
         $order =  $this->model->where('order_code', $orderCode)->first();
-        
+
         if ($order) {
             // Xóa tất cả order_items liên quan (nếu có)
-            $order->orderItems()->delete(); 
-            
+            $order->orderItems()->delete();
+
             // Xóa đơn hàng
-            $order->delete(); 
+            $order->delete();
         }
     }
     public function updatePaymentStatus($orderCode, $status)
-{
-    // Tìm đơn hàng theo order_code và cập nhật trạng thái thanh toán
-    return $this->model->where('order_code', $orderCode)->update(['payment-status' => $status]);
-}
+    {
+        // Tìm đơn hàng theo order_code và cập nhật trạng thái thanh toán
+        return $this->model->where('order_code', $orderCode)->update(['payment-status' => $status]);
+    }
 
 
     /**
@@ -148,30 +149,32 @@ class OrderService extends BaseService
 
         return $totalAmount;
     }
-    public function generateUniqueOrderCode() {
+    public function generateUniqueOrderCode()
+    {
         do {
             // Tạo mã order code ngẫu nhiên
             $order_code = substr(str_replace('-', '', base_convert(Str::uuid()->getHex(), 16, 36)), 0, 10);
-    
+
             // Kiểm tra sự tồn tại trong cơ sở dữ liệu (tránh trùng lặp)
             $orderExists = Order::where('order_code', $order_code)->exists();
         } while ($orderExists);  // Lặp lại nếu mã bị trùng
-    
+
         return $order_code;  // Trả về mã duy nhất
     }
-    public function updateStockForOrder ($orderCode){
+    public function updateStockForOrder($orderCode)
+    {
         $order = Order::where('order_code', $orderCode)->first();
         if (!$order) {
             return false;  // Trả về false nếu không tìm thấy đơn hàng
         }
         // Lấy danh sách các sản phẩm và số lượng từ bảng order_items
         $orderItems = OrderItem::where('order_id', $order->id)->get();
-    
+
         foreach ($orderItems as $item) {
             // Nếu có product_variant_id, giảm stock trong bảng product_variants
             if ($item->product_variant_id) {
                 ProductVariant::where('id', $item->product_variant_id)->decrement('stock', $item->quantity);
-            } 
+            }
             // Nếu không có product_variant_id, giảm stock trong bảng products
             else {
                 Product::where('id', $item->product_id)->decrement('stock', $item->quantity);
@@ -183,26 +186,25 @@ class OrderService extends BaseService
     public function returnStockForOrder($orderCode)
     {
         $order = Order::where('order_code', $orderCode)->first();
-    
+
         if (!$order) {
             return false;  // Trả về false nếu không tìm thấy đơn hàng
         }
-    
+
         // Lấy danh sách các sản phẩm và số lượng từ bảng order_items
         $orderItems = OrderItem::where('order_id', $order->id)->get();
-    
+
         foreach ($orderItems as $item) {
             // Nếu có product_variant_id, cộng lại stock trong bảng product_variants
             if ($item->product_variant_id) {
                 ProductVariant::where('id', $item->product_variant_id)->increment('stock', $item->quantity);
-            } 
+            }
             // Nếu không có product_variant_id, cộng lại stock trong bảng products
             else {
                 Product::where('id', $item->product_id)->increment('stock', $item->quantity);
             }
         }
-    
+
         return true;  // Trả về true nếu hoàn trả stock thành công
     }
-    
 }

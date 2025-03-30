@@ -4,13 +4,13 @@ import { Link } from "react-router-dom";
 const LeftNavbar = () => {
 
   const menuItems = [
-    { link: "info", icon: "fa-user", label: "Personal Information" },
-    { link: "orders", icon: "fa-box", label: "My Orders" },
-    { link: "wishlists", icon: "fa-heart", label: "My Wishlists" },
-    { link: "manage-address", icon: "fa-map-marker-alt", label: "Manage Addresses" },
-    { link: "saved-cards", icon: "fa-credit-card", label: "Saved Cards" },
-    { link: "notifications", icon: "fa-bell", label: "Notifications" },
-    { link: "settings", icon: "fa-cog", label: "Settings" }, // Mục "Settings"
+    { link: "info", icon: "fa-user", label: "Thông tin cá nhân" },
+    { link: "orders", icon: "fa-box", label: "Đơn hàng của tôi" },
+    { link: "wishlists", icon: "fa-heart", label: "Sản phâm yêu thích" },
+    { link: "manage-address", icon: "fa-map-marker-alt", label: "Quản lý địa chỉ" },
+    { link: "saved-cards", icon: "fa-credit-card", label: "Thẻ đã lưu" },
+    { link: "notifications", icon: "fa-bell", label: "Thông báo" },
+    { link: "settings", icon: "fa-cog", label: "Cài đặt" },
   ];
 
   return (

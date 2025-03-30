@@ -34,6 +34,7 @@ import ReviewOrder from "./pages/ReviewOrder";
 import ThankYou from "./pages/ThankYou";
 import ForgotPassword from "./pages/ForgotPassword";
 import OtpVerification from "./pages/OtpVerification";
+import PrivateRouter from "./pages/PrivateRouter";
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
@@ -59,15 +60,17 @@ function App() {
                 <Route path="reviews" element={<Review />} />
               </Route>
 
-              <Route path="my-profile" element={<Profile />}>
-                <Route index element={<InfoProfile />} />
-                <Route path="info" element={<InfoProfile />} />
-                <Route path="settings" element={<Setting />} />
-                <Route path="orders" element={<MyOrder />} />
-                <Route path="notifications" element={<Notification />} />
-                <Route path="manage-address" element={<ManageAddress />} />
-                <Route path="saved-cards" element={<PaymentCards />} />
-                <Route path="wishlists" element={<Whishlist />} />
+              <Route path="my-profile" element={<PrivateRouter />}>
+                <Route path="" element={<Profile />}>
+                  <Route index element={<InfoProfile />} />
+                  <Route path="info" element={<InfoProfile />} />
+                  <Route path="settings" element={<Setting />} />
+                  <Route path="orders" element={<MyOrder />} />
+                  <Route path="notifications" element={<Notification />} />
+                  <Route path="manage-address" element={<ManageAddress />} />
+                  <Route path="saved-cards" element={<PaymentCards />} />
+                  <Route path="wishlists" element={<Whishlist />} />
+                </Route>
               </Route>
 
               <Route path="blog" element={<Blog />} />

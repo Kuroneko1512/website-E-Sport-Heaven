@@ -16,6 +16,7 @@ class AttributeValueSeeder extends Seeder
     {
         $attributes = ModelsAttribute::all();
 
+        ModelsAttribute::factory(10)->create();
         foreach ($attributes as $attribute) {
             AttributeValue::factory(5)->create(['attribute_id' => $attribute->id]);
         }

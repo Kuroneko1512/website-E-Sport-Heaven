@@ -13,13 +13,20 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        
+
         $categories = [
-            ['name' => 'Điện thoại'],
-            ['name' => 'Laptop'],
-            ['name' => 'Máy tính bảng'],
-            ['name' => 'Phụ kiện'],
-            ['name' => 'Thời trang'],
+            ['name' => 'Nam'],
+            ['name' => 'Nữ'],
+            ['name' => 'Giày Chạy Bộ'],
+            ['name' => 'Dép Chạy Bộ'],
+            ['name' => 'Áo Chạy Bộ'],
+            ['name' => 'Quần Chạy Bộ'],
+            ['name' => 'Giày Chạy Địa Hình'],
+            ['name' => 'Mũ Chạy Bộ'],
+            ['name' => 'Kính Chạy Bộ'],
+            ['name' => 'Tất Chạy Bộ'],
+            ['name' => 'Đồng Hồ'],
+            ['name' => 'Tai Nghe'],
         ];
 
         foreach ($categories as $category) {
