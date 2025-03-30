@@ -44,7 +44,7 @@ const ProductBestseller = () => {
   return (
     <div className="container mx-auto px-4">
       <h2 className="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">
-        Our Best Sellers
+        Sản phẩm chạy nhất
       </h2>
 
       {/* Grid responsive */}
@@ -66,7 +66,7 @@ const ProductBestseller = () => {
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <i className="far fa-heart absolute text-black dark:text-gray-300 top-5 right-5 border rounded-full border-[#D9D9D9] dark:border-gray-600 p-3 bg-[#D9D9D9] dark:bg-gray-700 hover:bg-white dark:hover:bg-gray-500"> </i>
                 <button className="bg-black dark:bg-gray-700 text-white dark:text-gray-300 py-2 px-4 rounded-lg mt-auto w-5/6 hover:bg-gray-800 dark:hover:bg-gray-600">
-                  Add to Cart
+                  Thêm vào giỏ hàng
                 </button>
               </div>
             </div>

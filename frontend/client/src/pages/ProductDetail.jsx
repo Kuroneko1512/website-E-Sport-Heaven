@@ -369,8 +369,8 @@ console.log(matchingVariant);
           </div>
         </main>
 
-              {/* Bộ 3 mô tả, thông tin , đánh giá */}
-        <div className="mt-8">
+        {/* Bộ 3 mô tả, thông tin , đánh giá */}
+        <div className="container mx-auto py-8 px-4 md:px-0">
           <div className="border-b border-gray-200 mb-4">
             <ul className="flex space-x-4">
               <Link
