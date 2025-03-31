@@ -10,7 +10,7 @@ import Login from "./pages/Login";
 import Notfound from "./pages/Notfound";
 import Shop from "./pages/Shop";
 import Blog from "./pages/Blog";
-import Story from "./pages/Story";
+import Story from "./pages/OrderTracking";
 import Contact from "./pages/Contact";
 import Register from "./pages/Register";
 import ProductDetail from "./pages/ProductDetail";
@@ -35,6 +35,8 @@ import ThankYou from "./pages/ThankYou";
 import ForgotPassword from "./pages/ForgotPassword";
 import OtpVerification from "./pages/OtpVerification";
 import PrivateRouter from "./pages/PrivateRouter";
+import BlogDetail from "./pages/BlogDetail";
+import OrderTracking from "./pages/OrderTracking";
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
@@ -53,7 +55,7 @@ function App() {
               <Route index element={<Home />} />
               <Route path="shop" element={<Shop />} />
 
-              <Route path="product-detail/:id" element={<ProductDetail />}>
+              <Route path="shop/product-detail/:id" element={<ProductDetail />}>
                 <Route path="descriptions" element={<Description />} />
                 <Route index element={<Description />} />
                 <Route path="information" element={<AdditionalInformation />} />
@@ -74,7 +76,8 @@ function App() {
               </Route>
 
               <Route path="blog" element={<Blog />} />
-              <Route path="story" element={<Story />} />
+              <Route path="blog/:id" element={<BlogDetail />} />
+              <Route path="transaction-history" element={<OrderTracking />} />
               <Route path="contact" element={<Contact />} />
               <Route path="*" element={<Notfound />} />
               <Route path="cart" element={<Checkout />} />
