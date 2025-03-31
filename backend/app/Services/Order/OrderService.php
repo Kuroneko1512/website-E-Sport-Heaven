@@ -101,7 +101,13 @@ class OrderService extends BaseService
      */
     public function getOrderByCode($orderCode)
     {
-        return $this->model->with('orderItems')->where('order_code', $orderCode)->firstOrFail();
+        return $this->model
+            ->with([
+                'orderItems.product',  // Load thông tin sản phẩm
+                'orderItems.productVariant' // Load thông tin biến thể (nếu có)
+            ])
+            ->where('order_code', $orderCode)
+            ->firstOrFail();
     }
     /**
      * Xử lý dữ liệu khách hàng trước khi tạo đơn hàng

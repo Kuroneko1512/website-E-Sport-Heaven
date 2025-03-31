@@ -234,7 +234,7 @@ const ProductDetail = () => {
                   <img
                     alt={product?.name}
                     className="w-full mb-4"
-                    src={displayImage}
+                    src={`http://127.0.0.1:8000/storage/${displayImage}`}
                   />
                 </div>
 
@@ -456,7 +456,7 @@ const ProductDetail = () => {
                     >
                       Mô tả
                     </Link>
-                    <Link
+                    {/* <Link
                       to="information"
                       className={`pb-2 ${
                         location.pathname.includes("information")
@@ -465,7 +465,7 @@ const ProductDetail = () => {
                       }`}
                     >
                       Thông tin bổ sung
-                    </Link>
+                    </Link> */}
                     <Link
                       to="reviews"
                       className={`pb-2 ${
