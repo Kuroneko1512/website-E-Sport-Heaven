@@ -6,16 +6,17 @@ use Exception;
 use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\AdminActivity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Passport\TokenRepository;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Passport\RefreshTokenRepository;
 
 class AuthService
 {
-    /**
-     * Xác thực đăng nhập
-     */
+    // Xác thực đăng nhập
     public function attemptLogin($identifier, $password, $accountType)
     {
         try {
@@ -36,6 +37,7 @@ class AuthService
             // Ghi log thông tin người dùng
             Log::info('User data', [
                 'user' => $user,
+                'user only' => $user ? $user->only(['id', 'email', 'phone', 'account_type']) : null,
             ]);
 
             // Kiểm tra mật khẩu
@@ -44,6 +46,10 @@ class AuthService
                     'account_type' => $accountType,
                     'time' => now(),
                 ]);
+
+                // Hook cho xử lý đăng nhập thất bại
+                $this->handleFailedLogin($identifier, $accountType);
+
                 return [
                     'success' => false,
                     'message' => 'Thông tin đăng nhập không hợp lệ',
@@ -59,12 +65,13 @@ class AuthService
                 'client_secret' => env('PASSPORT_CLIENT_SECRET'),
                 'username' => $user->phone ?? $user->email,
                 'password' => $password,
-                'scope' => '',
+                'scope' => '*',
             ];
 
             Log::info('Sending request to OAuth token endpoint', [
                 'url' => config('app.url') . '/oauth/token',
                 'data' => $dataToSend,
+                'data 2' => array_merge($dataToSend, ['client_secret' => '***']), // Ẩn client secret trong log
             ]);
 
             // Tạo request nội bộ
@@ -75,6 +82,10 @@ class AuthService
 
             $data = json_decode($response->getContent(), true);
 
+            if ($response->getStatusCode() !== 200) {
+                throw new Exception('Authentication failed: ' . ($data['message'] ?? 'Unknown error'));
+            }
+
             $tokenPayload = json_decode(base64_decode(explode('.', $data['access_token'])[1]));
 
             // Thời gian tạo token
@@ -82,7 +93,7 @@ class AuthService
 
             // Thời gian hết hạn
             $expiresAt = $createdAt->copy()->addSeconds($data['expires_in']);
-            
+
             // Ghi log phản hồi
             Log::info('Response from OAuth token endpoint', [
                 'response' => $data,
@@ -95,9 +106,8 @@ class AuthService
                 'expires_at' => $expiresAt->toDateTimeString(),
             ]);
 
-            if ($response->getStatusCode() !== 200) {
-                throw new Exception('Authentication failed');
-            }
+            // Hook cho xử lý đăng nhập thành công
+            $this->handleSuccessfulLogin($user, request()->ip(), request()->userAgent());
 
             // Trả về thông tin chi tiết
             return [
@@ -122,7 +132,9 @@ class AuthService
                 'code' => 200
             ];
         } catch (Exception $e) {
-            Log::error('Login failed: ' . $e->getMessage());
+            Log::error('Login failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             return [
                 'success' => false,
                 'message' => 'Đã xảy ra lỗi trong quá trình đăng nhập',
@@ -135,8 +147,34 @@ class AuthService
     }
 
     /**
-     * Làm mới token
+     * Hook xử lý khi đăng nhập thành công
+     * Các lớp con có thể ghi đè phương thức này để xử lý log
+     * 
+     * @param User $user
+     * @param string $ipAddress
+     * @param string $userAgent
+     * @return void
      */
+    protected function handleSuccessfulLogin($user, $ipAddress, $userAgent)
+    {
+        // Phương thức trống để các lớp con ghi đè
+    }
+
+    /**
+     * Hook xử lý khi đăng nhập thất bại
+     * Các lớp con có thể ghi đè phương thức này để xử lý log
+     * 
+     * @param string $identifier
+     * @param string $accountType
+     * @return void
+     */
+    protected function handleFailedLogin($identifier, $accountType)
+    {
+        // Phương thức trống để các lớp con ghi đè
+    }
+
+    // Làm mới token
+    // Làm mới token
     public function refreshToken($refreshToken, $accountType)
     {
         try {
@@ -151,12 +189,12 @@ class AuthService
                 'refresh_token' => $refreshToken,
                 'client_id' => env('PASSPORT_CLIENT_ID'),
                 'client_secret' => env('PASSPORT_CLIENT_SECRET'),
-                'scope' => '',
+                'scope' => '*',
             ];
 
             Log::info('Sending request to OAuth token endpoint for refresh', [
                 'url' => config('app.url') . '/oauth/token',
-                'data' => $dataToSend,
+                'data' => array_merge($dataToSend, ['client_secret' => '***']), // Ẩn client secret trong log
             ]);
 
             // Tạo request nội bộ
@@ -167,6 +205,10 @@ class AuthService
 
             $data = json_decode($response->getContent(), true);
 
+            if ($response->getStatusCode() !== 200) {
+                throw new Exception('Refresh token failed: ' . ($data['message'] ?? 'Unknown error'));
+            }
+
             $tokenPayload = json_decode(base64_decode(explode('.', $data['access_token'])[1]));
 
             // Thời gian tạo token
@@ -174,13 +216,16 @@ class AuthService
 
             // Thời gian hết hạn
             $expiresAt = $createdAt->copy()->addSeconds($data['expires_in']);
-            
+
             // Lấy thông tin Users
             $userId = $tokenPayload->sub;
             $user = User::findOrFail($userId);
+
+            // Lấy token ID (jti) từ payload
+            $tokenId = $tokenPayload->jti ?? null;
+
             // Ghi log phản hồi
             Log::info('Response from OAuth token endpoint', [
-                'response' => $data,
                 'status' => $response->getStatusCode(),
                 'iat' => $tokenPayload->iat,
                 'user_id' => $tokenPayload->sub,
@@ -188,16 +233,16 @@ class AuthService
                 'now' => now()->toDateTimeString(),
                 'created_at' => $createdAt->toDateTimeString(),
                 'expires_at' => $expiresAt->toDateTimeString(),
+                'token_id' => $tokenId,
             ]);
 
-            if ($response->getStatusCode() !== 200) {
-                throw new Exception('Refresh token failed');
-            }
+            // Gọi hook để xử lý log làm mới token
+            $this->handleSuccessfulTokenRefresh($user, request()->ip(), request()->userAgent(), $tokenId);
 
             // Trả về thông tin chi tiết
             return [
                 'success' => true,
-                'message' => 'Đăng nhập thành công',
+                'message' => 'Làm mới token thành công',
                 'data' => [
                     'access_token' => $data['access_token'],
                     'refresh_token' => $data['refresh_token'],
@@ -217,7 +262,9 @@ class AuthService
                 'code' => 200
             ];
         } catch (Exception $e) {
-            Log::error('Refresh token failed: ' . $e->getMessage());
+            Log::error('Refresh token failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             return [
                 'success' => false,
                 'message' => 'Đã xảy ra lỗi trong quá trình làm mới token',
@@ -230,8 +277,37 @@ class AuthService
     }
 
     /**
-     * Đăng xuất
+     * Hook xử lý khi làm mới token thành công
+     * Các lớp con có thể ghi đè phương thức này để xử lý log
+     * 
+     * @param User $user
+     * @param string $ipAddress
+     * @param string $userAgent
+     * @param string|null $tokenId
+     * @return void
      */
+    protected function handleSuccessfulTokenRefresh($user, $ipAddress, $userAgent, $tokenId = null)
+    {
+        // Phương thức trống để các lớp con ghi đè
+    }
+
+    /**
+     * Hook xử lý khi đăng xuất thành công
+     * Các lớp con có thể ghi đè phương thức này để xử lý log
+     * 
+     * @param User $user
+     * @param string $ipAddress
+     * @param string $userAgent
+     * @param string|null $tokenId
+     * @return void
+     */
+    protected function handleSuccessfulLogout($user, $ipAddress, $userAgent, $tokenId = null)
+    {
+        // Phương thức trống để các lớp con ghi đè
+    }
+
+    // Đăng xuất
+    // Đăng xuất
     public function logout(Request $request)
     {
         try {
@@ -245,26 +321,80 @@ class AuthService
                     'code' => 404
                 ];
             }
+
             Log::info('Người dùng đăng xuất', [
                 'data' => $user->toArray(),
                 'request' => $request->all()
             ]);
-            
+
             // Lấy token hiện tại
-            $accessToken = $request->bearerToken();
+            $bearerToken = $request->bearerToken();
+            $tokenId = null;
 
-            // Revoke các refresh token liên quan
-            $refreshTokenRepository = app(\Laravel\Passport\RefreshTokenRepository::class);
-            $refreshTokenRepository->revokeRefreshTokensByAccessTokenId($accessToken);
+            if ($bearerToken) {
+                try {
+                    // Giải mã JWT để lấy jti (JWT ID)
+                    $tokenParts = explode('.', $bearerToken);
 
-            // Revoke access token
-            $tokenRepository = app(\Laravel\Passport\TokenRepository::class);
-            $tokenRepository->revokeAccessToken($accessToken);
+                    if (count($tokenParts) === 3) {
+                        $payload = json_decode(base64_decode($tokenParts[1]), true);
+                        if (isset($payload['jti'])) {
+                            $tokenId = $payload['jti'];
 
-            // Ghi log đăng xuất
-            Log::info('Người dùng đăng xuất', [
-                'data' => $user
-            ]);
+                            // Khởi tạo repositories
+                            $tokenRepository = app(TokenRepository::class);
+                            $refreshTokenRepository = app(RefreshTokenRepository::class);
+
+                            // Thu hồi access token
+                            $tokenRepository->revokeAccessToken($tokenId);
+
+                            // Thu hồi tất cả refresh token liên quan
+                            $refreshTokenRepository->revokeRefreshTokensByAccessTokenId($tokenId);
+
+                            Log::info('Token đã được thu hồi', [
+                                'token_id' => $tokenId,
+                                'method' => 'jti'
+                            ]);
+                        } else {
+                            Log::warning('Không tìm thấy jti trong JWT payload');
+                        }
+                    } else {
+                        Log::warning('Token không có định dạng JWT hợp lệ');
+                    }
+
+                    // Nếu không thể thu hồi bằng jti, thử thu hồi tất cả token của user
+                    if (!$tokenId) {
+                        DB::table('oauth_access_tokens')
+                            ->where('user_id', $user->id)
+                            ->where('revoked', 0)
+                            ->update(['revoked' => true]);
+
+                        Log::info('Đã thu hồi tất cả token của user', [
+                            'user_id' => $user->id,
+                            'method' => 'fallback'
+                        ]);
+                    }
+                } catch (Exception $tokenException) {
+                    Log::warning('Lỗi khi thu hồi token: ' . $tokenException->getMessage());
+
+                    // Fallback: Thu hồi tất cả token của user
+                    DB::table('oauth_access_tokens')
+                        ->where('user_id', $user->id)
+                        ->where('revoked', 0)
+                        ->update(['revoked' => true]);
+                }
+            } else {
+                Log::warning('Không tìm thấy bearer token trong request');
+
+                // Thu hồi tất cả token của user
+                DB::table('oauth_access_tokens')
+                    ->where('user_id', $user->id)
+                    ->where('revoked', 0)
+                    ->update(['revoked' => true]);
+            }
+
+            // Gọi hook để xử lý log đăng xuất
+            $this->handleSuccessfulLogout($user, $request->ip(), $request->userAgent(), $tokenId);
 
             DB::commit();
             return [
@@ -287,9 +417,9 @@ class AuthService
         }
     }
 
-    /**
-     * Xác thực dữ liệu đăng nhập
-     */
+
+
+    // Xác thực dữ liệu đăng nhập
     public function validateLoginData($data)
     {
         return Validator::make($data, [
@@ -310,14 +440,12 @@ class AuthService
         ]);
     }
 
-    /**
-     * Cập nhật thống tin người dùng
-     */
+    // Cập nhật thống tin người dùng
     public function updateUser(Request $request)
     {
         try {
             DB::beginTransaction();
-            
+
             $user = $request->user();
             if (!$user) {
                 return [
@@ -329,7 +457,11 @@ class AuthService
             }
 
             $data = $request->only([
-                'name', 'email', 'phone', 'password', 'avatar'
+                'name',
+                'email',
+                'phone',
+                'password',
+                'avatar'
             ]);
 
             $validator = Validator::make($data, [
@@ -358,6 +490,21 @@ class AuthService
                 ];
             }
 
+            // Lưu giá trị cũ TRƯỚC KHI cập nhật
+            $oldValues = [];
+            $fieldsToTrack = ['name', 'email', 'phone', 'avatar'];
+            foreach ($fieldsToTrack as $field) {
+                if (isset($data[$field])) {
+                    $oldValues[$field] = $user->$field;
+                }
+            }
+
+            // Đánh dấu nếu có thay đổi mật khẩu
+            $passwordChanged = isset($data['password']) && !empty($data['password']);
+            if ($passwordChanged) {
+                $oldValues['password'] = '[HIDDEN]';
+            }
+
             // Xử lý avatar nếu có
             if ($request->hasFile('avatar')) {
                 $path = $request->file('avatar')->store('avatars', 'public');
@@ -365,11 +512,41 @@ class AuthService
             }
 
             // Hash password nếu có thay đổi
-            if (isset($data['password'])) {
+            if ($passwordChanged) {
                 $data['password'] = Hash::make($data['password']);
+            } else {
+                unset($data['password']); // Loại bỏ password nếu không thay đổi
             }
 
+            // Cập nhật user
             $user->update($data);
+
+            // Chuẩn bị giá trị mới cho log
+            $newValues = [];
+            foreach ($fieldsToTrack as $field) {
+                if (isset($data[$field])) {
+                    $newValues[$field] = $user->$field;
+                }
+            }
+
+            if ($passwordChanged) {
+                $newValues['password'] = '[HIDDEN]';
+            }
+
+            // Xác định các trường đã thay đổi
+            $changedFields = [];
+            foreach ($oldValues as $field => $oldValue) {
+                if ($field === 'password' && $passwordChanged) {
+                    $changedFields[] = 'password';
+                } elseif (isset($newValues[$field]) && $oldValue !== $newValues[$field]) {
+                    $changedFields[] = $field;
+                }
+            }
+
+            // Gọi phương thức hook để các lớp con có thể xử lý log
+            if (!empty($changedFields)) {
+                $this->afterUserUpdate($request, $user, $oldValues, $newValues, $changedFields);
+            }
 
             DB::commit();
             return [
@@ -390,5 +567,21 @@ class AuthService
                 'code' => 500
             ];
         }
+    }
+
+    /**
+     * Hook được gọi sau khi cập nhật thông tin người dùng
+     * Các lớp con có thể ghi đè phương thức này để xử lý log
+     * 
+     * @param Request $request
+     * @param User $user
+     * @param array $oldValues
+     * @param array $newValues
+     * @param array $changedFields
+     * @return void
+     */
+    protected function afterUserUpdate(Request $request, $user, $oldValues, $newValues, $changedFields)
+    {
+        // Phương thức trống để các lớp con ghi đè
     }
 }

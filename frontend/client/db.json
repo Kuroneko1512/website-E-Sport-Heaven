@@ -77,6 +77,14 @@
       "confirmPassword": "11111111",
       "terms": true,
       "id": 6
+    },
+    {
+      "email": "beta@gmail.com",
+      "password": "$2a$10$0noaHLqfUz4XF000TywgQuL9yC/MUKf9y2.LYLGnFfJxypVk1brUW",
+      "fullname": "beta",
+      "confirmPassword": "a12345678",
+      "terms": true,
+      "id": 7
     }
   ],
   "products": [

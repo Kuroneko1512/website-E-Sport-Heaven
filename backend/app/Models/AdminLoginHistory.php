@@ -9,6 +9,9 @@ class AdminLoginHistory extends Model
 {
     use HasFactory;
 
+    // Chỉ định tên bảng chính xác
+    protected $table = 'admin_login_history';
+    
     // Các trường có thể gán giá trị hàng loạt
     protected $fillable = [
         'admin_id',         // ID admin đăng nhập

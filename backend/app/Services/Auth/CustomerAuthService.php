@@ -13,25 +13,19 @@ use Illuminate\Support\Facades\Validator;
 
 class CustomerAuthService extends AuthService
 {
-    /**
-     * Xác thực đăng nhập cho Customer
-     */
+    // Xác thực đăng nhập cho Customer
     public function attemptLogin($identifier, $password,$accountType = null)
     {
         return parent::attemptLogin($identifier, $password, 'customer');
     }
 
-    /**
-     * Làm mới token cho Customer
-     */
+    // Làm mới token cho Customer
     public function refreshToken($refreshToken,$accountType = null)
     {
         return parent::refreshToken($refreshToken, 'customer');
     }
 
-    /**
-     * Đăng ký tài khoản mới cho Customer
-     */
+    // Đăng ký tài khoản mới cho Customer
     public function register($data)
     {
         try {
@@ -111,9 +105,7 @@ class CustomerAuthService extends AuthService
         }
     }
 
-    /**
-     * Xác thực dữ liệu đăng ký
-     */
+    // Xác thực dữ liệu đăng ký
     private function validateRegisterData($data)
     {
         return Validator::make($data, [

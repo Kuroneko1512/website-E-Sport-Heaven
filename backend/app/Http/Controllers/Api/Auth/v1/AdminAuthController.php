@@ -16,9 +16,7 @@ class AdminAuthController extends Controller
         $this->adminAuthService = $adminAuthService;
     }
 
-    /**
-     * Format response chuẩn cho API
-     */
+    // Format response chuẩn cho API
     private function responseJson($success, $message = '', $data = [], $code = 200)
     {
         return response()->json([
@@ -28,9 +26,7 @@ class AdminAuthController extends Controller
         ], $code);
     }
 
-    /**
-     * Đăng nhập admin
-     */
+    // Đăng nhập admin
     public function login(Request $request)
     {
         // Validate dữ liệu
@@ -56,9 +52,7 @@ class AdminAuthController extends Controller
         );
     }
 
-    /**
-     * Làm mới token
-     */
+    // Làm mới token
     public function refreshToken(Request $request)
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
@@ -79,12 +73,23 @@ class AdminAuthController extends Controller
         );
     }
 
-    /**
-     * Đăng xuất
-     */
+    // Đăng xuất
     public function logout(Request $request)
     {
         $result = $this->adminAuthService->logout($request);
+
+        return $this->responseJson(
+            $result['success'],
+            $result['message'],
+            $result['data'],
+            $result['code']
+        );
+    }
+
+    // Cập nhật thông tin tài khoản
+    public function updateAccount(Request $request)
+    {
+        $result = $this->adminAuthService->updateUser($request);
 
         return $this->responseJson(
             $result['success'],
