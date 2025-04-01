@@ -23,7 +23,6 @@ class ProductController extends Controller
     public function __construct(ProductService $productService)
     {
         $this->productService = $productService;
-       
     }
     public function index()
     {
@@ -38,7 +37,7 @@ class ProductController extends Controller
             // Trường hợp có lỗi xảy ra khi lấy dữ liệu
             return response()->json([
                 'errnor' => 'lấy thất bại',
-                'mess'=>$th,
+                'mess' => $th,
                 'status' => 500
             ], 500); // Trả về mã lỗi 500 (Internal Server Error)
         }
@@ -49,15 +48,15 @@ class ProductController extends Controller
      */
     public function store(ProductStoreRequest $request)
     {
-     
+
         DB::beginTransaction();
         try {
 
             // Validate và lấy dữ liệu từ request
             $data = $request->validated();
-             //tạo sp
+            //tạo sp
             $product = $this->productService->createProduct($data);
-           
+
             DB::commit();
             return response()->json([
                 'message' => 'Thuộc tính đã được tạo thành công!', // Thông báo thành công
@@ -120,28 +119,28 @@ class ProductController extends Controller
      */
     public function update(ProductUpdateRequest $request, $id)
     {
-      
+
         try {
             // Validate và lấy dữ liệu từ request
-          $data = $request->validated();
-          
-          // Gọi service để cập nhật thuộc tính
-          $Product = $this->productService->updateProduct($data,$id);
+            $data = $request->validated();
 
-          return response()->json([
-              'message' => 'Thuộc tính đã được sửa thành công!', // Thông báo thành công
-              'data' => $Product,
-              'status'=>200
-          ], 200);// Trả về mã trạng thái 200 (OK)
+            // Gọi service để cập nhật thuộc tính
+            $Product = $this->productService->updateProduct($data, $id);
 
-      } catch (Exception $e) {
-          // Trường hợp có lỗi xảy ra khi cập nhật thuộc tính
-          return response()->json([
-              'message' => 'Lỗi khi xử lý dữ liệu.',
-              'error' => $e->getMessage(),
-              'status'=>500
-          ], 500); // Trả về mã lỗi 500 (Internal Server Error)
-      }
+            return response()->json([
+                'message' => 'Thuộc tính đã được sửa thành công!', // Thông báo thành công
+                'data' => $Product,
+                'status' => 200
+            ], 200); // Trả về mã trạng thái 200 (OK)
+
+        } catch (Exception $e) {
+            // Trường hợp có lỗi xảy ra khi cập nhật thuộc tính
+            return response()->json([
+                'message' => 'Lỗi khi xử lý dữ liệu.',
+                'error' => $e->getMessage(),
+                'status' => 500
+            ], 500); // Trả về mã lỗi 500 (Internal Server Error)
+        }
     }
 
     /**
@@ -155,16 +154,47 @@ class ProductController extends Controller
             return response()->json([
                 'message' => 'Thuộc tính đã được xóa',
                 'data' => $atr,
-                'status'=>200
-            ], 200);// Trả về mã trạng thái 200 (OK)
+                'status' => 200
+            ], 200); // Trả về mã trạng thái 200 (OK)
 
         } catch (Exception $e) {
-               // Trường hợp có lỗi xảy ra khi xóa thuộc tính
+            // Trường hợp có lỗi xảy ra khi xóa thuộc tính
             return response()->json([
                 'message' => 'Lỗi khi xử lý dữ liệu.',
                 'error' => $e->getMessage()  // Lỗi cụ thể
-            ], 500);// Trả về mã lỗi 500 (Internal Server Error)
+            ], 500); // Trả về mã lỗi 500 (Internal Server Error)
         }
     }
-  
+    public function searchProducts(Request $request)
+    {
+        
+        $request->validate([
+            'q' => 'required|string|min:1',
+        ]);
+
+        $products = $this->productService->searchProduct($request->q, $request->paginate ?? 12);
+
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+        ], 200
+    );
+    }
+    public function getProductFillterAll(Request $request){
+        $filters = [
+            'category_id' => $request->input('category_id'),
+            'min_price'   => $request->input('min_price'),
+            'max_price'   => $request->input('max_price'),
+            'attributes'  => is_string($request->input('attributes')) 
+                            ? explode(',', $request->input('attributes')) 
+                            : [],
+        ];
+      
+        $products = $this->productService->getProductFiterAll($filters, $request->paginate ?? 12);
+    
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+        ], 200);
+    }
 }

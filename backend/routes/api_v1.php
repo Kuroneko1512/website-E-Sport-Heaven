@@ -13,7 +13,8 @@ Route::prefix('v1')->group(callback: function (){
     Route::apiResource('/attribute',AttributeController::class);
     Route::get('/category/indexNoPagination', [CategoryController::class, 'indexNoPagination']);
     Route::apiResource('/category',CategoryController::class);
- 
+    Route::get('/product/search', [ProductController::class, 'searchProducts']);
+    Route::get('/product/fillter', [ProductController::class, 'getProductFillterAll']);
     Route::apiResource('/product',ProductController::class);
     Route::get('/product/{id}/Detail',[ProductController::class,'showForDetails']);
     Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);

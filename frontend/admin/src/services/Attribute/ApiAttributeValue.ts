@@ -7,11 +7,6 @@ export type AttributeValue = {
   description?: string;
   image?: string;
 };
-export interface ApiResponse<T> {
-  data: T;
-  message?: string;
-  status?: number;
-}
 
 
 export interface Pagination {
