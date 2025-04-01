@@ -29,6 +29,7 @@ class ReviewStoreRequest extends FormRequest
     {
         return [
             'product_id' => 'required|exists:products,id',
+            'product_variant_id' => 'nullable|exists:product_variants,id',
             'user_id' => 'required|exists:users,id',
             'rating' => 'required|min:1|max:5',
             'title' => 'nullable|string|max:255',
@@ -41,6 +42,7 @@ class ReviewStoreRequest extends FormRequest
         return [
             'product_id.required' => 'Sản phẩm không được để trống.',
             'product_id.exists'   => 'Sản phẩm không tồn tại trong hệ thống.',
+            'product_variant_id.exists'   => 'Sản phẩm không tồn tại trong hệ thống.',
             'user_id.required' => 'Người mua không được để trống.',
             'user_id.exists'   => 'Người mua không tồn tại trong hệ thống.',
             'rating.required' => 'Đánh giá không được để trống.',
