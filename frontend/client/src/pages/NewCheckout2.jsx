@@ -22,8 +22,6 @@ const { Option } = Select;
 
 const NewCheckout = () => {
   const isLogin = useSelector((state) => state.auth.isLogin);
-  const [useNewAddress, setUseNewAddress] = useState(false);
-  const [showAddressModal, setShowAddressModal] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [form] = Form.useForm();
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -37,9 +35,14 @@ const NewCheckout = () => {
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
-  const [order, setOrder] = useState({});
+  const [order, setOrder] = useState({
+    customer_name: "",
+    customer_email: "",
+    customer_phone: "",
+    shipping_address: "",
+    order_items: [],
+  });
   const [paymentMethod, setPaymentMethod] = useState("cod");
-  const [defaultAddr, setDefaultAddr] = useState({});
 
   // useEffect(() => {
   //   axios.get('https://provinces.open-api.vn/api/p/')
@@ -106,21 +109,7 @@ const NewCheckout = () => {
 
     if (cartItems) setCartItems(JSON.parse(cartItems));
     if (cartTotal) setCartTotal(JSON.parse(cartTotal));
-  }, []);
-
-  const handleDeleteAddress = (id) => {
-    Modal.confirm({
-      title: "Xác nhận xóa địa chỉ",
-      content: "Bạn có chắc muốn xóa địa chỉ này?",
-      cancelText: "Hủy",
-      onOk: () => {
-        const updated = addresses.filter((addr) => addr.id !== id);
-        setAddresses(updated);
-        localStorage.setItem("addresses", JSON.stringify(updated));
-        message.success("Đã xóa địa chỉ");
-      },
-    });
-  };
+  }, [selectedProvince, selectedDistrict, selectedWard]);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -130,8 +119,7 @@ const NewCheckout = () => {
   const calculateGrandTotal = () => {
     const subtotal = cartItems.reduce(
       (total, item) =>
-        total +
-        (item.price - (item.price * item.discount) / 100) * item.quantity,
+        total + (item.price - (item.price * item.discount) / 100) * item.quantity,
       0
     );
     const shippingFee = 5000;
@@ -144,51 +132,29 @@ const NewCheckout = () => {
   };
 
   const handleSubmit = async () => {
-    let shippingAddress;
-    let customerData;
-
-    if (useNewAddress) {
-      if (
-        !order.customer_name ||
-        !order.customer_phone ||
-        !order.customer_email
-      ) {
-        message.error("Vui lòng nhập đầy đủ thông tin");
-        return;
-      }
-      shippingAddress = `${order.specificAddress}, ${
-        wards.find((w) => w.code === selectedWard)?.name
-      }, ${districts.find((d) => d.code === selectedDistrict)?.name}, ${
-        provinces.find((p) => p.code === selectedProvince)?.name
-      }`;
-      customerData = { ...order };
-    } else {
-      const addr = addresses.find((a) => a.id === selectedAddress);
-      if (!addr) {
-        message.error("Vui lòng chọn địa chỉ giao hàng");
-        return;
-      }
-      shippingAddress = `${addr.specificAddress}, ${addr.ward}, ${addr.district}, ${addr.province}`;
-      customerData = {
-        customer_name: addr.fullname,
-        customer_phone: addr.mobile,
-        customer_email: addr.email,
-      };
-    }
+    const shippingAddressParts = [
+      wards.find((w) => parseFloat(w.code) === parseFloat(selectedWard))?.name,
+      districts.find((d) => parseFloat(d.code) === parseFloat(selectedDistrict))
+        ?.name,
+      provinces.find((p) => parseFloat(p.code) === parseFloat(selectedProvince))
+        ?.name,
+    ]
+      .filter(Boolean)
+      .join(", ");
 
     if (
-      !customerData.customer_name ||
-      !customerData.customer_phone ||
-      !customerData.customer_email ||
-      !shippingAddress
+      !order.customer_name ||
+      !order.customer_phone ||
+      !order.customer_email ||
+      !shippingAddressParts
     ) {
       message.error("Vui lòng điền đầy đủ thông tin!");
       return;
     }
 
     const orderData = {
-      ...customerData, // ✅ Ưu tiên dữ liệu vừa build đúng logic
-      shipping_address: shippingAddress,
+      ...order,
+      shipping_address: shippingAddressParts,
       amount: calculateGrandTotal(),
       order_items: cartItems.map((item) => ({
         product_id: item.product_id,
@@ -217,19 +183,11 @@ const NewCheckout = () => {
         // Lọc các item trong cartItems, giữ lại những item không trùng với checkoutItems
         cartItems = cartItems.filter(
           (item) =>
-            !checkoutItems.some(
-              (checkoutItem) =>
-                checkoutItem.product_id === item.product_id &&
-                checkoutItem.variant_id === item.variant_id
-            )
+            !checkoutItems.some((checkoutItem) => checkoutItem.id === item.id)
         );
 
         // Cập nhật lại localStorage sau khi đã loại bỏ các item trùng
-        fetch(
-          localStorage.setItem("cartItems", JSON.stringify(cartItems))
-        ).then(() => {
-          localStorage.removeItem("checkoutItems");
-        });
+        localStorage.setItem("cartItems", JSON.stringify(cartItems));
         setCartItems([]);
         setCartTotal(0);
         setOrder({
@@ -247,237 +205,238 @@ const NewCheckout = () => {
     }
   };
 
-  useEffect(() => {
-    const defaultAdd = addresses.find((addr) => addr.id === selectedAddress);
-    setDefaultAddr(
-      defaultAdd || {
-        fullname: "",
-        mobile: "",
-        specificAddress: "",
-        email: "",
-        ward: "",
-        district: "",
-        province: "",
-      }
-    );
-    setOrder({
-      ...order,
-      customer_name: defaultAdd?.fullname || "",
-      customer_email: defaultAdd?.email || "",
-      customer_phone: defaultAdd?.mobile || "",
-    });
-  }, [selectedAddress, addresses]);
+  const handleSuccess = (id) => {
+    const dataform = addresses.find((addr) => addr.id === id);
+    if (dataform) {
+      form.setFieldsValue({
+        fullname: dataform.fullname,
+        mobile: dataform.mobile,
+        specificAddress: dataform.specificAddress,
+        ward: dataform.ward,
+        district: dataform.district,
+        province: dataform.province,
+      });
+      setSelectedProvince(
+        provinces.find((p) => p.name === dataform.province)?.code || ""
+      );
+      setSelectedDistrict(
+        districts.find((d) => d.name === dataform.district)?.code || ""
+      );
+      setSelectedWard(wards.find((w) => w.name === dataform.ward)?.code || "");
+    }
+    setOrder((prev) => ({
+      ...prev,
+      customer_name: dataform.lastName + " " + dataform.firstName,
+      customer_phone: dataform.mobile,
+      shipping_address:
+        dataform.specificAddress +
+        ", " +
+        dataform.ward +
+        ", " +
+        dataform.district +
+        ", " +
+        dataform.province,
+      order_items: cartItems.map((item) => ({
+        product_id: item.product_id,
+        product_variant_id: item.variant_id || null,
+        quantity: item.quantity,
+        price: item.price,
+        discount: item.discount,
+      })),
+    }));
+  };
 
   return (
     <div className="p-6 bg-white">
+      {/* Thanh toán */}
       <Title level={2}>Thanh toán</Title>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="col-span-2">
+          {/* Địa chỉ giao hàng theo user*/}
+          {isLogin && (
+            <div className="p-6 bg-white">
+              <Title level={3}>Chọn địa chỉ giao hàng</Title>
 
-      <div className="mb-4">
-        <Text strong>Địa chỉ giao hàng:</Text>{" "}
-        {defaultAddr
-          ? `${defaultAddr.fullname} - ${defaultAddr.mobile} - ${defaultAddr.specificAddress}, ${defaultAddr.ward}, ${defaultAddr.district}, ${defaultAddr.province}`
-          : "Chưa chọn địa chỉ"}
-        {isLogin && addresses.length > 0 && (
-          <Button type="link" onClick={() => setShowAddressModal(true)}>
-            Thay đổi
-          </Button>
-        )}
-      </div>
-
-      {isLogin && addresses.length > 0 && (
-        <Button
-          type="default"
-          onClick={() => setUseNewAddress((useNewAddress) => !useNewAddress)}
-        >
-          Sử dụng địa chỉ khác
-        </Button>
-      )}
-
-      {(useNewAddress || !isLogin || addresses.length < 1) && (
-        <Card title="Địa chỉ mới">
-          <Form layout="vertical" form={form}>
-            <Form.Item label="Tên" required>
-              <Input
-                id="customer_name"
-                value={order.customer_name}
-                onChange={handleInputChange}
-              />
-            </Form.Item>
-            <Form.Item label="Số điện thoại" required>
-              <Input
-                id="customer_phone"
-                value={order.customer_phone}
-                onChange={handleInputChange}
-              />
-            </Form.Item>
-            <Form.Item label="Email" required>
-              <Input
-                id="customer_email"
-                value={order.customer_email}
-                onChange={handleInputChange}
-              />
-            </Form.Item>
-            <Form.Item label="Địa chỉ cụ thể" required>
-              <Input
-                onChange={(e) =>
-                  setOrder({ ...order, specificAddress: e.target.value })
-                }
-              />
-            </Form.Item>
-            <Form.Item
-              label="Tỉnh/Thành phố"
-              name="province"
-              rules={[
-                { required: true, message: "Vui lòng chọn tỉnh/thành phố" },
-              ]}
-            >
-              <Select
-                placeholder="Chọn Tỉnh/Thành phố"
-                value={selectedProvince}
-                onChange={(value) => {
-                  setSelectedProvince(value);
-                  setDistricts([]);
-                  setWards([]);
-                  setSelectedDistrict("");
-                  setSelectedWard("");
-                }}
-              >
-                {provinces.map((province) => (
-                  <Option key={province.code} value={province.code}>
-                    {province.name}
-                  </Option>
+              <div className="space-y-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-end">
+                {addresses.map((address) => (
+                  <div
+                    key={address.id}
+                    onClick={() => handleSelectAddress(address.id)}
+                    className={`border w-full h-full p-4 rounded ${
+                      selectedAddress === address.id
+                        ? "border-black border-2"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="cursor-pointer w-full">
+                        <h2 className="font-bold text-lg">
+                          {address.fullname} - {address.mobile}
+                        </h2>
+                        <p>
+                          {address.specificAddress}, {address.ward},{" "}
+                          {address.district}, {address.province}
+                        </p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="small"
+                          danger
+                          onClick={() => handleDelete(address.id)}
+                        >
+                          Xóa
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </Select>
-            </Form.Item>
-            <Form.Item
-              label="Quận/Huyện"
-              name="district"
-              rules={[{ required: true, message: "Vui lòng chọn quận/huyện" }]}
-            >
-              <Select
-                placeholder="Chọn Quận/Huyện"
-                value={selectedDistrict}
-                onChange={(value) => {
-                  setSelectedDistrict(value);
-                  setWards([]);
-                  setSelectedWard("");
-                }}
-                disabled={!selectedProvince}
-              >
-                {districts.map((d) => (
-                  <Option key={d.code} value={d.code}>
-                    {d.name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item
-              label="Phường/Xã"
-              name="ward"
-              rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
-            >
-              <Select
-                placeholder="Chọn Phường/Xã"
-                value={selectedWard}
-                onChange={setSelectedWard}
-                disabled={!selectedDistrict}
-              >
-                {wards.map((w) => (
-                  <Option key={w.code} value={w.code}>
-                    {w.name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Form>
-        </Card>
-      )}
-
-      <Divider />
-      <Card title="Thông tin đơn hàng">
-        <List
-          dataSource={cartItems}
-          renderItem={(item) => (
-            <List.Item>
-              <Text>
-                {item.name} (x{item.quantity})
-              </Text>
-              <Text>
-                {FomatVND(
-                  (item.price - (item.price * item.discount) / 100) *
-                    item.quantity
-                )}
-              </Text>
-            </List.Item>
-          )}
-        />
-        <Divider />
-        <div className="grid grid-cols-4 gap-4">
-          <div className="col-span-3 space-y-4">
-            <Text strong>Phương thức thanh toán:</Text>{" "}<br/>
-            <Radio.Group
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              value={paymentMethod}
-            >
-              <Radio value="cod">Thanh toán khi nhận hàng (COD)</Radio>
-              <Radio value="vnpay">Thanh toán qua VNPay</Radio>
-            </Radio.Group>
-          </div>{" "}
-          <div>
-            <Input
-              placeholder="Nhập mã giảm giá"
-              value={discountCode}
-              onChange={(e) => setDiscountCode(e.target.value)}
-              addonAfter={
-                <Button onClick={handleApplyDiscount}>Áp dụng</Button>
-              }
-            />
-          </div>
-        </div>
-        <Divider />
-        <div className="text-right">
-          <Text strong>Tổng cộng: {FomatVND(calculateGrandTotal())}</Text>
-        </div>
-        <div className="text-right">
-        <Button type="primary" block className="mt-4 !w-1/4" onClick={handleSubmit}>
-          Tiếp tục thanh toán
-        </Button>
-        </div>
-      </Card>
-
-      <Modal
-        open={showAddressModal}
-        onCancel={() => setShowAddressModal(false)}
-        footer={null}
-        title="Chọn địa chỉ giao hàng"
-      >
-        {addresses.map((addr) => (
-          <Card key={addr.id} className="mb-2">
-            <div className="flex">
-              <div>
-                <p>
-                  {addr.fullname} - {addr.mobile}
-                </p>
-                <p>
-                  {addr.specificAddress}, {addr.ward}, {addr.district},{" "}
-                  {addr.province}
-                </p>
               </div>
-              <div className="flex items-center">
-                <Button
-                  type="link"
-                  onClick={() => handleSelectAddress(addr.id)}
-                >
-                  Chọn
-                </Button>
-                <Button danger onClick={() => handleDeleteAddress(addr.id)}>
-                  Xóa
-                </Button>
-              </div>
+
+              <Button
+                type="primary"
+                block
+                className="mt-6"
+                disabled={!selectedAddress}
+                onClick={() => handleSuccess(selectedAddress)}
+              >
+                Giao đến địa chỉ này
+              </Button>
             </div>
+          )}
+
+          {/* Thêm địa chỉ giao hàng */}
+          <Card title="Địa chỉ giao hàng">
+            <Form layout="vertical" form={form}>
+              <Form.Item label="Tên" name="fullname" rules={[{ required: true, message: "Vui lòng nhập tên" }]}>
+                <Input
+                  id="customer_name"
+                  value={order.customer_name}
+                  onChange={handleInputChange}
+                />
+              </Form.Item>
+              <Form.Item label="Số điện thoại" name="mobile" rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}>
+                <Input
+                  id="customer_phone"
+                  value={order.customer_phone}
+                  onChange={handleInputChange}
+                />
+              </Form.Item>
+              <Form.Item label="Email" name="email" rules={[{ required: true, type: "email", message: "Email không hợp lệ" }]}>
+                <Input
+                  id="customer_email"
+                  value={order.customer_email}
+                  onChange={handleInputChange}
+                />
+              </Form.Item>
+              <Form.Item label="Tỉnh/Thành phố" name="province" rules={[{ required: true, message: "Vui lòng chọn tỉnh/thành phố" }]}>
+                <Select
+                  placeholder="Chọn Tỉnh/Thành phố"
+                  value={selectedProvince}
+                  onChange={(value) => {
+                    setSelectedProvince(value);
+                    setDistricts([]);
+                    setWards([]);
+                    setSelectedDistrict("");
+                    setSelectedWard("");
+                  }}
+                >
+                  {provinces.map((province) => (
+                    <Option key={province.code} value={province.code}>
+                      {province.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item label="Quận/Huyện" name="district" rules={[{ required: true, message: "Vui lòng chọn quận/huyện" }]}>
+                <Select
+                  placeholder="Chọn Quận/Huyện"
+                  value={selectedDistrict}
+                  onChange={(value) => {
+                    setSelectedDistrict(value);
+                    setWards([]);
+                    setSelectedWard("");
+                  }}
+                  disabled={!selectedProvince}
+                >
+                  {districts.map((d) => (
+                    <Option key={d.code} value={d.code}>
+                      {d.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item label="Phường/Xã" name="ward" rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}>
+                <Select
+                  placeholder="Chọn Phường/Xã"
+                  value={selectedWard}
+                  onChange={setSelectedWard}
+                  disabled={!selectedDistrict}
+                >
+                  {wards.map((w) => (
+                    <Option key={w.code} value={w.code}>
+                      {w.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Form>
           </Card>
-        ))}
-      </Modal>
+        </div>
+
+        <Card title="Thông tin đơn hàng">
+          <List
+            dataSource={cartItems}
+            renderItem={(item) => (
+              <List.Item>
+                <List.Item.Meta
+                  title={`${item.name} (x${item.quantity})`}
+                  description={`SKU: ${item.sku}`}
+                />
+                <Text>
+                  {FomatVND(
+                    (item.price - (item.price * item.discount) / 100) *
+                      item.quantity
+                  )}
+                </Text>
+              </List.Item>
+            )}
+          />
+
+          <Divider />
+
+          <Input
+            placeholder="Nhập mã giảm giá"
+            value={discountCode}
+            onChange={(e) => setDiscountCode(e.target.value)}
+            addonAfter={<Button onClick={handleApplyDiscount}>Áp dụng</Button>}
+          />
+
+          <Divider />
+
+          <Radio.Group
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            value={paymentMethod}
+          >
+            <Radio value="cod">Thanh toán khi nhận hàng (COD)</Radio>
+            <Radio value="vnpay">Thanh toán qua VNPay</Radio>
+          </Radio.Group>
+
+          <Divider />
+
+          <div className="flex justify-between mb-2">
+            <Text>Phí vận chuyển</Text>
+            <Text>{FomatVND(5000)}</Text>
+          </div>
+          <div className="flex justify-between font-bold">
+            <Text strong>Tổng cộng</Text>
+            <Text strong>{FomatVND(calculateGrandTotal())}</Text>
+          </div>
+
+          <Button type="primary" block className="mt-4" onClick={handleSubmit}>
+            Tiếp tục thanh toán
+          </Button>
+        </Card>
+      </div>
     </div>
   );
 };

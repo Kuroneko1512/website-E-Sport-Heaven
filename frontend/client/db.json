@@ -79,10 +79,12 @@
       "id": 6
     },
     {
-      "email": "beta@gmail.com",
-      "password": "$2a$10$0noaHLqfUz4XF000TywgQuL9yC/MUKf9y2.LYLGnFfJxypVk1brUW",
-      "fullname": "beta",
-      "confirmPassword": "a12345678",
+
+      "email": "toan2@gmail.com",
+      "password": "$2a$10$4V9T7ylxNEMDUA//F060vOK8iLY8VE7.wmBTd1wD6g/EY.EvGEMdq",
+      "fullname": "Hoàng Minh Thành",
+      "confirmPassword": "11111111",
+
       "terms": true,
       "id": 7
     }
@@ -5040,7 +5042,7 @@
     }
   ],
   "deals": {
-    "endTime": "2025-03-01T23:59:59Z"
+    "endTime": "2025-04-01T23:59:59Z"
   },
   "address": [
     {

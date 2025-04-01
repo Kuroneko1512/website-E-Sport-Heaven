@@ -16,7 +16,7 @@ const AttributePage = () => {
     current_page: 1,
     last_page: 1,
     prev_page_url: null,
-    next_page_url: null,
+    next_page_url: null,  
     total: 0,
     per_page: 5,
     data: [],
