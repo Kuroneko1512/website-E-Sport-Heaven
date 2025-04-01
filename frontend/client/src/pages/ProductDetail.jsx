@@ -481,6 +481,7 @@ const ProductDetail = () => {
                 <Outlet context={{ product }} />
               </div>
 
+
               {/* Sản phẩm gần đây */}
               <div className="my-8">
                 <h2 className="text-2xl font-bold mb-4">
