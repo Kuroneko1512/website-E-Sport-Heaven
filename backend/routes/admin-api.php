@@ -20,6 +20,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/update-info',[AdminAuthController::class, 'updateAccount'])->name('update-info');
 
             Route::get('/profile',[AdminProfileController::class, 'getProfile'])->name('profile');  
+            Route::post('/update-profile',[AdminProfileController::class, 'updateProfile'])->name('update-profile');
         });
     });
 });

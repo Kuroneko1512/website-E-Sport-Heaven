@@ -17,7 +17,7 @@ class CustomerProfileController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    
+
     public function getProfile(Request $request)
     {
         try {
@@ -40,19 +40,18 @@ class CustomerProfileController extends Controller
         }
     }
 
-        /**
-         * Update customer profile
-         *
-         * @param \Illuminate\Http\Request $request
-         * @return \Illuminate\Http\JsonResponse
-         */
-        
+    /**
+     * Update customer profile
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateProfile(Request $request)
     {
         try {
-            $user = $request->user();            
+            $user = $request->user();
             $customer = Customer::where('user_id', $user->id)->first();
-            
+
             if (!$customer) {
                 return response()->json([
                     'success' => false,
@@ -60,7 +59,7 @@ class CustomerProfileController extends Controller
                     'code' => 404
                 ], 404);
             }
-            
+
             // Validate the request data
             $validator = Validator::make($request->all(), [
                 'first_name' => 'nullable|string|max:255',
@@ -71,7 +70,7 @@ class CustomerProfileController extends Controller
                 'preferred_contact_method' => 'nullable|string',
                 'preferences' => 'nullable|json'
             ]);
-            
+
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
@@ -80,7 +79,7 @@ class CustomerProfileController extends Controller
                     'code' => 422
                 ]);
             }
-            
+
             // Update customer data with validated fields
             $customer->fill($request->only([
                 'first_name',
@@ -91,10 +90,10 @@ class CustomerProfileController extends Controller
                 'preferred_contact_method',
                 'preferences'
             ]));
-            
+
             // Save the updated customer
             $customer->save();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Cập nhật thông tin thành công',
@@ -103,7 +102,7 @@ class CustomerProfileController extends Controller
             ]);
         } catch (\Throwable $e) {
             Log::error('Error updating customer profile: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Lỗi hệ thống khi cập nhật thông tin',
