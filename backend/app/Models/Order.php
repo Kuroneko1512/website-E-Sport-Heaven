@@ -22,10 +22,10 @@ class Order extends Model
     }
 
     /**
-     * Quan hệ với bảng customer_profiles (Một đơn hàng có thể thuộc về một khách hàng)
+     * Quan hệ với bảng customer (Một đơn hàng có thể thuộc về một khách hàng)
      */
     public function customer()
     {
-        return $this->belongsTo(CustomerProfile::class, 'customer_id');
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 }

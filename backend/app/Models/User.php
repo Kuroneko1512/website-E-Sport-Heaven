@@ -76,7 +76,7 @@ class User extends Authenticatable
     /**
      *
      * @param string $username
-     * @return Customer|null
+     * @return User|null
      * Cái này cần thiết vì nếu không dùng email để đăng nhập
      * Ta cần function này trả về Customer và có thể lựa chọn thêm các trường để đăng nhập như email, phone, username, ...
      */

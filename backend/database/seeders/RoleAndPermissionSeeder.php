@@ -49,18 +49,18 @@ class RoleAndPermissionSeeder extends Seeder
         $this->createVipCustomer();
         $this->createWholesaler();
 
-        $superAdmin = User::where('name', 'SuperAdmin')
+        $superAdmin = User::where('email', 'superadmin@example.com')
             ->where('account_type', 'admin')
             ->first();
         if ($superAdmin) {
-            $superAdmin->assignRole(RolesEnum::SuperAdmin->value, 'admin');
+            $superAdmin->assignRole(RolesEnum::SuperAdmin->value);
         }
 
-        $admin = User::where('name', 'admin')
+        $admin = User::where('email', 'admin@example.com')
             ->where('account_type', 'admin')
             ->first();
         if ($admin) {
-            $admin->assignRole(RolesEnum::Admin->value, 'admin');
+            $admin->assignRole(RolesEnum::Admin->value);
         }
     }
 

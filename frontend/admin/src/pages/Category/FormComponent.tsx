@@ -38,6 +38,7 @@ const CategoryForm = ({ onCategoryAdded, editingCategory, setEditingCategory }: 
 
   const fetchCategories = async () => {
     try {
+
       setLoading(true);
       const response = await CategoryService.getAllNoPagination();
       setCategories(response.data.data);
@@ -46,6 +47,7 @@ const CategoryForm = ({ onCategoryAdded, editingCategory, setEditingCategory }: 
       toast.error("Không thể tải danh sách danh mục!");
     } finally {
       setLoading(false);
+
     }
   };
 

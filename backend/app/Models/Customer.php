@@ -48,4 +48,19 @@ class Customer extends Model
     {
         return $this->hasMany(ShippingAddress::class);
     }
+    /**
+     * Quan hệ với bảng orders (Một khách hàng có nhiều đơn hàng)
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Lấy tên đầy đủ của khách hàng
+     */
+    public function getFullNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
 }

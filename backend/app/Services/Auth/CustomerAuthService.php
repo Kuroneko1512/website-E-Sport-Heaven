@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Enums\RolesEnum;
 use Exception;
 use App\Models\User;
 use App\Models\Customer;
@@ -12,25 +13,19 @@ use Illuminate\Support\Facades\Validator;
 
 class CustomerAuthService extends AuthService
 {
-    /**
-     * Xác thực đăng nhập cho Customer
-     */
+    // Xác thực đăng nhập cho Customer
     public function attemptLogin($identifier, $password,$accountType = null)
     {
         return parent::attemptLogin($identifier, $password, 'customer');
     }
 
-    /**
-     * Làm mới token cho Customer
-     */
+    // Làm mới token cho Customer
     public function refreshToken($refreshToken,$accountType = null)
     {
         return parent::refreshToken($refreshToken, 'customer');
     }
 
-    /**
-     * Đăng ký tài khoản mới cho Customer
-     */
+    // Đăng ký tài khoản mới cho Customer
     public function register($data)
     {
         try {
@@ -57,6 +52,9 @@ class CustomerAuthService extends AuthService
                 'account_type' => 'customer',
                 'is_active' => true,
             ]);
+
+            // Tạo role cho user
+            $user->assignRole(RolesEnum::Customer->value);
 
             // Tạo customer profile
             Customer::create([
@@ -107,9 +105,7 @@ class CustomerAuthService extends AuthService
         }
     }
 
-    /**
-     * Xác thực dữ liệu đăng ký
-     */
+    // Xác thực dữ liệu đăng ký
     private function validateRegisterData($data)
     {
         return Validator::make($data, [
@@ -121,6 +117,20 @@ class CustomerAuthService extends AuthService
             'last_name' => 'nullable|string|max:255',
             'gender' => 'nullable|in:male,female,other',
             'birthdate' => 'nullable|date',
+        ],[
+            'name.required' => 'Tên không được để trống',
+            'email.required' => 'Email không được để trống',
+            'email.email' => 'Email không đúng định dạng',
+            'email.unique' => 'Email đã tồn tại',
+            'phone.unique' => 'Số điện thoại đã tồn tại',
+            'password.required' => 'Mật khẩu không được để trống',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự',
+            'password.confirmed' => 'Mật khẩu không khớp',
+            'first_name.max' => 'Tên không được quá 255 ký tự',
+            'last_name.max' => 'Hoạt đóng khó quá 255 ký tự',
+            'gender.in' => 'Giới tính không hợp lệ',
+            'birthdate.date' => 'Ngày sinh không hợp lệ',
+            'birthdate.before' => 'Ngày sinh không hợp lệ',
         ]);
     }
 }

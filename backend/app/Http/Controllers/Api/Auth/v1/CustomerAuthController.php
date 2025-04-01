@@ -15,9 +15,7 @@ class CustomerAuthController extends Controller
         $this->customerAuthService = $customerAuthService;
     }
 
-    /**
-     * Format response chuẩn cho API
-     */
+    // Format response chuẩn cho API
     private function responseJson($success, $message = '', $data = [], $code = 200)
     {
         return response()->json([
@@ -27,9 +25,7 @@ class CustomerAuthController extends Controller
         ], $code);
     }
 
-    /**
-     * Đăng nhập customer
-     */
+    // Đăng nhập customer
     public function login(Request $request)
     {
         // Validate dữ liệu
@@ -53,9 +49,7 @@ class CustomerAuthController extends Controller
         );
     }
 
-    /**
-     * Đăng ký tài khoản mới
-     */
+    // Đăng ký tài khoản mới
     public function register(Request $request)
     {
         $result = $this->customerAuthService->register($request->all());
@@ -68,9 +62,7 @@ class CustomerAuthController extends Controller
         );
     }
 
-    /**
-     * Làm mới token
-     */
+    // Làm mới token
     public function refreshToken(Request $request)
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
@@ -91,12 +83,23 @@ class CustomerAuthController extends Controller
         );
     }
 
-    /**
-     * Đăng xuất
-     */
+    // Đăng xuất
     public function logout(Request $request)
     {
-        $result = $this->customerAuthService->logout($request->user());
+        $result = $this->customerAuthService->logout($request);
+
+        return $this->responseJson(
+            $result['success'],
+            $result['message'],
+            $result['data'],
+            $result['code']
+        );
+    }
+
+    // Cập nhật thông tin tài khoản
+    public function updateAccount(Request $request)
+    {
+        $result = $this->customerAuthService->updateUser($request);
 
         return $this->responseJson(
             $result['success'],
