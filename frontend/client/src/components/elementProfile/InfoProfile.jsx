@@ -9,7 +9,8 @@ const CLOUDINARY_CLOUD_NAME = "dxrhxyhl8";
 const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
 const data = {
-  fullname: "Fox",
+  firstName: "Robert",
+  lastname: "Fox",
   phoneNumber: "0123456789",
   birthDate: "1990-01-01",
   email: "roberfox@example.com",
@@ -32,9 +33,9 @@ const InfoProfile = () => {
     form.validateFields().then((values) => {
       if (JSON.stringify(values) !== JSON.stringify(data)) {
         console.log("Updated Profile:", values);
-        message.success("Profile updated successfully!");
+        message.success("Hồ sơ đã cập nhật thành công!");
       } else {
-        message.info("No changes detected");
+        message.info("Không có thay đổi nào");
       }
       setIsEditing(false);
     });
@@ -54,17 +55,17 @@ const InfoProfile = () => {
       const data = await response.json();
       if (data.secure_url) {
         setPreviewAvatar(data.secure_url);
-        message.success("Avatar uploaded successfully!");
+        message.success("Ảnh đại diện tải lên thành công!");
       }
     } catch (error) {
-      message.error("Upload failed, please try again.");
+      message.error("Tải lên thất bại, vui lòng thử lại.");
     }
     setUploading(false);
   };
 
   const handleConfirmAvatar = () => {
     setAvatar(previewAvatar);
-    message.success("Avatar updated successfully!");
+    message.success("Ảnh đại diện cập nhật thành công!");
     setIsAvatarModalOpen(false);
   };
 
@@ -89,7 +90,10 @@ const InfoProfile = () => {
 
       <Form form={form} layout="vertical" disabled={!isEditing} initialValues={data}>
         <div className="grid gap-4">
-          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Họ Tên</span>} name="fullname" rules={[{ required: true, message: "Hãy nhập họ tên" }]}>
+          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Họ</span>} name="firstname" rules={[{ required: true, message: "Hãy nhập họ tên" }]}>
+            <Input className="bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600"/>
+          </Form.Item>
+          <Form.Item label={<span className="text-gray-800 dark:text-gray-200">Tên</span>} name="lastname" rules={[{ required: true, message: "Hãy nhập họ tên" }]}>
             <Input className="bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600"/>
           </Form.Item>
         </div>

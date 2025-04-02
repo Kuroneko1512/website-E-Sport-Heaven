@@ -233,7 +233,7 @@ const ProductDetail = () => {
                 <div className="md:w-1/3">
                   <img
                     alt={product?.name}
-                    className="w-full mb-4"
+                    className="w-full h-[400px] object-cover mb-4"
                     src={`http://127.0.0.1:8000/storage/${displayImage}`}
                   />
                 </div>

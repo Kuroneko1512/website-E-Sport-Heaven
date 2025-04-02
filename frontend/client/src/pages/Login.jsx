@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Checkbox, message } from "antd";
-import Logo from "../components/header/Logo";
-import Success from "../components/popupmodal/Success";
-import Error from "../components/popupmodal/Error";
 import { useMutation } from "@tanstack/react-query";
+import { Button, Form, Input, message } from "antd";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { login } from "../redux/AuthSide";
+import Logo from "../components/header/Logo";
+import Success from "../components/popupmodal/Success";
 import instanceAxios from "../config/db";
-import axios from "axios";
+import { login } from "../redux/AuthSide";
 
 const Login = () => {
   const nav = useNavigate();
@@ -27,28 +25,47 @@ const Login = () => {
 
   const mutation = useMutation({
     mutationFn: async (dataUser) => {
-      return await axios.post(`http://localhost:3000/login`, dataUser);
+      return await instanceAxios.post(`/api/v1/customer/login`, dataUser);
     },
-    onSuccess: async () => {
-      dispatch(login());
+    onSuccess: (res) => {
+      const { access_token, refresh_token, user } = res.data.data;
+
+      dispatch(
+        login({
+          accessToken: access_token,
+          refreshToken: refresh_token,
+          user: user,
+        })
+      );
+
       setSuccess(true);
-      // message.success("Login successful!");
       setTimeout(() => {
-        nav("/");
+        nav("/"); // hoặc '/home'
         setSuccess(false);
       }, 2000);
     },
-    onError: async () => {
+    onError: (err) => {
       setError(true);
-      setTimeout(() => {
-        setError(false);
-      }, 100);
-      // message.error("Login failed. Please try again.");
+      message.error(err.response?.data?.message || "Đăng nhập thất bại, vui lòng thử lại sau.");
+    //   setTimeout(() => setError(false), 200);
     },
   });
 
   const onFinish = (values) => {
-    mutation.mutate(values);
+    const { email, password } = values;
+
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // const phoneRegex = /^(0|\+84)[0-9]{9,11}$/;
+
+    // const isEmail = emailRegex.test(email);
+    // const isPhone = phoneRegex.test(email);
+
+    const dataUser = {
+      identifier: email,
+      password: password,
+    };
+
+    mutation.mutate(dataUser);
   };
 
   return (
@@ -108,7 +125,7 @@ const Login = () => {
             label={<span className="text-gray-700">Mật khẩu</span>}
             name="password"
             rules={[
-              { required: true, message: "Please enter your password!" },
+              { required: true, message: "Hãy nhập mật khẩu của bạn!" },
               { min: 8, message: "Mật khẩu phải hơn 8 ký tự!" },
             ]}
             className="w-full"
@@ -147,7 +164,6 @@ const Login = () => {
         </Form>
       </div>
       {success && <Success />}
-      {error && <Error />}
     </div>
   );
 };
