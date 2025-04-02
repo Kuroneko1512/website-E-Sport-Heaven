@@ -38,6 +38,7 @@ import PrivateRouter from "./pages/PrivateRouter";
 import BlogDetail from "./pages/BlogDetail";
 import OrderTracking from "./pages/OrderTracking";
 import useTokenRefresh from "./hooks/useTokenRefresh";
+import GoogleAuthCallback from "./components/elementLogin/GoogleAuthCallback";
 
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
         <CSSTransition key={location.pathname} classNames="page" timeout={300}>
           <Routes location={location}>
             <Route path="/login" element={<Login />} />
+            <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/otp-enter" element={<OtpVerification />} />
