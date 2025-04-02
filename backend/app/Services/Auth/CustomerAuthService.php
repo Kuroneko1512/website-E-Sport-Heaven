@@ -50,19 +50,7 @@ class CustomerAuthService extends AuthService
 
             DB::beginTransaction();
 
-            // Xử lý avatar nếu có
-            $avatarData = null;
-            if (isset($data['avatar'])) {
-                try {
-                    $avatarData = $this->mediaService->processAvatar($data['avatar']);
-                    Log::info('Avatar processed for registration', $avatarData);
-                } catch (Exception $e) {
-                    Log::error('Avatar upload failed: ' . $e->getMessage());
-                    // Tiếp tục đăng ký mà không có avatar
-                }
-            }
-
-            // Chuẩn bị dữ liệu user
+            // Chuẩn bị dữ liệu user với avatar cố định
             $userData = [
                 'name' => $data['name'],
                 'email' => $data['email'],
@@ -70,17 +58,8 @@ class CustomerAuthService extends AuthService
                 'password' => Hash::make($data['password']),
                 'account_type' => 'customer',
                 'is_active' => true,
+                'avatar' => 'https://res.cloudinary.com/dv5p8avz7/image/upload/v1743589352/avatars/avatar_rsrdx9XAHC_1743589353.jpg'
             ];
-
-            // Thêm avatar nếu đã upload thành công
-            if ($avatarData && isset($avatarData['url'])) {
-                $userData['avatar'] = $avatarData['url'];
-
-                // Nếu model User có trường avatar_public_id, lưu public_id để dễ dàng xóa sau này
-                if (isset($avatarData['public_id'])) {
-                    $userData['avatar_public_id'] = $avatarData['public_id'];
-                }
-            }
 
             // Tạo user mới
             $user = User::create($userData);
@@ -161,7 +140,7 @@ class CustomerAuthService extends AuthService
             'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự',
             'password.confirmed' => 'Mật khẩu không khớp',
             'first_name.max' => 'Tên không được quá 255 ký tự',
-            'last_name.max' => 'Hoạt đóng khó quá 255 ký tự',
+            'last_name.max' => 'Hoạt động khó quá 255 ký tự',
             'gender.in' => 'Giới tính không hợp lệ',
             'birthdate.date' => 'Ngày sinh không hợp lệ',
             'birthdate.before' => 'Ngày sinh không hợp lệ',
