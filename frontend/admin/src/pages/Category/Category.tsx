@@ -5,6 +5,7 @@ import { CategoryService, Category,Pagination } from "@app/services/Category/Cat
 
 const CategoryPage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
+
   
   const [pagination, setPagination] = useState<Pagination>({
     current_page: 1,
@@ -20,10 +21,16 @@ const CategoryPage = () => {
   // Hàm fetch dữ liệu danh mục
   const fetchCategories = async (page = 1) => {
     try {
+
       const response  = await CategoryService.getAll(page, pagination.per_page);
-      setCategories(response.data.data); // Giả sử API trả về `data.data` là danh sách category
-      setPagination(response.data); // Cập nhật phân trang
-      console.log('categories :',categories);
+
+      // console.log(response.data.data.data);
+      setCategories(response.data.data.data); 
+      // Giả sử API trả về `data.data` là danh sách category
+      setPagination(response.data.data); // Cập nhật phân trang
+
+      console.log(categories);
+
     } catch (error) {
       console.error("Lỗi khi lấy danh mục:", error);
     }
@@ -31,6 +38,7 @@ const CategoryPage = () => {
 
   useEffect(() => {
     fetchCategories();
+    console.log(categories);
   }, []);
 
   return (
