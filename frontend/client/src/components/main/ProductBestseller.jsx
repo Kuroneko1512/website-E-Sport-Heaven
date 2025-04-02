@@ -65,6 +65,7 @@ const ProductBestseller = () => {
               {/* Overlay hover */}
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <i className="far fa-heart absolute text-black dark:text-gray-300 top-5 right-5 border rounded-full border-[#D9D9D9] dark:border-gray-600 p-3 bg-[#D9D9D9] dark:bg-gray-700 hover:bg-white dark:hover:bg-gray-500"> </i>
+
               </div>
             </div>
 

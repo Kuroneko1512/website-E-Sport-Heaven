@@ -37,10 +37,13 @@ import OtpVerification from "./pages/OtpVerification";
 import PrivateRouter from "./pages/PrivateRouter";
 import BlogDetail from "./pages/BlogDetail";
 import OrderTracking from "./pages/OrderTracking";
+import useTokenRefresh from "./hooks/useTokenRefresh";
+
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
 
+  useTokenRefresh();
   return (
     <ThemeProvider>
       <SwitchTransition>
@@ -61,6 +64,7 @@ function App() {
                 <Route path="information" element={<AdditionalInformation />} />
                 <Route path="reviews" element={<Review />} />
               </Route>
+
 
               <Route path="my-profile" element={<PrivateRouter />}>
                 <Route path="" element={<Profile />}>

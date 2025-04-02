@@ -43,7 +43,9 @@ const DealsOfTheMonth = () => {
       <div className="flex flex-col lg:flex-row items-center gap-8">
         <div className="lg:w-1/2 text-center lg:text-left">
           <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+
           Ưu đãi của tháng
+
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             It is a long established fact that a reader will be distracted by the readable content.

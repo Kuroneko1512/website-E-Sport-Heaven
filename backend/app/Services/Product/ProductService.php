@@ -20,8 +20,43 @@ class ProductService extends BaseService
         return $this->model->with([
             'variants.productAttributes.attributeValue:id,value',
         ])
-        ->orderBy('created_at', 'DESC') // Sắp xếp theo thời gian mới nhất
-        ->paginate($paginate);
+            ->orderBy('created_at', 'DESC') // Sắp xếp theo thời gian mới nhất
+            ->paginate($paginate);
+    }
+    public function getProductFiterAll($filters = [], $paginate = 12)
+    {
+        // Sắp xếp theo thời gian mới nhất
+        $query = $this->model->with(['variants.productAttributes.attributeValue:id,value'])
+            ->orderBy('created_at', 'DESC');
+
+        // Lọc theo danh mục sản phẩm
+        if (!empty($filters['category_id'])) {
+            $query->where('category_id', $filters['category_id']);
+        }
+
+        // Lọc theo khoảng giá
+        if (!empty($filters['min_price']) && !empty($filters['max_price'])) {
+            $query->whereBetween('price', [$filters['min_price'], $filters['max_price']]);
+            // return $query;
+        }
+        // Lọc theo thuộc tính sản phẩm
+        if (!empty($filters['attributes'])) {
+            $query->whereHas('variants.productAttributes.attributeValue', function ($q) use ($filters) {
+                $q->whereIn('value', $filters['attributes']);
+            });  
+        }
+        return $query->paginate($paginate);
+    }
+    public function searchProduct($keyword, $paginate = 12)
+    {
+        return $this->model
+            ->with(['variants.productAttributes.attributeValue:id,value'])
+            ->where('name', 'LIKE', '%' . $keyword . '%')
+            ->orWhereHas('variants.productAttributes.attributeValue', function ($query) use ($keyword) {
+                $query->where('value', 'LIKE', '%' . $keyword . '%');
+            })
+            ->orderBy('created_at', 'DESC')
+            ->paginate($paginate);
     }
     public function getProduct($id)
     {
