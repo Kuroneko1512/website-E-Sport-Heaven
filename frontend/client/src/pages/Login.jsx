@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { Button, Form, Input, message } from "antd";
+import { Button, Divider, Form, Input, message } from "antd";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -161,6 +161,8 @@ const Login = () => {
               Đăng nhập
             </Button>
           </Form.Item>
+          <Divider />
+          
         </Form>
       </div>
       {success && <Success />}

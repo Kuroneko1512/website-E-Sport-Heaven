@@ -23,7 +23,7 @@ const ProductList = ({ products }) => {
           <div className="relative h-3/4">
             <img
               alt={item.name}
-              className="w-full h-full object-cover"
+              className="w-full h-[500px] object-cover"
               src={item.image}
             />
             
