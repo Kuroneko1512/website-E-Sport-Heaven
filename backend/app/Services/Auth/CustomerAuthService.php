@@ -2,25 +2,32 @@
 
 namespace App\Services\Auth;
 
-use App\Enums\RolesEnum;
 use Exception;
 use App\Models\User;
+use App\Enums\RolesEnum;
 use App\Models\Customer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\Media\MediaService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerAuthService extends AuthService
 {
+    protected $mediaService;
+
+    public function __construct(MediaService $mediaService)
+    {
+        $this->mediaService = $mediaService;
+    }
     // Xác thực đăng nhập cho Customer
-    public function attemptLogin($identifier, $password,$accountType = null)
+    public function attemptLogin($identifier, $password, $accountType = null)
     {
         return parent::attemptLogin($identifier, $password, 'customer');
     }
 
     // Làm mới token cho Customer
-    public function refreshToken($refreshToken,$accountType = null)
+    public function refreshToken($refreshToken, $accountType = null)
     {
         return parent::refreshToken($refreshToken, 'customer');
     }
@@ -31,7 +38,7 @@ class CustomerAuthService extends AuthService
         try {
             // Validate dữ liệu
             $validator = $this->validateRegisterData($data);
-            
+
             if ($validator->fails()) {
                 return [
                     'success' => false,
@@ -43,16 +50,41 @@ class CustomerAuthService extends AuthService
 
             DB::beginTransaction();
 
-            // Tạo user mới
-            $user = User::create([
+            // Xử lý avatar nếu có
+            $avatarData = null;
+            if (isset($data['avatar'])) {
+                try {
+                    $avatarData = $this->mediaService->processAvatar($data['avatar']);
+                    Log::info('Avatar processed for registration', $avatarData);
+                } catch (Exception $e) {
+                    Log::error('Avatar upload failed: ' . $e->getMessage());
+                    // Tiếp tục đăng ký mà không có avatar
+                }
+            }
+
+            // Chuẩn bị dữ liệu user
+            $userData = [
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'phone' => $data['phone'] ?? null,
                 'password' => Hash::make($data['password']),
                 'account_type' => 'customer',
                 'is_active' => true,
-            ]);
+            ];
 
+            // Thêm avatar nếu đã upload thành công
+            if ($avatarData && isset($avatarData['url'])) {
+                $userData['avatar'] = $avatarData['url'];
+
+                // Nếu model User có trường avatar_public_id, lưu public_id để dễ dàng xóa sau này
+                if (isset($avatarData['public_id'])) {
+                    $userData['avatar_public_id'] = $avatarData['public_id'];
+                }
+            }
+
+            // Tạo user mới
+            $user = User::create($userData);
+            
             // Tạo role cho user
             $user->assignRole(RolesEnum::Customer->value);
 
@@ -69,7 +101,7 @@ class CustomerAuthService extends AuthService
 
             // Đăng nhập tự động sau khi đăng ký
             $loginResult = $this->attemptLogin($data['email'], $data['password']);
-            
+
             if ($loginResult['success']) {
                 return [
                     'success' => true,
@@ -86,6 +118,7 @@ class CustomerAuthService extends AuthService
                             'id' => $user->id,
                             'email' => $user->email,
                             'name' => $user->name,
+                            'avatar' => $user->avatar,
                         ]
                     ],
                     'code' => 201
@@ -109,7 +142,7 @@ class CustomerAuthService extends AuthService
     private function validateRegisterData($data)
     {
         return Validator::make($data, [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'nullable|string|unique:users',
             'password' => 'required|string|min:8|confirmed',
@@ -117,8 +150,9 @@ class CustomerAuthService extends AuthService
             'last_name' => 'nullable|string|max:255',
             'gender' => 'nullable|in:male,female,other',
             'birthdate' => 'nullable|date',
-        ],[
+        ], [
             'name.required' => 'Tên không được để trống',
+            'name.unique' => 'Tên đã tồn tại',
             'email.required' => 'Email không được để trống',
             'email.email' => 'Email không đúng định dạng',
             'email.unique' => 'Email đã tồn tại',

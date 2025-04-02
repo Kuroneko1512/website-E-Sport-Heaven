@@ -34,5 +34,31 @@ Route::prefix('v1')->group(function () {
             Route::post('shipping-address/{shipping_address}/set-default', [ShippingAddressController::class, 'setDefault'])
                 ->name('shipping-address.set-default');
         });
+
+        //test route
+        Route::get('/test-cloudinary', function() {
+            try {
+                $cloudName = config('cloudinary.cloud_name');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Cloudinary đã được cấu hình đúng',
+                    'cloud_name' => $cloudName
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lỗi cấu hình Cloudinary',
+                    'error' => $e->getMessage()
+                ]);
+            }
+        });
+        Route::get('/test-cloudinary-config', function() {
+            return response()->json([
+                'cloud_name' => config('cloudinary.cloud_name'),
+                'api_key' => config('cloudinary.api_key') ? 'Đã cấu hình' : 'Chưa cấu hình',
+                'api_secret' => config('cloudinary.api_secret') ? 'Đã cấu hình' : 'Chưa cấu hình',
+            ]);
+        });
+        //        
     });
 });

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\AdminActivity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\Media\MediaService;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\TokenRepository;
 use Illuminate\Support\Facades\Validator;
@@ -16,6 +17,13 @@ use Laravel\Passport\RefreshTokenRepository;
 
 class AuthService
 {
+    protected $mediaService;
+
+    public function __construct(MediaService $mediaService)
+    {
+        $this->mediaService = $mediaService;
+    }
+
     // Xác thực đăng nhập
     public function attemptLogin($identifier, $password, $accountType)
     {
@@ -125,6 +133,7 @@ class AuthService
                         'phone' => $user->phone,
                         'email' => $user->email,
                         'name' => $user->name,
+                        'avatar' => $user->avatar,
                     ],
                     'role' => $user->roles()->pluck('name'),
                     'permission' => $user->getPermissionsViaRoles()->pluck('name')
@@ -507,8 +516,33 @@ class AuthService
 
             // Xử lý avatar nếu có
             if ($request->hasFile('avatar')) {
-                $path = $request->file('avatar')->store('avatars', 'public');
-                $data['avatar'] = $path;
+                try {
+                    // Xóa avatar cũ nếu có
+                    if (!empty($user->avatar) && strpos($user->avatar, 'cloudinary') !== false) {
+                        // Trích xuất public_id từ URL Cloudinary
+                        $publicId = null;
+                        if (preg_match('/\/v\d+\/([^\/]+)\/([^\.]+)/', $user->avatar, $matches)) {
+                            $publicId = $matches[1] . '/' . $matches[2];
+                            $this->mediaService->deleteAvatar($publicId);
+                        }
+                    }
+
+                    // Upload avatar mới
+                    $avatarResult = $this->mediaService->processAvatar($request->file('avatar'));
+                    $data['avatar'] = $avatarResult['url'];
+
+                    Log::info('Avatar uploaded successfully', [
+                        'public_id' => $avatarResult['public_id'],
+                        'url' => $avatarResult['url']
+                    ]);
+                } catch (Exception $e) {
+                    Log::error('Error uploading avatar', [
+                        'message' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    // Nếu có lỗi khi upload, không cập nhật avatar
+                    unset($data['avatar']);
+                }
             }
 
             // Hash password nếu có thay đổi
