@@ -1,102 +1,222 @@
-
-import React, { useState } from 'react';
+import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
+import { useMutation } from "@tanstack/react-query";
+import { Button, Checkbox, Form, Input } from "antd";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import Logo from "../components/header/Logo";
+import Error from "../components/popupmodal/Error";
+import Success from "../components/popupmodal/Success";
+import instanceAxios from "../config/db";
+import { login } from "../redux/AuthSide";
 
 const Register = () => {
-    const [firstName, setFirstName] = useState();
-    const [lastName, setLastName] = useState();
-    const [email, setEmail] = useState();
-    const [password, setPassword] = useState(''); // Password should be empty initially
-    const [termsAccepted, setTermsAccepted] = useState(false);
+  const nav = useNavigate();
+  const dispatch = useDispatch();
+  const [success, setSuccess] = useState(false);
 
-    const handlePasswordToggle = () => {
-        const passwordField = document.getElementById('password');
-        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordField.setAttribute('type', type);
+  const mutation = useMutation({
+    mutationFn: async (dataUser) => {
+      return await instanceAxios.post("api/v1/customer/register", dataUser);
+    },
+
+    onSuccess: (res) => {
+      const { access_token, refresh_token, user } = res.data.data;
+
+      dispatch(
+        login({
+          accessToken: access_token,
+          refreshToken: refresh_token,
+          user: user,
+        })
+      );
+
+      setSuccess(true);
+      setTimeout(() => {
+        nav("/"); // hoặc '/home'
+        setSuccess(false);
+      }, 2000);
+    },
+    onError: (err) => {
+      setError(true);
+      message.error(err.response?.data?.message || "Đăng ký thất bại, vui lòng thử lại sau.");
+    //   setTimeout(() => setError(false), 200);
+    },
+  });
+
+  const onFinish = (values) => {
+    const { name, email, password, confirmPassword } = values;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(0|\+84)[0-9]{9,11}$/;
+
+    const isEmail = emailRegex.test(email);
+    const isPhone = phoneRegex.test(email);
+
+    const dataUser = {
+      email: isEmail ? email : "",
+      phone: isPhone ? email : "",
+      name: name.trim(),
+      password: password,
+      password_confirmation: confirmPassword,
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // Handle form submission logic here
-    };
+    mutation.mutate(dataUser);
+  };
 
-    return (
-        <div className="w-full md:w-1/2 flex items-center justify-center bg-white p-8">
-            <div className="max-w-md w-full">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold">Create New Account</h1>
-                    <p className="text-gray-500">Please enter details</p>
-                </div>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">First Name</label>
-                        <input
-                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            type="text"
-                            placeholder="Enter your first name"
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Last Name</label>
-                        <input
-                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            type="text"
-                            placeholder="Enter your last name"
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Email Address</label>
-                        <input
-                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            type="email"
-                            placeholder="Enter your email address"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                    </div>
-                    <div className="mb-4 relative">
-                        <label className="block text-gray-700">Password</label>
-                        <input
-                            id="password"
-                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            type="password"
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <i
-                            onClick={handlePasswordToggle}
-                            className="fas fa-eye absolute right-3 top-9 cursor-pointer"
-                        ></i>
-                    </div>
-                    <div className="mb-4 flex items-center">
-                        <input
-                            className="mr-2"
-                            id="terms"
-                            type="checkbox"
-                            checked={termsAccepted}
-                            onChange={() => setTermsAccepted(!termsAccepted)}
-                        />
-                        <label className="text-gray-700" htmlFor="terms">
-                            I agree to the <span className="font-bold">Terms & Conditions</span>
-                        </label>
-                    </div>
-                    <div>
-                        <button
-                            className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800"
-                            type="submit"
-                        >
-                            Register
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
+  return (
+    <div className="flex min-h-screen bg-gray-100">
+      <div className="hidden lg:flex w-1/2 bg-white items-center justify-center relative overflow-hidden">
+        <Logo />
+        <img
+          alt="A woman sitting on a chair"
+          className="object-cover h-full w-full"
+          src="https://storage.googleapis.com/a1aa/image/7RfxLJiLxawifEFYNzH63i75ezQXds0tO0vgPKgB0S4OxLPoA.jpg"
+        />
+      </div>
+
+      <div className="flex flex-col justify-center w-full lg:w-1/2 p-8 lg:p-24 bg-white shadow-lg rounded-lg">
+        <h2 className="text-3xl font-bold mb-2 text-gray-800">
+          Chào mừng <span className="wave">👋</span>
+        </h2>
+        <p className="text-gray-600 mb-8">Đăng ký tại đây</p>
+
+        <Form layout="vertical" onFinish={onFinish} className="space-y-4">
+          {/* <Form.Item
+            label={<span className="text-gray-700">Họ</span>}
+            name="firstname"
+            rules={[{ required: true, message: "Hãy nhập họ của bạn!" }]}
+          >
+            <Input
+              placeholder="Robert"
+              className="px-4 py-2 border rounded-md"
+            />
+          </Form.Item> */}
+
+          <Form.Item
+            label={<span className="text-gray-700">Tên người dùng</span>}
+            name="name"
+            rules={[{ required: true, message: "Hãy nhập tên người dùng của bạn!" }]}
+          >
+            <Input placeholder="Fox" className="px-4 py-2 border rounded-md" />
+          </Form.Item>
+
+          <Form.Item
+            label={<span className="text-gray-700">Email / Số điện thoại</span>}
+            name="email"
+            rules={[
+              {
+                required: true,
+                message: "Hãy nhập Email hoặc Số điện thoại của bạn!",
+              },
+              {
+                validator: (_, value) => {
+                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  const phoneRegex = /^(0|\+84)[0-9]{9,11}$/;
+                  if (
+                    !value ||
+                    emailRegex.test(value) ||
+                    phoneRegex.test(value)
+                  ) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    "Vui lòng nhập đúng định dạng Email hoặc Số điện thoại!"
+                  );
+                },
+              },
+            ]}
+            className="w-full"
+          >
+            <Input
+              placeholder="robertfox@example.com hoặc 0987654321"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label={<span className="text-gray-700">Mật khẩu</span>}
+            name="password"
+            rules={[
+              { required: true, message: "Hãy nhập mật khẩu của bạn!" },
+              { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
+            ]}
+          >
+            <Input.Password
+              placeholder="••••••••"
+              className="px-4 py-2 border rounded-md"
+              iconRender={(visible) =>
+                visible ? <EyeOutlined /> : <EyeInvisibleOutlined />
+              }
+              visibilityToggle
+            />
+          </Form.Item>
+
+          <Form.Item
+            label={<span className="text-gray-700">Nhập lại Mật khẩu</span>}
+            name="confirmPassword"
+            dependencies={["password"]}
+            rules={[
+              { required: true, message: "Hãy nhập lại mật khẩu!" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Mật khẩu không khớp!"));
+                },
+              }),
+            ]}
+          >
+            <Input.Password
+              placeholder="••••••••"
+              className="px-4 py-2 border rounded-md"
+              iconRender={(visible) =>
+                visible ? <EyeOutlined /> : <EyeInvisibleOutlined />
+              }
+              visibilityToggle
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="terms"
+            valuePropName="checked"
+            rules={[
+              {
+                required: true,
+                message: "Bạn phải đồng ý với các điều khoản!",
+              },
+            ]}
+          >
+            <Checkbox>
+              Tôi đồng ý với các{" "}
+              <span className="font-bold">điều khoản & điều kiện</span>
+            </Checkbox>
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={mutation.isLoading}
+              className="w-full bg-black text-white py-2 rounded-lg hover:!bg-gray-800"
+            >
+              Đăng ký
+            </Button>
+          </Form.Item>
+        </Form>
+
+        <p className="text-center text-gray-600 text-sm mt-6">
+          Đã có tài khoản?{" "}
+          <Link to="/login" className="text-blue-600">
+            Đăng nhập.
+          </Link>
+        </p>
+      </div>
+
+      {success && <Success />}
+    </div>
+  );
 };
 
 export default Register;
-

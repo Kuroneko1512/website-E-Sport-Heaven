@@ -6,17 +6,20 @@ import FilterSidebar from "../components/filterProduct/FilterSidebar";
 import ProductList from "../components/filterProduct/ProductList";
 import { FaBoxOpen } from "react-icons/fa";
 import Pagination from "../components/filterProduct/Pagination";
+import axios from "axios";
 
 export default function Shop() {
   // Fetch dữ liệu sản phẩm
   const { data: products = [], isLoading, isError } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const res = await instanceAxios.get("/products");
+      const res = await axios.get("http://localhost:3000/products");
       return res.data;
     },
     staleTime: 60000, // Giữ dữ liệu trong 60 giây để tránh gọi API lại
   });
+
+  console.log("products", products);
 
   // State bộ lọc
   const [filters, setFilters] = useState({
@@ -58,7 +61,7 @@ export default function Shop() {
     <div className="bg-white text-gray-800 m-10">
       <main className="container mx-auto py-8 grid grid-cols-1">
         <span className="text-sm text-gray-500 mb-4">
-          Home &gt; <Link to={'/shop'}>Shop</Link>
+          Trang chủ &gt; <Link to={'/shop'}>Cửa hàng</Link>
         </span>
         <div className="flex flex-col md:flex-row">
           <FilterSidebar

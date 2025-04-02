@@ -13,10 +13,23 @@ class Product extends Model
     protected $fillable = [
         'name', 'price', 'discount_percent', 'discount_start', 
         'discount_end', 'sku', 'description', 'image', 
-        'product_type', 'status', 'category_id'
+        'product_type', 'status', 'category_id' ,'stock'
     ];
     public function variants()
     {
         return $this->hasMany(ProductVariant::class);
     }
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+    public function selectedAttributes()
+{
+    return $this->hasMany(ProductAttribute::class);
+}
 }

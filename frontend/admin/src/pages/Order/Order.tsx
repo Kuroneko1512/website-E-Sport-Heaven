@@ -82,6 +82,7 @@ const Orders = () => {
                                     <th>#</th>
                                     <th>Thông tin khách hàng</th>
                                     <th>Mã Đơn hàng</th>
+                                    
                                     <th>Tổng Tiền</th>
                                     <th className="text-center">Trạng thái</th>
 

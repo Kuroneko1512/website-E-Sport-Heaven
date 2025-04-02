@@ -1,22 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
-import React from 'react'
-import { useParams } from 'react-router-dom';
-
+import { useOutletContext } from "react-router-dom";
 
 const Description = () => {
+  const { product } = useOutletContext();
 
-  const {id} = useParams()
-
-  const {data, isLoading, isError} = useQuery({
-    queryKey: ["product", id],
-    queryFn: async () => {
-      return await instanceAxios.get(`/products/${id}`);
-    }
-  })
-
-    const {description} = data?.data
   return (
-    <div>{description}</div>
-  )
-}
-export default Description
+    <div>
+      <p
+        className="text-gray-600 mb-4"
+        dangerouslySetInnerHTML={{ __html: product?.description }}
+      ></p>
+    </div>
+  );
+};
+
+export default Description;

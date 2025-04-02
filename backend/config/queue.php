@@ -39,7 +39,7 @@ return [
             'table' => 'jobs',
             'queue' => 'default',
             'retry_after' => 90,
-            'after_commit' => false,
+            'after_commit' => true,
         ],
 
         'beanstalkd' => [
@@ -71,6 +71,24 @@ return [
             'after_commit' => false,
         ],
 
+        // queue riêng cho import địa chỉ
+        'location_import' => [
+            'driver' => 'database',
+            'table' => 'jobs',
+            'queue' => 'location_import',
+            'retry_after' => 90,
+            'after_commit' => true,
+        ],
+    ],
+
+    'queues' => [
+        'default', // Queue mặc định cho các jobs không chỉ định queue
+        'order-mail', // Queue cho mail order admin và customer
+        'user-notifications', // Queue cho thông báo user
+        'stock-alerts', // Queue cho thông báo hàng tồn
+        'monthly-reports', // Queue cho báo cáo tháng
+        'export-products', // Queue cho export sản phẩm
+        'export-locations', // Queue cho export địa chỉ VN
     ],
 
     /*

@@ -30,6 +30,11 @@ export const MENU: IMenuItem[] = [
     path: '/Product',
   },
   {
+    name: 'Category',
+    icon: 'fas fa-box nav-icon',
+    path: '/Category',
+  },
+  {
     name: 'Attribute',
     icon: 'fas fa-box nav-icon',
     path: '/Attribute',
@@ -38,6 +43,11 @@ export const MENU: IMenuItem[] = [
     name: 'Order',
     icon: 'fas fa-box nav-icon',
     path: '/Order',
+  },
+  {
+    name: 'Category',
+    icon: 'fas fa-box nav-icon',
+    path: '/category',
   },
   {
     name: i18n.t('menusidebar.label.mainMenu'),

@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import Main from "@modules/main/Main";
 import Login from "@modules/login/Login";
+import { AuthService } from "./services/auth.service";
 import Register from "@modules/register/Register";
 import ForgetPassword from "@modules/forgot-password/ForgotPassword";
 import RecoverPassword from "@modules/recover-password/RecoverPassword";
@@ -20,13 +21,19 @@ import PublicRoute from "./routes/PublicRoute";
 import PrivateRoute from "./routes/PrivateRoute";
 import { setCurrentUser } from "./store/reducers/auth";
 import  Store  from "@pages/Product/Store";
-import { firebaseAuth } from "./firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import { useAppDispatch, useAppSelector } from "./store/store";
 import { Loading } from "./components/Loading";
 import EditComponent from '@pages/Attribute/EditComponent';
+import AttributeForm from "./pages/Product/AttributeForm";
+import ValueProduct from "./pages/Product/ValueProduct";
+import DetailProductComponent from "./pages/Product/DetailProductComponent";
+import EditComponents from "./pages/Product/EditComponents";
 import Order from "./pages/Order/Order";
 import DetailOrder from "./pages/Order/DetailOrder";
+import AttributeProduct from "./pages/Product/AttributeProduct";
+import VariantProduct from "./pages/Product/VariantProduct";
+import Category from "./pages/Category/Category";
+import AttributePage from "@pages/Attribute/Attribute";
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {
@@ -38,42 +45,38 @@ const App = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
 
   useEffect(() => {
-    onAuthStateChanged(
-      firebaseAuth,
-      (user) => {
-        if (user) {
-          dispatch(setCurrentUser(user));
-        } else {
-          dispatch(setCurrentUser(null));
-        }
-        setIsAppLoading(false);
-      },
-      (e) => {
-        console.log(e);
-        dispatch(setCurrentUser(null));
-        setIsAppLoading(false);
+      const token = localStorage.getItem("token");
+      if (token) {
+          AuthService.getUser()
+              .then((response) => {
+                  dispatch(setCurrentUser(response.user));
+              })
+              .catch(() => {
+                  localStorage.removeItem("token");
+                  window.location.href = "/login";
+              });
       }
-    );
-  }, []);
+      setIsAppLoading(false);
+  }, [dispatch]);
 
   useEffect(() => {
-    const size = calculateWindowSize(windowSize.width);
-    if (screenSize !== size) {
-      dispatch(setWindowSize(size));
-    }
-  }, [windowSize]);
+      const size = calculateWindowSize(windowSize.width);
+      if (screenSize !== size) {
+          dispatch(setWindowSize(size));
+      }
+  }, [windowSize.width, dispatch, screenSize]);
 
   useEffect(() => {
-    if (location && location.pathname && VITE_NODE_ENV === "production") {
-      ReactGA.send({
-        hitType: "pageview",
-        page: location.pathname,
-      });
-    }
+      if (location && location.pathname && VITE_NODE_ENV === "production") {
+          ReactGA.send({
+              hitType: "pageview",
+              page: location.pathname,
+          });
+      }
   }, [location]);
 
   if (isAppLoading) {
-    return <Loading />;
+      return <Loading />;
   }
 
   return (
@@ -89,7 +92,7 @@ const App = () => {
       </Route>
 
       {/* Private Routes */}
-      <Route element={<PrivateRoute />}>
+      <Route  element={<PrivateRoute />}>
         <Route path="/" element={<Main />}>
           <Route index element={<Dashboard />} />
           <Route path="sub-menu-2" element={<Blank />} />
@@ -97,16 +100,33 @@ const App = () => {
           <Route path="blank" element={<Blank />} />
           <Route path="profile" element={<Profile />} />
           {/* route sản phẩm  */}
-          <Route path="product" element={<Product />} />
-          <Route path="add-product" element={<Store />} />
+          <Route path="Product" element={<Product />} >
+          
+          </Route> 
+          <Route path="Product/detail/:id" element={<DetailProductComponent/>} />
+    
+          <Route path="Product/edit/:id" element={<EditComponents/>} />
+    
+          <Route path="add-product" element={<Store />} >
+           <Route path="AttributeForm" element={<AttributeForm />} /> 
+           <Route path="ValueProduct" element={<ValueProduct />} /> 
+           <Route path="Attribute" element={<AttributeProduct />} /> 
+           <Route path="Variant" element={<VariantProduct />} /> 
+           <Route index element={<ValueProduct />} />
+          </Route>
           {/*Route attribute*/}
-          <Route path="Attribute" element={<Attribute />} />
+          <Route path="Attribute" element={<AttributePage />} />
+          <Route path="Category" element={<Category />} />
          
           <Route path="Order" element={<Order />} />
           <Route path="Order/Details/:id" element={<DetailOrder />} />
 
 
-          <Route path="Attribute/attribute/edit/:id"  element={<EditComponent/>} />
+        
+
+
+            {/*Route Category*/}
+            <Route path="category" element={<Category/>}/>
         </Route>
       </Route>
     </Routes>

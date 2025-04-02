@@ -123,4 +123,21 @@ class CategoryController extends Controller
             ], 500);
         }
     }
+    public function indexNoPagination(){
+        try {
+             // Gọi service để lấy dữ liệu
+            $categories = $this->categoryService->getAll();
+            return response()->json([
+                'status' => 200,
+                'data' => $categories, // Trả về dữ liệu Danh mục
+            ],200);
+        } catch (\Throwable $th) {
+             // Trường hợp có lỗi xảy ra khi lấy dữ liệu
+            return response()->json([
+                'errnor' => 'lấy thất bại',
+                'status'=>200
+            ],500); // Trả về mã lỗi 500 (Internal Server Error)
+        }
+    }
+
 }

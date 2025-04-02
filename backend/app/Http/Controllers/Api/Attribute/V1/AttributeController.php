@@ -10,7 +10,7 @@ use App\Services\Attribute\AttributeService;
 use Exception;
 
 use Illuminate\Database\QueryException;
-
+use Illuminate\Http\Request;
 
 class AttributeController extends Controller
 {
@@ -26,6 +26,23 @@ class AttributeController extends Controller
         try {
              // Gọi service để lấy dữ liệu
             $atr = $this->attributeService->getAttributes();
+            return response()->json([
+                'status' => 200,
+                'data' => $atr, // Trả về dữ liệu thuộc tính
+            ],200);
+        } catch (\Throwable $th) {
+             // Trường hợp có lỗi xảy ra khi lấy dữ liệu
+            return response()->json([
+                'errnor' => 'lấy thất bại',
+                'status'=>200
+            ],500); // Trả về mã lỗi 500 (Internal Server Error)
+        }
+    }
+    public function getAttributeForIds(Request $request){
+        $data = $request->all();
+        try {
+             // Gọi service để lấy dữ liệu
+            $atr = $this->attributeService->getAttributesForId($data['attribute_ids']);
             return response()->json([
                 'status' => 200,
                 'data' => $atr, // Trả về dữ liệu thuộc tính

@@ -15,23 +15,23 @@ const Footer = () => {
             <i className="fas fa-phone-alt mr-2"></i>(704) 655-0127
           </p>
           <p className="mb-2 text-sm text-gray-400 flex items-center">
-            <i className="fas fa-envelope mr-2"></i>krist@example.com
+            <i className="fas fa-envelope mr-2"></i>sportheaven@gmail.com
           </p>
           <p className="text-sm text-gray-400 flex items-center">
-            <i className="fas fa-map-marker-alt mr-2"></i>3891 Ranchview Dr. Richardson, CA
+            <i className="fas fa-map-marker-alt mr-2"></i>Mễ Trì, Nam Từ Liêm, TP. Hà Nội
           </p>
         </div>
         
         {/* Cột 2: Thông tin tài khoản */}
         <div>
-          <h3 className="text-lg font-medium mb-4">Information</h3>
+          <h3 className="text-lg font-medium mb-4">Thông tin</h3>
           <ul className="space-y-2">
             {[
-              { label: "My Account", path: "/my-profile" },
-              { label: "Login", path: "/login" },
-              { label: "My Cart", path: "/my-cart" },
-              { label: "My Wishlist", path: "/my-wishlist" },
-              { label: "Checkout", path: "/checkout" },
+              { label: "Tài khoản của tôi", path: "/my-profile" },
+              { label: "Đăng nhập", path: "/login" },
+              { label: "Giỏ hàng", path: "/my-cart" },
+              { label: "Sản phẩm yêu thích", path: "/my-wishlist" },
+              { label: "Thanh toán", path: "/checkout" },
             ].map((item) => (
               <li key={item.path}>
                 <Link className="text-sm text-gray-400 hover:text-white" to={item.path}>
@@ -44,14 +44,14 @@ const Footer = () => {
         
         {/* Cột 3: Dịch vụ */}
         <div>
-          <h3 className="text-lg font-medium mb-4">Service</h3>
+          <h3 className="text-lg font-medium mb-4">Dịch vụ</h3>
           <ul className="space-y-2">
             {[
-              { label: "About Us", path: "/about" },
-              { label: "Contact", path: "/contact" },
-              { label: "Delivery Information", path: "/delivery" },
-              { label: "Privacy Policy", path: "/privacy" },
-              { label: "Terms & Conditions", path: "/terms" },
+              { label: "Về chúng tôi", path: "/about" },
+              { label: "Liên hệ", path: "/contact" },
+              { label: "Thông tin giao hàng", path: "/delivery" },
+              { label: "Chính sách bảo mật", path: "/privacy" },
+              { label: "Điều khoản & Điều kiện", path: "/terms" },
             ].map((item) => (
               <li key={item.path}>
                 <Link className="text-sm text-gray-400 hover:text-white" to={item.path}>
@@ -64,14 +64,14 @@ const Footer = () => {
         
         {/* Cột 4: Subscribe */}
         <div>
-          <h3 className="text-lg font-medium mb-4">Subscribe</h3>
+          <h3 className="text-lg font-medium mb-4">Đặt mua</h3>
           <p className="text-sm text-gray-400 mb-4">
-            Enter your email to get updates about new collections and products.
+          Nhập email của bạn để nhận cập nhật về các bộ sưu tập và sản phẩm mới.
           </p>
           <div className="flex w-full max-w-xs">
             <input
               className="w-full px-3 py-2 text-gray-900 rounded-l-md focus:outline-none"
-              placeholder="Your Email"
+              placeholder="Email của bạn"
               type="email"
             />
             <button className="bg-black text-white px-4 py-2 rounded-r-md">
@@ -82,24 +82,30 @@ const Footer = () => {
       </div>
       
       {/* Phần dưới cùng của Footer */}
-      <div className="flex flex-col sm:flex-row justify-between items-center border-t border-gray-700 pt-4 mt-6 text-center">
-        <div className="flex space-x-4">
-          <i className="fab fa-cc-visa text-2xl"></i>
-          <i className="fab fa-cc-mastercard text-2xl"></i>
-          <i className="fab fa-cc-amex text-2xl"></i>
-          <i className="fab fa-cc-paypal text-2xl"></i>
+      <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-center">
+        <div>
+          <div className="flex space-x-4">
+            <i className="fab fa-cc-visa text-2xl"></i>
+            <i className="fab fa-cc-mastercard text-2xl"></i>
+            <i className="fab fa-cc-amex text-2xl"></i>
+            <i className="fab fa-cc-paypal text-2xl"></i>
+          </div>
         </div>
-        <p className="text-sm mt-4 sm:mt-0">© {new Date().getFullYear()} Sport Heaven. All rights reserved.</p>
-        <div className="flex space-x-4 mt-4 sm:mt-0">
-          {[
-            { icon: "fab fa-facebook-f", link: "#" },
-            { icon: "fab fa-twitter", link: "#" },
-            { icon: "fab fa-instagram", link: "#" },
-          ].map((social, index) => (
-            <a key={index} href={social.link} className="text-gray-400 hover:text-white text-lg">
-              <i className={social.icon}></i>
-            </a>
-          ))}
+        <div className="text-center">
+          <p className="text-sm mt-4 sm:mt-0">© {new Date().getFullYear()} Sport Heaven. Tất cả quyền được bảo lưu.</p>
+        </div>
+        <div className="flex flex-row-reverse">
+          <div className="flex space-x-4 mt-4 sm:mt-0">
+            {[
+              { icon: "fab fa-facebook-f", link: "#" },
+              { icon: "fab fa-twitter", link: "#" },
+              { icon: "fab fa-instagram", link: "#" },
+            ].map((social, index) => (
+              <a key={index} href={social.link} className="text-gray-400 hover:text-white text-lg">
+                <i className={social.icon}></i>
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </footer>

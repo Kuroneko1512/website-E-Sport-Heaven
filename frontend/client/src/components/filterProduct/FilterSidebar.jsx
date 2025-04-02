@@ -9,7 +9,6 @@ const FilterSidebar = ({ filters, setFilters, categories, colors, sizes }) => {
   const [sizeOpen, setSizeOpen] = useState(true);
 
   const toggleCategory = (setOpen) => {
-    // Bằng tiếng Việt
     setOpen(prev => !prev);
   };
 

@@ -8,21 +8,24 @@ import {
   UserHeader,
   UserMenuDropdown,
 } from '@app/styles/dropdown-menus';
-import { firebaseAuth } from '@app/firebase';
 import {} from '@app/index';
 import { useAppSelector } from '@app/store/store';
 import { DateTime } from 'luxon';
+import { AuthService } from '@app/services/auth.service';
+import { useAuth } from '@app/hooks/useAuth';
 
 const UserDropdown = () => {
   const navigate = useNavigate();
   const [t] = useTranslation();
   const currentUser = useAppSelector((state) => state.auth.currentUser);
+  const { logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const logOut = async (event: any) => {
-    await firebaseAuth.signOut();
+    await logout();
     event.preventDefault();
     setDropdownOpen(false);
+    navigate('/login');
   };
 
   const navigateToProfile = (event: any) => {
@@ -35,7 +38,7 @@ const UserDropdown = () => {
     <UserMenuDropdown isOpen={dropdownOpen} hideArrow>
       <StyledSmallUserImage
         slot="head"
-        src={currentUser?.photoURL}
+        src={currentUser?.photoURL || '/img/default-profile.png'}
         fallbackSrc="/img/default-profile.png"
         alt="User"
         width={25}
@@ -45,7 +48,7 @@ const UserDropdown = () => {
       <div slot="body">
         <UserHeader className=" bg-primary">
           <StyledBigUserImage
-            src={currentUser?.photoURL}
+            src={currentUser?.photoURL || '/img/default-profile.png'}
             fallbackSrc="/img/default-profile.png"
             alt="User"
             width={90}
@@ -56,10 +59,10 @@ const UserDropdown = () => {
             {currentUser?.email}
             <small>
               <span>Member since </span>
-              {currentUser?.metadata?.creationTime && (
+              {currentUser?.created_at && (
                 <span>
-                  {DateTime.fromRFC2822(
-                    currentUser?.metadata?.creationTime
+                  {DateTime.fromISO(
+                    currentUser?.created_at
                   ).toFormat('dd LLL yyyy')}
                 </span>
               )}
