@@ -13,6 +13,17 @@ const Login = () => {
   const dispatch = useDispatch();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
+  const [googleLoginUrl, setGoogleLoginUrl] = useState(null);
+
+  // Lấy URL đăng nhập Google
+  useEffect(() => {
+    fetch("/api/auth/google/url", {
+      headers: new Headers({ accept: "application/json" }),
+    })
+      .then((response) => response.ok ? response.json() : Promise.reject("Lỗi lấy URL đăng nhập Google"))
+      .then((data) => setGoogleLoginUrl(data.url))
+      .catch((error) => console.error(error));
+  }, []);
 
   useEffect(() => {
     const authTokens = document.cookie
@@ -40,25 +51,21 @@ const Login = () => {
 
       setSuccess(true);
       setTimeout(() => {
-        nav("/"); // hoặc '/home'
+        nav("/");
         setSuccess(false);
       }, 2000);
     },
     onError: (err) => {
       setError(true);
-      message.error(err.response?.data?.message || "Đăng nhập thất bại, vui lòng thử lại sau.");
-    //   setTimeout(() => setError(false), 200);
+      message.error(
+        err.response?.data?.message ||
+          "Đăng nhập thất bại, vui lòng thử lại sau."
+      );
     },
   });
 
   const onFinish = (values) => {
     const { email, password } = values;
-
-    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    // const phoneRegex = /^(0|\+84)[0-9]{9,11}$/;
-
-    // const isEmail = emailRegex.test(email);
-    // const isPhone = phoneRegex.test(email);
 
     const dataUser = {
       identifier: email,
@@ -100,16 +107,10 @@ const Login = () => {
                 validator: (_, value) => {
                   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                   const phoneRegex = /^(0|\+84)[0-9]{9,11}$/;
-                  if (
-                    !value ||
-                    emailRegex.test(value) ||
-                    phoneRegex.test(value)
-                  ) {
+                  if (!value || emailRegex.test(value) || phoneRegex.test(value)) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(
-                    "Vui lòng nhập đúng định dạng Email hoặc Số điện thoại!"
-                  );
+                  return Promise.reject("Vui lòng nhập đúng định dạng Email hoặc Số điện thoại!");
                 },
               },
             ]}
@@ -132,7 +133,6 @@ const Login = () => {
           >
             <Input.Password
               placeholder="••••••••••••••"
-              // visibilityToggle={{ visible: !hidden, onVisibleChange: setHidden }}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </Form.Item>
@@ -155,14 +155,28 @@ const Login = () => {
             <Button
               type="primary"
               htmlType="submit"
-              className="w-full bg-black text-white py-2 rounded-lg  hover:!bg-gray-800"
+              className="w-full bg-black text-white py-2 rounded-lg hover:!bg-gray-800"
               loading={mutation.isPending}
             >
               Đăng nhập
             </Button>
           </Form.Item>
-          <Divider />
-          
+
+          <div className="grid grid-cols-5 items-center justify-items-center">
+            <Divider className="col-span-2" /> <span>Hoặc</span> <Divider className="col-span-2" />
+          </div>
+
+          {/* Google login */}
+          <Form.Item>
+            <Button
+              type="default"
+              className="w-full bg-red-500 text-white py-2 rounded-lg hover:!bg-red-600 disabled:opacity-50 disabled:hover:!bg-gray-100 disabled:cursor-not-allowed"
+              onClick={() => window.location.href = googleLoginUrl}
+              disabled={!googleLoginUrl}
+            >
+              Đăng nhập bằng Google
+            </Button>
+          </Form.Item>
         </Form>
       </div>
       {success && <Success />}
