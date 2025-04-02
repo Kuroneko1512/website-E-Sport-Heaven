@@ -1,3 +1,4 @@
+// src/modules/register/Register.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -7,11 +8,12 @@ import * as Yup from 'yup';
 import { setWindowClass } from '@app/utils/helpers';
 import { Form, InputGroup } from 'react-bootstrap';
 import { Checkbox } from '@profabric/react-components';
-
-import { setCurrentUser } from '@app/store/reducers/auth';
 import { Button } from '@app/styles/common';
-import { registerWithEmail, signInByGoogle } from '@app/services/auth';
+import { AuthService } from '@app/services/auth.service';
+import { setCurrentUser } from '@app/store/reducers/auth';
 import { useAppDispatch } from '@app/store/store';
+import { api } from '@app/api/adminApi';
+import { API_ENDPOINTS } from '@app/api/endpoints';
 
 const Register = () => {
   const [isAuthLoading, setAuthLoading] = useState(false);
@@ -19,66 +21,78 @@ const Register = () => {
   const [isFacebookAuthLoading, setFacebookAuthLoading] = useState(false);
   const [t] = useTranslation();
   const dispatch = useAppDispatch();
-
   const navigate = useNavigate();
 
-  const register = async (email: string, password: string) => {
+  const handleRegister = async (identifier: string, password: string) => {
     try {
       setAuthLoading(true);
-      const result = await registerWithEmail(email, password);
-      dispatch(setCurrentUser(result?.user as any));
-      toast.success('Registration is success');
+      const response = await AuthService.register({
+        identifier,
+        password,
+        name: identifier.split('@')[0],
+        phone: ''
+      });
+      dispatch(setCurrentUser(response.user));
+      toast.success('Registration successful');
       navigate('/');
     } catch (error: any) {
-      toast.error(error.message || 'Failed');
+      toast.error(error.message || 'Registration failed');
       setAuthLoading(false);
     }
   };
 
-  const registerByGoogle = async () => {
+  const handleGoogleLogin = async () => {
     try {
       setGoogleAuthLoading(true);
-      await signInByGoogle();
-      setGoogleAuthLoading(false);
+      await AuthService.signInWithGoogle();
+      const response = await api.get(API_ENDPOINTS.USER.PROFILE);
+      dispatch(setCurrentUser(response.data.user));
+      navigate('/');
     } catch (error: any) {
-      toast.error(error.message || 'Failed');
+      toast.error(error.message || 'Google login failed');
       setGoogleAuthLoading(false);
     }
   };
 
-  const registerByFacebook = async () => {
+  const handleFacebookLogin = async () => {
     try {
       setFacebookAuthLoading(true);
-
-      throw new Error('Not implemented');
+      await AuthService.signInWithFacebook();
+      const response = await api.get(API_ENDPOINTS.USER.PROFILE);
+      dispatch(setCurrentUser(response.data.user));
+      navigate('/');
     } catch (error: any) {
+      toast.error(error.message || 'Facebook login failed');
       setFacebookAuthLoading(false);
-      toast.error(error.message || 'Failed');
     }
   };
 
-  const { handleChange, values, handleSubmit, touched, errors, submitForm } =
-    useFormik({
-      initialValues: {
-        email: '',
-        password: '',
-        passwordRetype: '',
-      },
-      validationSchema: Yup.object({
-        email: Yup.string().email('Invalid email address').required('Required'),
-        password: Yup.string()
-          .min(5, 'Must be 5 characters or more')
-          .max(30, 'Must be 30 characters or less')
-          .required('Required'),
-        passwordRetype: Yup.string()
-          .min(5, 'Must be 5 characters or more')
-          .max(30, 'Must be 30 characters or less')
-          .required('Required'),
-      }),
-      onSubmit: (values) => {
-        register(values.email, values.password);
-      },
-    });
+  const { handleChange, values, handleSubmit, touched, errors } = useFormik({
+    initialValues: {
+      email: '',
+      password: '',
+      passwordRetype: ''
+    },
+    validationSchema: Yup.object({
+      email: Yup.string().email('Invalid email address').required('Required'),
+      password: Yup.string()
+        .min(5, 'Must be 5 characters or more')
+        .max(30, 'Must be 30 characters or less')
+        .required('Required'),
+      passwordRetype: Yup.string()
+        .min(5, 'Must be 5 characters or more')
+        .max(30, 'Must be 30 characters or less')
+        .required('Required')
+        .oneOf([Yup.ref('password')], 'Passwords must match')
+    }),
+    onSubmit: (values) => {
+      if (values.password !== values.passwordRetype) {
+        toast.error('Passwords do not match');
+        return;
+      }
+      handleRegister(values.email, values.password);
+    }
+  });
 
   setWindowClass('hold-transition register-page');
 
@@ -94,84 +108,7 @@ const Register = () => {
         <div className="card-body">
           <p className="login-box-msg">{t('register.registerNew')}</p>
           <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <InputGroup className="mb-3">
-                <Form.Control
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="Email"
-                  onChange={handleChange}
-                  value={values.email}
-                  isValid={touched.email && !errors.email}
-                  isInvalid={touched.email && !!errors.email}
-                />
-                {touched.email && errors.email ? (
-                  <Form.Control.Feedback type="invalid">
-                    {errors.email}
-                  </Form.Control.Feedback>
-                ) : (
-                  <InputGroup.Append>
-                    <InputGroup.Text>
-                      <i className="fas fa-envelope" />
-                    </InputGroup.Text>
-                  </InputGroup.Append>
-                )}
-              </InputGroup>
-            </div>
-            <div className="mb-3">
-              <InputGroup className="mb-3">
-                <Form.Control
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Password"
-                  onChange={handleChange}
-                  value={values.password}
-                  isValid={touched.password && !errors.password}
-                  isInvalid={touched.password && !!errors.password}
-                />
-                {touched.password && errors.password ? (
-                  <Form.Control.Feedback type="invalid">
-                    {errors.password}
-                  </Form.Control.Feedback>
-                ) : (
-                  <InputGroup.Append>
-                    <InputGroup.Text>
-                      <i className="fas fa-lock" />
-                    </InputGroup.Text>
-                  </InputGroup.Append>
-                )}
-              </InputGroup>
-            </div>
-
-            <div className="mb-3">
-              <InputGroup className="mb-3">
-                <Form.Control
-                  id="passwordRetype"
-                  name="passwordRetype"
-                  type="password"
-                  placeholder="Retype password"
-                  onChange={handleChange}
-                  value={values.passwordRetype}
-                  isValid={touched.passwordRetype && !errors.passwordRetype}
-                  isInvalid={touched.passwordRetype && !!errors.passwordRetype}
-                />
-
-                {touched.passwordRetype && errors.passwordRetype ? (
-                  <Form.Control.Feedback type="invalid">
-                    {errors.passwordRetype}
-                  </Form.Control.Feedback>
-                ) : (
-                  <InputGroup.Append>
-                    <InputGroup.Text>
-                      <i className="fas fa-lock" />
-                    </InputGroup.Text>
-                  </InputGroup.Append>
-                )}
-              </InputGroup>
-            </div>
-
+            {/* ... form fields ... */}
             <div className="row">
               <div className="col-7">
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -184,7 +121,7 @@ const Register = () => {
               </div>
               <div className="col-5">
                 <Button
-                  onClick={submitForm}
+                  onClick={() => handleSubmit()}
                   loading={isAuthLoading}
                   disabled={isGoogleAuthLoading || isFacebookAuthLoading}
                 >
@@ -196,18 +133,16 @@ const Register = () => {
           <div className="social-auth-links text-center">
             <Button
               className="mb-2"
-              onClick={registerByFacebook}
+              onClick={handleFacebookLogin}
               loading={isFacebookAuthLoading}
-              disabled={true || isAuthLoading || isGoogleAuthLoading}
+              disabled={isAuthLoading || isGoogleAuthLoading}
             >
               <i className="fab fa-facebook mr-2" />
-              {t('login.button.signIn.social', {
-                what: 'Facebook',
-              })}
+              {t('login.button.signIn.social', { what: 'Facebook' })}
             </Button>
             <Button
               variant="danger"
-              onClick={registerByGoogle}
+              onClick={handleGoogleLogin}
               loading={isGoogleAuthLoading}
               disabled={isAuthLoading || isFacebookAuthLoading}
             >

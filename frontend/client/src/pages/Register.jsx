@@ -6,7 +6,6 @@ import Error from '../components/popupmodal/Error';
 import { useMutation } from '@tanstack/react-query';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { register } from '../redux/AuthSide';
 import instanceAxios from '../config/db';
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import axios from 'axios';
@@ -52,28 +51,20 @@ const Register = () => {
             </div>
             
             <div className="flex flex-col justify-center w-full lg:w-1/2 p-8 lg:p-24 bg-white shadow-lg rounded-lg">
-                <h2 className="text-3xl font-bold mb-2 text-gray-800">Welcome <span className="wave">👋</span></h2>
-                <p className="text-gray-600 mb-8">Please register here</p>
+                <h2 className="text-3xl font-bold mb-2 text-gray-800">Chào mừng <span className="wave">👋</span></h2>
+                <p className="text-gray-600 mb-8">Đăng ký tại đây</p>
                 
                 <Form layout="vertical" onFinish={onFinish} className="space-y-4">
             <Form.Item
-                label={<span className="text-gray-700">First Name</span>}
-                name="firstName"
+                label={<span className="text-gray-700">Tên</span>}
+                name="fullname"
                 rules={[{ required: true, message: 'Please enter your first name!' }]}
             >
                 <Input placeholder="Robert" className="px-4 py-2 border rounded-md" />
             </Form.Item>
             
             <Form.Item
-                label={<span className="text-gray-700">Last Name</span>}
-                name="lastName"
-                rules={[{ required: true, message: 'Please enter your last name!' }]}
-            >
-                <Input placeholder="Fox" className="px-4 py-2 border rounded-md" />
-            </Form.Item>
-            
-            <Form.Item
-                label={<span className="text-gray-700">Email Address</span>}
+                label={<span className="text-gray-700">Email</span>}
                 name="email"
                 rules={[{ required: true, type: 'email', message: 'Invalid email format!' }]}
             >
@@ -81,7 +72,7 @@ const Register = () => {
             </Form.Item>
             
             <Form.Item
-                label={<span className="text-gray-700">Password</span>}
+                label={<span className="text-gray-700">Mật khẩu</span>}
                 name="password"
                 rules={[{ required: true, message: 'Please enter your password!' }, { min: 8, message: 'Password must be at least 8 characters!' }]}
             >
@@ -94,7 +85,7 @@ const Register = () => {
             </Form.Item>
             
             <Form.Item
-                label={<span className="text-gray-700">Confirm Password</span>}
+                label={<span className="text-gray-700">Nhập lại Mật khẩu</span>}
                 name="confirmPassword"
                 dependencies={["password"]}
                 rules={[
@@ -119,17 +110,17 @@ const Register = () => {
             
             <Form.Item name="terms" valuePropName="checked" rules={[{ required: true, message: 'You must agree to the Terms & Conditions!' }]}
             >
-                <Checkbox>I agree to the <span className="font-bold">Terms & Conditions</span></Checkbox>
+                <Checkbox>Tôi đồng ý với các <span className="font-bold">điều khoản & điều kiện</span></Checkbox>
             </Form.Item>
             
             <Form.Item>
                 <Button type="primary" htmlType="submit" className="w-full bg-black text-white py-2 rounded-lg  hover:!bg-gray-800">
-                    Register
+                    Đăng ký
                 </Button>
             </Form.Item>
         </Form>
 
-                <p className="text-center text-gray-600 text-sm">Already have an account? <Link to="/login" className="text-blue-600">Login here</Link></p>
+                <p className="text-center text-gray-600 text-sm mt-6">Đã có tài khoản? <Link to="/login" className="text-blue-600">Đăng nhập.</Link></p>
             </div>
             
             {success && <Success />}

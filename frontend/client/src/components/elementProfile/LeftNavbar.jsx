@@ -1,38 +1,17 @@
 import React, { useState } from "react"; 
 import { Link } from "react-router-dom";
 
-// Tạo component cho mỗi mục menu
-const NavItem = ({ link, icon, label, isActive, onClick }) => (
-  <Link
-    className={`flex items-center space-x-2 px-4 py-3 
-      ${isActive 
-        ? 'bg-black text-white dark:bg-gray-700 dark:text-gray-200' 
-        : 'text-gray-600 dark:text-gray-300 hover:text-white hover:bg-black dark:hover:bg-gray-600'}`}
-    to={`${link}`}
-    onClick={onClick}
-  >
-    <i className={`fas ${icon}`} />
-    <span>{label}</span>
-  </Link>
-);
-
 const LeftNavbar = () => {
-  const [activeMenu, setActiveMenu] = useState("info"); // Mặc định mục "Settings" được chọn
 
   const menuItems = [
-    { link: "info", icon: "fa-user", label: "Personal Information" },
-    { link: "orders", icon: "fa-box", label: "My Orders" },
-    { link: "wishlists", icon: "fa-heart", label: "My Wishlists" },
-    { link: "manage-address", icon: "fa-map-marker-alt", label: "Manage Addresses" },
-    { link: "saved-cards", icon: "fa-credit-card", label: "Saved Cards" },
-    { link: "notifications", icon: "fa-bell", label: "Notifications" },
-    { link: "settings", icon: "fa-cog", label: "Settings" }, // Mục "Settings"
+    { link: "info", icon: "fa-user", label: "Thông tin cá nhân" },
+    { link: "orders", icon: "fa-box", label: "Đơn hàng của tôi" },
+    { link: "wishlists", icon: "fa-heart", label: "Sản phâm yêu thích" },
+    { link: "manage-address", icon: "fa-map-marker-alt", label: "Quản lý địa chỉ" },
+    { link: "saved-cards", icon: "fa-credit-card", label: "Thẻ đã lưu" },
+    { link: "notifications", icon: "fa-bell", label: "Thông báo" },
+    { link: "settings", icon: "fa-cog", label: "Cài đặt" },
   ];
-
-  // Hàm xử lý sự kiện khi người dùng chọn một mục
-  const handleMenuClick = (link) => {
-    setActiveMenu(link); // Cập nhật trạng thái active khi người dùng nhấn vào menu
-  };
 
   return (
     <aside className="w-full md:w-1/4 md:mb-0">
@@ -52,14 +31,17 @@ const LeftNavbar = () => {
         </div>
         <nav>
           {menuItems.map((item, index) => (
-              <NavItem
-                icon={item.icon}
-                label={item.label}
-                key={index}
-                link={item.link}
-                isActive={activeMenu === item.link} // Kiểm tra nếu item này là mục đang active
-                onClick={() => handleMenuClick(item.link)} // Cập nhật active khi click
-              />
+              <Link
+              key={index}
+              className={`flex items-center space-x-2 px-4 py-3 
+                ${location.pathname.includes(item.link) || (index === 0 && location.pathname === "/my-profile")
+                  ? 'bg-black text-white dark:bg-gray-700 dark:text-gray-200' 
+                  : 'text-gray-600 dark:text-gray-300 hover:text-white hover:bg-black dark:hover:bg-gray-600'}`}
+              to={`${item.link}`}
+            >
+              <i className={`fas ${item.icon}`} />
+              <span>{item.label}</span>
+            </Link>
           ))}
         </nav>
       </div>

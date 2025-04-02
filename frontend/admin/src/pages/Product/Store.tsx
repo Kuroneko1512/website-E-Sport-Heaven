@@ -2,7 +2,7 @@ import { useState, useEffect, ChangeEvent } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { getCategory, Category } from "@app/services/Category/ApiCategory";
-import NoImage from "../../../public/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
+// import NoImage from "../../../public/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { createProduct } from "@app/services/Product/Api";
 import Select, { SingleValue } from "react-select";
@@ -32,6 +32,8 @@ import Select, { SingleValue } from "react-select";
   selected_attributes: AttributeSelection[];  // 🟢 Định nghĩa cụ thể
   variants: Variant[];  // 🟢 Định nghĩa cụ thể
 }
+
+const NoImage = "/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
 
 const Store = () => {
   
@@ -150,6 +152,7 @@ const Store = () => {
       const newProduct = await createProduct(product);
       console.log(newProduct);
       alert("Tạo sản phẩm thành công!");
+      navigate("/product");
     } catch (error) {
       alert("Lỗi khi tạo sản phẩm!");
     }

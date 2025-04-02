@@ -1,4 +1,5 @@
 // src/api/productApi.ts
+import Product from "@app/pages/Product/Product";
 import axios from "axios";
 
 const API_URL = "http://127.0.0.1:8000/api/v1/product";
@@ -15,8 +16,17 @@ export interface Variant {
   image?: File | string | null;
   attributes: AttributeSelection[];
 }
+export interface Pagination {
+  current_page: number; // Trang hiện tại
+  last_page: number; // Tổng số trang
+  prev_page_url: string | null; // Link trang trước (null nếu không có)
+  next_page_url: string | null; // Link trang tiếp theo (null nếu không có)
+  total: number; // Tổng số records
+  per_page: number; // Số records trên mỗi trang
+  data: api4 []; // Mảng dữ liệu attributes
+}
 
-export interface Product {
+export interface api4 {
   id?: number;
   name: string;
   description?: string;
@@ -27,8 +37,8 @@ export interface Product {
   category_id: string;
   stock: number;
   image?: File | null;
-  selected_attributes: AttributeSelection[];  // 🟢 Định nghĩa cụ thể
-  variants: Variant[];  // 🟢 Định nghĩa cụ thể
+  selected_attributes: AttributeSelection[];  
+  variants: Variant[];  
 }
 
 // Tạo sản phẩm mới
@@ -97,10 +107,30 @@ export const createProduct = async (product: Product): Promise<Product> => {
 
 
 // Lấy danh sách sản phẩm
-export const getProducts = async () => {
-  return await axios.get(API_URL);
+export const getProducts = async (page : 1 , limit : 5): Promise<Pagination> => {
+  try{
+  
+    const response = await axios.get<Pagination>(`${API_URL}?page=${page}&limit=${limit}`);
+  
+    return response.data;
+  }
+catch(error) {
+  console.error("Error fetching products:",error);
+  throw error;
+}
+
 };
 
+
+export const getProductById = async (id: number): Promise<Product> => {
+  try {
+    const response = await axios.get<Product>(`${API_URL}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    throw error;
+  }
+};
 // Cập nhật sản phẩm theo ID
 export const updateProduct = async (
   id: number,

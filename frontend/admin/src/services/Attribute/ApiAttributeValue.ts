@@ -1,76 +1,43 @@
-// src/api/attributeApi.ts
-import axios from 'axios';
+import { apiService } from "../BaseApi";
 
-const API_URL = 'api/v1/attributeValue/index/{attribute_id}';
+export type AttributeValue = {
+  id: number;
+  attribute_id: number;
+  value: string;
+  description?: string;
+  image?: string;
+};
 
 
-
-
-
-// Interface định nghĩa dữ liệu của một attribute
-export interface Attribute {
-  id?: number;
-  value? : string;
- 
+export interface Pagination {
+  current_page: number; // Trang hiện tại
+  last_page: number; // Tổng số trang
+  prev_page_url: string | null; // Link trang trước (null nếu không có)
+  next_page_url: string | null; // Link trang tiếp theo (null nếu không có)
+  total: number; // Tổng số records
+  per_page: number; // Số records trên mỗi trang
+  data: AttributeValue[]; // Mảng dữ liệu attribute_values
 }
 
-// Interface định nghĩa dữ liệu trả về từ API, bao gồm thông tin phân trang
+const AttributeValue_API = "/api/v1/attributeValue";
 
+export const AttributeValueService = {
+  /** Lấy danh sách Attribute Value theo `attribute_id` */
+  getAll: (attribute_id: number, page = 1, perPage = 5) =>
+    apiService.get<Pagination>(`${AttributeValue_API}/index/${attribute_id}?page=${page}&per_page=${perPage}`),
 
-export const createAttribute = async (attribute: FormData): Promise<Attribute> => {
-  try {
-    const response = await axios.post<Attribute>(API_URL, attribute, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error creating attribute:', error);
-    throw error;
-  }
-};
-export const getAttributeById = async (id: string | number) => {
-  return await axios.get(`${API_URL}/${id}`);
-};
-// Hàm cập nhật một thuộc tính dựa vào ID
-export const updateAttribute = async (
-  id: number, // ID của thuộc tính cần cập nhật
-  attribute: FormData | { name: string; description: string } // Dữ liệu cần cập nhật, có thể là FormData hoặc Object JSON
-): Promise<Attribute> => {
-  try {
-    // Gửi yêu cầu cập nhật dữ liệu lên API bằng phương thức PUT
-    const response = await axios.put<Attribute>(
-      `${API_URL}/${id}`, // URL API endpoint có chứa ID của thuộc tính cần cập nhật
-      attribute, // Dữ liệu thuộc tính cần gửi
-      {
-        headers: {
-          // Kiểm tra nếu attribute là FormData thì dùng "multipart/form-data"
-          // Ngược lại, nếu là object JSON thì dùng "application/json"
-          "Content-Type": attribute instanceof FormData ? "multipart/form-data" : "application/json",
-        },
-      }
-    );
+  /** Lấy một Attribute Value theo ID */
+  getById: (id: number) =>
+    apiService.get<AttributeValue>(`${AttributeValue_API}/${id}`),
 
-    // Trả về dữ liệu phản hồi từ API sau khi cập nhật thành công
-    return response.data;
-  } catch (error) {
-    // In lỗi ra console nếu có lỗi xảy ra trong quá trình gửi request
-    console.error("Error updating attribute:", error);
-    throw error; // Ném lỗi để có thể xử lý ở nơi gọi hàm này
-  }
-};
+  /** Tạo mới Attribute Value */
+  create: (attributeValue: Omit<AttributeValue, "id">) =>
+    apiService.post<AttributeValue>(`${AttributeValue_API}`, attributeValue),
 
-// Hàm gọi API lấy danh sách attributes với phân trang
+  /** Cập nhật Attribute Value */
+  update: (id: number, attributeValue: Partial<AttributeValue>) =>
+    apiService.put<AttributeValue>(`${AttributeValue_API}/${id}`, attributeValue),
 
-
-export const deleteAttribute = async (id: number): Promise<void> => {
-  try {
-    // console.log(`Sending DELETE request to: ${API_URL}/attributes/${id}`);
-    await axios.delete(`${API_URL}/${id}`);
-    console.log(`Deleted attribute with id: ${id}`);
-  } catch (error) {
-    console.error("Error deleting attribute:", error);
-    throw error;
-  }
+  /** Xóa Attribute Value */
+  delete: (id: number) => apiService.delete(`${AttributeValue_API}/${id}`),
 };

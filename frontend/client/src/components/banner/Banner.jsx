@@ -1,33 +1,39 @@
 import React from "react";
-import anhBanner from '../../assets/banner.jpg'
+import Banner1 from "../../assets/banner.jpg";
+import Banner2 from "../../assets/Banner2.png";
+import Banner3 from "../../assets/Banner3.png";
+import Banner4 from "../../assets/Banner4.png";
+import Banner5 from "../../assets/Banner5.png";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
+
+const images = [Banner1, Banner2, Banner3, Banner4, Banner5];
 
 const Banner = () => {
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    adaptiveHeight: true,
+    autoplay: true, // ✅ Bật chế độ tự chuyển ảnh
+    autoplaySpeed: 3000, // ⏳ Thời gian mỗi slide (3000ms = 3 giây)
+  };
+
   return (
-    <div>
-      <section className="relative mx-auto">
-        {/* Fake hình ảnhảnh */}
-        <img
-          alt="Woman in stylish outfit"
-          className="w-full h-auto"
-          src={anhBanner}
-        />
-        {/* fake nội dungdung */}
-        <div className="absolute inset-0 flex flex-col justify-center items-start p-8 md:p-16 bg-black bg-opacity-50">
-          <h2 className="text-lg text-gray-200">Classic Exclusive</h2>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mt-2">
-            Women's Collection
-          </h1>
-          <p className="text-lg text-gray-200 mt-2">UPTO 40% OFF</p>
-          <a
-            className="inline-block bg-white text-black px-6 py-3 mt-6 rounded"
-            href="#"
-          >
-            Shop Now
-            <i className="fas fa-arrow-right ml-2"></i>
-          </a>
+    <Slider {...settings} className="mx-auto">
+      {images.map((src, index) => (
+        <div key={index} className="flex justify-center">
+          <img
+            src={src}
+            alt={`slide-${index}`}
+            className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-cover mx-auto"
+          />
         </div>
-      </section>
-    </div>
+      ))}
+    </Slider>
   );
 };
 

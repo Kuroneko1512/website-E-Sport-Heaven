@@ -14,9 +14,9 @@ const SettingOption = ({ title, description, children }) => (
 
 const Setting = () => {
   const { isDarkMode, toggleTheme } = useContext(ThemeContext);
-  const [isPushNotificationsEnabled, setIsPushNotificationsEnabled] = useState(true);
-  const [isDesktopNotificationsEnabled, setIsDesktopNotificationsEnabled] = useState(true);
-  const [isEmailNotificationsEnabled, setIsEmailNotificationsEnabled] = useState(true);
+  const [isPushNotificationsEnabled, setIsPushNotificationsEnabled] = useState(false);
+  const [isDesktopNotificationsEnabled, setIsDesktopNotificationsEnabled] = useState(false);
+  const [isEmailNotificationsEnabled, setIsEmailNotificationsEnabled] = useState(false);
 
   // Hàm xử lý thay đổi theme từ select
   const handleThemeChange = (event) => {
@@ -30,36 +30,36 @@ const Setting = () => {
 
   return (
     <div className="p-6 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg shadow-md">
-      {/* Appearance */}
+      {/* Chủ đề */}
       <SettingOption
-        title="Appearance"
-        description="Customize how your theme looks on your device"
+        title="Chủ đề"
+        description="Tùy chỉnh cách chủ đề của bạn trông trên thiết bị của bạn"
       >
         <select
           className="bg-gray-100 dark:bg-gray-700 dark:text-white rounded px-4 py-2"
           value={isDarkMode ? "Dark" : "Light"} // Thiết lập giá trị của select
           onChange={handleThemeChange} // Gọi hàm khi thay đổi
         >
-          <option value="Light">Light</option>
-          <option value="Dark">Dark</option>
+          <option value="Light">Sáng</option>
+          <option value="Dark">Tối</option>
         </select>
       </SettingOption>
 
-      {/* Language */}
+      {/* Ngôn ngữ */}
       <SettingOption
-        title="Language"
-        description="Select your language"
+        title="Ngôn ngữ"
+        description="Chọn ngôn ngữ của bạn"
       >
         <select className="bg-gray-100 dark:bg-gray-700 dark:text-white rounded px-4 py-2">
-          <option>English</option>
-          <option>Spanish</option>
+          <option>Tiếng Việt</option>
+          <option>Tiếng Anh</option>
         </select>
       </SettingOption>
 
-      {/* Push Notifications */}
+      {/* Thông báo đẩy */}
       <SettingOption
-        title="Push Notifications"
-        description="Receive push notification"
+        title="Thông báo đẩy"
+        description="Nhận thông báo đẩy"
       >
         <label className="switch">
           <input
@@ -71,10 +71,10 @@ const Setting = () => {
         </label>
       </SettingOption>
 
-      {/* Desktop Notifications */}
+      {/* Thông báo máy tính để bàns */}
       <SettingOption
-        title="Desktop Notification"
-        description="Receive push notification in desktop"
+        title="Thông báo máy tính để bàn"
+        description="Nhận thông báo đẩy trong máy tính để bàn"
       >
         <label className="switch">
           <input
@@ -86,10 +86,10 @@ const Setting = () => {
         </label>
       </SettingOption>
 
-      {/* Email Notifications */}
+      {/* Thông báo Email */}
       <SettingOption
-        title="Email Notifications"
-        description="Receive email notification"
+        title="Thông báo Email"
+        description="Nhận thông báo qua email"
       >
         <label className="switch">
           <input

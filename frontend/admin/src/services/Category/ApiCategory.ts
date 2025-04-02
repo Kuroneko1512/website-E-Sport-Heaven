@@ -12,6 +12,7 @@ export interface Category {
   id?: number;
   name: string;
   description?: string;
+  parent_id?:number;
 }
 
 // Interface định nghĩa dữ liệu trả về từ API, bao gồm thông tin phân trang

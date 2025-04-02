@@ -18,8 +18,45 @@ class ProductService extends BaseService
     public function getProductAll($paginate = 10)
     {
         return $this->model->with([
-            'variants.productAttributes.attributeValue:id,value', 
-        ])->paginate($paginate);
+            'variants.productAttributes.attributeValue:id,value',
+        ])
+            ->orderBy('created_at', 'DESC') // Sắp xếp theo thời gian mới nhất
+            ->paginate($paginate);
+    }
+    public function getProductFiterAll($filters = [], $paginate = 12)
+    {
+        // Sắp xếp theo thời gian mới nhất
+        $query = $this->model->with(['variants.productAttributes.attributeValue:id,value'])
+            ->orderBy('created_at', 'DESC');
+
+        // Lọc theo danh mục sản phẩm
+        if (!empty($filters['category_id'])) {
+            $query->where('category_id', $filters['category_id']);
+        }
+
+        // Lọc theo khoảng giá
+        if (!empty($filters['min_price']) && !empty($filters['max_price'])) {
+            $query->whereBetween('price', [$filters['min_price'], $filters['max_price']]);
+            // return $query;
+        }
+        // Lọc theo thuộc tính sản phẩm
+        if (!empty($filters['attributes'])) {
+            $query->whereHas('variants.productAttributes.attributeValue', function ($q) use ($filters) {
+                $q->whereIn('value', $filters['attributes']);
+            });  
+        }
+        return $query->paginate($paginate);
+    }
+    public function searchProduct($keyword, $paginate = 12)
+    {
+        return $this->model
+            ->with(['variants.productAttributes.attributeValue:id,value'])
+            ->where('name', 'LIKE', '%' . $keyword . '%')
+            ->orWhereHas('variants.productAttributes.attributeValue', function ($query) use ($keyword) {
+                $query->where('value', 'LIKE', '%' . $keyword . '%');
+            })
+            ->orderBy('created_at', 'DESC')
+            ->paginate($paginate);
     }
     public function getProduct($id)
     {
@@ -71,13 +108,14 @@ class ProductService extends BaseService
             'name' => $data['name'],
             'sku' => $productSku,
             'price' => $isVariable ? null : $data['price'],
+            'stock' => $isVariable ? null : $data['stock'],
             'discount_percent' => $data['discount_percent'] ?? null,
             'discount_start' => $data['discount_start'] ?? null,
             'discount_end' => $data['discount_end'] ?? null,
             'description' => $data['description'] ?? null,
             'product_type' => $data['product_type'],
-            'status' => 'draft', // Sản phẩm sẽ là bản nháp ban đầu
-            'category_id'=>$data['category_id'] ?? null
+            'status' => 'active', // Sản phẩm sẽ là bản nháp ban đầu
+            'category_id' => $data['category_id'] ?? null
         ]);
         if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
             $imagePath = $data['image']->store('products', 'public');
@@ -85,7 +123,6 @@ class ProductService extends BaseService
         }
         if ($isVariable) {
             $this->handelVariant($isVariable, $product, $data);
-           
         }
         return true;
     }
@@ -164,6 +201,10 @@ class ProductService extends BaseService
 
             // Tự động tạo SKU nếu chưa có
             $variantSku = $variantData['sku'] ?? $this->generateSKU($data['name'], $variantData['attributes']);
+            $variantImage = null;
+            if (isset($variantData['image'])) {
+                $variantImage = $variantData['image']->store('variants', 'public');
+            }
 
             // Lưu biến thể
             $variant = $product->variants()->create([
@@ -173,6 +214,7 @@ class ProductService extends BaseService
                 'discount_start' => $variantData['discount_start'] ?? null,
                 'discount_end' => $variantData['discount_end'] ?? null,
                 'stock' => $variantData['stock'],
+                'image' => $variantImage,
             ]);
 
             // Lưu thuộc tính của biến thể

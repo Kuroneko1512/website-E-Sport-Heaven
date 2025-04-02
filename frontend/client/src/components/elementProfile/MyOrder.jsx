@@ -33,10 +33,10 @@ const OrderItem = ({ product, status, price, buttons }) => {
           </p>
         </div>
       </div>
-      <div className="text-center">
+      <div className="text-center col-span-1">
         <p className="font-bold text-lg text-gray-900 dark:text-gray-200">${price}</p>
       </div>
-      <div className="text-right">
+      <div className="col-span-1 flex flex-col space-y-2 items-end">
         {buttons.map((btn, index) => (
           <button
             key={index}
