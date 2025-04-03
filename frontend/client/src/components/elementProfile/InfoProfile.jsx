@@ -174,31 +174,31 @@ const InfoProfile = () => {
 
           <Form form={form} layout="vertical" disabled={!isEditing}>
             <div className="grid grid-cols-2 gap-4">
-              <Form.Item label="Tên đăng nhập" name="name" rules={[{ required: true }]}>
+              <Form.Item label="Tên đăng nhập" name="name" rules={[{ required: true ,message: "Phải nhập tên đăng nhập!" }]}>
                 <Input />
               </Form.Item>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Form.Item label="Họ" name="firstname" rules={[{ required: true }]}>
+              <Form.Item label="Họ" name="firstname" rules={[{ required: true ,message: "Phải nhập họ!" }]}>
                 <Input />
               </Form.Item>
-              <Form.Item label="Tên" name="lastname" rules={[{ required: true }]}>
-                <Input />
-              </Form.Item>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true }]}>
-                <Input />
-              </Form.Item>
-              <Form.Item label="Email" name="email" rules={[{ required: true, type: "email" }]}>
+              <Form.Item label="Tên" name="lastname" rules={[{ required: true ,message:"Phải nhập tên!" }]}>
                 <Input />
               </Form.Item>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Form.Item label="Ngày sinh" name="birthDate">
+              <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true,message:"Phải nhập số điện thoại!" }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item label="Email" name="email" rules={[{ required: true,message:"Phải nhập email"},{ type: "email", message:"Không đúng định dạng email!" }]}>
+                <Input />
+              </Form.Item>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Form.Item label="Ngày sinh" name="birthDate" rules={[{ required: true, message:"Phải nhập ngày sinh!" }]}>
                 <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
               </Form.Item>
-              <Form.Item label="Giới tính" name="gender">
+              <Form.Item label="Giới tính" name="gender" rules={[{ required: true , message:"Phải chọn giới tính!" }]}>
                 <Select>
                   <Option value="male">Nam</Option>
                   <Option value="female">Nữ</Option>
