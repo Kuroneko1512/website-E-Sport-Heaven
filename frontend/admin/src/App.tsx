@@ -19,8 +19,7 @@ import Profile from "@pages/profile/Profile";
 import Product from "@pages/Product/Product";
 import PublicRoute from "./routes/PublicRoute";
 import PrivateRoute from "./routes/PrivateRoute";
-import { setCurrentUser } from "./store/reducers/auth";
-import  Store  from "@pages/Product/Store";
+import Store from "@pages/Product/Store";
 import { useAppDispatch, useAppSelector } from "./store/store";
 import { Loading } from "./components/Loading";
 import EditComponent from '@pages/Attribute/EditComponent';
@@ -34,6 +33,8 @@ import AttributeProduct from "./pages/Product/AttributeProduct";
 import VariantProduct from "./pages/Product/VariantProduct";
 import Category from "./pages/Category/Category";
 import AttributePage from "@pages/Attribute/Attribute";
+import { setCurrentUser, setAuthData, clearAuth } from "./store/reducers/auth";
+
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {
@@ -43,106 +44,129 @@ const App = () => {
   const location = useLocation();
 
   const [isAppLoading, setIsAppLoading] = useState(true);
-
   useEffect(() => {
-      const token = localStorage.getItem("token");
-      if (token) {
-          AuthService.getUser()
-              .then((response) => {
-                  dispatch(setCurrentUser(response.user));
-              })
-              .catch(() => {
-                  localStorage.removeItem("token");
-                  window.location.href = "/login";
-              });
-      }
+    const access_token = localStorage.getItem("access_token");
+    console.log('App init - access_token:', access_token);
+
+    if (access_token) {
+      setIsAppLoading(true);
+      AuthService.getUser()
+        .then((user) => {
+          console.log('User fetched successfully:', user);
+          // Lấy các thông tin khác từ localStorage
+          const refreshToken = localStorage.getItem("refresh_token");
+          const expiresAt = localStorage.getItem("expires_at");
+          const expiresIn = localStorage.getItem("expires_in");
+          const permissions = localStorage.getItem("permissions");
+          const roles = localStorage.getItem("roles");
+
+          dispatch(setAuthData({
+            accessToken: access_token,
+            refreshToken: refreshToken,
+            expiresAt: expiresAt,
+            expiresIn: expiresIn ? Number(expiresIn) : null,
+            permissions: permissions ? JSON.parse(permissions) : null,
+            roles: roles ? JSON.parse(roles) : null,
+            user: user
+          }));
+        })
+        .catch((error) => {
+          console.error('Error fetching user:', error);
+          dispatch(clearAuth());
+        })
+        .finally(() => {
+          setIsAppLoading(false);
+        });
+    } else {
       setIsAppLoading(false);
+    }
   }, [dispatch]);
 
+
   useEffect(() => {
-      const size = calculateWindowSize(windowSize.width);
-      if (screenSize !== size) {
-          dispatch(setWindowSize(size));
-      }
+    const size = calculateWindowSize(windowSize.width);
+    if (screenSize !== size) {
+      dispatch(setWindowSize(size));
+    }
   }, [windowSize.width, dispatch, screenSize]);
 
   useEffect(() => {
-      if (location && location.pathname && VITE_NODE_ENV === "production") {
-          ReactGA.send({
-              hitType: "pageview",
-              page: location.pathname,
-          });
-      }
+    if (location && location.pathname && VITE_NODE_ENV === "production") {
+      ReactGA.send({
+        hitType: "pageview",
+        page: location.pathname,
+      });
+    }
   }, [location]);
 
   if (isAppLoading) {
-      return <Loading />;
+    return <Loading />;
   }
 
   return (
 
     <>
-    <Routes>
-      {/* Public Routes */}
-      <Route element={<PublicRoute />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgetPassword />} />
-        <Route path="/recover-password" element={<RecoverPassword />} />
-      </Route>
+      <Routes>
+        {/* Public Routes */}
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgetPassword />} />
+          <Route path="/recover-password" element={<RecoverPassword />} />
+        </Route>
 
-      {/* Private Routes */}
-      <Route  element={<PrivateRoute />}>
-        <Route path="/" element={<Main />}>
-          <Route index element={<Dashboard />} />
-          <Route path="sub-menu-2" element={<Blank />} />
-          <Route path="sub-menu-1" element={<SubMenu />} />
-          <Route path="blank" element={<Blank />} />
-          <Route path="profile" element={<Profile />} />
-          {/* route sản phẩm  */}
-          <Route path="Product" element={<Product />} >
-          
-          </Route> 
-          <Route path="Product/detail/:id" element={<DetailProductComponent/>} />
-    
-          <Route path="Product/edit/:id" element={<EditComponents/>} />
-    
-          <Route path="add-product" element={<Store />} >
-           <Route path="AttributeForm" element={<AttributeForm />} /> 
-           <Route path="ValueProduct" element={<ValueProduct />} /> 
-           <Route path="Attribute" element={<AttributeProduct />} /> 
-           <Route path="Variant" element={<VariantProduct />} /> 
-           <Route index element={<ValueProduct />} />
-          </Route>
-          {/*Route attribute*/}
-          <Route path="Attribute" element={<AttributePage />} />
-          <Route path="Category" element={<Category />} />
-         
-          <Route path="Order" element={<Order />} />
-          <Route path="Order/Details/:id" element={<DetailOrder />} />
+        {/* Private Routes */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/" element={<Main />}>
+            <Route index element={<Dashboard />} />
+            <Route path="sub-menu-2" element={<Blank />} />
+            <Route path="sub-menu-1" element={<SubMenu />} />
+            <Route path="blank" element={<Blank />} />
+            <Route path="profile" element={<Profile />} />
+            {/* route sản phẩm  */}
+            <Route path="Product" element={<Product />} >
+
+            </Route>
+            <Route path="Product/detail/:id" element={<DetailProductComponent />} />
+
+            <Route path="Product/edit/:id" element={<EditComponents />} />
+
+            <Route path="add-product" element={<Store />} >
+              <Route path="AttributeForm" element={<AttributeForm />} />
+              <Route path="ValueProduct" element={<ValueProduct />} />
+              <Route path="Attribute" element={<AttributeProduct />} />
+              <Route path="Variant" element={<VariantProduct />} />
+              <Route index element={<ValueProduct />} />
+            </Route>
+            {/*Route attribute*/}
+            <Route path="Attribute" element={<AttributePage />} />
+            <Route path="Category" element={<Category />} />
+
+            <Route path="Order" element={<Order />} />
+            <Route path="Order/Details/:id" element={<DetailOrder />} />
 
 
-        
+
 
 
             {/*Route Category*/}
-            <Route path="category" element={<Category/>}/>
+            <Route path="category" element={<Category />} />
+          </Route>
         </Route>
-      </Route>
-    </Routes>
+      </Routes>
 
-    {/* Toast Notification */}
-    <ToastContainer
-      autoClose={3000}
-      draggable={false}
-      position="top-right"
-      hideProgressBar={false}
-      newestOnTop
-      closeOnClick
-      rtl={false}
-      pauseOnHover
-    />
-  </>
+      {/* Toast Notification */}
+      <ToastContainer
+        autoClose={3000}
+        draggable={false}
+        position="top-right"
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnHover
+      />
+    </>
     // <>
     //   <Routes>
     //     <Route path="/login" element={<PublicRoute />}>

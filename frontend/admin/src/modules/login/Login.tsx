@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useFormik } from "formik";
 import { useTranslation } from "react-i18next";
-import { setCurrentUser } from "@store/reducers/auth";
+import { setCurrentUser, setAuthData } from "@store/reducers/auth";
 import { setWindowClass } from "@app/utils/helpers";
 import { Checkbox } from "@profabric/react-components";
 import * as Yup from "yup";
@@ -29,21 +29,28 @@ const Login = () => {
             setAuthLoading(true);
             setIdentifierError(null);
             setPasswordError(null);
-
+    
             console.log("Attempting to login with:", { identifier, password });
             const response = await AuthService.login({ identifier, password });
             console.log("Login response:", response);
-
+    
             // Kiểm tra dữ liệu user
             if (!response.user) {
                 console.error("No user data in response");
                 throw new Error("No user data in response");
             }
-
-            // Kiểm tra dữ liệu user trước khi dispatch
-            console.log("User data:", response.user);
-            dispatch(setCurrentUser(response.user));
-
+    
+            // Cập nhật Redux store với đầy đủ thông tin
+            dispatch(setAuthData({
+                accessToken: response.access_token,
+                refreshToken: response.refresh_token,
+                expiresAt: response.expires_at,
+                expiresIn: response.expires_in,
+                permissions: response.permission,
+                roles: response.role,
+                user: response.user
+            }));
+    
             toast.success("Login successful");
             navigate("/");
             // Kiểm tra token sau khi login
@@ -68,6 +75,7 @@ const Login = () => {
             setAuthLoading(false);
         }
     };
+    
 
     const handleGoogleLogin = async () => {
         try {
