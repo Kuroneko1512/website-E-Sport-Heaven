@@ -479,7 +479,7 @@ class AuthService
                 'phone' => 'string|unique:users,phone,' . $user->id,
                 'password' => 'nullable|string|min:8|confirmed',
                 'password_confirmation' => 'nullable|string|min:8',
-                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             ], [
                 'email.email' => 'Email không đúng định dạng',
                 'email.unique' => 'Email đã tồn tại',
@@ -523,7 +523,7 @@ class AuthService
                         $publicId = null;
                         if (preg_match('/\/v\d+\/([^\/]+)\/([^\.]+)/', $user->avatar, $matches)) {
                             $publicId = $matches[1] . '/' . $matches[2];
-                            $this->mediaService->deleteAvatar($publicId);
+                            $this->mediaService->deleteImage($publicId);
                         }
                     }
 
