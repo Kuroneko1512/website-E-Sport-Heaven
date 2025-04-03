@@ -51,6 +51,7 @@ function App() {
         <CSSTransition key={location.pathname} classNames="page" timeout={300}>
           <Routes location={location}>
             <Route path="/login" element={<Login />} />
+            {/* callback google */}
             <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
