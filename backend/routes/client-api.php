@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Auth\v1\SocialAuthController;
 use App\Http\Controllers\Api\Auth\v1\CustomerAuthController;
 use App\Http\Controllers\Api\Profile\V1\CustomerProfileController;
 use App\Http\Controllers\Api\Profile\V1\ShippingAddressController;
@@ -16,6 +17,19 @@ Route::prefix('v1')->group(function () {
 
         Route::post('/login', [CustomerAuthController::class, 'login'])->name('login');
         Route::post('refresh', [CustomerAuthController::class, 'refresh'])->name('refresh');
+
+        // Đăng nhập xã hội - không yêu cầu xác thực
+        Route::group(['prefix' => 'auth/social', 'as' => 'auth.social.'], function () {
+            // Route để lấy URL chuyển hướng đến nhà cung cấp xã hội
+            Route::get('{provider}/redirect', [SocialAuthController::class, 'redirectToProvider'])
+                ->where('provider', 'google|facebook|github')
+                ->name('redirect');
+
+            // Route để xử lý callback từ nhà cung cấp xã hội
+            Route::post('{provider}/callback', [SocialAuthController::class, 'handleProviderCallback'])
+                ->where('provider', 'google|facebook|github')
+                ->name('callback');
+        });
 
         // Protected routes - yêu cầu đăng nhập
         Route::middleware('auth:customer')->group(function () {
@@ -36,7 +50,7 @@ Route::prefix('v1')->group(function () {
         });
 
         //test route
-        Route::get('/test-cloudinary', function() {
+        Route::get('/test-cloudinary', function () {
             try {
                 $cloudName = config('cloudinary.cloud_name');
                 return response()->json([
@@ -52,7 +66,7 @@ Route::prefix('v1')->group(function () {
                 ]);
             }
         });
-        Route::get('/test-cloudinary-config', function() {
+        Route::get('/test-cloudinary-config', function () {
             return response()->json([
                 'cloud_name' => config('cloudinary.cloud_name'),
                 'api_key' => config('cloudinary.api_key') ? 'Đã cấu hình' : 'Chưa cấu hình',

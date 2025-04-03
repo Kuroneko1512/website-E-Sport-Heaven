@@ -6,11 +6,13 @@ use Exception;
 use App\Models\User;
 use App\Enums\RolesEnum;
 use App\Models\Customer;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\Media\MediaService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class CustomerAuthService extends AuthService
 {
@@ -30,6 +32,120 @@ class CustomerAuthService extends AuthService
     public function refreshToken($refreshToken, $accountType = null)
     {
         return parent::refreshToken($refreshToken, 'customer');
+    }
+
+    /**
+     * Đăng nhập không cần mật khẩu (dùng cho đăng nhập xã hội)
+     * 
+     * @param User $user Đối tượng người dùng đã xác thực qua mạng xã hội
+     * @return array Kết quả đăng nhập
+     */
+    public function attemptLoginWithoutPassword(User $user)
+    {
+        try {
+            // Ghi log
+            Log::info('Social login attempt', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'account_type' => $user->account_type,
+                'provider' => $user->provider,
+                'provider_id' => $user->provider_id
+            ]);
+
+            // Cập nhật thông tin người dùng nếu cần
+            if (!$user->email_verified_at && $user->provider) {
+                // Nếu đăng nhập qua mạng xã hội, coi như email đã được xác thực
+                $user->email_verified_at = now();
+                $user->save();
+            }
+
+            // Tạo một request giả lập để gửi đến OAuth server
+            $dataToSend = [
+                'grant_type' => 'password',
+                'client_id' => env('PASSPORT_CLIENT_ID'),
+                'client_secret' => env('PASSPORT_CLIENT_SECRET'),
+                'username' => $user->email,
+                'password' => env('SOCIAL_AUTH_DEFAULT_PASSWORD', 'SocialAuth@2024!'), // Mật khẩu mặc định an toàn
+                'scope' => '*',
+                'provider' => $user->provider,
+                'provider_id' => $user->provider_id,
+                'social_auth' => true // Đánh dấu đây là đăng nhập xã hội
+            ];
+
+            Log::info('Sending request to OAuth token endpoint for social login', [
+                'url' => config('app.url') . '/oauth/token',
+                'data' => array_merge($dataToSend, ['client_secret' => '***', 'password' => '***']), // Ẩn thông tin nhạy cảm
+            ]);
+
+            // Tạo request nội bộ
+            $tokenRequest = Request::create('/oauth/token', 'POST', $dataToSend);
+
+            // Dispatch request nội bộ
+            $response = app()->handle($tokenRequest);
+
+            $data = json_decode($response->getContent(), true);
+
+            if ($response->getStatusCode() !== 200) {
+                throw new Exception('Authentication failed: ' . ($data['message'] ?? 'Unknown error'));
+            }
+
+            $tokenPayload = json_decode(base64_decode(explode('.', $data['access_token'])[1]));
+
+            // Thời gian tạo token
+            $createdAt = Carbon::createFromTimestamp($tokenPayload->iat);
+
+            // Thời gian hết hạn
+            $expiresAt = $createdAt->copy()->addSeconds($data['expires_in']);
+
+            // Ghi log phản hồi
+            Log::info('Response from OAuth token endpoint for social login', [
+                'status' => $response->getStatusCode(),
+                'iat' => $tokenPayload->iat,
+                'user_id' => $tokenPayload->sub,
+                'expires_in' => $data['expires_in'],
+                'now' => now()->toDateTimeString(),
+                'created_at' => $createdAt->toDateTimeString(),
+                'expires_at' => $expiresAt->toDateTimeString(),
+            ]);
+
+            // Trả về thông tin chi tiết
+            return [
+                'success' => true,
+                'message' => 'Đăng nhập thành công',
+                'data' => [
+                    'access_token' => $data['access_token'],
+                    'refresh_token' => $data['refresh_token'],
+                    'token_type' => 'Bearer',
+                    'created_at' => $createdAt->toDateTimeString(),
+                    'expires_at' => $expiresAt->toDateTimeString(),
+                    'expires_in' => $data['expires_in'], // Thời gian hết hạn
+                    'user' => [
+                        'id' => $user->id,
+                        'phone' => $user->phone,
+                        'email' => $user->email,
+                        'name' => $user->name,
+                        'avatar' => $user->avatar,
+                        'provider' => $user->provider,
+                        'provider_id' => $user->provider_id
+                    ],
+                    'role' => $user->roles()->pluck('name'),
+                    'permission' => $user->getPermissionsViaRoles()->pluck('name')
+                ],
+                'code' => 200
+            ];
+        } catch (Exception $e) {
+            Log::error('Social login failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return [
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi trong quá trình đăng nhập',
+                'data' => [
+                    'message' => 'Lỗi hệ thống, vui lòng thử lại sau.'
+                ],
+                'code' => 500
+            ];
+        }
     }
 
     // Đăng ký tài khoản mới cho Customer
