@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import instanceAxios from "../config/db";
+import instanceAxios from "../../config/db";
 
 const GoogleAuthCallback = () => {
   const location = useLocation();
