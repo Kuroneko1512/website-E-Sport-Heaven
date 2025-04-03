@@ -12,7 +12,7 @@ const Login = () => {
   const nav = useNavigate();
   const dispatch = useDispatch();
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(false);
+  // const [error, setError] = useState(false);
   const [googleLoginUrl, setGoogleLoginUrl] = useState(null);
   const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -63,12 +63,12 @@ const Login = () => {
 
       setSuccess(true);
       setTimeout(() => {
-        nav("/");
+        nav("/"); // hoặc '/home'
         setSuccess(false);
       }, 2000);
     },
     onError: (err) => {
-      setError(true);
+      // setError(true);
       message.error(
         err.response?.data?.message ||
           "Đăng nhập thất bại, vui lòng thử lại sau."
@@ -135,10 +135,16 @@ const Login = () => {
                 validator: (_, value) => {
                   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                   const phoneRegex = /^(0|\+84)[0-9]{9,11}$/;
-                  if (!value || emailRegex.test(value) || phoneRegex.test(value)) {
+                  if (
+                    !value ||
+                    emailRegex.test(value) ||
+                    phoneRegex.test(value)
+                  ) {
                     return Promise.resolve();
                   }
-                  return Promise.reject("Vui lòng nhập đúng định dạng Email hoặc Số điện thoại!");
+                  return Promise.reject(
+                    "Vui lòng nhập đúng định dạng Email hoặc Số điện thoại!"
+                  );
                 },
               },
             ]}
@@ -173,7 +179,10 @@ const Login = () => {
                   Đăng ký
                 </Link>
               </span>
-              <Link to={`/forgot-password`} className="text-sm text-blue-600 hover:underline">
+              <Link
+                to={`/forgot-password`}
+                className="text-sm text-blue-600 hover:underline"
+              >
                 Quên mật khẩu?
               </Link>
             </div>
@@ -191,7 +200,8 @@ const Login = () => {
           </Form.Item>
 
           <div className="grid grid-cols-5 items-center justify-items-center">
-            <Divider className="col-span-2" /> <span>Hoặc</span> <Divider className="col-span-2" />
+            <Divider className="col-span-2" /> <span>Hoặc</span>{" "}
+            <Divider className="col-span-2" />
           </div>
 
           {/* Google login */}
@@ -201,7 +211,7 @@ const Login = () => {
               className="w-full bg-red-500 text-white py-2 rounded-lg hover:!bg-red-600 disabled:opacity-50 disabled:hover:!bg-gray-100 disabled:cursor-not-allowed"
               onClick={handleGoogleLogin}
               loading={googleLoading}
-              disabled={!googleLoginUrl || googleLoading}
+              disabled={!googleLoginUrl}
             >
               Đăng nhập bằng Google
             </Button>

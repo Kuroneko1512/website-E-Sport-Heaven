@@ -71,7 +71,8 @@ const GoogleAuthCallback = () => {
         // Chuyển hướng về trang chủ
         setTimeout(() => {
           navigate('/');
-        }, 1000);
+          setLoading(false);
+        }, 10);
       } else {
         console.error("Login failed:", response.data.message);
         setError(response.data.message || "Đăng nhập thất bại");
