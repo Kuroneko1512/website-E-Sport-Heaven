@@ -45,14 +45,9 @@ export class AuthService {
         }
     }
 
-    static async register(params: RegisterParams): Promise<AuthResponse> {
-        const response = await api.post(API_ENDPOINTS.AUTH.REGISTER, params);
-        return response.data.data;
-    }
-
-    static async getUser(): Promise<User> {
+    static async getProfileUser(): Promise<User> {
         try {
-            const response = await api.get(API_ENDPOINTS.USER.PROFILE);
+            const response = await api.get(API_ENDPOINTS.USER.GET_PROFILE);
             console.log('getUser response:', response.data);
             return response.data.data.user;
         } catch (error) {
