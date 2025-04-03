@@ -50,7 +50,7 @@ class CustomerAuthService extends AuthService
 
             DB::beginTransaction();
 
-            // Chuẩn bị dữ liệu user với avatar cố định
+            // Chuẩn bị dữ liệu user
             $userData = [
                 'name' => $data['name'],
                 'email' => $data['email'],
@@ -58,12 +58,38 @@ class CustomerAuthService extends AuthService
                 'password' => Hash::make($data['password']),
                 'account_type' => 'customer',
                 'is_active' => true,
-                'avatar' => 'https://res.cloudinary.com/dv5p8avz7/image/upload/v1743589352/avatars/avatar_rsrdx9XAHC_1743589353.jpg'
             ];
+
+            // Xử lý avatar
+            try {
+                // Nếu người dùng tải lên avatar
+                if (isset($data['avatar'])) {
+                    $avatarData = $this->mediaService->processAvatar($data['avatar']);
+                } else {
+                    // Sử dụng avatar mặc định duy nhất
+                    $avatarData = $this->mediaService->processDefaultAvatar();
+                }
+
+                if ($avatarData && isset($avatarData['url'])) {
+                    $userData['avatar'] = $avatarData['url'];
+
+                    // Nếu model User có trường avatar_public_id, lưu public_id để dễ dàng xóa sau này
+                    if (isset($avatarData['public_id'])) {
+                        $userData['avatar_public_id'] = $avatarData['public_id'];
+                    }
+                }
+
+                Log::info('Avatar processed for registration', $avatarData ?? []);
+            } catch (Exception $e) {
+                Log::error('Avatar upload failed: ' . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // Tiếp tục đăng ký mà không có avatar
+            }
 
             // Tạo user mới
             $user = User::create($userData);
-            
+
             // Tạo role cho user
             $user->assignRole(RolesEnum::Customer->value);
 
@@ -105,7 +131,9 @@ class CustomerAuthService extends AuthService
             }
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Registration failed: ' . $e->getMessage());
+            Log::error('Registration failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             return [
                 'success' => false,
                 'message' => 'Đã xảy ra lỗi trong quá trình đăng ký',
@@ -116,7 +144,6 @@ class CustomerAuthService extends AuthService
             ];
         }
     }
-
     // Xác thực dữ liệu đăng ký
     private function validateRegisterData($data)
     {
