@@ -39,13 +39,21 @@ const Login = () => {
       return await instanceAxios.post(`/api/v1/customer/login`, dataUser);
     },
     onSuccess: (res) => {
-      const { access_token, refresh_token, user } = res.data.data;
+      const { access_token, refresh_token, user, expires_at, expires_in } =
+        res.data.data;
 
       dispatch(
         login({
           accessToken: access_token,
           refreshToken: refresh_token,
-          user: user,
+          user: {
+            avatar: user.avatar,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+          },
+          expiresAt: expires_at, // Lưu thời gian hết hạn
+          expiresIn: expires_in, // Lưu thời gian sống của token
         })
       );
 
