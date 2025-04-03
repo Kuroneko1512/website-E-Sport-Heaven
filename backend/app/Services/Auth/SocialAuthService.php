@@ -58,29 +58,29 @@ class SocialAuthService
     }
 
     /**
-     * Xử lý đăng nhập từ nhà cung cấp xã hội
+     * Xử lý thông tin người dùng từ nhà cung cấp xã hội
      * 
      * @param string $provider Tên nhà cung cấp (google, facebook, github)
-     * @param string $token Token từ nhà cung cấp
+     * @param \Laravel\Socialite\Two\User $socialUser Thông tin người dùng từ nhà cung cấp
      * @return array Kết quả xử lý
      */
-    public function handleSocialLogin($provider, $token)
+    public function handleSocialUserInfo($provider, $socialUser)
     {
         try {
-            // Ghi log thông tin đăng nhập
-            Log::info("{$provider} login attempt with token", [
-                'provider' => $provider
+            // Ghi log thông tin người dùng
+            Log::info("{$provider} user info received", [
+                'provider' => $provider,
+                'email' => $socialUser->getEmail(),
+                'name' => $socialUser->getName(),
+                'id' => $socialUser->getId()
             ]);
 
-            // Xác thực token với nhà cung cấp thông qua Socialite
-            $socialUser = Socialite::driver($provider)->stateless()->userFromToken($token);
-            
-            if (!$socialUser) {
+            if (!$socialUser || !$socialUser->getEmail()) {
                 return [
                     'success' => false,
-                    'message' => "Token {$provider} không hợp lệ",
+                    'message' => "Không thể lấy thông tin email từ {$provider}",
                     'data' => [],
-                    'code' => 401
+                    'code' => 400
                 ];
             }
 
@@ -89,7 +89,7 @@ class SocialAuthService
 
             if ($user) {
                 // Nếu người dùng đã tồn tại, kiểm tra provider
-                if ($user->provider !== $provider) {
+                if ($user->provider !== $provider && $user->provider !== null) {
                     // Nếu tài khoản đã tồn tại nhưng không phải từ provider hiện tại
                     return [
                         'success' => false,
@@ -106,13 +106,13 @@ class SocialAuthService
                 return $this->registerNewSocialUser($socialUser, $provider);
             }
         } catch (Exception $e) {
-            Log::error("{$provider} login failed: " . $e->getMessage(), [
+            Log::error("{$provider} user processing failed: " . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return [
                 'success' => false,
-                'message' => "Đã xảy ra lỗi trong quá trình đăng nhập với {$provider}",
+                'message' => "Đã xảy ra lỗi trong quá trình xử lý thông tin người dùng",
                 'data' => [
                     'message' => 'Lỗi hệ thống, vui lòng thử lại sau.'
                 ],
@@ -150,7 +150,7 @@ class SocialAuthService
     {
         try {
             DB::beginTransaction();
-            
+
             // Chuẩn bị dữ liệu người dùng
             $userData = [
                 'name' => $socialUser->getName(),
@@ -162,46 +162,34 @@ class SocialAuthService
                 'email_verified_at' => now(), // Đánh dấu email đã được xác thực
                 'password' => Hash::make(env('SOCIAL_AUTH_DEFAULT_PASSWORD', 'SocialAuth@2024!')), // Mật khẩu mặc định an toàn
             ];
-            
-            // Xử lý avatar từ nhà cung cấp
+
+            // Sử dụng avatar mặc định
             try {
-                if ($socialUser->getAvatar()) {
-                    // Tải avatar từ URL của nhà cung cấp
-                    $avatarData = $this->mediaService->processImage($socialUser->getAvatar(), 'avatar');
-                    
-                    if ($avatarData && isset($avatarData['url'])) {
-                        $userData['avatar'] = $avatarData['url'];
-                        
-                        if (isset($avatarData['public_id'])) {
-                            $userData['avatar_public_id'] = $avatarData['public_id'];
-                        }
-                    }
-                } else {
-                    // Sử dụng avatar mặc định
-                    $avatarData = $this->mediaService->processDefaultAvatar();
-                    
-                    if ($avatarData && isset($avatarData['url'])) {
-                        $userData['avatar'] = $avatarData['url'];
-                        
-                        if (isset($avatarData['public_id'])) {
-                            $userData['avatar_public_id'] = $avatarData['public_id'];
-                        }
+                // Sử dụng avatar mặc định
+                $avatarData = $this->mediaService->processDefaultAvatar();
+
+                if ($avatarData && isset($avatarData['url'])) {
+                    $userData['avatar'] = $avatarData['url'];
+
+                    // Nếu model User có trường avatar_public_id, lưu public_id để dễ dàng xóa sau này
+                    if (isset($avatarData['public_id'])) {
+                        $userData['avatar_public_id'] = $avatarData['public_id'];
                     }
                 }
             } catch (Exception $e) {
-                Log::error('Avatar processing failed: ' . $e->getMessage());
+                Log::error('Default avatar processing failed: ' . $e->getMessage());
                 // Tiếp tục mà không có avatar
             }
-            
+
             // Tạo người dùng mới
             $user = User::create($userData);
-            
+
             // Gán vai trò khách hàng
             $user->assignRole(RolesEnum::Customer->value);
-            
+
             // Tách tên đầy đủ thành tên và họ
             $names = $this->splitName($socialUser->getName());
-            
+
             // Tạo hồ sơ khách hàng
             Customer::create([
                 'user_id' => $user->id,
@@ -210,9 +198,9 @@ class SocialAuthService
                 'gender' => null,
                 'birthdate' => null,
             ]);
-            
+
             DB::commit();
-            
+
             // Đăng nhập người dùng mới
             return $this->loginExistingUser($user);
         } catch (Exception $e) {
@@ -221,7 +209,7 @@ class SocialAuthService
             throw $e;
         }
     }
-    
+
     /**
      * Tách tên đầy đủ thành tên và họ
      * 
@@ -231,7 +219,7 @@ class SocialAuthService
     protected function splitName($fullName)
     {
         $parts = explode(' ', $fullName);
-        
+
         if (count($parts) > 1) {
             $lastName = array_shift($parts);
             $firstName = implode(' ', $parts);
@@ -239,7 +227,7 @@ class SocialAuthService
             $firstName = $fullName;
             $lastName = '';
         }
-        
+
         return [
             'first_name' => $firstName,
             'last_name' => $lastName

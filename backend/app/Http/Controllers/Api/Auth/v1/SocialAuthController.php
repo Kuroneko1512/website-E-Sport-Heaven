@@ -7,6 +7,7 @@ use App\Services\Auth\SocialAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
 {
@@ -88,7 +89,7 @@ class SocialAuthController extends Controller
             'request_data' => $request->all(),
             'headers' => $request->header()
         ]);
-        dd($request->all());
+        
         try {
             // Kiểm tra provider có hợp lệ không
             if (!in_array($provider, ['google', 'facebook', 'github'])) {
@@ -100,7 +101,7 @@ class SocialAuthController extends Controller
                 ], 400);
             }
 
-            // Validate token
+            // Validate token (authorization code)
             $validator = Validator::make($request->all(), [
                 'token' => 'required|string',
             ]);
@@ -114,15 +115,37 @@ class SocialAuthController extends Controller
                 ], 422);
             }
 
-            // Xử lý đăng nhập xã hội
-            $result = $this->socialAuthService->handleSocialLogin($provider, $request->token);
-
-            return response()->json([
-                'success' => $result['success'],
-                'message' => $result['message'],
-                'data' => $result['data'],
-                'code' => $result['code']
-            ], $result['code']);
+            // Lấy thông tin người dùng từ Google bằng authorization code
+            try {
+                // Đặt code vào request để Socialite có thể sử dụng
+                $request->request->add(['code' => $request->token]);
+                
+                // Lấy thông tin người dùng từ provider
+                $socialUser = Socialite::driver($provider)->stateless()->user();
+                
+                // Xử lý thông tin người dùng
+                $result = $this->socialAuthService->handleSocialUserInfo($provider, $socialUser);
+                
+                return response()->json([
+                    'success' => $result['success'],
+                    'message' => $result['message'],
+                    'data' => $result['data'],
+                    'code' => $result['code']
+                ], $result['code']);
+            } catch (\Exception $e) {
+                Log::error("Error getting user info from {$provider}: " . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString()
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => "Không thể lấy thông tin người dùng từ {$provider}",
+                    'data' => [
+                        'message' => $e->getMessage()
+                    ],
+                    'code' => 500
+                ], 500);
+            }
         } catch (\Exception $e) {
             Log::error("{$provider} login error: " . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
