@@ -58,7 +58,7 @@ const UserDropdown = () => {
           <p>
             {currentUser?.email}
             <small>
-              <span>Member since </span>
+              <span>Thành viên</span>
               {currentUser?.created_at && (
                 <span>
                   {DateTime.fromISO(
@@ -69,7 +69,7 @@ const UserDropdown = () => {
             </small>
           </p>
         </UserHeader>
-        <UserBody>
+        {/* <UserBody>
           <div className="row">
             <div className="col-4 text-center">
               <Link to="/">{t('header.user.followers')}</Link>
@@ -81,21 +81,21 @@ const UserDropdown = () => {
               <Link to="/">{t('header.user.friends')}</Link>
             </div>
           </div>
-        </UserBody>
+        </UserBody> */}
         <UserFooter>
           <button
             type="button"
             className="btn btn-default btn-flat"
             onClick={navigateToProfile}
           >
-            {t('header.user.profile')}
+            Hồ sơ
           </button>
           <button
             type="button"
             className="btn btn-default btn-flat float-right"
             onClick={logOut}
           >
-            {t('login.button.signOut')}
+            Đăng xuất
           </button>
         </UserFooter>
       </div>
