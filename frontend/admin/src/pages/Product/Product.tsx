@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { getProducts, deleteProduct, Pagination } from "@app/services/Product/Api";
 import { useEffect, useState } from "react";
+import FomatVND from "@app/utils/FomatVND";
 
 interface Product {
   id?: number;
@@ -156,9 +157,9 @@ const Product = () => {
                 <div className="col-sm-6">
                     <ol className="breadcrumb float-sm-right">
                         <li className="breadcrumb-item">
-                            <a href="#">Home</a>
+                            <Link to={"/"}>Trang chủ</Link>
                         </li>
-                        <li className="breadcrumb-item active">Orders</li>
+                        <li className="breadcrumb-item active">Đơn hàng</li>
                        
                     </ol>
                 </div>
@@ -168,7 +169,7 @@ const Product = () => {
 
     <div className="card">
         <div className="card-header">
-            <h3 className="card-title">Orders</h3> 
+            <h3 className="card-title">Đơn hàng</h3> 
             <div className="card-tools">
             <Link to="/add-product" className="btn btn-success me-2">
            + Add
@@ -182,12 +183,12 @@ const Product = () => {
                          <thead>
                            <tr>
                              <th>ID</th>
-                            <th>Name</th>
-                             <th>Price</th>
-                             <th>Type</th>
-                             <th>Status</th>
-                             <th>Stock</th>
-                             <th>Action</th>
+                             <th>Tên</th>
+                             <th>Giá</th>
+                             <th>Loại</th>
+                             <th>Trạng thái</th>
+                             <th>Số lượng</th>
+                             <th>Thao tác</th>
                            </tr>
                          </thead>
                          <tbody>
@@ -195,11 +196,11 @@ const Product = () => {
                              <tr key={product.id}>
                                <td>{product.id}</td>
                                <td>{product.name}</td>
-                               <td>${product.price}</td>
-                               <td>{product.product_type}</td>
+                               <td>{FomatVND(product.price)}</td>
+                               <td>{product.product_type === "variable" ? "Biến thể" : "Đơn giản"}</td>
                                <td>
                                  <span className={`tag ${product.status === "active" ? "tag-success" : "tag-danger"}`}>
-                                   {product.status}
+                                   {product.status === "active" ? "Đang bán" : "Ngừng"}
                                  </span>
                                </td>
                                <td>{product.stock}</td>
@@ -207,7 +208,7 @@ const Product = () => {
                                  className="btn btn-warning btn-sm"
                                  onClick={() => navigate(`detail/${product.id}`)}
                                >
-                                 Detail
+                                 Chi tiết
                                </button></td>
           
                              </tr>
