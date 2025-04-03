@@ -14,15 +14,19 @@ const Login = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
   const [googleLoginUrl, setGoogleLoginUrl] = useState(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   // Lấy URL đăng nhập Google
   useEffect(() => {
-    fetch("/api/auth/google/url", {
+    fetch("http://127.0.0.1:8000/api/v1/customer/auth/social/google/redirect", {
       headers: new Headers({ accept: "application/json" }),
     })
       .then((response) => response.ok ? response.json() : Promise.reject("Lỗi lấy URL đăng nhập Google"))
-      .then((data) => setGoogleLoginUrl(data.url))
-      .catch((error) => console.error(error));
+      .then((data) => setGoogleLoginUrl(data.data.url))
+      .catch((error) => {
+        console.error("Error fetching Google login URL:", error);
+        message.error("Không thể kết nối với dịch vụ đăng nhập Google");
+      });
   }, []);
 
   useEffect(() => {
@@ -81,6 +85,22 @@ const Login = () => {
     };
 
     mutation.mutate(dataUser);
+  };
+
+  // Xử lý đăng nhập Google
+  const handleGoogleLogin = () => {
+    if (!googleLoginUrl) {
+      message.error("URL đăng nhập Google không khả dụng");
+      return;
+    }
+    
+    setGoogleLoading(true);
+    
+    // Lưu lại URL hiện tại để sau khi đăng nhập có thể quay lại
+    localStorage.setItem('redirectAfterLogin', window.location.pathname);
+    
+    // Chuyển hướng đến trang đăng nhập Google
+    window.location.href = googleLoginUrl;
   };
 
   return (
@@ -171,7 +191,7 @@ const Login = () => {
           </Form.Item>
 
           <div className="grid grid-cols-5 items-center justify-items-center">
-            <Divider className="col-span-2" /> <span>Hoặc</span> <Divider className="col-span-2" />
+            <Divider className="col-span-2" /> <span>Hoặc</span> <Divider className="col-span-2" />
           </div>
 
           {/* Google login */}
@@ -179,8 +199,9 @@ const Login = () => {
             <Button
               type="default"
               className="w-full bg-red-500 text-white py-2 rounded-lg hover:!bg-red-600 disabled:opacity-50 disabled:hover:!bg-gray-100 disabled:cursor-not-allowed"
-              onClick={() => window.location.href = googleLoginUrl}
-              disabled={!googleLoginUrl}
+              onClick={handleGoogleLogin}
+              loading={googleLoading}
+              disabled={!googleLoginUrl || googleLoading}
             >
               Đăng nhập bằng Google
             </Button>

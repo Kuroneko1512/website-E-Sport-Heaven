@@ -52,7 +52,7 @@ function App() {
           <Routes location={location}>
             <Route path="/login" element={<Login />} />
             {/* callback google */}
-            <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
+            <Route path="/auth/google-callback" element={<GoogleAuthCallback />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/otp-enter" element={<OtpVerification />} />
