@@ -454,7 +454,6 @@ class AuthService
     {
         try {
             DB::beginTransaction();
-
             $user = $request->user();
             if (!$user) {
                 return [
@@ -499,19 +498,24 @@ class AuthService
                 ];
             }
 
-            // Lưu giá trị cũ TRƯỚC KHI cập nhật
-            $oldValues = [];
-            $fieldsToTrack = ['name', 'email', 'phone', 'avatar'];
+            // Kiểm tra xem có dữ liệu nào cần cập nhật không
+            $hasChanges = false;
+            $fieldsToTrack = ['name', 'email', 'phone'];
+            $updateData = [];
+
+            // Kiểm tra các trường cơ bản
             foreach ($fieldsToTrack as $field) {
-                if (isset($data[$field])) {
-                    $oldValues[$field] = $user->$field;
+                if (isset($data[$field]) && $data[$field] !== $user->$field) {
+                    $updateData[$field] = $data[$field];
+                    $hasChanges = true;
                 }
             }
 
-            // Đánh dấu nếu có thay đổi mật khẩu
+            // Kiểm tra mật khẩu
             $passwordChanged = isset($data['password']) && !empty($data['password']);
             if ($passwordChanged) {
-                $oldValues['password'] = '[HIDDEN]';
+                $updateData['password'] = Hash::make($data['password']);
+                $hasChanges = true;
             }
 
             // Xử lý avatar nếu có
@@ -526,10 +530,10 @@ class AuthService
                             $this->mediaService->deleteImage($publicId);
                         }
                     }
-
                     // Upload avatar mới
                     $avatarResult = $this->mediaService->processAvatar($request->file('avatar'));
-                    $data['avatar'] = $avatarResult['url'];
+                    $updateData['avatar'] = $avatarResult['url'];
+                    $hasChanges = true;
 
                     Log::info('Avatar uploaded successfully', [
                         'public_id' => $avatarResult['public_id'],
@@ -541,24 +545,39 @@ class AuthService
                         'trace' => $e->getTraceAsString()
                     ]);
                     // Nếu có lỗi khi upload, không cập nhật avatar
-                    unset($data['avatar']);
                 }
             }
 
-            // Hash password nếu có thay đổi
-            if ($passwordChanged) {
-                $data['password'] = Hash::make($data['password']);
-            } else {
-                unset($data['password']); // Loại bỏ password nếu không thay đổi
+            // Nếu không có thay đổi, trả về thông báo thành công luôn
+            if (!$hasChanges) {
+                DB::commit();
+                return [
+                    'success' => true,
+                    'message' => 'Không có thông tin nào được thay đổi',
+                    'data' => $user,
+                    'code' => 200
+                ];
             }
 
-            // Cập nhật user
-            $user->update($data);
+            // Lưu giá trị cũ TRƯỚC KHI cập nhật
+            $oldValues = [];
+            foreach (array_keys($updateData) as $field) {
+                if ($field !== 'password') {
+                    $oldValues[$field] = $user->$field;
+                }
+            }
+
+            if ($passwordChanged) {
+                $oldValues['password'] = '[HIDDEN]';
+            }
+
+            // Cập nhật user với dữ liệu đã thay đổi
+            $user->update($updateData);
 
             // Chuẩn bị giá trị mới cho log
             $newValues = [];
-            foreach ($fieldsToTrack as $field) {
-                if (isset($data[$field])) {
+            foreach (array_keys($updateData) as $field) {
+                if ($field !== 'password') {
                     $newValues[$field] = $user->$field;
                 }
             }
@@ -568,14 +587,7 @@ class AuthService
             }
 
             // Xác định các trường đã thay đổi
-            $changedFields = [];
-            foreach ($oldValues as $field => $oldValue) {
-                if ($field === 'password' && $passwordChanged) {
-                    $changedFields[] = 'password';
-                } elseif (isset($newValues[$field]) && $oldValue !== $newValues[$field]) {
-                    $changedFields[] = $field;
-                }
-            }
+            $changedFields = array_keys($updateData);
 
             // Gọi phương thức hook để các lớp con có thể xử lý log
             if (!empty($changedFields)) {
@@ -602,6 +614,7 @@ class AuthService
             ];
         }
     }
+
 
     /**
      * Hook được gọi sau khi cập nhật thông tin người dùng

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useFormik } from "formik";
 import { useTranslation } from "react-i18next";
-import { setCurrentUser } from "@store/reducers/auth";
+import { setCurrentUser, setAuthData } from "@store/reducers/auth";
 import { setWindowClass } from "@app/utils/helpers";
 import { Checkbox } from "@profabric/react-components";
 import * as Yup from "yup";
@@ -24,50 +24,60 @@ const Login = () => {
   const navigate = useNavigate();
   const [t] = useTranslation();
 
-  const handleLogin = async (identifier: string, password: string) => {
-    try {
-      setAuthLoading(true);
-      setIdentifierError(null);
-      setPasswordError(null);
 
-      console.log("Attempting to login with:", { identifier, password });
-      const response = await AuthService.login({ identifier, password });
-      console.log("Login response:", response);
+    const handleLogin = async (identifier: string, password: string) => {
+        try {
+            setAuthLoading(true);
+            setIdentifierError(null);
+            setPasswordError(null);
+    
+            console.log("Attempting to login with:", { identifier, password });
+            const response = await AuthService.login({ identifier, password });
+            console.log("Login response:", response);
+    
+            // Kiểm tra dữ liệu user
+            if (!response.user) {
+                console.error("No user data in response");
+                throw new Error("No user data in response");
+            }
+    
+            // Cập nhật Redux store với đầy đủ thông tin
+            dispatch(setAuthData({
+                accessToken: response.access_token,
+                refreshToken: response.refresh_token,
+                expiresAt: response.expires_at,
+                expiresIn: response.expires_in,
+                permissions: response.permission,
+                roles: response.role,
+                user: response.user
+            }));
+    
+            toast.success("Login successful");
+            navigate("/");
+            // Kiểm tra token sau khi login
+            console.log(
+                "Access token after login:",
+                localStorage.getItem("access_token")
+            );
+        } catch (error: any) {
+            console.error("Login error:", error.response?.data);
+            // Xử lý lỗi cho từng trường
+            if (error.response?.data?.errors?.identifier) {
+                setIdentifierError(error.response?.data.errors.identifier[0]);
+            }
+            if (error.response?.data?.errors?.password) {
+                setPasswordError(error.response?.data.errors.password[0]);
+            }
+            // Nếu không có lỗi cụ thể, hiển thị thông báo chung
+            else {
+                toast.error(error.response?.data?.message || "Login failed");
+            }
+        } finally {
+            setAuthLoading(false);
+        }
+    };
+    
 
-      // Kiểm tra dữ liệu user
-      if (!response.user) {
-        console.error("No user data in response");
-        throw new Error("No user data in response");
-      }
-
-      // Kiểm tra dữ liệu user trước khi dispatch
-      console.log("User data:", response.user);
-      dispatch(setCurrentUser(response.user));
-
-      toast.success("Đăng nhập thành công!");
-      navigate("/");
-      // Kiểm tra token sau khi login
-      console.log(
-        "Access token after login:",
-        localStorage.getItem("access_token")
-      );
-    } catch (error: any) {
-      console.error("Login error:", error.response?.data);
-      // Xử lý lỗi cho từng trường
-      if (error.response?.data?.errors?.identifier) {
-        setIdentifierError(error.response?.data.errors.identifier[0]);
-      }
-      if (error.response?.data?.errors?.password) {
-        setPasswordError(error.response?.data.errors.password[0]);
-      }
-      // Nếu không có lỗi cụ thể, hiển thị thông báo chung
-      else {
-        toast.error(error.response?.data?.message || "Đăng nhập thất bại");
-      }
-    } finally {
-      setAuthLoading(false);
-    }
-  };
 
   const handleGoogleLogin = async () => {
     try {
