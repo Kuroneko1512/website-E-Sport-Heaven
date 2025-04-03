@@ -134,7 +134,7 @@ const RightNavbar = () => {
         <div className="flex items-center mb-3" key={idx}>
           <div className="flex items-center">
             <img
-              src={item.image}
+              src={`http://127.0.0.1:8000/storage/${item.image}`}
               alt={item.name}
               className="w-12 h-16 object-cover mr-3"
             />
@@ -183,7 +183,7 @@ const RightNavbar = () => {
       {/* Cart */}
       <Popover
         content={cartContent}
-        trigger="click"
+        trigger={["hover","click"]}
         open={cartVisible}
         onOpenChange={setCartVisible}
         getPopupContainer={(triggerNode) => triggerNode.parentNode}
@@ -207,7 +207,7 @@ const RightNavbar = () => {
       ) : (
         <Dropdown
           overlay={userMenu}
-          trigger={["hover"]}
+          trigger={["hover", "click"]}
           getPopupContainer={(triggerNode) => triggerNode.parentNode}
           overlayClassName="dark:bg-gray-800 dark:text-white"
         >

@@ -15,7 +15,7 @@ export interface IMenuItem {
 
 export const MENU: IMenuItem[] = [
   {
-    name: i18n.t('menusidebar.label.dashboard'),
+    name: 'Bảng điều khiển',
     icon: 'fas fa-tachometer-alt nav-icon',
     path: '/',
   },
@@ -25,22 +25,22 @@ export const MENU: IMenuItem[] = [
     path: '/blank',
   },
   {
-    name: 'Product',
+    name: 'Sản phẩm',
     icon: 'fas fa-box nav-icon',
     path: '/Product',
   },
   {
-    name: 'Category',
+    name: 'Danh mục',
     icon: 'fas fa-box nav-icon',
     path: '/Category',
   },
   {
-    name: 'Attribute',
+    name: 'Thuộc tính',
     icon: 'fas fa-box nav-icon',
     path: '/Attribute',
   },
   {
-    name: 'Order',
+    name: 'Đơn hàng',
     icon: 'fas fa-box nav-icon',
     path: '/Order',
   },
@@ -97,7 +97,7 @@ const MenuSidebar = () => {
           height={33}
           rounded
         />
-        <span className="brand-text font-weight-light">AdminLTE 3</span>
+        <span className="brand-text font-weight-light">Quản trị viên</span>
       </Link>
       <div className="sidebar">
         <div className="user-panel mt-3 pb-3 mb-3 d-flex">
