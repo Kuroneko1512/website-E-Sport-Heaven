@@ -23,8 +23,6 @@ const ProductDetail = () => {
   const [attributes, setAttributes] = useState([]);
   const [validOptions, setValidOptions] = useState({});
 
-  const [add, setAdd] = useState({});
-
   const { data: productDetailData, isLoading } = useQuery({
     queryKey: ["productDetailData", id],
     queryFn: async () => {
@@ -160,7 +158,6 @@ const ProductDetail = () => {
       return newQuantity;
     });
   };
-  
 
   const handleAddToCart = () => {
     if (product?.variants?.length > 0) {
@@ -171,14 +168,15 @@ const ProductDetail = () => {
         return;
       }
     }
-    const generateId = () => Date.now() + Math.random().toString(36).substr(2, 9);
+    const generateId = () =>
+      Date.now() + Math.random().toString(36).substr(2, 9);
     let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
     let cartItem = {
-      id: generateId(), 
+      id: generateId(),
       product_id: product.id,
       variant_id: selectedVariant?.id,
       quantity: quantity,
-      image: product.image, 
+      image: product.image || selectedVariant?.image,
       name: product.name,
       price: selectedVariant?.price || product.price,
       discount: product.discount?.percent,
@@ -202,11 +200,6 @@ const ProductDetail = () => {
     message.success("Thêm thành công");
     const event = new CustomEvent("cartUpdated", { detail: cartItems });
     window.dispatchEvent(event);
-  };
-
-  const handleSelett = (name, value) => {
-    console.log("name", name, "value", value);
-    setAdd({ ...add, [name]: value });
   };
 
   return (
@@ -320,36 +313,57 @@ const ProductDetail = () => {
 
                   {/* Chọn thuộc tính */}
                   {hasVariants &&
-                    attributes.map((attr) => (
-                      <div key={attr.id} className="mb-4">
-                        <span>{attr.name}:</span>
-                        <div className="flex space-x-2 mt-2">
-                          {attr.values.map((value) => (
-                            <button
-                              key={value.id}
-                              onClick={() => (
-                                handleAttributeSelect(attr.id, value.id),
-                                handleSelett(attr.name, value.value)
-                              )}
-                              className={`px-4 py-2 border rounded ${
-                                selectedAttributes[attr.id] === value.id
-                                  ? "bg-black text-white"
-                                  : "border-gray-300"
-                              } ${
-                                validOptions[attr.id]?.includes(value.id)
-                                  ? ""
-                                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                              }`}
-                              disabled={
-                                !validOptions[attr.id]?.includes(value.id)
-                              }
-                            >
-                              {value.value}
-                            </button>
-                          ))}
+                    attributes.map((attr) => {
+                      // Lọc ra những giá trị thực sự tồn tại trong các biến thể
+                      const validValueIdsInVariants = new Set();
+                      variants.forEach((variant) => {
+                        variant.attributes.forEach((a) => {
+                          if (a.attribute_id === attr.id) {
+                            validValueIdsInVariants.add(a.value_id);
+                          }
+                        });
+                      });
+
+                      const filteredValues = attr.values.filter((v) =>
+                        validValueIdsInVariants.has(v.id)
+                      );
+
+                      return (
+                        <div key={attr.id} className="mb-4">
+                          <span>{attr.name}:</span>
+                          <div className="flex space-x-2 mt-2 flex-wrap">
+                            {filteredValues.map((value) => {
+                              const isSelected =
+                                selectedAttributes[attr.id] === value.id;
+                              const isDisabled =
+                                !validOptions[attr.id]?.includes(value.id) &&
+                                !isSelected; // luôn cho phép chọn lại, chỉ disabled nếu không hợp lệ và chưa chọn
+
+                              return (
+                                <button
+                                  key={value.id}
+                                  onClick={() =>
+                                    handleAttributeSelect(attr.id, value.id)
+                                  }
+                                  className={`px-4 py-2 border rounded transition-all duration-150 ${
+                                    isSelected
+                                      ? "bg-black text-white"
+                                      : "border-gray-300 hover:bg-gray-100"
+                                  } ${
+                                    isDisabled
+                                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                  disabled={isDisabled}
+                                >
+                                  {value.value}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
 
                   {/* Hiển thị số lượng tồn kho của biến thể */}
                   <p className="text-gray-600 mb-2">
@@ -480,7 +494,6 @@ const ProductDetail = () => {
                 </div>
                 <Outlet context={{ product }} />
               </div>
-
 
               {/* Sản phẩm gần đây */}
               <div className="my-8">
