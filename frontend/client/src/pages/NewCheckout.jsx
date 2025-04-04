@@ -17,6 +17,7 @@ import {
 } from "antd";
 import { useSelector } from "react-redux";
 import Cookies from "js-cookie";
+
 const { Title, Text } = Typography;
 const { Option } = Select;
 
@@ -41,10 +42,9 @@ const NewCheckout = () => {
   const [order, setOrder] = useState({});
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submit, setSubmit] = useState(false);
-  const user = JSON.parse(Cookies.get("user"));
-  console.log('user',user);
-  console.log(order);
+  // console.log("User:", user);
 
+  console.log("order", order);
   // Load dữ liệu provinces, districts, wards một lần khi mount
   useEffect(() => {
     const loadData = async () => {
@@ -78,7 +78,15 @@ const NewCheckout = () => {
 
   // Khi đăng nhập, load địa chỉ từ localStorage
   useEffect(() => {
+    const userRaw = Cookies.get("user");
+  if (!userRaw) return;
+
+  const user = JSON.parse(userRaw);
     if (isLogin) {
+      setOrder((prev) => ({
+        ...prev,
+        customer_id: user.customerId || null,
+      }));
       const savedAddresses =
         JSON.parse(localStorage.getItem("addresses")) || [];
       setAddresses(savedAddresses);
@@ -113,8 +121,7 @@ const NewCheckout = () => {
         provinces.find((p) => p.name === dataform.province)?.code || "";
       const districtCode =
         districts.find((d) => d.name === dataform.district)?.code || "";
-      const wardCode =
-        wards.find((w) => w.name === dataform.ward)?.code || "";
+      const wardCode = wards.find((w) => w.name === dataform.ward)?.code || "";
 
       setSelectedProvince(provinceCode);
       setSelectedDistrict(districtCode);
@@ -165,7 +172,19 @@ const NewCheckout = () => {
         })),
       }));
     }
-  }, [selectedAddress, addresses, specificAddress, selectedProvince, selectedDistrict, selectedWard, form, cartItems, provinces, districts, wards]);
+  }, [
+    selectedAddress,
+    addresses,
+    specificAddress,
+    selectedProvince,
+    selectedDistrict,
+    selectedWard,
+    form,
+    cartItems,
+    provinces,
+    districts,
+    wards,
+  ]);
 
   // Xử lý chọn địa chỉ từ modal
   const handleSelectAddress = (id) => {
@@ -213,8 +232,6 @@ const NewCheckout = () => {
         amount: calculateGrandTotal(),
         payment_method: paymentMethod,
       };
-
-      console.log("orderData",orderData);
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/order",
         orderData
@@ -462,9 +479,10 @@ const NewCheckout = () => {
             <Button
               type="primary"
               block
-              className="mt-4 bg-black hover:!bg-gray-700 px-6 py-2"
+              className="mt-4"
               onClick={handleSubmit}
               disabled={submit || (order && order?.order_items?.length === 0)}
+              // loading={mutation.isPending}
             >
               Tiếp tục thanh toán
             </Button>

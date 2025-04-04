@@ -34,10 +34,7 @@ import VariantProduct from "./pages/Product/VariantProduct";
 import Category from "./pages/Category/Category";
 import AttributePage from "@pages/Attribute/Attribute";
 import { setCurrentUser, setAuthData, clearAuth } from "./store/reducers/auth";
-import Coupon from '@pages/Coupon/Coupon';
-import AddCoupon from '@pages/Coupon/Store';
-import EditCoupon from '@pages/Coupon/Edit';
-import DetailCoupon from '@pages/Coupon/Detail';
+
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {
@@ -63,6 +60,7 @@ const App = () => {
 
           // Lấy các thông tin khác từ localStorage
           const refreshToken = localStorage.getItem("refresh_token");
+          const createdAt = localStorage.getItem("created_at");
           const expiresAt = localStorage.getItem("expires_at");
           const expiresIn = localStorage.getItem("expires_in");
           const permissions = localStorage.getItem("permissions");
@@ -71,6 +69,7 @@ const App = () => {
           dispatch(setAuthData({
             accessToken: access_token,
             refreshToken: refreshToken,
+            createdAt: createdAt,
             expiresAt: expiresAt,
             expiresIn: expiresIn ? Number(expiresIn) : null,
             permissions: permissions ? JSON.parse(permissions || '[]') : null,
