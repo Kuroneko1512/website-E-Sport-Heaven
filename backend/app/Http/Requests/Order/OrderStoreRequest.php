@@ -24,7 +24,7 @@ class OrderStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'customer_id' => 'nullable|exists:customer_profiles,id',
+            'customer_id' => 'nullable|exists:customers,id',
 
             // Nếu không có customer_id thì bắt buộc nhập các thông tin khách hàng
             'customer_name' => 'required_without:customer_id|string|max:255',

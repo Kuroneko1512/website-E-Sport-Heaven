@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Blog>
  */
-class BlogFactory extends Factory
+class CouponFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -21,13 +21,13 @@ class BlogFactory extends Factory
     {
         $title = $this->faker->sentence(6); // Tạo tiêu đề bài viết
         return [
-            'title' => $title,
-            'slug' => Str::slug($title), // Tạo slug từ tiêu đề
-            'content' => $this->faker->paragraphs(5, true), // Tạo nội dung giả
-            'thumbnail' => $this->faker->imageUrl(640, 480, 'sports', true, 'blog'), // Tạo URL ảnh giả
-            'category_id' => BlogCategory::factory(), // Tạo danh mục ngẫu nhiên
-            'created_at' => now(),
-            'updated_at' => now(),
+            'code' => $this->faker->unique()->regexify('[A-Z0-9]{6}'),
+            'name' => $this->faker->word,
+            'description' => $this->faker->sentence,
+            'discount_type' => $this->faker->randomElement(['percentage', 'fixed']),
+            'discount_value' => $this->faker->numberBetween(1, 100),
+            'min_purchase' => $this->faker->numberBetween(1, 1000), 
+            
         ];
     }
 }

@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\Product\V1\ProductController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\Category\V1\CategoryController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Api\Coupons\CouponsController;
 
 Route::prefix('v1')->group(callback: function (){
     Route::apiResource('/attribute',AttributeController::class);
@@ -29,4 +29,5 @@ Route::prefix('v1')->group(callback: function (){
     Route::apiResource('/blogs', BlogController::class);
     Route::get('/review-by-product/{id}',[ReviewController::class,'getByProduct']);
 
+    Route::apiResource('/coupon', CouponsController::class);
 }); 

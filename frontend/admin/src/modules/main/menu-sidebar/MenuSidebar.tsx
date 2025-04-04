@@ -45,9 +45,9 @@ export const MENU: IMenuItem[] = [
     path: '/Order',
   },
   {
-    name: 'Category',
-    icon: 'fas fa-folder-open nav-icon', // Đã có 'Danh mục' phía trên, nên chọn biểu tượng khác
-    path: '/category',
+    name: 'Mã giảm giá',
+    icon: 'fas fa-tags nav-icon', // Mã giảm giá -> thẻ/tag là biểu tượng hợp lý
+    path: '/Coupon',
   },
   {
     name: i18n.t('menusidebar.label.mainMenu'),

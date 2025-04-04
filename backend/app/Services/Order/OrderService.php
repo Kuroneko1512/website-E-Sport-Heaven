@@ -114,13 +114,14 @@ class OrderService extends BaseService
      */
     private function prepareOrderData($data)
     {
+
         // Nếu có `customer_id`, xóa thông tin khách hàng
-        if (!empty($data['customer_id'])) {
-            $data['customer_name'] = null;
-            $data['customer_email'] = null;
-            $data['customer_phone'] = null;
-            $data['shipping_address'] = null;
-        }
+        // if (!empty($data['customer_id'])) {
+        //     $data['customer_name'] = null;
+        //     $data['customer_email'] = null;
+        //     $data['customer_phone'] = null;
+        //     $data['shipping_address'] = null;
+        // }
         return [
             'customer_id' => $data['customer_id'] ?? null,
             'customer_name' => $data['customer_name'] ?? null,
@@ -212,5 +213,39 @@ class OrderService extends BaseService
         }
 
         return true;  // Trả về true nếu hoàn trả stock thành công
+    }
+
+    /**
+     * Lấy danh sách đơn hàng của một khách hàng
+     * 
+     * @param int $customerId ID của khách hàng
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getOrdersByCustomerId($customerId)
+    {
+        return $this->model->with([
+            'orderItems.product',
+            'orderItems.productVariant.productAttributes.attribute',
+            'orderItems.productVariant.productAttributes.attributeValue'
+        ])
+            ->where('customer_id', $customerId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Lấy danh sách đơn hàng của người dùng hiện tại
+     * 
+     * @param \App\Models\User $user Người dùng hiện tại
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getOrdersByUser($user)
+    {
+        // Kiểm tra xem user có phải là customer không
+        if ($user->account_type !== 'customer' || !$user->customer) {
+            return collect(); // Trả về collection rỗng nếu không phải customer
+        }
+
+        return $this->getOrdersByCustomerId($user->customer->id);
     }
 }

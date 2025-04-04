@@ -11,7 +11,7 @@ import { useWindowSize } from "@app/hooks/useWindowSize";
 import { calculateWindowSize } from "@app/utils/helpers";
 import { setWindowSize } from "@app/store/reducers/ui";
 import ReactGA from "react-ga4";
-import Attribute from '@pages/Attribute/Attribute';
+
 import Dashboard from "@pages/Dashboard";
 import Blank from "@pages/Blank";
 import SubMenu from "@pages/SubMenu";
@@ -22,7 +22,7 @@ import PrivateRoute from "./routes/PrivateRoute";
 import Store from "@pages/Product/Store";
 import { useAppDispatch, useAppSelector } from "./store/store";
 import { Loading } from "./components/Loading";
-import EditComponent from '@pages/Attribute/EditComponent';
+
 import AttributeForm from "./pages/Product/AttributeForm";
 import ValueProduct from "./pages/Product/ValueProduct";
 import DetailProductComponent from "./pages/Product/DetailProductComponent";
@@ -60,6 +60,7 @@ const App = () => {
 
           // Lấy các thông tin khác từ localStorage
           const refreshToken = localStorage.getItem("refresh_token");
+          const createdAt = localStorage.getItem("created_at");
           const expiresAt = localStorage.getItem("expires_at");
           const expiresIn = localStorage.getItem("expires_in");
           const permissions = localStorage.getItem("permissions");
@@ -68,6 +69,7 @@ const App = () => {
           dispatch(setAuthData({
             accessToken: access_token,
             refreshToken: refreshToken,
+            createdAt: createdAt,
             expiresAt: expiresAt,
             expiresIn: expiresIn ? Number(expiresIn) : null,
             permissions: permissions ? JSON.parse(permissions || '[]') : null,
@@ -134,13 +136,17 @@ const App = () => {
             <Route path="profile" element={<Profile />} />
             {/* route sản phẩm  */}
             <Route path="Product" element={<Product />} >
-
             </Route>
             <Route path="Product/detail/:id" element={<DetailProductComponent />} />
-
             <Route path="Product/edit/:id" element={<EditComponents />} />
-
             <Route path="add-product" element={<Store />} >
+              <Route path="AttributeForm" element={<AttributeForm />} />
+              <Route path="ValueProduct" element={<ValueProduct />} />
+              <Route path="Attribute" element={<AttributeProduct />} />
+              <Route path="Variant" element={<VariantProduct />} />
+              <Route index element={<ValueProduct />} />
+            </Route>
+            <Route path="add-product/:id" element={<Store />} >
               <Route path="AttributeForm" element={<AttributeForm />} />
               <Route path="ValueProduct" element={<ValueProduct />} />
               <Route path="Attribute" element={<AttributeProduct />} />
@@ -154,12 +160,12 @@ const App = () => {
             <Route path="Order" element={<Order />} />
             <Route path="Order/Details/:id" element={<DetailOrder />} />
 
-
-
-
-
-            {/*Route Category*/}
-            <Route path="category" element={<Category />} />
+            <Route path="Coupon" element={<Coupon />} />
+            <Route path="add-coupon" element={<AddCoupon />} />
+            <Route path="edit-coupon/:id" element={<EditCoupon />} />
+            <Route path="detail-coupon/:id" element={<DetailCoupon />} />
+          
+           
           </Route>
         </Route>
       </Routes>
@@ -176,47 +182,7 @@ const App = () => {
         pauseOnHover
       />
     </>
-    // <>
-    //   <Routes>
-    //     <Route path="/login" element={<PublicRoute />}>
-    //       <Route path="/login" element={<Login />} />
-    //     </Route>
-    //     <Route path="/register" element={<PublicRoute />}>
-    //       <Route path="/register" element={<Register />} />
-    //     </Route>
-    //     <Route path="/forgot-password" element={<PublicRoute />}>
-    //       <Route path="/forgot-password" element={<ForgetPassword />} />
-    //     </Route>
-    //     <Route path="/recover-password" element={<PublicRoute />}>
-    //       <Route path="/recover-password" element={<RecoverPassword />} />
-    //     </Route>
-    //     <Route path="/" element={<PrivateRoute />}>
-    //       {/* route của thanh navbar */}
-    //       <Route path="/" element={<Main />}>
-    //         <Route path="/sub-menu-2" element={<Blank />} />
-    //         <Route path="/sub-menu-1" element={<SubMenu />} />
-    //         <Route path="/blank" element={<Blank />} />
-    //         <Route path="/profile" element={<Profile />} />
-    //         <Route path="/product" element={<Product />} />
-    //         <Route path="/" element={<Dashboard />} />
-
-    //         {/* Route của sản phẩm  */}
-    //         <Route path="/add-product" element={<Store />} />
-    //       </Route>
-    //     </Route>
-    //   </Routes>
-
-    //   <ToastContainer
-    //     autoClose={3000}
-    //     draggable={false}
-    //     position="top-right"
-    //     hideProgressBar={false}
-    //     newestOnTop
-    //     closeOnClick
-    //     rtl={false}
-    //     pauseOnHover
-    //   />
-    // </>
+  
   );
 };
 
