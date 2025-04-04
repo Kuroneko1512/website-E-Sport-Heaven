@@ -48,8 +48,12 @@ const authSide = createSlice({
       state.accessToken = action.payload;
       Cookies.set("accessToken", action.payload, { expires: 7, secure: true, sameSite: "Strict" });
     },
+    updateUser: (state, action) => {
+      state.user = { ...state.user, ...action.payload };
+      Cookies.set("user", JSON.stringify(state.user), { expires: 7, secure: true, sameSite: "Strict" });
+    },
   },
 });
 
-export const { login, logout, updateAccessToken } = authSide.actions;
+export const { login, logout, updateAccessToken, updateUser } = authSide.actions;
 export default authSide.reducer;
