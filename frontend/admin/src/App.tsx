@@ -11,7 +11,7 @@ import { useWindowSize } from "@app/hooks/useWindowSize";
 import { calculateWindowSize } from "@app/utils/helpers";
 import { setWindowSize } from "@app/store/reducers/ui";
 import ReactGA from "react-ga4";
-import Attribute from '@pages/Attribute/Attribute';
+
 import Dashboard from "@pages/Dashboard";
 import Blank from "@pages/Blank";
 import SubMenu from "@pages/SubMenu";
@@ -22,7 +22,7 @@ import PrivateRoute from "./routes/PrivateRoute";
 import Store from "@pages/Product/Store";
 import { useAppDispatch, useAppSelector } from "./store/store";
 import { Loading } from "./components/Loading";
-import EditComponent from '@pages/Attribute/EditComponent';
+
 import AttributeForm from "./pages/Product/AttributeForm";
 import ValueProduct from "./pages/Product/ValueProduct";
 import DetailProductComponent from "./pages/Product/DetailProductComponent";
@@ -137,13 +137,17 @@ const App = () => {
             <Route path="profile" element={<Profile />} />
             {/* route sản phẩm  */}
             <Route path="Product" element={<Product />} >
-
             </Route>
             <Route path="Product/detail/:id" element={<DetailProductComponent />} />
-
             <Route path="Product/edit/:id" element={<EditComponents />} />
-
             <Route path="add-product" element={<Store />} >
+              <Route path="AttributeForm" element={<AttributeForm />} />
+              <Route path="ValueProduct" element={<ValueProduct />} />
+              <Route path="Attribute" element={<AttributeProduct />} />
+              <Route path="Variant" element={<VariantProduct />} />
+              <Route index element={<ValueProduct />} />
+            </Route>
+            <Route path="add-product/:id" element={<Store />} >
               <Route path="AttributeForm" element={<AttributeForm />} />
               <Route path="ValueProduct" element={<ValueProduct />} />
               <Route path="Attribute" element={<AttributeProduct />} />
@@ -162,7 +166,7 @@ const App = () => {
 
 
             {/*Route Category*/}
-            <Route path="category" element={<Category />} />
+           
           </Route>
         </Route>
       </Routes>

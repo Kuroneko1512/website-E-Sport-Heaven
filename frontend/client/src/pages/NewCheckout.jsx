@@ -16,7 +16,7 @@ import {
   Modal,
 } from "antd";
 import { useSelector } from "react-redux";
-
+import Cookies from "js-cookie";
 const { Title, Text } = Typography;
 const { Option } = Select;
 
@@ -41,7 +41,8 @@ const NewCheckout = () => {
   const [order, setOrder] = useState({});
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submit, setSubmit] = useState(false);
-
+  const user = JSON.parse(Cookies.get("user"));
+  console.log('user',user);
   console.log(order);
 
   // Load dữ liệu provinces, districts, wards một lần khi mount
@@ -461,7 +462,7 @@ const NewCheckout = () => {
             <Button
               type="primary"
               block
-              className="mt-4"
+              className="mt-4 bg-black hover:!bg-gray-700 px-6 py-2"
               onClick={handleSubmit}
               disabled={submit || (order && order?.order_items?.length === 0)}
             >

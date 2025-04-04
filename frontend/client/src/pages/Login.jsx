@@ -208,7 +208,7 @@ const Login = () => {
           <Form.Item>
             <Button
               type="default"
-              className="w-full bg-red-500 text-white py-2 rounded-lg hover:!bg-red-600 disabled:opacity-50 disabled:hover:!bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full bg-red-500 text-white py-2 rounded-lg hover:!text-white hover:!border-white hover:!bg-red-600 disabled:opacity-50 disabled:hover:!bg-gray-100 disabled:cursor-not-allowed"
               onClick={handleGoogleLogin}
               loading={googleLoading}
               disabled={!googleLoginUrl}

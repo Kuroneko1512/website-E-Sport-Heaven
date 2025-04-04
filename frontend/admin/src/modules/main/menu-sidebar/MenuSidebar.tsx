@@ -16,38 +16,33 @@ export interface IMenuItem {
 export const MENU: IMenuItem[] = [
   {
     name: 'Bảng điều khiển',
-    icon: 'fas fa-tachometer-alt nav-icon',
+    icon: 'fas fa-tachometer-alt nav-icon', // Bảng điều khiển -> biểu tượng dashboard
     path: '/',
   },
   {
     name: i18n.t('menusidebar.label.blank'),
-    icon: 'fas fa-wrench nav-icon',
+    icon: 'fas fa-wrench nav-icon', // Tạm giữ nguyên vì không rõ nội dung cụ thể
     path: '/blank',
   },
   {
     name: 'Sản phẩm',
-    icon: 'fas fa-box nav-icon',
+    icon: 'fas fa-box-open nav-icon', // Sản phẩm -> hộp mở, phù hợp cho product
     path: '/Product',
   },
   {
     name: 'Danh mục',
-    icon: 'fas fa-box nav-icon',
+    icon: 'fas fa-th-list nav-icon', // Danh mục -> danh sách lưới
     path: '/Category',
   },
   {
     name: 'Thuộc tính',
-    icon: 'fas fa-box nav-icon',
+    icon: 'fas fa-tags nav-icon', // Thuộc tính -> thẻ/tag là biểu tượng hợp lý
     path: '/Attribute',
   },
   {
     name: 'Đơn hàng',
-    icon: 'fas fa-box nav-icon',
+    icon: 'fas fa-shopping-cart nav-icon', // Đơn hàng -> giỏ hàng
     path: '/Order',
-  },
-  {
-    name: 'Category',
-    icon: 'fas fa-box nav-icon',
-    path: '/category',
   },
   {
     name: i18n.t('menusidebar.label.mainMenu'),

@@ -1,22 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
-import { getProducts, deleteProduct, Pagination } from "@app/services/Product/Api";
+import { getProducts, deleteProduct, Pagination, api4 } from "@app/services/Product/Api";
 import { useEffect, useState } from "react";
 import FomatVND from "@app/utils/FomatVND";
-
-interface Product {
-  id?: number;
-  name: string;
-  description?: string;
-  price: number;
-  discount_percent?: string;
-  product_type: "simple" | "variable";
-  status: "active" | "inactive";
-  category_id: string;
-  stock: number;
-  image?: File | null;
-  selected_attributes: [];
-  variants: [];
-}
 
 const Product = () => {
   const navigate = useNavigate();
@@ -30,7 +15,27 @@ const Product = () => {
     data: [],
   });
 
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<api4[]>([]);
+  const [isDelete, setIsDelete] = useState(false);
+
+  const handleDeleteProduct = async (id: number) => {
+    try {
+      // Xác nhận trước khi xóa
+      const confirm = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?");
+      if (!confirm) return;
+
+      await deleteProduct(id);
+      
+      // Cập nhật lại dữ liệu sau khi xóa thành công
+      setProducts(products.filter(product => product.id !== id));
+      
+      // Hiển thị thông báo xóa thành công
+      alert("Xóa sản phẩm thành công!");
+    } catch (error) {
+      console.error("Lỗi khi xóa sản phẩm:", error);
+      alert("Xóa sản phẩm thất bại!");
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,7 +44,13 @@ const Product = () => {
         setProducts(response.data.data);
         setPagination((prev) => ({
           ...prev,
-          ...response.data,
+          current_page: response.current_page,
+          last_page: response.last_page,
+          prev_page_url: response.prev_page_url,
+          next_page_url: response.next_page_url,
+          total: response.total,
+          per_page: response.per_page,
+          data: response.data
         }));
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -47,106 +58,9 @@ const Product = () => {
     };
 
     fetchData();
-  }, [pagination.current_page]); // 🔥 Chỉ gọi khi current_page thay đổi
+  }, [pagination.current_page, isDelete]); // 🔥 Thêm isDelete để load lại khi xóa
 
   return (
-    // <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-100">
-    //   <div className="w-full max-w-5xl overflow-x-auto bg-white shadow-lg rounded-lg p-5">
-    //     <h1 className="text-3xl font-bold mb-5 text-center">Trang Sản Phẩm</h1>
-
-    //     <Link to="/add-product" className="btn btn-success mb-4">
-    //       + Add
-    //     </Link>
-
-    //     <div className="card">
-    //       <div className="card-header">
-    //         <h3 className="card-title">Danh sách sản phẩm</h3>
-    //         <div className="card-tools">
-    //           <div className="input-group input-group-sm search-box">
-    //             <input type="text" className="form-control search-input" placeholder="Search" />
-    //             <div className="input-group-append">
-    //               <button type="submit" className="btn btn-default search-button">
-    //                 <i className="fas fa-search"></i>
-    //               </button>
-    //             </div>
-    //           </div>
-    //         </div>
-    //       </div>
-
-    //       <div className="card-body table-responsive p-0">
-    //         <table className="table table-hover text-nowrap">
-    //           <thead>
-    //             <tr>
-    //               <th>ID</th>
-    //               <th>Name</th>
-    //               <th>Price</th>
-    //               <th>Type</th>
-    //               <th>Status</th>
-    //               <th>Stock</th>
-    //               <th>Action</th>
-    //             </tr>
-    //           </thead>
-    //           <tbody>
-    //             {products.map((product) => (
-    //               <tr key={product.id}>
-    //                 <td>{product.id}</td>
-    //                 <td>{product.name}</td>
-    //                 <td>${product.price}</td>
-    //                 <td>{product.product_type}</td>
-    //                 <td>
-    //                   <span className={`tag ${product.status === "active" ? "tag-success" : "tag-danger"}`}>
-    //                     {product.status}
-    //                   </span>
-    //                 </td>
-    //                 <td>{product.stock}</td>
-    //                 <td> <button
-    //                   className="btn btn-warning btn-sm"
-    //                   onClick={() => navigate(`detail/${product.id}`)}
-    //                 >
-    //                   Detail
-    //                 </button></td>
-
-    //               </tr>
-    //             ))}
-    //           </tbody>
-    //         </table>
-    //       </div>
-
-    //       {/* Pagination */}
-    //       <div className="card-footer clearfix">
-    //         <ul className="pagination pagination-sm m-0 float-right">
-    //           <li className={`page-item ${!pagination.prev_page_url && "disabled"}`}>
-    //             <button
-    //               className="page-link"
-    //               onClick={() => setPagination((prev) => ({ ...prev, current_page: prev.current_page - 1 }))}
-    //               disabled={!pagination.prev_page_url}
-    //             >
-    //               Pre
-    //             </button>
-    //           </li>
-
-    //           {[...Array(pagination.last_page)].map((_, i) => (
-    //             <li key={i} className={`page-item ${pagination.current_page === i + 1 ? "active" : ""}`}>
-    //               <button className="page-link" onClick={() => setPagination((prev) => ({ ...prev, current_page: i + 1 }))}>
-    //                 {i + 1}
-    //               </button>
-    //             </li>
-    //           ))}
-
-    //           <li className={`page-item ${!pagination.next_page_url && "disabled"}`}>
-    //             <button
-    //               className="page-link"
-    //               onClick={() => setPagination((prev) => ({ ...prev, current_page: prev.current_page + 1 }))}
-    //               disabled={!pagination.next_page_url}
-    //             >
-    //               Next
-    //             </button>
-    //           </li>
-    //         </ul>
-    //       </div>
-    //     </div>
-    //   </div>
-    // </div>
     <section className="content">
     <div className="content-header">
         <div className="container-fluid">
@@ -172,7 +86,7 @@ const Product = () => {
             <h3 className="card-title">Đơn hàng</h3> 
             <div className="card-tools">
             <Link to="/add-product" className="btn btn-success me-2">
-           + Add
+           + Thêm
        </Link>
             </div>
         </div>
@@ -196,7 +110,7 @@ const Product = () => {
                              <tr key={product.id}>
                                <td>{product.id}</td>
                                <td>{product.name}</td>
-                               <td>{FomatVND(product.price)}</td>
+                               <td>{FomatVND(product.variants.length > 0 ? product.variants[0].price : product.price)}</td>
                                <td>{product.product_type === "variable" ? "Biến thể" : "Đơn giản"}</td>
                                <td>
                                  <span className={`tag ${product.status === "active" ? "tag-success" : "tag-danger"}`}>
@@ -204,13 +118,26 @@ const Product = () => {
                                  </span>
                                </td>
                                <td>{product.stock}</td>
-                               <td> <button
-                                 className="btn btn-warning btn-sm"
-                                 onClick={() => navigate(`detail/${product.id}`)}
-                               >
-                                 Chi tiết
-                               </button></td>
-          
+                               <td>
+                                 <button
+                                   className="btn btn-warning btn-sm me-2"
+                                   onClick={() => navigate(`detail/${product.id}`)}
+                                 >
+                                   Chi tiết
+                                 </button>
+                                 <button
+                                   className="btn btn-primary btn-sm"
+                                   onClick={() => navigate(`/add-product/${product.id}`)}
+                                 >
+                                   Chỉnh sửa
+                                 </button>
+                                 <button
+                                   className="btn btn-danger btn-sm mx-2"
+                                   onClick={() =>  handleDeleteProduct(product.id) }
+                                 >
+                                   Xóa
+                                 </button>
+                               </td>
                              </tr>
                            ))}
                          </tbody>
