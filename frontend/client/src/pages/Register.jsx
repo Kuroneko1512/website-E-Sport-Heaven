@@ -206,7 +206,7 @@ const Register = () => {
             <Button
               type="primary"
               htmlType="submit"
-              loading={mutation.isLoading}
+              loading={mutation.isPending}
               className="w-full bg-black text-white py-2 rounded-lg hover:!bg-gray-800"
             >
               Đăng ký

@@ -44,15 +44,20 @@ const App = () => {
   const location = useLocation();
 
   const [isAppLoading, setIsAppLoading] = useState(true);
+
   useEffect(() => {
     const access_token = localStorage.getItem("access_token");
-    console.log('App init - access_token:', access_token);
+    console.log("App init - access_token:", access_token);
 
     if (access_token) {
       setIsAppLoading(true);
-      AuthService.getUser()
-        .then((user) => {
-          console.log('User fetched successfully:', user);
+
+      // Lấy thông tin user từ localStorage thay vì gọi API
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+
           // Lấy các thông tin khác từ localStorage
           const refreshToken = localStorage.getItem("refresh_token");
           const expiresAt = localStorage.getItem("expires_at");
@@ -65,18 +70,22 @@ const App = () => {
             refreshToken: refreshToken,
             expiresAt: expiresAt,
             expiresIn: expiresIn ? Number(expiresIn) : null,
-            permissions: permissions ? JSON.parse(permissions) : null,
-            roles: roles ? JSON.parse(roles) : null,
+            permissions: permissions ? JSON.parse(permissions || '[]') : null,
+            roles: roles ? JSON.parse(roles || '[]') : null,
             user: user
           }));
-        })
-        .catch((error) => {
-          console.error('Error fetching user:', error);
+
+          console.log("Auth data restored from localStorage");
+        } catch (error) {
+          console.error("Error parsing user data from localStorage:", error);
           dispatch(clearAuth());
-        })
-        .finally(() => {
-          setIsAppLoading(false);
-        });
+        }
+      } else {
+        console.error("No user data in localStorage");
+        dispatch(clearAuth());
+      }
+
+      setIsAppLoading(false);
     } else {
       setIsAppLoading(false);
     }

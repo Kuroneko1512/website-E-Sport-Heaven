@@ -86,7 +86,7 @@ const Product = () => {
             <h3 className="card-title">Đơn hàng</h3> 
             <div className="card-tools">
             <Link to="/add-product" className="btn btn-success me-2">
-           + Add
+           + Thêm
        </Link>
             </div>
         </div>
