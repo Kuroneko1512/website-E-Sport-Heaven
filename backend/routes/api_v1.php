@@ -27,4 +27,6 @@ Route::prefix('v1')->group(callback: function (){
     Route::apiResource('/review', ReviewController::class);
     Route::apiResource('/blog-categories', BlogCategoryController::class);
     Route::apiResource('/blogs', BlogController::class);
+    Route::get('/review-by-product/{id}',[ReviewController::class,'getByProduct']);
+
 }); 

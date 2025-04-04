@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Review\ReviewStoreRequest;
 use App\Http\Requests\Review\ReviewUpdateRequest;
 use App\Services\ReviewService;
+use \Illuminate\Support\Facades\Auth;
 use Exception;
 use Illuminate\Database\QueryException;
 
@@ -20,6 +21,25 @@ class ReviewController extends Controller
     {
         $this->reviewService = $reviewService;
     }
+
+    // Lấy danh sách tất cả Đánh giá
+    public function getByProduct($id){
+        try {
+             // Gọi service để lấy dữ liệu
+            $reviews = $this->reviewService->getByProduct($id);
+            return response()->json([
+                'status' => 200,
+                'data' => $reviews, // Trả về dữ liệu Đánh giá
+            ],200);
+        } catch (\Throwable $th) {
+             // Trường hợp có lỗi xảy ra khi lấy dữ liệu
+            return response()->json([
+                'errnor' => 'lấy thất bại',
+                'status'=>200
+            ],500); // Trả về mã lỗi 500 (Internal Server Error)
+        }
+    }
+
     // Lấy danh sách tất cả Đánh giá
     public function index(){
         try {
@@ -40,11 +60,12 @@ class ReviewController extends Controller
 
     public function store(ReviewStoreRequest $request)
     {
-       
         try {
+
              // Validate và lấy dữ liệu từ request
             $data = $request->validated();
              // Gọi service để tạo mới Đánh giá
+            $data['user_id'] = $request->user()->id;
             $review = $this->reviewService->create($data);
 
             return response()->json([
@@ -64,6 +85,10 @@ class ReviewController extends Controller
     public function update(ReviewUpdateRequest $request ,$id)
     {
         try {
+            $request->merge([
+                'user_id' => auth()->id(),
+            ]);
+
               // Validate và lấy dữ liệu từ request
             $data = $request->validated();
             // Gọi service để cập nhật Đánh giá
