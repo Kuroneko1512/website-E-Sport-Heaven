@@ -213,4 +213,38 @@ class OrderService extends BaseService
 
         return true;  // Trả về true nếu hoàn trả stock thành công
     }
+
+    /**
+     * Lấy danh sách đơn hàng của một khách hàng
+     * 
+     * @param int $customerId ID của khách hàng
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getOrdersByCustomerId($customerId)
+    {
+        return $this->model->with([
+            'orderItems.product',
+            'orderItems.productVariant.productAttributes.attribute',
+            'orderItems.productVariant.productAttributes.attributeValue'
+        ])
+            ->where('customer_id', $customerId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Lấy danh sách đơn hàng của người dùng hiện tại
+     * 
+     * @param \App\Models\User $user Người dùng hiện tại
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getOrdersByUser($user)
+    {
+        // Kiểm tra xem user có phải là customer không
+        if ($user->account_type !== 'customer' || !$user->customer) {
+            return collect(); // Trả về collection rỗng nếu không phải customer
+        }
+
+        return $this->getOrdersByCustomerId($user->customer->id);
+    }
 }
