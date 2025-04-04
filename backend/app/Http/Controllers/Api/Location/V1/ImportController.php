@@ -109,5 +109,13 @@ class ImportController extends Controller
         // Số jobs đã xử lý
         $processedJobs = Cache::get('processed_location_jobs', 0);
 
+        return response()->json([
+            'total' => $totalJobs,
+            'pending' => $pendingJobs,
+            'failed' => $failedJobs,
+            'processed' => $processedJobs,
+            'percent' => $totalJobs > 0 ? round(($processedJobs / $totalJobs) * 100) : 0,
+            'error' => Cache::get('import_error') // Nếu có lỗi xảy ra trong quá trình import
+        ]);
     }
 }
