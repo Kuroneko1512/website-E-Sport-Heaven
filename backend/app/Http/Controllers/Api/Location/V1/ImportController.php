@@ -59,5 +59,55 @@ class ImportController extends Controller
         ]);
     }
 
-    
+    /**
+     * Import dữ liệu từ file CSV thông qua API.
+     *
+     * @param ImportRequest $request Yêu cầu chứa file import.
+     * @return JsonResponse
+     */
+    public function import(ImportRequest $request): JsonResponse
+    {
+        try {
+            // Gọi service để thực hiện import
+            $this->importService->import($request->allFiles());
+
+            return response()->json([
+                'message' => 'Bắt đầu import dữ liệu thành công',
+                'status' => 'success',
+            ]);
+        } catch (\Exception $e) {
+            // Lưu lỗi vào cache để kiểm tra tiến độ hoặc hiển thị thông báo lỗi
+            Cache::put('import_error', 'Lỗi trong quá trình import: ' . $e->getMessage());
+            
+            return response()->json([
+                'message' => 'Lỗi trong quá trình import: ' . $e->getMessage(),
+                'status' => 'error',
+            ], 500);
+        }
+    }
+
+    /**
+     * Kiểm tra tiến độ import dữ liệu.
+     *
+     * @return JsonResponse
+     */
+    public function importProgress(): JsonResponse
+    {
+        // Tổng số jobs cần xử lý
+        $totalJobs = Cache::get('total_location_jobs', 0);
+
+        // Số jobs đang chờ trong queue
+        $pendingJobs = DB::table('jobs')
+            ->where('queue', 'Location_import')
+            ->count();
+
+        // Số jobs thất bại
+        $failedJobs = DB::table('failed_jobs')
+            ->where('queue', 'Location_import')
+            ->count();
+
+        // Số jobs đã xử lý
+        $processedJobs = Cache::get('processed_location_jobs', 0);
+
+    }
 }
