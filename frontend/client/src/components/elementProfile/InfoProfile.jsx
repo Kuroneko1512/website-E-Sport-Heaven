@@ -9,7 +9,8 @@ import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import instanceAxios from "../../config/db";
-
+import { useDispatch } from "react-redux";
+import { updateUser } from "../../redux/AuthSide";
 const { Option } = Select;
 
 const InfoProfile = () => {
@@ -21,6 +22,7 @@ const InfoProfile = () => {
   const [uploading, setUploading] = useState(false);
   const queryClient = useQueryClient();
   const user = JSON.parse(Cookies.get("user"));
+  const dispatch = useDispatch();
 
   const { data: userData, isLoading } = useQuery({
     queryKey: ["user"],
@@ -76,34 +78,33 @@ const InfoProfile = () => {
       message.success("Cập nhật hồ sơ thành công!");
       queryClient.invalidateQueries(["user"]);
 
-      const updatedUser = {
+      // Update user in Redux
+      dispatch(updateUser({
         ...user,
         name: values.name,
         email: values.email,
         phone: values.phone,
-      };
-  
-      Cookies.set("user", JSON.stringify(updatedUser), {
-        expires: 7,
-        secure: true,
-        sameSite: "Strict",
-      });
+      }));
   
       setIsEditing(false);
     } catch (error) {
-      if (error.response?.status === 422) {
-        const apiErrors = error.response.data.errors;
-        const fieldErrors = Object.entries(apiErrors).map(([field, errors]) => ({
-          name: field,
-          errors,
-        }));
-        form.setFields(fieldErrors);
-        message.error(error.response.data.message || "Dữ liệu không hợp lệ!");
-      } else {
-        message.error("Cập nhật thất bại, vui lòng thử lại.");
+      console.log("Error:", error);
+      if (error.errorFields && error.errorFields.length > 0) {
+        const firstError = error.errorFields[0];
+        console.log("First Error:", firstError);
+        message.error(firstError.errors[0] || "Vui lòng kiểm tra lại thông tin.");
+      } 
+      if (error.status  === 400) {
+        const messageError = error?.response?.data?.message;
+        message.error(messageError || "Vui lòng kiểm tra lại thông tin.");
+      }
+      if (error.status  === 422) {
+        const messageError = error?.response?.data?.message;
+        message.error(messageError || "Vui lòng kiểm tra lại thông tin.");
       }
     }
   };
+
   const handleUpload = async ({ file }) => {
     setUploading(true);
     const formData = new FormData();
@@ -118,13 +119,7 @@ const InfoProfile = () => {
       if (newAvatar) {
         setPreviewAvatar(newAvatar);
         setAvatar(newAvatar);
-  
-        Cookies.set("user", JSON.stringify({ ...user, avatar: newAvatar }), {
-          expires: 7,
-          secure: true,
-          sameSite: "Strict",
-        });
-  
+        dispatch(updateUser({ avatar: newAvatar }));
         message.success("Ảnh đại diện cập nhật thành công!");
       } else {
         message.error("Không lấy được URL ảnh từ phản hồi API.");
@@ -135,7 +130,6 @@ const InfoProfile = () => {
       setUploading(false);
     }
   };
-  
 
   const handleConfirmAvatar = () => {
     setAvatar(previewAvatar);
