@@ -164,8 +164,8 @@ const CategoryForm = ({ onCategoryAdded, editingCategory, setEditingCategory }: 
         {loading && (
           <div className="overlay">
             <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Đang tải...</span>
             </div>
+              <span className="visually-hidden">Đang tải...</span>
           </div>
         )}
         

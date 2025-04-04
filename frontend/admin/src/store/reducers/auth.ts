@@ -10,6 +10,7 @@ export interface AuthState {
   expiresIn: number | null;
   permissions: string[] | null;
   roles: string[] | null;
+  isLoginAdmin: boolean;
 }
 
 const initialState: AuthState = {
@@ -19,7 +20,8 @@ const initialState: AuthState = {
   expiresAt: localStorage.getItem('expires_at') || null,
   expiresIn: localStorage.getItem('expires_in') ? Number(localStorage.getItem('expires_in')) : null,
   permissions: localStorage.getItem('permissions') ? JSON.parse(localStorage.getItem('permissions') || '[]') : null,
-  roles: localStorage.getItem('roles') ? JSON.parse(localStorage.getItem('roles') || '[]') : null
+  roles: localStorage.getItem('roles') ? JSON.parse(localStorage.getItem('roles') || '[]') : null,
+  isLoginAdmin: localStorage.getItem('isLoginAdmin') === 'true'
 };
 
 export const authSlice = createSlice({
@@ -113,6 +115,7 @@ export const authSlice = createSlice({
       localStorage.removeItem('expires_in');
       localStorage.removeItem('permissions');
       localStorage.removeItem('roles');
+      localStorage.removeItem('isLoginAdmin');
     }
   },
 });
