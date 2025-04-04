@@ -11,9 +11,24 @@ use Illuminate\Support\Facades\Validator;
 
 class CouponsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $coupons = Coupon::all();
+        $perPage = $request->input('limit', 10); // Mặc định 10 item mỗi trang
+        $page = $request->input('page', 1); // Mặc định trang 1
+        $search = $request->input('search', ''); // Từ khóa tìm kiếm
+        
+        $query = Coupon::orderBy('id', 'desc');
+        
+        // Thêm tìm kiếm nếu có từ khóa
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+        
+        $coupons = $query->paginate($perPage);
 
         return response()->json($coupons);
     }
@@ -49,6 +64,7 @@ class CouponsController extends Controller
     public function update(Request $request, Coupon $coupon)
     {
         $validator = Validator::make($request->all(), [
+            'code' => 'required|string|max:255|unique:coupons,code,' . $coupon->id,
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'discount_type' => 'required|in:percentage,fixed',
@@ -74,8 +90,8 @@ class CouponsController extends Controller
 
         return response()->json(null, 204);
     }
+   
 }
-
 
 
 
