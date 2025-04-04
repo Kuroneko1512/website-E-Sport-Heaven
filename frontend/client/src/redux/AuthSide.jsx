@@ -7,6 +7,7 @@ const initialState = {
   refreshToken: Cookies.get("refreshToken") || null,
   expiresAt: Cookies.get("expiresAt") || null,  // Lưu expiresAt
   user: {
+    customerId: null,
     avatar: null,
     name: null,
     email: null,
