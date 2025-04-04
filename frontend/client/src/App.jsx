@@ -42,7 +42,10 @@ import GoogleAuthCallback from "./components/elementLogin/GoogleAuthCallback";
 import { useDispatch } from "react-redux";
 import Cookies from "js-cookie";
 import { logout, updateUser } from "./redux/AuthSide";
-
+import { useQuery } from "@tanstack/react-query";
+import instanceAxios from "./config/db";
+import { useEffect } from "react";
+import { message } from "antd";
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
