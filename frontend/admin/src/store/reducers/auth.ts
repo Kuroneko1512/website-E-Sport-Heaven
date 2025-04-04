@@ -6,6 +6,7 @@ export interface AuthState {
   currentUser: User | null;
   accessToken: string | null;
   refreshToken: string | null;
+  createdAt: string | null; 
   expiresAt: string | null;
   expiresIn: number | null;
   permissions: string[] | null;
@@ -16,6 +17,7 @@ const initialState: AuthState = {
   currentUser: null,
   accessToken: localStorage.getItem('access_token') || null,
   refreshToken: localStorage.getItem('refresh_token') || null,
+  createdAt: localStorage.getItem('created_at') || null,
   expiresAt: localStorage.getItem('expires_at') || null,
   expiresIn: localStorage.getItem('expires_in') ? Number(localStorage.getItem('expires_in')) : null,
   permissions: localStorage.getItem('permissions') ? JSON.parse(localStorage.getItem('permissions') || '[]') : null,
@@ -38,6 +40,7 @@ export const authSlice = createSlice({
         payload: {
           accessToken: string | null,
           refreshToken: string | null,
+          createdAt: string | null,
           expiresAt: string | null,
           expiresIn: number | null,
           permissions: string[] | null,
@@ -48,6 +51,7 @@ export const authSlice = createSlice({
     ) => {
       state.accessToken = payload.accessToken;
       state.refreshToken = payload.refreshToken;
+      state.createdAt = payload.createdAt;
       state.expiresAt = payload.expiresAt;
       state.expiresIn = payload.expiresIn;
       state.permissions = payload.permissions;
@@ -65,6 +69,12 @@ export const authSlice = createSlice({
         localStorage.setItem('refresh_token', payload.refreshToken);
       } else {
         localStorage.removeItem('refresh_token');
+      }
+
+      if (payload.createdAt) {
+        localStorage.setItem('created_at', payload.createdAt);
+      } else {
+        localStorage.removeItem('created_at');
       }
 
       if (payload.expiresAt) {
@@ -102,6 +112,7 @@ export const authSlice = createSlice({
       state.currentUser = null;
       state.accessToken = null;
       state.refreshToken = null;
+      state.createdAt = null;
       state.expiresAt = null;
       state.expiresIn = null;
       state.permissions = null;
@@ -109,6 +120,7 @@ export const authSlice = createSlice({
 
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
+      localStorage.removeItem('created_at');
       localStorage.removeItem('expires_at');
       localStorage.removeItem('expires_in');
       localStorage.removeItem('permissions');

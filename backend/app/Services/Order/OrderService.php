@@ -114,13 +114,13 @@ class OrderService extends BaseService
      */
     private function prepareOrderData($data)
     {
-        // Nếu có `customer_id`, xóa thông tin khách hàng
-        if (!empty($data['customer_id'])) {
-            $data['customer_name'] = null;
-            $data['customer_email'] = null;
-            $data['customer_phone'] = null;
-            $data['shipping_address'] = null;
-        }
+        // // Nếu có `customer_id`, xóa thông tin khách hàng
+        // if (!empty($data['customer_id'])) {
+        //     $data['customer_name'] = null;
+        //     $data['customer_email'] = null;
+        //     $data['customer_phone'] = null;
+        //     $data['shipping_address'] = null;
+        // }
         return [
             'customer_id' => $data['customer_id'] ?? null,
             'customer_name' => $data['customer_name'] ?? null,
