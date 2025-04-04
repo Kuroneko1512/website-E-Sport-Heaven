@@ -19,6 +19,7 @@ export const useAuth = () => {
                 dispatch(setAuthData({
                     accessToken: response.access_token,
                     refreshToken: response.refresh_token,
+                    createAt: response.created_at,
                     expiresAt: response.expires_at,
                     expiresIn: response.expires_in,
                     permissions: response.permission,
@@ -37,38 +38,6 @@ export const useAuth = () => {
         [dispatch]
     );
 
-    const register = useCallback(
-        async (identifier: string, password: string, name: string, phone: string) => {
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await AuthService.register({
-                    identifier,
-                    password,
-                    name,
-                    phone
-                });
-                
-                dispatch(setAuthData({
-                    accessToken: response.access_token,
-                    refreshToken: response.refresh_token,
-                    expiresAt: response.expires_at,
-                    expiresIn: response.expires_in,
-                    permissions: response.permission,
-                    roles: response.role,
-                    user: response.user
-                }));
-                
-                return response;
-            } catch (err: any) {
-                setError(err.message);
-                throw err;
-            } finally {
-                setLoading(false);
-            }
-        },
-        [dispatch]
-    );
 
     const logout = useCallback(async () => {
         try {
@@ -88,7 +57,6 @@ export const useAuth = () => {
         loading,
         error,
         login,
-        register,
         logout,
     };
 };

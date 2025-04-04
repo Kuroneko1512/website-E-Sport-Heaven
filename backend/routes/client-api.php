@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Order\V1\OrderController;
 use App\Http\Controllers\Api\Auth\v1\SocialAuthController;
 use App\Http\Controllers\Api\Auth\v1\CustomerAuthController;
 use App\Http\Controllers\Api\Profile\V1\CustomerProfileController;
@@ -47,6 +48,12 @@ Route::prefix('v1')->group(function () {
             // Thêm route riêng cho setDefault
             Route::post('shipping-address/{shipping_address}/set-default', [ShippingAddressController::class, 'setDefault'])
                 ->name('shipping-address.set-default');
+
+            // Thêm route cho đơn hàng của khách hàng
+            Route::prefix('orders')->group(function () {
+                Route::get('/', [OrderController::class, 'myOrders'])->name('orders.my');
+                Route::get('/{orderCode}', [OrderController::class, 'myOrderDetail'])->name('orders.my.detail');
+            });
         });
 
         //test route

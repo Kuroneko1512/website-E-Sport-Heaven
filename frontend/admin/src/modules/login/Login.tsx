@@ -45,6 +45,7 @@ const Login = () => {
             dispatch(setAuthData({
                 accessToken: response.access_token,
                 refreshToken: response.refresh_token,
+                createdAt: response.created_at,
                 expiresAt: response.expires_at,
                 expiresIn: response.expires_in,
                 permissions: response.permission,
