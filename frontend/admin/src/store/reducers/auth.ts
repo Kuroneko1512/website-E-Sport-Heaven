@@ -10,6 +10,7 @@ export interface AuthState {
   expiresIn: number | null;
   permissions: string[] | null;
   roles: string[] | null;
+  isLoginAdmin: boolean;
 }
 
 const initialState: AuthState = {
@@ -19,7 +20,8 @@ const initialState: AuthState = {
   expiresAt: localStorage.getItem('expires_at') || null,
   expiresIn: localStorage.getItem('expires_in') ? Number(localStorage.getItem('expires_in')) : null,
   permissions: localStorage.getItem('permissions') ? JSON.parse(localStorage.getItem('permissions') || '[]') : null,
-  roles: localStorage.getItem('roles') ? JSON.parse(localStorage.getItem('roles') || '[]') : null
+  roles: localStorage.getItem('roles') ? JSON.parse(localStorage.getItem('roles') || '[]') : null,
+  isLoginAdmin: localStorage.getItem('isLoginAdmin') === 'true'
 };
 
 export const authSlice = createSlice({
@@ -51,6 +53,9 @@ export const authSlice = createSlice({
       state.permissions = payload.permissions;
       state.roles = payload.roles;
       state.currentUser = payload.user;
+      state.isLoginAdmin = !!payload.user;
+      
+      localStorage.setItem('isLoginAdmin', !!payload.user ? 'true' : 'false');
       
       // Lưu vào localStorage
       if (payload.accessToken) {
@@ -97,6 +102,7 @@ export const authSlice = createSlice({
       state.expiresIn = null;
       state.permissions = null;
       state.roles = null;
+      state.isLoginAdmin = false;
       
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
@@ -104,6 +110,7 @@ export const authSlice = createSlice({
       localStorage.removeItem('expires_in');
       localStorage.removeItem('permissions');
       localStorage.removeItem('roles');
+      localStorage.removeItem('isLoginAdmin');
     }
   },
 });
