@@ -39,11 +39,71 @@ import BlogDetail from "./pages/BlogDetail";
 import OrderTracking from "./pages/OrderTracking";
 import useTokenRefresh from "./hooks/useTokenRefresh";
 import GoogleAuthCallback from "./components/elementLogin/GoogleAuthCallback";
+import { useDispatch } from "react-redux";
+import Cookies from "js-cookie";
+import { logout, updateUser } from "./redux/AuthSide";
 
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
+  const dispatch = useDispatch();
 
+  // const user = JSON.parse(Cookies.get("user"));
+
+  const { data: userData, isLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const isLogin = Cookies.get("isLogin") === "true";
+      if (!isLogin) {
+        return null;
+      }
+      try {
+        const res = await instanceAxios.get("/api/v1/customer/profile");
+        return res?.data?.data;
+      } catch (error) {
+        if (error.response?.status === 401) {
+          // Handle unauthorized (token expired/invalid)
+          dispatch(logout());
+        }
+        throw error;
+      }
+    },
+    onError: (error) => {
+      if (error.response?.status !== 401) {
+        message.error("Không thể tải thông tin hồ sơ, vui lòng thử lại.");
+      }
+    },
+    enabled: Cookies.get("isLogin") === "true", // Only run query if logged in
+  });
+
+  console.log("userData", userData);
+
+  useEffect(() => {
+    if (userData?.id) {
+      try {
+        const cookieUser = Cookies.get("user");
+        // const currentUser = cookieUser ? JSON.parse(cookieUser) : {};
+        
+        dispatch(
+          updateUser({
+            // Start with initial empty user structure
+            customerId: userData.id,
+            // avatar: currentUser.avatar || null,
+            // name: currentUser.name || null,
+            // email: currentUser.email || null,
+            // phone: currentUser.phone || null,
+            // // Explicitly include any other fields from userData that should be synced
+            // ...(userData.avatar && { avatar: userData.avatar }),
+            // ...(userData.name && { name: userData.name }),
+            // ...(userData.email && { email: userData.email }),
+            ...(userData.phone && { phone: userData.phone }),
+          })
+        );
+      } catch (error) {
+        console.error("Error updating user data:", error);
+      }
+    }
+  }, [userData]);
   useTokenRefresh();
   return (
     <ThemeProvider>

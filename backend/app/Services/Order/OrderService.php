@@ -114,7 +114,8 @@ class OrderService extends BaseService
      */
     private function prepareOrderData($data)
     {
-        // // Nếu có `customer_id`, xóa thông tin khách hàng
+
+        // Nếu có `customer_id`, xóa thông tin khách hàng
         // if (!empty($data['customer_id'])) {
         //     $data['customer_name'] = null;
         //     $data['customer_email'] = null;
