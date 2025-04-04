@@ -158,7 +158,7 @@ const Cart = () => {
     {
       title: "Hình ảnh",
       dataIndex: "image",
-      render: (image) => <Image width={80} src={`http://127.0.0.1:8000/storage/${image}`} />,
+      render: (image) => <Image width={80} height={100} className="object-cover" src={`http://127.0.0.1:8000/storage/${image}`} />,
     },
     {
       title: "Tên sản phẩm",
