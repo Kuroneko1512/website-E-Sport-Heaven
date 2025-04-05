@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\AdminActivity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\Media\MediaService;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\TokenRepository;
 use Illuminate\Support\Facades\Validator;
@@ -16,6 +17,13 @@ use Laravel\Passport\RefreshTokenRepository;
 
 class AuthService
 {
+    protected $mediaService;
+
+    public function __construct(MediaService $mediaService)
+    {
+        $this->mediaService = $mediaService;
+    }
+
     // Xác thực đăng nhập
     public function attemptLogin($identifier, $password, $accountType)
     {
@@ -125,6 +133,7 @@ class AuthService
                         'phone' => $user->phone,
                         'email' => $user->email,
                         'name' => $user->name,
+                        'avatar' => $user->avatar,
                     ],
                     'role' => $user->roles()->pluck('name'),
                     'permission' => $user->getPermissionsViaRoles()->pluck('name')
@@ -445,7 +454,6 @@ class AuthService
     {
         try {
             DB::beginTransaction();
-
             $user = $request->user();
             if (!$user) {
                 return [
@@ -470,7 +478,7 @@ class AuthService
                 'phone' => 'string|unique:users,phone,' . $user->id,
                 'password' => 'nullable|string|min:8|confirmed',
                 'password_confirmation' => 'nullable|string|min:8',
-                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             ], [
                 'email.email' => 'Email không đúng định dạng',
                 'email.unique' => 'Email đã tồn tại',
@@ -490,41 +498,86 @@ class AuthService
                 ];
             }
 
-            // Lưu giá trị cũ TRƯỚC KHI cập nhật
-            $oldValues = [];
-            $fieldsToTrack = ['name', 'email', 'phone', 'avatar'];
+            // Kiểm tra xem có dữ liệu nào cần cập nhật không
+            $hasChanges = false;
+            $fieldsToTrack = ['name', 'email', 'phone'];
+            $updateData = [];
+
+            // Kiểm tra các trường cơ bản
             foreach ($fieldsToTrack as $field) {
-                if (isset($data[$field])) {
-                    $oldValues[$field] = $user->$field;
+                if (isset($data[$field]) && $data[$field] !== $user->$field) {
+                    $updateData[$field] = $data[$field];
+                    $hasChanges = true;
                 }
             }
 
-            // Đánh dấu nếu có thay đổi mật khẩu
+            // Kiểm tra mật khẩu
             $passwordChanged = isset($data['password']) && !empty($data['password']);
             if ($passwordChanged) {
-                $oldValues['password'] = '[HIDDEN]';
+                $updateData['password'] = Hash::make($data['password']);
+                $hasChanges = true;
             }
 
             // Xử lý avatar nếu có
             if ($request->hasFile('avatar')) {
-                $path = $request->file('avatar')->store('avatars', 'public');
-                $data['avatar'] = $path;
+                try {
+                    // Xóa avatar cũ nếu có
+                    if (!empty($user->avatar) && strpos($user->avatar, 'cloudinary') !== false) {
+                        // Trích xuất public_id từ URL Cloudinary
+                        $publicId = null;
+                        if (preg_match('/\/v\d+\/([^\/]+)\/([^\.]+)/', $user->avatar, $matches)) {
+                            $publicId = $matches[1] . '/' . $matches[2];
+                            $this->mediaService->deleteImage($publicId);
+                        }
+                    }
+                    // Upload avatar mới
+                    $avatarResult = $this->mediaService->processAvatar($request->file('avatar'));
+                    $updateData['avatar'] = $avatarResult['url'];
+                    $hasChanges = true;
+
+                    Log::info('Avatar uploaded successfully', [
+                        'public_id' => $avatarResult['public_id'],
+                        'url' => $avatarResult['url']
+                    ]);
+                } catch (Exception $e) {
+                    Log::error('Error uploading avatar', [
+                        'message' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    // Nếu có lỗi khi upload, không cập nhật avatar
+                }
             }
 
-            // Hash password nếu có thay đổi
+            // Nếu không có thay đổi, trả về thông báo thành công luôn
+            if (!$hasChanges) {
+                DB::commit();
+                return [
+                    'success' => true,
+                    'message' => 'Không có thông tin nào được thay đổi',
+                    'data' => $user,
+                    'code' => 200
+                ];
+            }
+
+            // Lưu giá trị cũ TRƯỚC KHI cập nhật
+            $oldValues = [];
+            foreach (array_keys($updateData) as $field) {
+                if ($field !== 'password') {
+                    $oldValues[$field] = $user->$field;
+                }
+            }
+
             if ($passwordChanged) {
-                $data['password'] = Hash::make($data['password']);
-            } else {
-                unset($data['password']); // Loại bỏ password nếu không thay đổi
+                $oldValues['password'] = '[HIDDEN]';
             }
 
-            // Cập nhật user
-            $user->update($data);
+            // Cập nhật user với dữ liệu đã thay đổi
+            $user->update($updateData);
 
             // Chuẩn bị giá trị mới cho log
             $newValues = [];
-            foreach ($fieldsToTrack as $field) {
-                if (isset($data[$field])) {
+            foreach (array_keys($updateData) as $field) {
+                if ($field !== 'password') {
                     $newValues[$field] = $user->$field;
                 }
             }
@@ -534,14 +587,7 @@ class AuthService
             }
 
             // Xác định các trường đã thay đổi
-            $changedFields = [];
-            foreach ($oldValues as $field => $oldValue) {
-                if ($field === 'password' && $passwordChanged) {
-                    $changedFields[] = 'password';
-                } elseif (isset($newValues[$field]) && $oldValue !== $newValues[$field]) {
-                    $changedFields[] = $field;
-                }
-            }
+            $changedFields = array_keys($updateData);
 
             // Gọi phương thức hook để các lớp con có thể xử lý log
             if (!empty($changedFields)) {
@@ -568,6 +614,7 @@ class AuthService
             ];
         }
     }
+
 
     /**
      * Hook được gọi sau khi cập nhật thông tin người dùng

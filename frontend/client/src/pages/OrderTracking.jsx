@@ -58,7 +58,7 @@ const OrderTracking = () => {
           <div className="h-screen flex justify-center">
             <div className="text-center text-gray-500 flex flex-col items-center">
               <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-500"></div>
-              <p>Đang tải sản phẩm...</p>
+              <p>Đang tải dữ liệu...</p>
             </div>
           </div>
         )}

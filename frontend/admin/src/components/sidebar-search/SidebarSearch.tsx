@@ -109,7 +109,7 @@ export const SidebarSearch = () => {
           <input
             className="form-control form-control-sidebar"
             type="text"
-            placeholder="Search"
+            placeholder="Tìm kiếm"
             aria-label="Search"
             value={searchText}
             onInput={(e: any) => setSearchText(e?.target?.value)}

@@ -69,7 +69,7 @@ const Header = ({ containered, ...rest }: { containered?: boolean } & any) => {
                 className="brand-text font-weight-light"
                 style={{ color: 'rgba(0, 0, 0, 0.9)' }}
               >
-                AdminLTE 3
+                Quản trị viên
               </span>
             </Link>
 
@@ -100,20 +100,20 @@ const Header = ({ containered, ...rest }: { containered?: boolean } & any) => {
           )}
           <li className="nav-item d-none d-sm-inline-block">
             <Link to="/" className="nav-link">
-              {t('header.label.home')}
+              Trang chủ
             </Link>
           </li>
           <li className="nav-item d-none d-sm-inline-block">
             <Link to="/profile" className="nav-link">
-              Profile
+              Hồ sơ
             </Link>
           </li>
          
         </ul>
         <ul className="navbar-nav ml-auto">
-          <MessagesDropdown />
+          {/* <MessagesDropdown />
           <NotificationsDropdown />
-          <LanguagesDropdown />
+          <LanguagesDropdown /> */}
           <UserDropdown />
           <li className="nav-item">
             <button

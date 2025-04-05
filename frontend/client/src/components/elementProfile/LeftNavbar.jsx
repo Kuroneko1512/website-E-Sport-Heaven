@@ -1,7 +1,11 @@
+import Cookies from "js-cookie";
 import React, { useState } from "react"; 
 import { Link } from "react-router-dom";
 
 const LeftNavbar = () => {
+
+  const user = JSON.parse(Cookies.get("user"));
+  
 
   const menuItems = [
     { link: "info", icon: "fa-user", label: "Thông tin cá nhân" },
@@ -21,12 +25,12 @@ const LeftNavbar = () => {
             alt="User profile picture"
             className="h-10 w-10 rounded-full"
             height="40"
-            src="https://storage.googleapis.com/a1aa/image/FAPkl1Y91WlvvxgBiksD13hg1rq0feawzZuI2uVQLDQ.jpg"
+            src={user.avatar}
             width="40"
           />
           <div>
-            <p className="font-semibold text-gray-800 dark:text-gray-200">Hello 👋</p>
-            <p className="font-semibold text-gray-900 dark:text-gray-300">Robert Fox</p>
+            <p className="font-semibold text-gray-800 dark:text-gray-200">Xin chào 👋</p>
+            <p className="font-semibold text-gray-900 dark:text-gray-300">{user.name}</p>
           </div>
         </div>
         <nav>

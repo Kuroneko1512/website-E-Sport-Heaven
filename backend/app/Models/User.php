@@ -30,6 +30,7 @@ class User extends Authenticatable
         'is_active',
         'account_type',
         'avatar',
+        'avatar_public_id',
         'provider',
         'provider_id'
     ];

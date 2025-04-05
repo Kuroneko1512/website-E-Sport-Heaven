@@ -8,6 +8,7 @@ import { getAttributesByIds } from "@app/services/Attribute/ApiAttribute";
 
 
 const VariantProduct = () => {
+
   const { product, setProduct } = useOutletContext<{
     product: any;
     setProduct: React.Dispatch<React.SetStateAction<any>>;
@@ -27,6 +28,7 @@ const VariantProduct = () => {
         console.log("Gọi API với selected_attributes:", product.selected_attributes);
   
         const response = await getAttributesByIds(product.selected_attributes);
+      
         console.log(response);
 
           setAttributes(response);
@@ -64,7 +66,7 @@ const VariantProduct = () => {
     );
 
     const isDuplicate = variants.some(variant =>
-      JSON.stringify(variant.attributes) === newAttributesString
+      JSON.stringify(variant.product_attributes) === newAttributesString
     );
 
     if (isDuplicate) {
@@ -76,7 +78,7 @@ const VariantProduct = () => {
       price: 0,
       stock: 0,
       image: null as string | File | null,
-      attributes: JSON.parse(newAttributesString),
+      product_attributes: JSON.parse(newAttributesString),
     };
 
     setVariants((prev) => [...prev, newVariant]);
@@ -111,6 +113,7 @@ const VariantProduct = () => {
       variants: allVariants,
     }));
     console.log("Đã lưu vào product:", product);
+    alert("Lưu biến thể thành công!");
   };
 
   return (
@@ -165,7 +168,7 @@ const VariantProduct = () => {
                   <td>{variant.price.toLocaleString()}₫</td>
                   <td>{variant.stock}</td>
                   <td>
-                    {variant.attributes
+                    {variant.product_attributes
                       .map((attr: any) => {
                         const attrData = attributes.find((a) => a.id === attr.attribute_id);
                         const attrValue = attrData?.values.find((v: any) => v.id === attr.attribute_value_id);
@@ -226,7 +229,7 @@ const VariantProduct = () => {
         </table>
       </div>
 
-      {/* 🌟 Nút lưu tất cả */}
+   
       <span className="btn btn-success mt-3" onClick={handleSaveAll}>
         Lưu tất cả biến thể
       </span>

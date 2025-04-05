@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 const Dashboard = () => {
   return (
     <div>
-      <ContentHeader title="Dashboard" />
+      <ContentHeader title="Bảng điều khiển" />
 
       <section className="content">
         <div className="container-fluid">

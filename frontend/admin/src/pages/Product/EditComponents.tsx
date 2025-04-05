@@ -3,7 +3,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { getCategory, Category } from "@app/services/Category/ApiCategory";
 import NoImage from "../../../public/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
 
 import Select, { SingleValue } from "react-select";
 import axios from "axios";
@@ -35,7 +35,7 @@ import axios from "axios";
 }
 
 const EditComponents = () => {
-  
+  const { id } = useParams();
   const navigate = useNavigate();
   const [image, setImage] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -158,8 +158,9 @@ const EditComponents = () => {
         if (product.image instanceof File) {
           formData.append("image", product.image);
         }
+        formData.append('_method', 'PUT')
     
-        await axios.post(`http://127.0.0.1:8000/api/products/${id}`, formData, {
+        await axios.post(`http://127.0.0.1:8000/api/products/${id}`, product, {
           headers: { "Content-Type": "multipart/form-data" },
         });
     

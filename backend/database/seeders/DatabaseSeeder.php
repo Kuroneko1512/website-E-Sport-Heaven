@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             // ProductSeeder::class,  // Sau đó mới chạy ProductSeeder
             AdminSeeder::class,
             RoleAndPermissionSeeder::class,
+            CouponSeeder::class,
         ]);
     }
 }

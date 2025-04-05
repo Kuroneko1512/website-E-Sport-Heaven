@@ -75,9 +75,9 @@ const MyOrder = () => {
   return (
     <div className="dark:bg-gray-800 min-h-screen p-6">
       <div className="flex justify-between items-center mb-6">
-        <input className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg p-2 w-1/2" placeholder="Search" type="text" />
+        <input className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg p-2 w-1/2" placeholder="Tìm kiếm" type="text" />
         <button className="bg-black dark:bg-gray-700 text-white dark:text-gray-300 rounded-lg p-2 ml-2 flex items-center">
-          Filter
+          Bộ Lọc
           <i className="fas fa-sliders-h ml-2" />
         </button>
       </div>

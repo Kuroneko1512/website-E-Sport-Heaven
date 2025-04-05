@@ -63,7 +63,7 @@ class OrderController extends Controller
             // Tải lại đơn hàng với các quan hệ để gửi email
             $orderWithRelations = $this->orderService->getOrderById($Order->id);
 
-            NewOrderJob::dispatch($orderWithRelations);// gửi mail với jobs và queue
+            NewOrderJob::dispatch($orderWithRelations); // gửi mail với jobs và queue
 
             DB::commit();
             $this->orderService->updateStockForOrder($Order->order_code);
@@ -203,5 +203,84 @@ class OrderController extends Controller
         $vnp_Url .= "?" . $queryString . "&vnp_SecureHash=" . $vnpSecureHash;
 
         return $vnp_Url;
+    }
+
+    /**
+     * Lấy danh sách đơn hàng của khách hàng đang đăng nhập
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function myOrders(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Người dùng chưa đăng nhập',
+                    'status' => 401
+                ], 401);
+            }
+
+            // Gọi service để lấy dữ liệu
+            $orders = $this->orderService->getOrdersByUser($user);
+
+            return response()->json([
+                'message' => 'Lấy danh sách đơn hàng thành công',
+                'data' => $orders,
+                'status' => 200
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Lỗi khi xử lý dữ liệu',
+                'error' => $th->getMessage(),
+                'status' => 500
+            ], 500);
+        }
+    }
+
+    /**
+     * Lấy chi tiết một đơn hàng của khách hàng đang đăng nhập
+     * 
+     * @param Request $request
+     * @param string $orderCode Mã đơn hàng
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function myOrderDetail(Request $request, $orderCode)
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user || $user->account_type !== 'customer' || !$user->customer) {
+                return response()->json([
+                    'message' => 'Không có quyền truy cập',
+                    'status' => 403
+                ], 403);
+            }
+
+            // Lấy thông tin đơn hàng
+            $order = $this->orderService->getOrderByCode($orderCode);
+
+            // Kiểm tra xem đơn hàng có thuộc về khách hàng này không
+            if ($order->customer_id !== $user->customer->id) {
+                return response()->json([
+                    'message' => 'Không có quyền truy cập đơn hàng này',
+                    'status' => 403
+                ], 403);
+            }
+
+            return response()->json([
+                'message' => 'Lấy thông tin đơn hàng thành công',
+                'data' => $order,
+                'status' => 200
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Lỗi khi xử lý dữ liệu',
+                'error' => $th->getMessage(),
+                'status' => 500
+            ], 500);
+        }
     }
 }

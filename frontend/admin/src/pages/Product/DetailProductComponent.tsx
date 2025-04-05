@@ -50,10 +50,12 @@ const DetailProductComponent = () => {
       try {
         const response = await getProductById(id);
         setProduct(response.data);
+        console.log(response.data);
 
         // Cập nhật ảnh nếu có
         if (response.data.image) {
           setImage(`${API_BASE_URL}${response.data.image}`);
+        console.log(image);
         }
       } catch (error) {
         console.error("Lỗi khi lấy sản phẩm:", error);
