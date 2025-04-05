@@ -242,7 +242,7 @@ export default function Shop() {
     <div className="bg-white text-gray-800 dark:bg-gray-800 dark:text-white m-10">
       {(isLoading2 || isProductsLoading) ? (
         <div>
-          <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
+          <div className="text-center h-screen text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-500 dark:border-gray-400"></div>
                 <p>Đang tải sản phẩm...</p>
               </div>
