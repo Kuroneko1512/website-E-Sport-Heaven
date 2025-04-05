@@ -205,12 +205,6 @@ class OrderController extends Controller
         return $vnp_Url;
     }
 
-    /**
-     * Lấy danh sách đơn hàng của khách hàng đang đăng nhập
-     * 
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function myOrders(Request $request)
     {
         try {
@@ -223,8 +217,17 @@ class OrderController extends Controller
                 ], 401);
             }
 
-            // Gọi service để lấy dữ liệu
-            $orders = $this->orderService->getOrdersByUser($user);
+            // Lấy các tham số tìm kiếm từ request
+            $searchParams = [
+                'order_code' => $request->input('order_code'),
+                'product_name' => $request->input('product_name')
+            ];
+
+            // Lấy số lượng kết quả mỗi trang
+            $perPage = $request->input('per_page', 10);
+
+            // Gọi service để lấy dữ liệu với tham số tìm kiếm và phân trang
+            $orders = $this->orderService->getOrdersByUser($user, $searchParams, $perPage);
 
             return response()->json([
                 'message' => 'Lấy danh sách đơn hàng thành công',
