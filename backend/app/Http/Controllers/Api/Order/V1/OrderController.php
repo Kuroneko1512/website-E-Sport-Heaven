@@ -146,7 +146,7 @@ class OrderController extends Controller
         $vnp_TxnRef = $data['order_code']; // Transaction reference (unique per order)
         $vnp_OrderInfo = 'Thanh toán đơn hàng test'; // Order information
         $vnp_OrderType = 'other';
-        $vnp_Amount = 121029 * 100; // Amount in VND (VNPAY expects amount in cents)
+        $vnp_Amount = $data['total_amount']; // Amount in VND (VNPAY expects amount in cents)
         $vnp_Locale = 'vn'; // Locale
 
         $vnp_IpAddr = $ip; // Use Laravel's request to get IP

@@ -249,13 +249,13 @@ const Store = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
+    // if (!validateForm()) {
     
-      window.scrollTo(0, 0);
-      return;
-    }else{
-      console.log("hi",product);
-    }
+    //   window.scrollTo(0, 0);
+    //   return;
+    // }else{
+    //   console.log("hi",product);
+    // }
 
     try {
    
