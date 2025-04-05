@@ -110,8 +110,8 @@ function App() {
   useTokenRefresh();
   return (
     <ThemeProvider>
-      <SwitchTransition>
-        <CSSTransition key={location.pathname} classNames="page" timeout={300}>
+      {/* <SwitchTransition>
+        <CSSTransition key={location.pathname} classNames="page" timeout={300}> */}
           <Routes location={location}>
             <Route path="/login" element={<Login />} />
             {/* callback google */}
@@ -158,8 +158,8 @@ function App() {
               <Route path="thankyou" element={<ThankYou />}></Route>
             </Route>
           </Routes>
-        </CSSTransition>
-      </SwitchTransition>
+        {/* </CSSTransition>
+      </SwitchTransition> */}
     </ThemeProvider>
   );
 }
