@@ -34,7 +34,6 @@ import VariantProduct from "./pages/Product/VariantProduct";
 import Category from "./pages/Category/Category";
 import AttributePage from "@pages/Attribute/Attribute";
 import { setCurrentUser, setAuthData, clearAuth } from "./store/reducers/auth";
-import { c } from "vite/dist/node/types.d-aGj9QkWt";
 
 const { VITE_NODE_ENV } = import.meta.env;
 
@@ -161,11 +160,11 @@ const App = () => {
             <Route path="Order" element={<Order />} />
             <Route path="Order/Details/:id" element={<DetailOrder />} />
 
-
-
-
-
-            {/*Route Category*/}
+            <Route path="Coupon" element={<Coupon />} />
+            <Route path="add-coupon" element={<AddCoupon />} />
+            <Route path="edit-coupon/:id" element={<EditCoupon />} />
+            <Route path="detail-coupon/:id" element={<DetailCoupon />} />
+          
            
           </Route>
         </Route>
@@ -183,47 +182,7 @@ const App = () => {
         pauseOnHover
       />
     </>
-    // <>
-    //   <Routes>
-    //     <Route path="/login" element={<PublicRoute />}>
-    //       <Route path="/login" element={<Login />} />
-    //     </Route>
-    //     <Route path="/register" element={<PublicRoute />}>
-    //       <Route path="/register" element={<Register />} />
-    //     </Route>
-    //     <Route path="/forgot-password" element={<PublicRoute />}>
-    //       <Route path="/forgot-password" element={<ForgetPassword />} />
-    //     </Route>
-    //     <Route path="/recover-password" element={<PublicRoute />}>
-    //       <Route path="/recover-password" element={<RecoverPassword />} />
-    //     </Route>
-    //     <Route path="/" element={<PrivateRoute />}>
-    //       {/* route của thanh navbar */}
-    //       <Route path="/" element={<Main />}>
-    //         <Route path="/sub-menu-2" element={<Blank />} />
-    //         <Route path="/sub-menu-1" element={<SubMenu />} />
-    //         <Route path="/blank" element={<Blank />} />
-    //         <Route path="/profile" element={<Profile />} />
-    //         <Route path="/product" element={<Product />} />
-    //         <Route path="/" element={<Dashboard />} />
-
-    //         {/* Route của sản phẩm  */}
-    //         <Route path="/add-product" element={<Store />} />
-    //       </Route>
-    //     </Route>
-    //   </Routes>
-
-    //   <ToastContainer
-    //     autoClose={3000}
-    //     draggable={false}
-    //     position="top-right"
-    //     hideProgressBar={false}
-    //     newestOnTop
-    //     closeOnClick
-    //     rtl={false}
-    //     pauseOnHover
-    //   />
-    // </>
+  
   );
 };
 

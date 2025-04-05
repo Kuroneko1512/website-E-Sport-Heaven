@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent } from "react";
 import { useOutletContext } from "react-router-dom";
 
 interface Product {
@@ -29,12 +29,7 @@ interface ContextType {
 }
 
 const ValueProduct = () => {
-  // Tạo state local để tránh lỗi khi product từ context là undefined
-  const [localPrice, setLocalPrice] = useState<number>(0);
-  const [localStock, setLocalStock] = useState<number>(1);
-  const [localDiscount, setLocalDiscount] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { product, setProduct, errors, setErrors } = useOutletContext<ContextType>();
 
   // Khai báo context bên ngoài các hàm và hook
   let contextValue: ContextType | null = null;
@@ -45,69 +40,21 @@ const ValueProduct = () => {
     setError("Không thể tải dữ liệu sản phẩm. Vui lòng thử lại!");
   }
 
-  // Hook useEffect luôn được gọi ở cùng một cấp, không được đặt trong điều kiện
-  useEffect(() => {
-    if (contextValue && contextValue.product) {
-      try {
-        setLocalPrice(contextValue.product.price || 0);
-        setLocalStock(contextValue.product.stock || 1);
-        setLocalDiscount(contextValue.product.discount_percent || "");
-      } catch (err) {
-        console.error("Lỗi khi đọc dữ liệu sản phẩm:", err);
-        setError("Không thể đọc dữ liệu sản phẩm.");
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      setIsLoading(false);
-    }
-  }, [contextValue]);
-
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    if (!contextValue) return;
-    
     const { name, value } = e.target;
-    
-    // Cập nhật state local
-    if (name === "price") {
-      setLocalPrice(Number(value));
-    } else if (name === "stock") {
-      setLocalStock(Number(value));
-    } else if (name === "discount_percent") {
-      setLocalDiscount(value);
-    }
-    
-    
-    try {
-      contextValue.setProduct((prev) => ({
-        ...prev,
-        [name]: name === "stock" || name === "price" ? Number(value) : value,
-      }));
+    setProduct((prev) => ({
+      ...prev,
+      [name]: name === "stock" || name === "price" ? Number(value) : value,
+    }));
 
-   
-      if (contextValue.errors && contextValue.errors[name as keyof ValidationErrors]) {
-        contextValue.setErrors(prev => ({
-          ...prev,
-          [name]: undefined
-        }));
-      }
-    } catch (err) {
-      console.error("Lỗi khi cập nhật dữ liệu:", err);
-      setError("Không thể cập nhật dữ liệu sản phẩm.");
+    // Xóa lỗi khi người dùng chỉnh sửa trường
+    if (errors[name as keyof ValidationErrors]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
     }
   };
-
-  if (error) {
-    return (
-      <div className="alert alert-danger">
-        <p>{error}</p>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return <p>Đang tải dữ liệu sản phẩm...</p>;
-  }
 
   return (
     <div className="card card-default">
@@ -121,13 +68,13 @@ const ValueProduct = () => {
               <label>Giá:</label>
               <input 
                 type="number" 
-                className={`form-control ${contextValue?.errors?.price ? 'is-invalid' : ''}`}
+                className="form-control"
                 name="price" 
-                value={localPrice} 
+                value={product.price} 
                 onChange={handleChange}
                 min="0" 
               />
-              {contextValue?.errors?.price && <div className="invalid-feedback">{contextValue.errors.price}</div>}
+              {errors.price && <div className="invalid-feedback">{errors.price}</div>}
             </div>
           </div>
           <div className="col-md-6">
@@ -135,13 +82,13 @@ const ValueProduct = () => {
               <label>Số lượng:</label>
               <input 
                 type="number" 
-                className={`form-control ${contextValue?.errors?.stock ? 'is-invalid' : ''}`}
+                className="form-control"
                 name="stock" 
-                value={localStock} 
+                value={product.stock} 
                 onChange={handleChange}
                 min="1" 
               />
-              {contextValue?.errors?.stock && <div className="invalid-feedback">{contextValue.errors.stock}</div>}
+              {errors.stock && <div className="invalid-feedback">{errors.stock}</div>}
             </div>
           </div>
           <div className="col-md-12">
@@ -150,7 +97,7 @@ const ValueProduct = () => {
               <select 
                 name="discount_percent" 
                 className="form-control"
-                value={localDiscount} 
+                value={product.discount_percent} 
                 onChange={handleChange}
               >
                 <option value="">Chọn</option>
