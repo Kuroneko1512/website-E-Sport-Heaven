@@ -87,7 +87,6 @@ function App() {
       try {
         const cookieUser = Cookies.get("user");
         const currentUser = cookieUser ? JSON.parse(cookieUser) : {};
-
         dispatch(
           updateUser({
             ...currentUser,
