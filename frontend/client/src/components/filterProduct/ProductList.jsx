@@ -1,30 +1,25 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import FomatVND from "../../utils/FomatVND";
 
 const ProductList = ({ products }) => {
-  const itemsPerPage = 12; // Số sản phẩm mỗi trang
-  const [currentPage, setCurrentPage] = useState(1);
 
-  // Tính toán tổng số trang
-  const totalPages = Math.ceil(products.length / itemsPerPage);
+  console.log("products", products);
 
-  // Xác định phạm vi sản phẩm hiển thị
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const selectedProducts = products.slice(startIndex, startIndex + itemsPerPage);
   return (
     <div>
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {selectedProducts.map((item) => (
+        {products.map((item) => (
           <div
           key={item.id}
-          className="group bg-white shadow-md rounded-lg overflow-hidden hover:shadow-xl duration-300 transition-transform transform hover:scale-105"
+          className="group bg-white shadow-md rounded-lg overflow-hidden hover:shadow-xl duration-300 transition-transform transform hover:scale-105 h-[34rem]"
         >
           {/* Image section */}
           <div className="relative h-3/4">
             <img
               alt={item.name}
-              className="w-full h-[500px] object-cover"
-              src={item.image}
+              className="w-full h-full object-cover"
+              src={`http://127.0.0.1:8000/storage/${item.image || item.variants[0].image}`}
             />
             
             {/* Overlay hover */}
@@ -36,14 +31,14 @@ const ProductList = ({ products }) => {
           {/* Text section */}
         <Link to={`/shop/product-detail/${item.id}`}>
           <div className="p-4">
-            <h2 className="text-lg font-bold">{item.brand}</h2>
-            <p className="text-gray-600">{item.name}</p>
+            <h2 className="text-lg font-bold">{item.name}</h2>
+            {/* <p className="text-gray-600">{item.name}</p> */}
             <div className="flex items-center mt-2">
               <span className="text-lg font-bold text-black">
-                ${item.price}
+                {FomatVND((item.price - item.price * 0.1) || item.variants[0].price - item.variants[0].price * 0.1)}
               </span>
               <span className="text-gray-400 line-through ml-2">
-                ${item.originalPrice}
+                {FomatVND(item.price || item.variants[0].price)}
               </span>
             </div>
           </div>
