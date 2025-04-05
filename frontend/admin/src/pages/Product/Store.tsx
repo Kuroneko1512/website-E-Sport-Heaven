@@ -3,51 +3,57 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { getCategory, Category } from "@app/services/Category/ApiCategory";
 // import NoImage from "../../../public/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
-import { Link, Outlet, useNavigate } from "react-router-dom";
-import { createProduct } from "@app/services/Product/Api";
+import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
+import {
+  createProduct,
+  getProductById,
+  updateProduct,
+  api4,
+} from "@app/services/Product/Api";
 import Select, { SingleValue } from "react-select";
- interface AttributeSelection {
+
+interface AttributeSelection {
   attribute_id: number;
   attribute_value_id: number;
 }
 
- interface Variant {
+interface Variant {
   price: number;
   stock: number;
   image?: File | string | null;
   attributes: AttributeSelection[];
 }
 
- interface Product {
-  id?: number;
-  name: string;
-  description?: string;
-  price: number;
+// Định nghĩa interface cho errors
+interface ValidationErrors {
+  name?: string;
+  price?: string;
   discount_percent?: string;
-  product_type: "simple" | "variable";
-  status: "active" | "inactive";
-  category_id: string;
-  stock: number;
-  image?: File | null;
-  selected_attributes: AttributeSelection[];  // 🟢 Định nghĩa cụ thể
-  variants: Variant[];  // 🟢 Định nghĩa cụ thể
+  category_id?: string;
+  stock?: string;
+  description?: string;
+  image?: string;
 }
 
-const NoImage = "/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
+const NoImage =
+  "/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
 
 const Store = () => {
-  
   const navigate = useNavigate();
+  const { id: paramId } = useParams(); // Lấy `id` từ URL
+  const [id, setId] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
- 
-  const [product, setProduct] = useState<Product>({
+  const [isEdit, setIsEdit] = useState(false);
+  const [errors, setErrors] = useState<ValidationErrors>({});
+
+  const [product, setProduct] = useState<api4>({
     name: "",
     price: 0,
     discount_percent: "",
     product_type: "simple",
     status: "active",
-    category_id: "",  
+    category_id: "",
     stock: 1,
     image: null as File | null,
     description: "",
@@ -64,27 +70,63 @@ const Store = () => {
     label: string;
   } | null>(ProductOptions[0]);
 
+ 
+  const validateForm = (): boolean => {
+    const newErrors: ValidationErrors = {};
+    
+  
+    if (!product.name.trim()) {
+      newErrors.name = "Tên sản phẩm không được để trống";
+    } else if (product.name.length > 255) {
+      newErrors.name = "Tên sản phẩm không được vượt quá 255 ký tự";
+    }
+    
+    
+    if (product.price <= 1) {
+      newErrors.price = "Giá sản phẩm phải lớn hơn hoặc bằng 1";
+    }
+    
+   
+    
+   
+    if (!product.category_id) {
+      newErrors.category_id = "Vui lòng chọn danh mục sản phẩm";
+    }
+    
+    
+  
+    
+    if (product.product_type === "simple") {
+      if (product.price <= 1) {
+        newErrors.price = "Giá sản phẩm phải lớn hơn  hoặc bằng   1";
+      }
+  
+      if (product.stock <= 1) {
+        newErrors.stock = "Số lượng trong kho phải lớn  hơn hoặc bằng  1";
+      }
+    }
+ 
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleOptionChange = (
     newValue: SingleValue<{ value: string; label: string }>
   ) => {
     if (!newValue) return; // Kiểm tra nếu null thì không làm gì
     setSelectedProduct(newValue);
-  
-   
-  
     if (newValue.value === "simple") {
-      let confirm =  window.confirm('Bạn có chắc muốn chuyển không');
-      if(confirm){
+      let confirm = window.confirm("Bạn có chắc muốn chuyển không");
+      if (confirm) {
         product.selected_attributes = [];
         product.variants = [];
-      }else{
+      } else {
         newValue.value = "variable";
       }
-     
+
       navigate("/add-product/ValueProduct");
-    }
-     else {
+    } else {
       navigate("/add-product/Attribute");
     }
     setProduct((prev) => ({
@@ -97,95 +139,173 @@ const Store = () => {
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-
+    console.log(product);
     setProduct((prev) => ({
       ...prev,
       [name]: name === "price" || name === "stock" ? Number(value) : value,
     }));
-
+    
+    
+    if (errors[name as keyof ValidationErrors]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
   };
 
-  // Xử lý thay đổi mô tả (ReactQuill)
+  
   const handleDescriptionChange = (content: string) => {
     setProduct((prev) => ({
       ...prev,
       description: content,
     }));
+    
+    
+  
   };
 
-  // Xử lý upload ảnh
+
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setImage(URL.createObjectURL(file)); // Hiển thị ảnh xem trước
+      setImage(URL.createObjectURL(file)); 
 
-      // Cập nhật product.image với file để gửi API
+      
       setProduct((prev) => ({
         ...prev,
-        image: file, // Lưu file để gửi lên server
+        image: file, 
       }));
+      
+      
     }
   };
 
   // Gọi API lấy danh mục
   const fetchData = async () => {
-    
     try {
       const response = await getCategory();
       setCategories(response.data.data.data);
+      console.log(response.data.data.data);
     } catch (error) {
       console.error("Lỗi khi lấy danh mục:", error);
     }
- 
   };
 
   useEffect(() => {
+    if (paramId) {
+      setId(paramId); // Lưu `id` vào state khi `id` có trong URL
+    }
+    const fetchProduct = async () => {
+    
+      if (id) {
+        try {
+          const productData = await getProductById(Number(id));
+
+          // Chuyển đổi selected_attributes thành mảng dạng [[2], [3]]
+          const selected_attributes: number[] = [];
+
+          productData.data.selected_attributes.forEach((attr) => {
+            selected_attributes.push(attr.attribute_id);
+            console.log(selected_attributes);
+          });
+
+          setProduct({
+            ...productData.data,
+            selected_attributes: selected_attributes,
+            variants: productData.data.variants || [],
+          });
+          setIsEdit(true);
+          if (productData.data.image) {
+            setImage(`http://127.0.0.1:8000/storage/${productData.data.image}`);
+          }
+          // Cập nhật selectedProduct dựa trên product_type
+          setSelectedProduct(
+            ProductOptions.find(
+              (option) => option.value === productData.data.product_type
+            ) || ProductOptions[0]
+          );
+          if(productData.data.product_type === "variable"){
+            navigate("/add-product/Attribute");
+          }else{
+            navigate("/add-product/ValueProduct");
+          }
+        } catch (error) {
+          console.error("Lỗi khi lấy thông tin sản phẩm:", error);
+        }
+      }
+    };
+
+    fetchProduct();
     fetchData();
-  }, []);
+  }, [id]);
+
+  const ProductOptionsDefault =
+  product?.product_type === ProductOptions[1].value
+    ? ProductOptions[1]
+    : ProductOptions[0];
+ 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+    
+    // if (!validateForm()) {
+    
+    //   window.scrollTo(0, 0);
+    //   return;
+    // }else{
+    //   console.log("hi",product);
+    // }
+
     try {
-     
-      // Gửi API tạo sản phẩm
-      const newProduct = await createProduct(product);
-      console.log(newProduct);
-      alert("Tạo sản phẩm thành công!");
+   
+      if (isEdit && id) {
+     await updateProduct(Number(id), product);
+    
+        alert("Cập nhật sản phẩm thành công!");
+      } else {
+        await createProduct(product);
+        alert("Tạo sản phẩm thành công!");
+      }
       navigate("/product");
     } catch (error) {
-      alert("Lỗi khi tạo sản phẩm!");
+      alert(isEdit ? "Lỗi khi cập nhật sản phẩm!" : "Lỗi khi tạo sản phẩm!");
     }
-  
-  
   };
-  
 
   return (
     <div className="container-fluid bg-white p-4">
-      <h3>ADD PRODUCT</h3>
+      <h3>{isEdit ? "EDIT PRODUCT" : "ADD PRODUCT"}</h3>
       <form onSubmit={handleSubmit}>
         <div className="row align-items-stretch">
           {/* Cột nhập thông tin sản phẩm */}
           <div className="col-8 bg-body-secondary p-3">
-            <input
-              type="text"
-              className="w-100 form-control my-2"
-              placeholder="Name"
-              name="name"
-              value={product.name}
-              onChange={handleChange}
-            />
-            <ReactQuill
-              theme="snow"
-              value={product.description}
-              style={{ height: "300px", marginBottom: "20px" }}
-              onChange={handleDescriptionChange}
-            />
+            <div className="form-group">
+              <input
+                type="text"
+                className={`w-100 form-control my-2 ${errors.name ? 'is-invalid' : ''}`}
+                placeholder="Name"
+                name="name"
+                value={product.name}
+                onChange={handleChange}
+              />
+              {errors.name && <div className="invalid-feedback">{errors.name}</div>}
+            </div>
+            
+            <div className="form-group">
+              <ReactQuill
+                theme="snow"
+                value={product.description}
+                style={{ height: "300px", marginBottom: "20px" }}
+                onChange={handleDescriptionChange}
+              />
+            
+            </div>
+            
             <div className="Choose mt-5">
               <Select
                 options={ProductOptions}
-                defaultValue={ProductOptions[0]}
+                value={selectedProduct}
                 onChange={handleOptionChange}
               />
             </div>
@@ -199,12 +319,21 @@ const Store = () => {
                         <li key={index} className="my-2">
                           <Link to={item} className="text-black mx-4">
                             {item}
-                          </Link>
+                          </Link> 
                         </li>
                       ))
-                    : [ "Attribute","Variant"].map((item, index) => (
+                    : ["Attribute", "Variant"].map((item, index) => (
                         <li key={index} className="my-2">
-                          <Link to={item}  className={`text-black mx-4 `} style={item != 'Attribute' && product.selected_attributes.length === 0 ? { display: 'none' } : {}}>
+                          <Link
+                            to={item}
+                            className={`text-black mx-4 `}
+                            style={
+                              item != "Attribute" &&
+                              product.selected_attributes.length === 0
+                                ? { display: "none" }
+                                : {}
+                            }
+                          >
                             {item}
                           </Link>
                         </li>
@@ -212,7 +341,7 @@ const Store = () => {
                 </ul>
               </div>
               <div className="col-9 p-3 bg-light border">
-                <Outlet context={{ product, setProduct }}  />
+                <Outlet context={{ product, setProduct, errors, setErrors }} />
               </div>
             </div>
           </div>
@@ -238,7 +367,7 @@ const Store = () => {
             />
             <select
               name="category_id"
-              className="form-control mt-2"
+              className={`form-control mt-2 ${errors.category_id ? 'is-invalid' : ''}`}
               value={product.category_id}
               onChange={handleChange}
             >
@@ -249,8 +378,10 @@ const Store = () => {
                 </option>
               ))}
             </select>
+            {errors.category_id && <div className="invalid-feedback">{errors.category_id}</div>}
+            
             <button type="submit" className="btn btn-primary my-3">
-              Create
+              {isEdit ? "Update" : "Create"}
             </button>
           </div>
         </div>

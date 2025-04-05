@@ -14,6 +14,17 @@ interface AttributeOption {
   label: string;
 }
 
+// Định nghĩa kiểu dữ liệu cho errors
+interface ValidationErrors {
+  name?: string;
+  price?: string;
+  discount_percent?: string;
+  category_id?: string;
+  stock?: string;
+  description?: string;
+  image?: string;
+}
+
 // Hàm lấy thuộc tính từ API
 const fetchAttributes = async (): Promise<AttributeOption[]> => {
 
@@ -30,9 +41,11 @@ const fetchAttributes = async (): Promise<AttributeOption[]> => {
 };
 
 const AttributeProduct = () => {
-  const { product, setProduct } = useOutletContext<{
+  const { product, setProduct, errors, setErrors } = useOutletContext<{
     product: any;
     setProduct: React.Dispatch<React.SetStateAction<any>>;
+    errors: ValidationErrors;
+    setErrors: React.Dispatch<React.SetStateAction<ValidationErrors>>;
   }>();
 
   // State để lưu danh sách thuộc tính từ API
