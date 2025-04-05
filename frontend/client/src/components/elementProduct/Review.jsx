@@ -2,7 +2,7 @@ import { Button, Form, Input, Rate, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import React, { useState } from 'react';
 import { Link, Outlet, useParams } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import instanceAxios from '../../config/db';
 
 const StarRating = ({ rating }) => {
@@ -19,7 +19,7 @@ const StarRating = ({ rating }) => {
 const Review = () => {
   const { id } = useParams();
 
-  const { data: datareviews } = useQuery({
+  let { data: datareviews } = useQuery({
     queryKey: ["datareviews", id],
     queryFn: async () => {
       const res = await instanceAxios.get(`/api/v1/review-by-product/${id}`);
@@ -27,14 +27,20 @@ const Review = () => {
     },
   });
 
+  const queryClient = useQueryClient();
+
+
   const [form] = Form.useForm();
   const onFinish = async (value) => {
     console.log("Submitted Review:", value);
     value = { product_id: id, ...value };
     await instanceAxios.post("/api/v1/review", value);
+    
+    const updatedReviews = await instanceAxios.get(`/api/v1/review-by-product/${id}`);
+    queryClient.setQueryData(["datareviews", id], updatedReviews?.data);
 
     form.resetFields();
-    location.reload();
+    
   };
 
   function DateTimeFormat( dateTime ) {

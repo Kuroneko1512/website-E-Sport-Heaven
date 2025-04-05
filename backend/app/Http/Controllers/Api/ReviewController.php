@@ -64,8 +64,11 @@ class ReviewController extends Controller
 
              // Validate và lấy dữ liệu từ request
             $data = $request->validated();
+
+            // lấy user_id của user đang đăng nhập
+            $data['user_id'] = Auth::id() ?? 1;
+
              // Gọi service để tạo mới Đánh giá
-            $data['user_id'] = $request->user()->id;
             $review = $this->reviewService->create($data);
 
             return response()->json([
