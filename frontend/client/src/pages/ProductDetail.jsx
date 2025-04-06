@@ -124,18 +124,36 @@ const ProductDetail = () => {
 
   // Xử lý biến thể khi người dùng chọn
   const handleAttributeSelect = (attributeId, valueId) => {
-    const updatedAttributes = { ...selectedAttributes, [attributeId]: valueId };
+    // Check if this value is already selected
+    const isAlreadySelected = selectedAttributes[attributeId] === valueId;
+    
+    // Create updated attributes
+    const updatedAttributes = isAlreadySelected
+      ? { ...selectedAttributes }
+      : { ...selectedAttributes, [attributeId]: valueId };
+    
+    // If deselecting, remove the attribute
+    if (isAlreadySelected) {
+      delete updatedAttributes[attributeId];
+    }
+
     setSelectedAttributes(updatedAttributes);
 
-    const matchingVariant = variants.find((variant) =>
-      variant.attributes.every(
-        (attr) => updatedAttributes[attr.attribute_id] === attr.value_id
-      )
-    );
+    // Find matching variant only if all attributes are selected
+    if (Object.keys(updatedAttributes).length === attributes.length) {
+      const matchingVariant = variants.find((variant) =>
+        variant.attributes.every(
+          (attr) => updatedAttributes[attr.attribute_id] === attr.value_id
+        )
+      );
 
-    if (matchingVariant) {
-      setSelectedVariant(matchingVariant);
-      setDisplayImage(matchingVariant.image || product?.image);
+      if (matchingVariant) {
+        setSelectedVariant(matchingVariant);
+        setDisplayImage(matchingVariant.image || product?.image);
+      }
+    } else {
+      // If not all attributes selected, reset variant
+      setSelectedVariant(null);
     }
 
     updateValidOptions(updatedAttributes);
@@ -296,23 +314,37 @@ const ProductDetail = () => {
                     </div>
                   ) : (
                     <div className="flex items-center mb-4">
-                      {parseFloat(product?.discount?.percent) > 0 ? (
+                      {selectedVariant || isAllAttributesSelected ? (
+                        parseFloat(product?.discount?.percent) > 0 ? (
+                          <div>
+                            <span className="text-xl font-bold text-gray-800">
+                              {FomatVND(
+                                parseFloat(selectedVariant?.price || variants[0]?.price) -
+                                  (parseFloat(selectedVariant?.price || variants[0]?.price) *
+                                    parseFloat(product?.discount?.percent)) /
+                                    100
+                              )}
+                            </span>
+                            <span className="text-lg line-through text-gray-500 ml-4">
+                              {FomatVND(selectedVariant?.price || variants[0]?.price)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xl font-bold text-gray-800">
+                            {FomatVND(selectedVariant?.price || variants[0]?.price)}
+                          </span>
+                        )
+                      ) : (
                         <div>
                           <span className="text-xl font-bold text-gray-800">
-                            {FomatVND(
-                              (parseFloat(selectedVariant?.price) *
-                                parseFloat(product?.discount?.percent)) /
-                                100
-                            )}
+                            {FomatVND(variants[0]?.price || product?.price)}
                           </span>
-                          <span className="text-lg line-through text-gray-500 ml-4 ">
-                            {FomatVND(selectedVariant?.price)}
-                          </span>
+                          {hasVariants && !isAllAttributesSelected && (
+                            <span className="text-sm text-gray-500 ml-2">
+                              (Chọn đầy đủ thuộc tính)
+                            </span>
+                          )}
                         </div>
-                      ) : (
-                        <span className="text-xl font-bold text-gray-800">
-                          {FomatVND(selectedVariant?.price)}
-                        </span>
                       )}
                     </div>
                   )}
@@ -377,9 +409,9 @@ const ProductDetail = () => {
                   {/* Hiển thị số lượng tồn kho của biến thể */}
                   <p className="text-gray-600 mb-2">
                     <strong>Kho:</strong>{" "}
-                    {product?.stock > 0
-                      ? product?.stock
-                      : selectedVariant?.stock || 0}{" "}
+                    {hasVariants && !isAllAttributesSelected
+                      ? variants[0]?.stock || 0
+                      : selectedVariant?.stock || product?.stock || 0}{" "}
                   </p>
 
                   <div className="flex space-x-4 mt-8">

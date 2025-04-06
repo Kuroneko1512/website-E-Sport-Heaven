@@ -17,6 +17,7 @@ import {
 } from "@ant-design/icons";
 import { logout } from "../../redux/AuthSide";
 import LoginAlert from "../popupmodal/LoginAlert";
+import Cookies from "js-cookie";
 
 const RightNavbar = () => {
   const isLogin = useSelector((state) => state.auth.isLogin, shallowEqual);
@@ -33,6 +34,40 @@ const RightNavbar = () => {
   const [miniCartData, setMiniCartData] = useState(
     JSON.parse(localStorage.getItem("cartItems")) || []
   );
+
+  const user = useSelector((state) => state.auth.user, shallowEqual);
+  const [nameU, setNameU] = useState(null);
+
+  useEffect(() => {
+    if (!isLogin) {
+      setNameU(null);
+      return;
+    }
+    
+    // First try to get from Redux store
+    if (user && user.name) {
+      setNameU({ user });
+      return;
+    }
+
+    // Fallback to cookies if Redux state not available
+    try {
+      const userRaw = Cookies.get("user");
+      if (!userRaw || userRaw === "undefined") {
+        setNameU(null);
+        return;
+      }
+      const cookieUser = JSON.parse(userRaw);
+      if (cookieUser && typeof cookieUser === "object") {
+        setNameU({ user: cookieUser });
+      } else {
+        setNameU(null);
+      }
+    } catch (err) {
+      console.warn("Invalid user cookie:", err);
+      setNameU(null);
+    }
+  }, [isLogin, user]);
 
   // Click outside search box to close
   useEffect(() => {
@@ -213,7 +248,16 @@ const RightNavbar = () => {
           getPopupContainer={(triggerNode) => triggerNode.parentNode}
           overlayClassName="dark:bg-gray-800 dark:text-white"
         >
-          <UserOutlined className="text-2xl cursor-pointer dark:text-white" />
+          <div className="flex items-center gap-2">
+            <UserOutlined className="text-2xl cursor-pointer dark:text-white" />
+            <span>
+              {nameU?.user?.name 
+                ? nameU?.user.name.length > 10 
+                  ? `${nameU?.user.name.substring(0, 8)}...`
+                  : nameU?.user.name
+                : ''}
+            </span>
+          </div>
         </Dropdown>
       )}
 
