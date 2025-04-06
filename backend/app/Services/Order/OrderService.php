@@ -39,7 +39,7 @@ class OrderService extends BaseService
         return $this->model->with([
             'orderItems.product',
             'orderItems.productVariant'
-        ])->get();
+        ])->orderBy('id', 'desc')->get(); ;
     }
 
 
@@ -92,7 +92,7 @@ class OrderService extends BaseService
     public function updatePaymentStatus($orderCode, $status)
     {
         // Tìm đơn hàng theo order_code và cập nhật trạng thái thanh toán
-        return $this->model->where('order_code', $orderCode)->update(['payment-status' => $status]);
+        return $this->model->where('order_code', $orderCode)->update(['payment_status' => $status]);
     }
 
 
