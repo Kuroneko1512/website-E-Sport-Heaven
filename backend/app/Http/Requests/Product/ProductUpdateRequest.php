@@ -107,8 +107,7 @@ class ProductUpdateRequest extends FormRequest
             // Kiểm tra ảnh của biến thể
             'variants.*.image' => [
                 'nullable',
-                'image',
-                'mimes:jpeg,png,jpg,gif,svg',
+                
                 'max:5120' // Giới hạn 5MB
             ],
             'variants.*.id' => ['nullable', 'exists:product_variants,id'],

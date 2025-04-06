@@ -39,7 +39,7 @@ class OrderService extends BaseService
         return $this->model->with([
             'orderItems.product',
             'orderItems.productVariant'
-        ])->get();
+        ])->orderBy('id', 'desc')->get(); ;
     }
 
 
@@ -92,7 +92,7 @@ class OrderService extends BaseService
     public function updatePaymentStatus($orderCode, $status)
     {
         // Tìm đơn hàng theo order_code và cập nhật trạng thái thanh toán
-        return $this->model->where('order_code', $orderCode)->update(['payment-status' => $status]);
+        return $this->model->where('order_code', $orderCode)->update(['payment_status' => $status]);
     }
 
 
@@ -216,21 +216,37 @@ class OrderService extends BaseService
     }
 
     /**
-     * Lấy danh sách đơn hàng của một khách hàng
+     * Lấy danh sách đơn hàng của một khách hàng với tìm kiếm và phân trang
      * 
      * @param int $customerId ID của khách hàng
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @param array $searchParams Các tham số tìm kiếm
+     * @param int $perPage Số lượng kết quả mỗi trang
+     * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    public function getOrdersByCustomerId($customerId)
+    public function getOrdersByCustomerId($customerId, $searchParams = [], $perPage = 10)
     {
-        return $this->model->with([
+        $query = $this->model->with([
             'orderItems.product',
             'orderItems.productVariant.productAttributes.attribute',
             'orderItems.productVariant.productAttributes.attributeValue'
         ])
-            ->where('customer_id', $customerId)
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->where('customer_id', $customerId);
+
+        // Tìm kiếm theo mã đơn hàng
+        if (!empty($searchParams['order_code'])) {
+            $query->where('order_code', 'like', '%' . $searchParams['order_code'] . '%');
+        }
+
+        // Tìm kiếm theo tên sản phẩm
+        if (!empty($searchParams['product_name'])) {
+            $productName = $searchParams['product_name'];
+            $query->whereHas('orderItems.product', function ($q) use ($productName) {
+                $q->where('name', 'like', '%' . $productName . '%');
+            });
+        }
+
+        // Sắp xếp theo thời gian tạo, mới nhất lên đầu
+        return $query->orderBy('created_at', 'desc')->paginate($perPage);
     }
 
     /**
@@ -239,13 +255,13 @@ class OrderService extends BaseService
      * @param \App\Models\User $user Người dùng hiện tại
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getOrdersByUser($user)
+    public function getOrdersByUser($user, $searchParams = [], $perPage = 10)
     {
         // Kiểm tra xem user có phải là customer không
         if ($user->account_type !== 'customer' || !$user->customer) {
             return collect(); // Trả về collection rỗng nếu không phải customer
         }
 
-        return $this->getOrdersByCustomerId($user->customer->id);
+        return $this->getOrdersByCustomerId($user->customer->id, $searchParams, $perPage);
     }
 }
