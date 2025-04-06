@@ -6,6 +6,7 @@ import FilterSidebar from "../components/filterProduct/FilterSidebar";
 import Pagination from "../components/filterProduct/Pagination";
 import ProductList from "../components/filterProduct/ProductList";
 import instanceAxios from "../config/db";
+import SkeletonLoading from "../components/loadingSkeleton/SkeletonLoading";
 
 export default function Shop() {
   const location = useLocation(); // 🛠 Lấy query params từ URL
@@ -24,7 +25,7 @@ export default function Shop() {
   // const [products, setProducts] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
+  // const itemsPerPage = 12;
 
   const startLoading = () => setLoading((prev) => prev + 1);
   const stopLoading = () => setLoading((prev) => Math.max(0, prev - 1));
@@ -242,10 +243,7 @@ export default function Shop() {
     <div className="bg-white text-gray-800 dark:bg-gray-800 dark:text-white m-10">
       {(isLoading2 || isProductsLoading) ? (
         <div>
-          <div className="text-center h-screen text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-500 dark:border-gray-400"></div>
-                <p>Đang tải sản phẩm...</p>
-              </div>
+            <SkeletonLoading/>
         </div>
       ) : (
         <div>

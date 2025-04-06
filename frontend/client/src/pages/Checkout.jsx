@@ -166,7 +166,15 @@ const Cart = () => {
       render: (_, item) => (
         <>
           <div>{item.name}</div>
-          <div>Size: {item.variant_id}</div>
+          <div>
+            {Object.entries(item.thuoc_tinh || {}).map(([key, value]) => (
+              <div key={key}>
+                <Text type="secondary" style={{ fontSize: 13 }}>
+                  {key}: {value}
+                </Text>
+              </div>
+            ))}
+          </div>
         </>
       ),
     },

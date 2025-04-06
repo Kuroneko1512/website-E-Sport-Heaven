@@ -432,7 +432,16 @@ const NewCheckout = () => {
                 <List.Item>
                   <List.Item.Meta
                     title={`${item.name} (x${item.quantity})`}
-                    description={`SKU: ${item.sku}`}
+                    description={<>
+                      <div>SKU: {item.sku}</div>
+                      {Object.entries(item.thuoc_tinh || {}).map(([key, value]) => (
+                        <div key={key}>
+                          <Text type="secondary" style={{ fontSize: 13 }}>
+                            {key}: {value}
+                          </Text>
+                        </div>
+                      ))}
+                    </>}
                   />
                   <Text>
                     {FomatVND(

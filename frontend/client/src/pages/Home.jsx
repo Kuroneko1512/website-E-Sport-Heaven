@@ -6,6 +6,8 @@ import CustomerSay from "../components/main/CustomerSay";
 import TopFooter from "../components/footer/TopFooter";
 import DealsOfTheMonth from "../components/main/DealsOfThMonth";
 
+
+
 const Home = () => {
   return (
     <div className="bg-gray-50 dark:bg-gray-800 min-h-screen text-black dark:text-white">

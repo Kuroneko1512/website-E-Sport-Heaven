@@ -61,10 +61,11 @@ const Login = () => {
         })
       );
 
-      setSuccess(true);
+      // setSuccess(true);
+      message.success("Đăng nhập thành công!");
       setTimeout(() => {
         nav("/"); // hoặc '/home'
-        setSuccess(false);
+        // setSuccess(false);
       }, 2000);
     },
     onError: (err) => {
@@ -218,7 +219,7 @@ const Login = () => {
           </Form.Item>
         </Form>
       </div>
-      {success && <Success />}
+      {/* {success && <Success />} */}
     </div>
   );
 };

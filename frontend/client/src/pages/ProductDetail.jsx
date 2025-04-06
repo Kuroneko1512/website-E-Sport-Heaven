@@ -22,6 +22,7 @@ const ProductDetail = () => {
   const [selectedAttributes, setSelectedAttributes] = useState({});
   const [attributes, setAttributes] = useState([]);
   const [validOptions, setValidOptions] = useState({});
+  const [chon, setChon] = useState([]);
 
   const { data: productDetailData, isLoading } = useQuery({
     queryKey: ["productDetailData", id],
@@ -182,6 +183,7 @@ const ProductDetail = () => {
       discount: product.discount?.percent,
       stock: selectedVariant?.stock || product.stock,
       sku: selectedVariant?.sku || product.sku,
+      thuoc_tinh: chon
     };
 
     const existingIndex = cartItems.findIndex(
@@ -201,6 +203,13 @@ const ProductDetail = () => {
     const event = new CustomEvent("cartUpdated", { detail: cartItems });
     window.dispatchEvent(event);
   };
+
+  const value_attribute = (name, value) => {
+    console.log(name, value);
+    setChon( {...chon, [name]: value});
+  }
+
+  console.log("Chon", chon);
 
   return (
     <div>
@@ -343,7 +352,7 @@ const ProductDetail = () => {
                                 <button
                                   key={value.id}
                                   onClick={() =>
-                                    handleAttributeSelect(attr.id, value.id)
+                                    {handleAttributeSelect(attr.id, value.id),value_attribute(attr.name, value.value)}
                                   }
                                   className={`px-4 py-2 border rounded transition-all duration-150 ${
                                     isSelected
