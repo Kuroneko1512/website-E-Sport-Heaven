@@ -6,7 +6,6 @@ import { FomatTime } from "../../utils/FomatTime";
 import { Link } from "react-router-dom";
 
 const OrderItem = ({ order_items, status }) => {
-  
   return (
     <>
       <div className="bg-white dark:bg-gray-800 flex gap-4 items-start border-b border-gray-200 dark:border-gray-700 pb-3">
@@ -67,28 +66,43 @@ const OrderItem = ({ order_items, status }) => {
 
 const MyOrder = () => {
   const {
-    data: orderData,
+    data: apiResponse,
     isLoading,
+    error
   } = useQuery({
     queryKey: ["orders"],
     queryFn: async () => {
       const res = await instanceAxios.get(`/api/v1/customer/orders`);
-      return res?.data?.data;
+      return res?.data;
     },
   });
 
-  console.log("orderData", orderData);
+  console.log("orderData", apiResponse);
+
+  // Truy cập đúng mảng đơn hàng từ cấu trúc phản hồi API
+  const orders = apiResponse?.data?.data || [];
 
   // 1. Dùng useMemo để group orders theo ngày (string)
   const ordersByDate = useMemo(() => {
-    return orderData?.reduce((groups, order) => {
+    // Kiểm tra xem orders có phải là mảng không
+    if (!Array.isArray(orders)) {
+      console.error("orders is not an array:", orders);
+      return {}; // Trả về object rỗng nếu không phải mảng
+    }
+    
+    return orders.reduce((groups, order) => {
       // FomatTime trả về chuỗi như "Hôm nay", "Hôm qua", hoặc "DD/MM/YYYY"
       const day = FomatTime(order.created_at);
       if (!groups[day]) groups[day] = [];
       groups[day].push(order);
       return groups;
     }, {});
-  }, [orderData]);
+  }, [orders]);
+
+  // Hiển thị lỗi nếu có
+  if (error) {
+    return <div className="text-red-500">Error loading orders: {error.message}</div>;
+  }
 
   return (
     <>
@@ -96,8 +110,8 @@ const MyOrder = () => {
         <div>Loading...</div>
       ) : (
         <div className="dark:bg-gray-800 min-h-screen p-6">
-      {/* … filter, search bar … */}
-      <div className="flex justify-between items-center mb-3">
+          {/* … filter, search bar … */}
+          <div className="flex justify-between items-center mb-3">
             <div className="px-2 py-1">Tất cả</div>
             <div className="px-2 py-1">Chờ thanh toán</div>
             <div className="px-2 py-1">Vận chuyển</div>
@@ -113,44 +127,50 @@ const MyOrder = () => {
               type="text"
             />
           </div>
-      <div className="space-y-8">
-        {Object.entries(ordersByDate).map(([dayLabel, orders]) => (
-          <div key={dayLabel} className="border p-3 rounded-lg shadow-lg border-gray-200 dark:border-gray-700">
-            {/* Tiêu đề ngày mua chỉ render 1 lần cho nhóm */}
-            <h3 className="mb-4 text-lg font-semibold">Ngày mua: {dayLabel}</h3>
-            <div className="space-y-6">
-              {orders.map((order, idx) => (
-                <div key={idx} >
-                  <OrderItem {...order}/>
-                  {/* Phần Tổng tiền + button */}
-                  <div className="flex items-end flex-col gap-2 mt-3">
-                    <div className="self-end">
-                      <span className="mr-2 font-medium">Tổng tiền:</span>
-                      <span className="font-bold">
-                        {FomatVND(
-                          order?.order_items?.reduce(
-                            (sum, item) => sum + item.price * item.quantity,
-                            0
-                          )
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex flex-row-reverse w-1/3">
-                      <Link to={`/my-profile/orders/${order?.order_code}`} className="px-4 py-2 rounded-lg border border-black text-black dark:border-gray-500 dark:text-gray-200">
-                        Chi tiết
-                      </Link>
-                      <button className="px-4 py-2 rounded-lg border bg-black text-white dark:bg-gray-700 dark:text-gray-300">
-                        Đánh giá
-                      </button>
-                    </div>
+          <div className="space-y-8">
+            {Object.entries(ordersByDate).length > 0 ? (
+              Object.entries(ordersByDate).map(([dayLabel, orders]) => (
+                <div key={dayLabel} className="border p-3 rounded-lg shadow-lg border-gray-200 dark:border-gray-700">
+                  {/* Tiêu đề ngày mua chỉ render 1 lần cho nhóm */}
+                  <h3 className="mb-4 text-lg font-semibold">Ngày mua: {dayLabel}</h3>
+                  <div className="space-y-6">
+                    {orders.map((order, idx) => (
+                      <div key={idx} >
+                        <OrderItem order_items={order.order_items} status={order.status}/>
+                        {/* Phần Tổng tiền + button */}
+                        <div className="flex items-end flex-col gap-2 mt-3">
+                          <div className="self-end">
+                            <span className="mr-2 font-medium">Tổng tiền:</span>
+                            <span className="font-bold">
+                              {FomatVND(
+                                order?.order_items?.reduce(
+                                  (sum, item) => sum + item.price * item.quantity,
+                                  0
+                                )
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex flex-row-reverse w-1/3">
+                            <Link to={`/my-profile/orders/${order?.order_code}`} className="px-4 py-2 rounded-lg border border-black text-black dark:border-gray-500 dark:text-gray-200">
+                              Chi tiết
+                            </Link>
+                            <button className="px-4 py-2 rounded-lg border bg-black text-white dark:bg-gray-700 dark:text-gray-300">
+                              Đánh giá
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className="text-center py-10">
+                <p className="text-gray-500 dark:text-gray-400">Bạn chưa có đơn hàng nào</p>
+              </div>
+            )}
           </div>
-        ))}
-      </div>
-    </div>
+        </div>
       )}
     </>
   );
