@@ -126,7 +126,8 @@ const RightNavbar = () => {
 
   // Mini cart content
   const cartContent = (
-    <div className="w-72 max-h-80 overflow-y-auto bg-white dark:bg-gray-800 dark:text-white">
+    <div className="w-72 bg-white dark:bg-gray-800 dark:text-white">
+      <div className=" overflow-y-auto max-h-80">
       <h2 className="font-semibold mb-3">
         Bạn có {miniCartData.length} sản phẩm
       </h2>
@@ -148,6 +149,7 @@ const RightNavbar = () => {
           </i>
         </div>
       ))}
+      </div>
       <Link
         to="/cart"
         className="block text-center bg-black text-white dark:bg-blue-600 dark:text-white py-2 rounded mt-4"
@@ -183,7 +185,7 @@ const RightNavbar = () => {
       {/* Cart */}
       <Popover
         content={cartContent}
-        trigger={["hover","click"]}
+        trigger={["click"]}
         open={cartVisible}
         onOpenChange={setCartVisible}
         getPopupContainer={(triggerNode) => triggerNode.parentNode}
@@ -207,7 +209,7 @@ const RightNavbar = () => {
       ) : (
         <Dropdown
           overlay={userMenu}
-          trigger={["hover", "click"]}
+          trigger={["click"]}
           getPopupContainer={(triggerNode) => triggerNode.parentNode}
           overlayClassName="dark:bg-gray-800 dark:text-white"
         >

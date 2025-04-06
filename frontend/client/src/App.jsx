@@ -46,6 +46,7 @@ import { useQuery } from "@tanstack/react-query";
 import instanceAxios from "./config/db";
 import { useEffect } from "react";
 import { message } from "antd";
+import OrderDetail from "./components/elementProfile/OrderDetail";
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
@@ -85,10 +86,11 @@ function App() {
     if (userData?.id) {
       try {
         const cookieUser = Cookies.get("user");
-        // const currentUser = cookieUser ? JSON.parse(cookieUser) : {};
+        const currentUser = cookieUser ? JSON.parse(cookieUser) : {};
         
         dispatch(
           updateUser({
+            ...currentUser,
             // Start with initial empty user structure
             customerId: userData.id,
             // avatar: currentUser.avatar || null,
@@ -99,7 +101,7 @@ function App() {
             // ...(userData.avatar && { avatar: userData.avatar }),
             // ...(userData.name && { name: userData.name }),
             // ...(userData.email && { email: userData.email }),
-            ...(userData.phone && { phone: userData.phone }),
+            // ...(userData.phone && { phone: userData.phone }),
           })
         );
       } catch (error) {
@@ -138,6 +140,7 @@ function App() {
                   <Route path="info" element={<InfoProfile />} />
                   <Route path="settings" element={<Setting />} />
                   <Route path="orders" element={<MyOrder />} />
+                  <Route path="orders/:order_code" element={<OrderDetail />} />
                   <Route path="notifications" element={<Notification />} />
                   <Route path="manage-address" element={<ManageAddress />} />
                   <Route path="saved-cards" element={<PaymentCards />} />
