@@ -46,6 +46,7 @@ import { useQuery } from "@tanstack/react-query";
 import instanceAxios from "./config/db";
 import { useEffect } from "react";
 import { message } from "antd";
+import OrderDetail from "./components/elementProfile/OrderDetail";
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
@@ -139,6 +140,7 @@ function App() {
                   <Route path="info" element={<InfoProfile />} />
                   <Route path="settings" element={<Setting />} />
                   <Route path="orders" element={<MyOrder />} />
+                  <Route path="orders/:order_code" element={<OrderDetail />} />
                   <Route path="notifications" element={<Notification />} />
                   <Route path="manage-address" element={<ManageAddress />} />
                   <Route path="saved-cards" element={<PaymentCards />} />
