@@ -4,6 +4,7 @@ import {
   Checkbox,
   Col,
   Image,
+  message,
   Modal,
   Row,
   Space,
@@ -21,6 +22,8 @@ const Cart = () => {
 const [selectedItems, setSelectedItems] = useState([]); // Lưu trữ danh sách sản phẩm được chọn
 const [checkoutItems, setCheckoutItems] = useState([]); // Lưu trữ danh sách sản phẩm để thanh toán
 const nav = useNavigate(); // Điều hướng giữa các trang
+const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông báo
+  const [canWarn, setCanWarn] = useState(true); // Kiểm soát thời gian chờ thông báo
 
   const miniCartData = useMemo(
     () => JSON.parse(localStorage.getItem("cartItems")) || [],// Lấy dữ liệu giỏ hàng từ localStorage
@@ -33,18 +36,38 @@ const nav = useNavigate(); // Điều hướng giữa các trang
 
   const handleQuantityChange = (productId, variantId, delta) => {
     setCartItems((prev) =>
-      prev.map((item) =>
-        item.product_id === productId &&
-        (!variantId || item.variant_id === variantId) // Kiểm tra sản phẩm và biến thể
-          ? {
-              ...item,
-              quantity: Math.max(
-                1,// Đảm bảo số lượng không nhỏ hơn 1
-                Math.min(item.quantity + delta, item.stock)// Đảm bảo số lượng không vượt quá tồn kho
-              ),
+      prev.map((item) => {
+        if (
+          item.product_id === productId &&
+          (!variantId || item.variant_id === variantId)
+        ) {
+          const newQuantity = Math.max(
+            1,
+            Math.min(item.quantity + delta, item.stock)
+          );
+  
+          // Kiểm tra nếu vượt quá tồn kho
+          if (item.quantity + delta > item.stock && canWarn) {
+            if (warningCount < 3) {
+              message.warning("Không thể nhập quá số lượng tồn kho!");
+              setWarningCount((prevCount) => prevCount + 1);
             }
-          : item
-      )
+  
+            // Đặt thời gian chờ 3 giây để cho phép thông báo lại
+            setCanWarn(false);
+            setTimeout(() => {
+              setCanWarn(true);
+              setWarningCount(0); // Đặt lại bộ đếm sau 3 giây
+            }, 3000);
+          }
+  
+          return {
+            ...item,
+            quantity: newQuantity,
+          };
+        }
+        return item;
+      })
     );
   };
 
@@ -201,25 +224,37 @@ const nav = useNavigate(); // Điều hướng giữa các trang
             <i className="fa-solid fa-minus"></i>
           </button>
           <input
-            type="text"
-            value={item.quantity}
-            min={1}
-            max={item.stock}
-            onChange={(e) => {
-              let value = parseInt(e.target.value, 10);
-              if (isNaN(value) || value < 1) value = 1;
-              if (value > item.stock) value = item.stock;
-              handleQuantityChange(
-                item.product_id,
-                item.variant_id,
-                value - item.quantity
-              );
-            }}
-            className="text-center"
-            style={{
-              width: `${item.quantity.toString().length + 1}ch`,
-            }}
-          />
+  type="text"
+  value={item.quantity}
+  min={1}
+  max={item.stock}
+  onChange={(e) => {
+    let value = parseInt(e.target.value, 10);
+    if (isNaN(value) || value < 1) value = 1;
+
+    if (value > item.stock) {
+      if (canWarn) {
+        if (warningCount < 3) {
+          message.warning("Không thể nhập quá số lượng tồn kho!");
+          setWarningCount((prevCount) => prevCount + 1);
+        }
+
+        setCanWarn(false);
+        setTimeout(() => {
+          setCanWarn(true);
+          setWarningCount(0);
+        }, 3000);
+      }
+      value = item.stock;
+    }
+
+    handleQuantityChange(item.product_id, item.variant_id, value - item.quantity);
+  }}
+  className="text-center"
+  style={{
+    width: `${item.quantity.toString().length + 1}ch`,
+  }}
+/>
           <button
             onClick={() =>
               handleQuantityChange(item.product_id, item.variant_id, 1)
