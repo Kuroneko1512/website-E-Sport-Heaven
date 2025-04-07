@@ -21,7 +21,6 @@ const OrderItem = ({ order_items, status, order_code }) => {
     "đã hủy": "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
   };
 
-const OrderItem = ({ order_items, status }) => {
   return (
     <>
       <h3 className="bg-white dark:bg-gray-800 pb-3 italic">
@@ -276,7 +275,7 @@ const MyOrder = () => {
       )}
     </>
   );
-}
+
 };
 
 export default MyOrder;
