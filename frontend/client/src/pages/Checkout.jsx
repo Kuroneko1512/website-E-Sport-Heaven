@@ -158,7 +158,7 @@ const Cart = () => {
     {
       title: "Hình ảnh",
       dataIndex: "image",
-      render: (image) => <Image width={80} src={image} />,
+      render: (image) => <Image width={80} height={100} className="object-cover" src={`http://127.0.0.1:8000/storage/${image}`} />,
     },
     {
       title: "Tên sản phẩm",
@@ -166,7 +166,15 @@ const Cart = () => {
       render: (_, item) => (
         <>
           <div>{item.name}</div>
-          <div>Size: {item.variant_id}</div>
+          <div>
+            {Object.entries(item.thuoc_tinh || {}).map(([key, value]) => (
+              <div key={key}>
+                <Text type="secondary" style={{ fontSize: 13 }}>
+                  {key}: {value}
+                </Text>
+              </div>
+            ))}
+          </div>
         </>
       ),
     },

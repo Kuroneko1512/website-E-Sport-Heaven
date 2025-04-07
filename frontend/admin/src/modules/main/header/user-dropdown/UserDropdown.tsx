@@ -18,6 +18,8 @@ const UserDropdown = () => {
   const navigate = useNavigate();
   const [t] = useTranslation();
   const currentUser = useAppSelector((state) => state.auth.currentUser);
+  const createdAt = useAppSelector((state) => state.auth.createdAt); // Lấy createdAt từ state
+  const roles = useAppSelector((state) => state.auth.roles); // Lấy roles từ state
   const { logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -34,11 +36,14 @@ const UserDropdown = () => {
     navigate('/profile');
   };
 
+  // Lấy role đầu tiên để hiển thị (nếu có)
+  const role = roles && roles.length > 0 ? roles[0] : '';
+
   return (
     <UserMenuDropdown isOpen={dropdownOpen} hideArrow>
       <StyledSmallUserImage
         slot="head"
-        src={currentUser?.photoURL || '/img/default-profile.png'}
+        src={currentUser?.avatar || '/img/default-profile.png'}
         fallbackSrc="/img/default-profile.png"
         alt="User"
         width={25}
@@ -46,30 +51,36 @@ const UserDropdown = () => {
         rounded
       />
       <div slot="body">
-        <UserHeader className=" bg-primary">
+        <UserHeader className=" bg-primary" style={{ 
+            minHeight: '200px',
+          }}>
           <StyledBigUserImage
-            src={currentUser?.photoURL || '/img/default-profile.png'}
+            src={currentUser?.avatar || '/img/default-profile.png'}
             fallbackSrc="/img/default-profile.png"
             alt="User"
             width={90}
             height={90}
             rounded
           />
-          <p>
-            {currentUser?.email}
-            <small>
-              <span>Member since </span>
-              {currentUser?.created_at && (
-                <span>
-                  {DateTime.fromISO(
-                    currentUser?.created_at
-                  ).toFormat('dd LLL yyyy')}
-                </span>
+          <div className="user-info" style={{ 
+              // Cố định chiều cao tối thiểu
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
+          }}>
+            <p className="user-name" style={{ margin: 0, fontWeight: 'bold' }}>
+              {currentUser?.name}
+            </p>
+            <small className="user-details" style={{ display: 'block', lineHeight: '1.5' }}>
+              <div style={{ marginBottom: '2px' }}>{role}</div>
+              <div style={{ marginBottom: '2px' }}>{currentUser?.email}</div>
+              {createdAt && (
+                <div>Thành viên từ {DateTime.fromFormat(createdAt, 'yyyy-MM-dd HH:mm:ss').toFormat('dd LLL yyyy')}</div>
               )}
             </small>
-          </p>
+          </div>
         </UserHeader>
-        <UserBody>
+        {/* <UserBody>
           <div className="row">
             <div className="col-4 text-center">
               <Link to="/">{t('header.user.followers')}</Link>
@@ -81,21 +92,21 @@ const UserDropdown = () => {
               <Link to="/">{t('header.user.friends')}</Link>
             </div>
           </div>
-        </UserBody>
+        </UserBody> */}
         <UserFooter>
           <button
             type="button"
             className="btn btn-default btn-flat"
             onClick={navigateToProfile}
           >
-            {t('header.user.profile')}
+            Hồ sơ
           </button>
           <button
             type="button"
             className="btn btn-default btn-flat float-right"
             onClick={logOut}
           >
-            {t('login.button.signOut')}
+            Đăng xuất
           </button>
         </UserFooter>
       </div>

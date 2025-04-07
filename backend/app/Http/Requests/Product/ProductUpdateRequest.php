@@ -4,7 +4,7 @@ namespace App\Http\Requests\Product;
 
 use App\Traits\HandlesValidationFailure;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+
 
 class ProductUpdateRequest extends FormRequest
 {
@@ -26,21 +26,21 @@ class ProductUpdateRequest extends FormRequest
 
     public function rules()
     {
-        $rules = [
-            'name' => 'nullable|string|max:255',
-            'price' => 'nullable|numeric|between:0,99999999.99',
-            'sku' => [
-                'required',
-                'string',
-                Rule::unique('products', 'sku')->ignore($this->route('product')), // Sửa $productId thành $this->route('product')
-            ],
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
-            'product_type' => 'nullable|in:simple,variable',
-            'status' => 'nullable|in:active,inactive',
-            'category_id' => 'nullable|exists:categories,id',
+        return [
+            'name'             => ['required', 'string', 'max:255'],
+            'price'            => ['nullable', 'between:0,99999999.99'],
+            'stock'            => ['nullable', 'between:0,99999999.99'],
+            'selected_attributes' => 'required_if:product_type,variable|array',
+            'description'      => ['nullable', 'string'],
+            'image'            => ['nullable', 'max:10240'],
+            'product_type'     => ['required', 'in:simple,variable'],
+            'status'           => ['nullable', 'in:active,inactive'],
+            'category_id'      => ['nullable', 'exists:categories,id'],
+            'discount_percent' => ['nullable', 'numeric', 'between:0,100'],
+            'discount_start'   => ['nullable', 'date', 'before_or_equal:discount_end'],
+            'discount_end'     => ['nullable', 'date', 'after_or_equal:discount_start'],
 
-            // Kiểm tra biến thể
+            // Kiểm tra biến thể (variants)
             'variants' => [
                 'nullable',
                 'array',
@@ -50,10 +50,19 @@ class ProductUpdateRequest extends FormRequest
                     }
                 }
             ],
-            'variants.*.id' => 'nullable|exists:product_variants,id',
-            'variants.*.price' => 'nullable|numeric|min:0',
-            'variants.*.stock' => 'required_if:product_type,variable|integer|min:0',
-            'variants.*.attributes' => 'required_if:product_type,variable|array|min:1',
+
+            'variants.*.discount_percent' => ['nullable', 'numeric', 'between:0,100'],
+            'variants.*.discount_start'   => ['nullable', 'date', 'before_or_equal:variants.*.discount_end'],
+            'variants.*.discount_end'     => ['nullable', 'date', 'after_or_equal:variants.*.discount_start'],
+            'variants.*.price' => ['required_if:product_type,variable', 'nullable', 'numeric', 'min:0'],
+            'variants.*.stock' => ['required_if:product_type,variable', 'integer', 'min:0'],
+
+            // Kiểm tra thuộc tính của biến thể
+            'variants.*.attributes' => [
+                'required_if:product_type,variable',
+                'array',
+                'min:1'
+            ],
             'variants.*.attributes.*.attribute_id' => [
                 'required_if:product_type,variable',
                 'exists:attributes,id',
@@ -64,50 +73,45 @@ class ProductUpdateRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     $variantIndex = explode('.', $attribute)[1];
 
-                    // Kiểm tra attribute_value_id có hợp lệ không
-                    $attributeValue = \App\Models\AttributeValue::find($value);
-                    if (!$attributeValue) {
-                        return $fail("Giá trị thuộc tính không hợp lệ.");
-                    }
+                    // Lấy tất cả biến thể
+                    $variants = $this->input('variants', []);
 
-                    $attributeId = $attributeValue->attribute_id;
-                    $variantAttributes = $this->input("variants.{$variantIndex}.attributes", []);
+                    // Tổ hợp thuộc tính của từng biến thể
+                    $variantCombinations = [];
 
-                    // 🛑 Kiểm tra một biến thể có nhiều giá trị của cùng một thuộc tính không
-                    $count = collect($variantAttributes)->where('attribute_id', $attributeId)->count();
-                    if ($count > 1) {
-                        return $fail("Biến thể không thể có hai giá trị cho cùng một thuộc tính.");
-                    }
+                    foreach ($variants as $index => $variant) {
+                        $sortedAttributes = collect($variant['attributes'] ?? [])
+                            ->sortBy('attribute_id')
+                            ->pluck('attribute_value_id')
+                            ->toArray();
 
-                    // 🛑 Kiểm tra giá trị thuộc tính có trùng giữa các biến thể không
-                    $productId = $this->route('product');
-                    $existsInProduct = \App\Models\ProductAttribute::whereHas('productVariant', function ($query) use ($productId) {
-                        $query->where('product_id', $productId);
-                    })
-                        ->where('attribute_value_id', $value)
-                        ->whereNotIn('product_variant_id', [$this->input("variants.{$variantIndex}.id")])
-                        ->exists();
+                        $combinationKey = implode('-', $sortedAttributes);
 
-                    if ($existsInProduct) {
-                        return $fail("Giá trị thuộc tính này đã tồn tại trong một biến thể khác của sản phẩm.");
+                        // ✅ Lấy id của biến thể hiện tại (nếu có)
+                        $currentId = $variants[$variantIndex]['id'] ?? null;
+                        $otherId = $variant['id'] ?? null;
+
+                       
+                        if ($index != $variantIndex && $combinationKey && $currentId !== $otherId) {
+                            if (in_array($combinationKey, $variantCombinations)) {
+                                return $fail("Biến thể với tổ hợp thuộc tính này đã tồn tại.");
+                            }   
+                        }
+
+                        $variantCombinations[] = $combinationKey;
                     }
                 }
             ],
-            'variants.*.images' => 'nullable|array',
-            'variants.*.images.*' => 'nullable|string|url',
+
+
+            // Kiểm tra ảnh của biến thể
+            'variants.*.image' => [
+                'nullable',
+                
+                'max:5120' // Giới hạn 5MB
+            ],
+            'variants.*.id' => ['nullable', 'exists:product_variants,id'],
         ];
-
-        // ✅ Cách sửa lỗi unique cho variants.*.sku
-        foreach ($this->input('variants', []) as $key => $variant) {
-            $variantId = $variant['id'] ?? null;
-            $rules["variants.$key.sku"] = [
-                'required_if:product_type,variable',
-                'string',
-                Rule::unique('product_variants', 'sku')->ignore($variantId),
-            ];
-        }
-
-        return $rules;
     }
 
     public function messages()
@@ -124,6 +128,7 @@ class ProductUpdateRequest extends FormRequest
             'variants.*.sku.required_if' => 'SKU của biến thể là bắt buộc khi loại sản phẩm là variable.',
             'variants.*.attributes.*.attribute_id.exists' => 'Thuộc tính không tồn tại.',
             'variants.*.attributes.*.attribute_value_id.exists' => 'Giá trị thuộc tính không tồn tại.',
+            'variants.*.attributes.*.attribute_value_id' => 'Giá trị thuộc tính phải hợp lệ.',
         ];
     }
 }

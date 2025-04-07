@@ -68,7 +68,7 @@ const OtpVerification = () => {
             <span className="ml-2 text-gray-500">Trở lại</span>
           </Space>
 
-          <Title level={3}>Enter OTP</Title>
+          <Title level={3}>Nhập OTP</Title>
           <Text type="secondary">
             Chúng tôi đã chia sẻ mã đến địa chỉ email đã đăng ký của bạn
           </Text>

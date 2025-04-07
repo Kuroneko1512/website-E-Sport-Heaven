@@ -23,8 +23,9 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         if (error.response?.status === 401) {
-            localStorage.removeItem("access_token");
-            window.location.href = "/login";
+            // Không xóa token và chuyển hướng ở đây
+            // Thay vào đó, dispatch một action để xử lý trong component
+            console.error("Unauthorized access, please login again");
         }
         return Promise.reject(error);
     }

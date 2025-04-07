@@ -30,7 +30,7 @@ class ReviewStoreRequest extends FormRequest
         return [
             'product_id' => 'required|exists:products,id',
             'product_variant_id' => 'nullable|exists:product_variants,id',
-            'user_id' => 'required|exists:users,id',
+            // 'user_id' => 'required|exists:users,id',
             'rating' => 'required|min:1|max:5',
             'title' => 'nullable|string|max:255',
             'comment' => 'nullable|string|max:1000',
@@ -58,5 +58,12 @@ class ReviewStoreRequest extends FormRequest
         throw new HttpResponseException(
             response()->json(['errors' => $errors], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
         );
+    }
+
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'user_id' => \Illuminate\Support\Facades\Auth::id(),
+        ]);
     }
 }

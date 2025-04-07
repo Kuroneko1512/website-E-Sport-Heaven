@@ -11,7 +11,7 @@ const ContentHeader = ({ title }: { title: string }) => {
           <div className="col-sm-6">
             <ol className="breadcrumb float-sm-right">
               <li className="breadcrumb-item">
-                <a href="/">Home</a>
+                <a href="/">Trang chủ</a>
               </li>
               <li className="breadcrumb-item active">{title}</li>
               
