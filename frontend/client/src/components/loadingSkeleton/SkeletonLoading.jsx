@@ -15,7 +15,7 @@ const SkeletonLoading = () => {
       <div className="col-span-3 grid grid-cols-3 gap-4">
         {[...Array(12)].map((_, index) => (
           <Card key={index} className="w-full">
-            <Skeleton.Image active style={{ width: "19rem", height: "25rem" }} className="mb-4"/>
+            <Skeleton.Image active style={{ width: "19rem", height: "22rem" }} className="mb-4"/>
             <Skeleton active title={{ width: "60%" }} paragraph={{ rows: 1, width: ["80%"] }} />
           </Card>
         ))}
