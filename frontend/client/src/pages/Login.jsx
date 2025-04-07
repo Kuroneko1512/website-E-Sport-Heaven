@@ -51,6 +51,7 @@ const Login = () => {
           accessToken: access_token,
           refreshToken: refresh_token,
           user: {
+            customerId: user.id,
             avatar: user.avatar,
             name: user.name,
             email: user.email,

@@ -17,30 +17,30 @@ import FomatVND from "../utils/FomatVND";
 const { Title, Text } = Typography;
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [checkoutItems, setCheckoutItems] = useState([]);
-  const nav = useNavigate();
+  const [cartItems, setCartItems] = useState([]); // Lưu trữ danh sách sản phẩm trong giỏ hàng
+const [selectedItems, setSelectedItems] = useState([]); // Lưu trữ danh sách sản phẩm được chọn
+const [checkoutItems, setCheckoutItems] = useState([]); // Lưu trữ danh sách sản phẩm để thanh toán
+const nav = useNavigate(); // Điều hướng giữa các trang
 
   const miniCartData = useMemo(
-    () => JSON.parse(localStorage.getItem("cartItems")) || [],
+    () => JSON.parse(localStorage.getItem("cartItems")) || [],// Lấy dữ liệu giỏ hàng từ localStorage
     []
   );
 
   useEffect(() => {
-    setCartItems(miniCartData);
+    setCartItems(miniCartData);// Cập nhật trạng thái `cartItems` khi dữ liệu thay đổi
   }, [miniCartData]);
 
   const handleQuantityChange = (productId, variantId, delta) => {
     setCartItems((prev) =>
       prev.map((item) =>
         item.product_id === productId &&
-        (!variantId || item.variant_id === variantId)
+        (!variantId || item.variant_id === variantId) // Kiểm tra sản phẩm và biến thể
           ? {
               ...item,
               quantity: Math.max(
-                1,
-                Math.min(item.quantity + delta, item.stock)
+                1,// Đảm bảo số lượng không nhỏ hơn 1
+                Math.min(item.quantity + delta, item.stock)// Đảm bảo số lượng không vượt quá tồn kho
               ),
             }
           : item
@@ -57,17 +57,17 @@ const Cart = () => {
         const updatedCartItems = cartItems.filter(
           (item) =>
             item.product_id !== productId ||
-            (variantId && item.variant_id !== variantId)
+            (variantId && item.variant_id !== variantId)// Loại bỏ sản phẩm khỏi danh sách
         );
-        setCartItems(updatedCartItems);
+        setCartItems(updatedCartItems);// Cập nhật trạng thái giỏ hàng
         setSelectedItems(
           selectedItems.filter(
             (itemId) =>
               itemId.product_id !== productId ||
-              (variantId && itemId.variant_id !== variantId)
+              (variantId && itemId.variant_id !== variantId)// Loại bỏ sản phẩm khỏi danh sách đã chọn
           )
         );
-        localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+        localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));// Lưu lại giỏ hàng vào localStorage
       },
     });
   };
@@ -77,16 +77,16 @@ const Cart = () => {
     const isSelected = selectedItems.some(
       (item) =>
         item.product_id === productId &&
-        (!variantId || item.variant_id === variantId)
+        (!variantId || item.variant_id === variantId)// Kiểm tra xem sản phẩm đã được chọn chưa
     );
     setSelectedItems((prev) =>
       isSelected
         ? prev.filter(
             (item) =>
               item.product_id !== productId ||
-              (variantId && item.variant_id !== variantId)
+              (variantId && item.variant_id !== variantId)// Bỏ chọn sản phẩm
           )
-        : [...prev, itemKey]
+        : [...prev, itemKey]// Thêm sản phẩm vào danh sách đã chọn
     );
   };
 
@@ -96,7 +96,7 @@ const Cart = () => {
       variant_id: item.variant_id,
     }));
     setSelectedItems((prev) =>
-      prev.length === allItems.length ? [] : allItems
+      prev.length === allItems.length ? [] : allItems// Nếu tất cả đã được chọn, bỏ chọn tất cả; ngược lại, chọn tất cả
     );
   };
 
@@ -110,7 +110,7 @@ const Cart = () => {
         )
       )
       .reduce((total, item) => total + (item.price - (item.price * item.discount / 100)) * item.quantity, 0)
-      .toFixed(2);
+      .toFixed(2);// Làm tròn đến 2 chữ số thập phân
   };
 
   const handleCheckout = () => {
@@ -119,7 +119,7 @@ const Cart = () => {
         selectedItems.some(
           (selected) =>
             selected.product_id === item.product_id &&
-            (!item.variant_id || selected.variant_id === item.variant_id)
+            (!item.variant_id || selected.variant_id === item.variant_id)// Lọc các sản phẩm đã chọn
         )
       )
       .map((item) => ({
@@ -128,9 +128,9 @@ const Cart = () => {
         discount: item.discount,
       }));
   
-    setCheckoutItems(selectedCartItems);
-    localStorage.setItem("checkoutItems", JSON.stringify(selectedCartItems));
-    nav("/newcheckout");
+    setCheckoutItems(selectedCartItems);// Lưu danh sách sản phẩm để thanh toán
+    localStorage.setItem("checkoutItems", JSON.stringify(selectedCartItems));// Lưu vào localStorage
+    nav("/newcheckout");// Điều hướng đến trang thanh toán
   };
 
   const columns = [
@@ -264,12 +264,12 @@ const Cart = () => {
       <div style={{ background: "#fff", padding: "2rem", borderRadius: 8 }}>
         <Title level={3}>GIỎ HÀNG</Title>
         <Table
-          dataSource={cartItems}
-          columns={columns}
+          dataSource={cartItems}// Dữ liệu giỏ hàng
+          columns={columns}// Cấu hình cột
           rowKey={(record) =>
-            `${record.product_id}_${record.variant_id || "default"}`
+            `${record.product_id}_${record.variant_id || "default"}`// Khóa duy nhất cho mỗi hàng
           }
-          pagination={false}
+          pagination={false}// Không sử dụng phân trang
         />
         <Row justify="end" style={{ marginTop: "2rem" }}>
           <Col>
@@ -277,7 +277,7 @@ const Cart = () => {
               <Text strong>
                 Tổng tiền:{" "}
                 <Text type="danger" strong>
-                  {FomatVND(calculateSubtotal())}
+                  {FomatVND(calculateSubtotal())} {/* Hiển thị tổng tiền */}
                 </Text>
               </Text>
               <Space>
@@ -286,8 +286,8 @@ const Cart = () => {
                 </Button>
                 <Button
                   type="primary"
-                  disabled={selectedItems.length === 0}
-                  onClick={handleCheckout}
+                  disabled={selectedItems.length === 0} // Vô hiệu hóa nếu không có sản phẩm nào được chọn
+                  onClick={handleCheckout} // Xử lý thanh toán
                   className="bg-black hover:!bg-gray-700 px-6 py-2"
                 >
                   Đặt hàng
