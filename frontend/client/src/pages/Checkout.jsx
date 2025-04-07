@@ -8,7 +8,7 @@ import {
   Row,
   Space,
   Table,
-  Typography
+  Typography,
 } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +28,26 @@ const Cart = () => {
   );
 
   useEffect(() => {
+    const handleCartUpdate = (e) => {
+      const updatedCart = e.detail || JSON.parse(localStorage.getItem("cartItems")) || [];
+      setCartItems(updatedCart);
+      // Also update selectedItems to remove any deleted items
+      setSelectedItems(prev => 
+        prev.filter(selected => 
+          updatedCart.some(item => 
+            item.product_id === selected.product_id && 
+            (!item.variant_id || item.variant_id === selected.variant_id)
+          )
+        )
+      );
+    };
+    
     setCartItems(miniCartData);
+    window.addEventListener("cartUpdated", handleCartUpdate);
+    
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
   }, [miniCartData]);
 
   const handleQuantityChange = (productId, variantId, delta) => {
@@ -59,6 +78,11 @@ const Cart = () => {
             item.product_id !== productId ||
             (variantId && item.variant_id !== variantId)
         );
+        // Update localStorage and dispatch event with updated cart
+        localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+        window.dispatchEvent(new CustomEvent("cartUpdated", { 
+          detail: updatedCartItems 
+        }));
         setCartItems(updatedCartItems);
         setSelectedItems(
           selectedItems.filter(
@@ -67,7 +91,6 @@ const Cart = () => {
               (variantId && itemId.variant_id !== variantId)
           )
         );
-        localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
       },
     });
   };
@@ -109,7 +132,12 @@ const Cart = () => {
             (!item.variant_id || selected.variant_id === item.variant_id)
         )
       )
-      .reduce((total, item) => total + (item.price - (item.price * item.discount / 100)) * item.quantity, 0)
+      .reduce(
+        (total, item) =>
+          total +
+          (item.price - (item.price * item.discount) / 100) * item.quantity,
+        0
+      )
       .toFixed(2);
   };
 
@@ -127,7 +155,7 @@ const Cart = () => {
         price: item.price,
         discount: item.discount,
       }));
-  
+
     setCheckoutItems(selectedCartItems);
     localStorage.setItem("checkoutItems", JSON.stringify(selectedCartItems));
     nav("/newcheckout");
@@ -158,7 +186,14 @@ const Cart = () => {
     {
       title: "Hình ảnh",
       dataIndex: "image",
-      render: (image) => <Image width={80} height={100} className="object-cover" src={`http://127.0.0.1:8000/storage/${image}`} />,
+      render: (image) => (
+        <Image
+          width={80}
+          height={100}
+          className="object-cover"
+          src={`http://127.0.0.1:8000/storage/${image}`}
+        />
+      ),
     },
     {
       title: "Tên sản phẩm",
@@ -281,7 +316,10 @@ const Cart = () => {
                 </Text>
               </Text>
               <Space>
-                <Button onClick={() => nav("/shop")} className="border hover:!border-gray-800 hover:!text-gray-800">
+                <Button
+                  onClick={() => nav("/shop")}
+                  className="border hover:!border-gray-800 hover:!text-gray-800"
+                >
                   Tiếp tục mua hàng
                 </Button>
                 <Button
