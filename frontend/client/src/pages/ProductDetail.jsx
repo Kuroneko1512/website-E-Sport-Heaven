@@ -140,6 +140,10 @@ const ProductDetail = () => {
       delete updatedAttributes[attributeId];
     }
 
+    setIsAllAttributesSelected(
+      Object.keys(updatedAttributes).length === attributes.length
+    );
+
     setSelectedAttributes(updatedAttributes);
 
     // Find matching variant only if all attributes are selected
@@ -261,7 +265,15 @@ const ProductDetail = () => {
     setChon({ ...chon, [name]: value });
   };
 
-  console.log("Chon", chon);
+  // console.log("Chon", chon);
+
+  useEffect(() => {
+    if (attributes.length > 0) {
+      setIsAllAttributesSelected(
+        Object.keys(selectedAttributes).length === attributes.length
+      );
+    }
+  }, [attributes, selectedAttributes]);
 
   return (
     <div>
@@ -528,7 +540,10 @@ const ProductDetail = () => {
                           <button
                             className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
                             onClick={handleAddToCart}
-                            disabled={!isAllAttributesSelected}
+                            disabled={
+                              !isAllAttributesSelected ||
+                              attributes.length === 0
+                            }
                           >
                             Thêm vào giỏ hàng
                           </button>
@@ -537,7 +552,6 @@ const ProductDetail = () => {
                     ) : (
                       <button
                         className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                        onClick={handleAddToCart}
                         disabled={true}
                       >
                         Thêm vào giỏ hàng
