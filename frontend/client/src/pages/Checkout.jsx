@@ -9,7 +9,7 @@ import {
   Row,
   Space,
   Table,
-  Typography
+  Typography,
 } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +31,28 @@ const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông
   );
 
   useEffect(() => {
-    setCartItems(miniCartData);// Cập nhật trạng thái `cartItems` khi dữ liệu thay đổi
+
+    const handleCartUpdate = (e) => {
+      const updatedCart = e.detail || JSON.parse(localStorage.getItem("cartItems")) || [];
+      setCartItems(updatedCart);
+      // Also update selectedItems to remove any deleted items
+      setSelectedItems(prev => 
+        prev.filter(selected => 
+          updatedCart.some(item => 
+            item.product_id === selected.product_id && 
+            (!item.variant_id || item.variant_id === selected.variant_id)
+          )
+        )
+      );
+    };
+    
+    setCartItems(miniCartData);
+    window.addEventListener("cartUpdated", handleCartUpdate);
+    
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
+
   }, [miniCartData]);
 
   const handleQuantityChange = (productId, variantId, delta) => {
@@ -82,7 +103,14 @@ const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông
             item.product_id !== productId ||
             (variantId && item.variant_id !== variantId)// Loại bỏ sản phẩm khỏi danh sách
         );
-        setCartItems(updatedCartItems);// Cập nhật trạng thái giỏ hàng
+
+        // Update localStorage and dispatch event with updated cart
+        localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+        window.dispatchEvent(new CustomEvent("cartUpdated", { 
+          detail: updatedCartItems 
+        }));
+        setCartItems(updatedCartItems);
+
         setSelectedItems(
           selectedItems.filter(
             (itemId) =>
@@ -90,7 +118,9 @@ const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông
               (variantId && itemId.variant_id !== variantId)// Loại bỏ sản phẩm khỏi danh sách đã chọn
           )
         );
+
         localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));// Lưu lại giỏ hàng vào localStorage
+
       },
     });
   };
@@ -132,8 +162,10 @@ const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông
             (!item.variant_id || selected.variant_id === item.variant_id)
         )
       )
+
       .reduce((total, item) => total + (item.price - (item.price * item.discount / 100)) * item.quantity, 0)
       .toFixed(2);// Làm tròn đến 2 chữ số thập phân
+
   };
 
   const handleCheckout = () => {
@@ -150,10 +182,12 @@ const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông
         price: item.price,
         discount: item.discount,
       }));
+
   
     setCheckoutItems(selectedCartItems);// Lưu danh sách sản phẩm để thanh toán
     localStorage.setItem("checkoutItems", JSON.stringify(selectedCartItems));// Lưu vào localStorage
     nav("/newcheckout");// Điều hướng đến trang thanh toán
+
   };
 
   const columns = [
@@ -181,7 +215,14 @@ const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông
     {
       title: "Hình ảnh",
       dataIndex: "image",
-      render: (image) => <Image width={80} height={100} className="object-cover" src={`http://127.0.0.1:8000/storage/${image}`} />,
+      render: (image) => (
+        <Image
+          width={80}
+          height={100}
+          className="object-cover"
+          src={`http://127.0.0.1:8000/storage/${image}`}
+        />
+      ),
     },
     {
       title: "Tên sản phẩm",
@@ -316,7 +357,10 @@ const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông
                 </Text>
               </Text>
               <Space>
-                <Button onClick={() => nav("/shop")} className="border hover:!border-gray-800 hover:!text-gray-800">
+                <Button
+                  onClick={() => nav("/shop")}
+                  className="border hover:!border-gray-800 hover:!text-gray-800"
+                >
                   Tiếp tục mua hàng
                 </Button>
                 <Button

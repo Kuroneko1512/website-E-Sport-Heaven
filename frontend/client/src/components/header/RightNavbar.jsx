@@ -86,19 +86,31 @@ const RightNavbar = () => {
       setMiniCartData(JSON.parse(localStorage.getItem("cartItems")) || []);
     };
 
+    const handleCartUpdated = (e) => {
+      // Use event detail if available, otherwise fallback to localStorage
+      if (e.detail) {
+        setMiniCartData(e.detail);
+      } else {
+        handleStorageChange();
+      }
+    };
+
     window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("cartUpdated", handleStorageChange);
+    window.addEventListener("cartUpdated", handleCartUpdated);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("cartUpdated", handleStorageChange);
+      window.removeEventListener("cartUpdated", handleCartUpdated);
     };
   }, []);
 
   const updateCart = (newCart) => {
     localStorage.setItem("cartItems", JSON.stringify(newCart));
     setMiniCartData(newCart);
-    window.dispatchEvent(new Event("cartUpdated")); // Kích hoạt cập nhật ngay lập tức
+    // Dispatch event with the updated cart data
+    window.dispatchEvent(new CustomEvent("cartUpdated", { 
+      detail: newCart 
+    }));
   };
 
   const removeFromCart = (id, vid) => {
