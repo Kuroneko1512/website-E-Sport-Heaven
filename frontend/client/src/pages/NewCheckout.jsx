@@ -44,32 +44,39 @@ const NewCheckout = () => {
   const [submit, setSubmit] = useState(false);
   // console.log("User:", user);
 
-  console.log("order", order);
+  // console.log("order", order);
   // Load dữ liệu provinces, districts, wards một lần khi mount
   useEffect(() => {
-    const loadData = async () => {
-      const provincesData = await fetch("/data/provinces.json").then((res) =>
-        res.json()
-      );
-      const districtsData = await fetch("/data/districts.json").then((res) =>
-        res.json()
-      );
-      const wardsData = await fetch("/data/wards.json").then((res) =>
-        res.json()
-      );
+    axios.get('http://127.0.0.1:8000/api/v1/address/provinces/')
+      .then(response => setProvinces(response?.data?.data))
+      .catch(error => console.error('Lỗi khi tải tỉnh/thành phố:', error));
 
-      setProvinces(provincesData);
-      setDistricts(districtsData);
-      setWards(wardsData);
-    };
-
-    loadData();
-    const cartItems = localStorage.getItem("checkoutItems");
-    const cartTotal = localStorage.getItem("cartTotal");
+    const cartItems = localStorage.getItem('checkoutItems');
+    const cartTotal = localStorage.getItem('cartTotal');
 
     if (cartItems) setCartItems(JSON.parse(cartItems));
     if (cartTotal) setCartTotal(JSON.parse(cartTotal));
-  }, [selectedProvince, selectedDistrict, selectedWard]);
+  }, []);
+
+  console.log("provinces", provinces);
+  console.log("districts", districts);
+  console.log("wards", wards);
+
+  useEffect(() => {
+    if (selectedProvince) {
+      axios.get(`http://127.0.0.1:8000/api/v1/address/districts?province_code=${selectedProvince}`)
+        .then(response => setDistricts(response?.data?.data))
+        .catch(error => console.error('Lỗi khi tải quận/huyện:', error));
+    }
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    if (selectedDistrict) {
+      axios.get(`http://127.0.0.1:8000/api/v1/address/communes?district_code=${selectedDistrict}`)
+        .then(response => setWards(response?.data?.data))
+        .catch(error => console.error('Lỗi khi tải phường/xã:', error));
+    }
+  }, [selectedDistrict]);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -79,7 +86,7 @@ const NewCheckout = () => {
   // Khi đăng nhập, load địa chỉ từ localStorage
   useEffect(() => {
     const userRaw = Cookies.get("user");
-  if (!userRaw) return;
+    if (!userRaw) return;
 
   const user = JSON.parse(userRaw);
     if (isLogin) {

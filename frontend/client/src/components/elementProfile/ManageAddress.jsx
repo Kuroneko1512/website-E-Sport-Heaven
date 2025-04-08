@@ -1,5 +1,6 @@
 
 import { Button, Form, Input, Modal, Select, Typography } from "antd";
+import axios from "axios";
 import { useEffect, useState } from "react";
 
 const { Title } = Typography;
@@ -19,24 +20,36 @@ const ManageAddress = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    const loadData = async () => {
-      const provincesData = await fetch("/data/provinces.json").then((res) =>
-        res.json()
-      );
-      const districtsData = await fetch("/data/districts.json").then((res) =>
-        res.json()
-      );
-      const wardsData = await fetch("/data/wards.json").then((res) =>
-        res.json()
-      );
+    axios.get('http://127.0.0.1:8000/api/v1/address/provinces/')
+      .then(response => setProvinces(response?.data?.data))
+      .catch(error => console.error('Lỗi khi tải tỉnh/thành phố:', error));
 
-      setProvinces(provincesData);
-      setDistricts(districtsData);
-      setWards(wardsData);
-    };
+    // const cartItems = localStorage.getItem('checkoutItems');
+    // const cartTotal = localStorage.getItem('cartTotal');
 
-    loadData();
+    // if (cartItems) setCartItems(JSON.parse(cartItems));
+    // if (cartTotal) setCartTotal(JSON.parse(cartTotal));
   }, []);
+
+  console.log("provinces", provinces);
+  console.log("districts", districts);
+  console.log("wards", wards);
+
+  useEffect(() => {
+    if (selectedProvince) {
+      axios.get(`http://127.0.0.1:8000/api/v1/address/districts?province_code=${selectedProvince}`)
+        .then(response => setDistricts(response?.data?.data))
+        .catch(error => console.error('Lỗi khi tải quận/huyện:', error));
+    }
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    if (selectedDistrict) {
+      axios.get(`http://127.0.0.1:8000/api/v1/address/communes?district_code=${selectedDistrict}`)
+        .then(response => setWards(response?.data?.data))
+        .catch(error => console.error('Lỗi khi tải phường/xã:', error));
+    }
+  }, [selectedDistrict]);
 
   // console.log(wards);
 

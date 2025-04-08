@@ -11,9 +11,12 @@ const OrderDetail = () => {
     queryKey: ['order', order_code],
     queryFn: async ()=> {
         const res = await instanceAxios.get(`/api/v1/customer/orders/${order_code}`)
+        return res.data;
     }
   })
 
+  console.log("orderData", orderData);
+  console.log("image",orderData?.data?.order_items);
 //   const {
 //     order_code,
 //     customer_name,
@@ -38,7 +41,12 @@ const OrderDetail = () => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="h-screen flex justify-center items-center">
+    <div className="text-center text-gray-500 flex flex-col items-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-500"></div>
+      <p>Đang tải sản phẩm...</p>
+    </div>
+  </div>;
   }
 
   return (
@@ -46,31 +54,28 @@ const OrderDetail = () => {
       <header className="mb-8 border-b pb-4 flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900">Chi tiết đơn hàng</h1>
         <span className="text-sm italic">
-          Mã đơn hàng: <strong>#{order_code}</strong>
+          Mã đơn hàng: <strong>{order_code}</strong>
         </span>
       </header>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <section className="grid grid-cols-1 gap-6 mb-8">
         <div className="bg-gray-100 p-4 rounded-lg shadow">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Thông tin khách hàng</h2>
-          <p><strong>Họ và tên:</strong> {orderData?.customer_name}</p>
-          <p><strong>Email:</strong> {orderData?.customer_email}</p>
-          <p><strong>Điện thoại:</strong> {orderData?.customer_phone}</p>
-        </div>
-        <div className="bg-gray-100 p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Địa chỉ giao hàng</h2>
-          <p>{orderData?.shipping_address.split(',').map((line, idx) => (<span key={idx}>{line.trim()}<br/></span>))}</p>
+          <p><strong>Họ và tên:</strong> {orderData?.data?.customer_name}</p>
+          <p><strong>Email:</strong> {orderData?.data?.customer_email}</p>
+          <p><strong>Điện thoại:</strong> {orderData?.data?.customer_phone}</p>
+          <p><strong>Địa chỉ:</strong>{orderData?.data?.shipping_address}</p>
         </div>
       </section>
 
       <section className="mb-8">
         <h2 className="text-2xl font-semibold text-gray-900 mb-4">Sản phẩm đã đặt</h2>
         <div className="space-y-4">
-          {orderData?.order_items.map(item => (
+          {orderData?.data?.order_items?.map(item => (
             <div key={item.id} className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow">
               <div className="flex items-center space-x-4">
                 <img
-                  src={item.product_variant?.image || item.product.image}
+                src={`http://127.0.0.1:8000/storage/${item.product_variant?.image || item.product.image}`}
                   alt={item.product.name}
                   className="w-16 h-16 object-cover rounded"
                 />
@@ -91,18 +96,18 @@ const OrderDetail = () => {
       <section className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-gray-100 p-4 rounded-lg shadow">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Tổng giá trị</h2>
-          <p className="text-2xl font-bold text-red-500">{formatPrice(orderData?.total_amount)}</p>
+          <p className="text-2xl font-bold text-red-500">{formatPrice(orderData?.data?.total_amount)}</p>
         </div>
         <div className="bg-gray-100 p-4 rounded-lg shadow">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Trạng thái</h2>
-          <p><strong>Đơn hàng:</strong> <span className="text-red-500">{orderData?.status}</span></p>
-          <p><strong>Thanh toán:</strong> <span className="text-red-500">{orderData?.paymentStatus}</span></p>
+          <p><strong>Đơn hàng:</strong> <span className="text-red-500">{orderData?.data?.status}</span></p>
+          <p><strong>Thanh toán:</strong> <span className="text-red-500">{orderData?.data["payment-status"]}</span></p>
         </div>
       </section>
 
       <footer className="text-center text-sm text-gray-500">
-        <p>Ngày tạo: {formatDateTime(orderData?.created_at)}</p>
-        <p>Cập nhật: {formatDateTime(orderData?.updated_at)}</p>
+        <p>Ngày tạo: {formatDateTime(orderData?.data?.created_at)}</p>
+        <p>Cập nhật: {formatDateTime(orderData?.data?.updated_at)}</p>
       </footer>
     </div>
   );

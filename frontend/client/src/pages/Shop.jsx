@@ -226,7 +226,8 @@ export default function Shop() {
         return res.data?.data?.data;
       }
     },
-    staleTime: 60000,
+    staleTime: 600000,
+    refetchInterval: 600000,
   });
   console.log("products", products);
 
