@@ -25,7 +25,7 @@ export default function Shop() {
   // const [products, setProducts] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  // const itemsPerPage = 12;
+  const itemsPerPage = 12;
 
   const startLoading = () => setLoading((prev) => prev + 1);
   const stopLoading = () => setLoading((prev) => Math.max(0, prev - 1));
@@ -85,9 +85,13 @@ export default function Shop() {
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const response = await instanceAxios.get("api/v1/category/indexNoPagination");
+      const response = await instanceAxios.get(
+        "api/v1/category/indexNoPagination"
+      );
       return response.data?.data;
     },
+    staleTime: 600000,
+    refetchInterval: 600000,
   });
 
   // console.log("categories", categories)
@@ -98,6 +102,8 @@ export default function Shop() {
       const response = await instanceAxios.get("/api/v1/attribute");
       return response.data?.data?.data;
     },
+    staleTime: 600000,
+    refetchInterval: 600000,
   });
 
   const attributeMutation = useMutation({
@@ -107,6 +113,8 @@ export default function Shop() {
       });
       return response.data?.data;
     },
+    staleTime: 600000,
+    refetchInterval: 600000,
   });
 
   const attributeFilters = attributeMutation.data;
@@ -219,7 +227,9 @@ export default function Shop() {
     queryKey: ["products", searchQuery, dataToFilter, currentPage],
     queryFn: async () => {
       if (searchQuery && searchQuery.trim() !== "") {
-        const res = await instanceAxios.get(`api/v1/product/search?q=${searchQuery}`);
+        const res = await instanceAxios.get(
+          `api/v1/product/search?q=${searchQuery}`
+        );
         return res.data?.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
       } else {
         const res = await instanceAxios.get(`api/v1/product/fillter`);
@@ -242,44 +252,48 @@ export default function Shop() {
 
   return (
     <div className="bg-white text-gray-800 dark:bg-gray-800 dark:text-white m-10">
-      {(isLoading2 || isProductsLoading) ? (
+      {isLoading2 || isProductsLoading ? (
         <div>
-            <SkeletonLoading/>
+          <SkeletonLoading />
         </div>
       ) : (
         <div>
           <main className="container mx-auto py-8 grid grid-cols-1">
-        <span className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          Trang chủ &gt; <Link to={"/shop"}>Cửa hàng</Link>
-        </span>
-        <div className="flex flex-col md:flex-row">
-          <FilterSidebar
-            filters={filters}
-            setFilters={setFilters}
-            availableFilters={dataToFilter}
-          />
-          <div className="flex-1">
-            {(isProductsLoading) ? (
-              <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-500 dark:border-gray-400"></div>
-                <p>Đang tải sản phẩm...</p>
-              </div>
-            ) : products.length > 0 ? (
-              <>
-                <ProductList products={products} />
-                  <div className="flex justify-end mt-4">
-                    <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
+            <span className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Trang chủ &gt; <Link to={"/shop"}>Cửa hàng</Link>
+            </span>
+            <div className="flex flex-col md:flex-row">
+              <FilterSidebar
+                filters={filters}
+                setFilters={setFilters}
+                availableFilters={dataToFilter}
+              />
+              <div className="flex-1">
+                {isProductsLoading ? (
+                  <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-500 dark:border-gray-400"></div>
+                    <p>Đang tải sản phẩm...</p>
                   </div>
-              </>
-            ) : (
-              <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
-                <FaBoxOpen className="text-6xl mb-2" />
-                <p>Không tìm thấy sản phẩm</p>
+                ) : products.length > 0 ? (
+                  <>
+                    <ProductList products={products} />
+                    <div className="flex justify-end mt-4">
+                      <Pagination
+                        totalPages={totalPages}
+                        currentPage={currentPage}
+                        onPageChange={setCurrentPage}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
+                    <FaBoxOpen className="text-6xl mb-2" />
+                    <p>Không tìm thấy sản phẩm</p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
-      </main>
+            </div>
+          </main>
         </div>
       )}
     </div>

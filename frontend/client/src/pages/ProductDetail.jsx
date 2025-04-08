@@ -126,16 +126,20 @@ const ProductDetail = () => {
   const handleAttributeSelect = (attributeId, valueId) => {
     // Check if this value is already selected
     const isAlreadySelected = selectedAttributes[attributeId] === valueId;
-    
+
     // Create updated attributes
     const updatedAttributes = isAlreadySelected
       ? { ...selectedAttributes }
       : { ...selectedAttributes, [attributeId]: valueId };
-    
+
     // If deselecting, remove the attribute
     if (isAlreadySelected) {
       delete updatedAttributes[attributeId];
     }
+
+    setIsAllAttributesSelected(
+      Object.keys(updatedAttributes).length === attributes.length
+    );
 
     setSelectedAttributes(updatedAttributes);
 
@@ -201,7 +205,7 @@ const ProductDetail = () => {
       discount: product.discount?.percent,
       stock: selectedVariant?.stock || product.stock,
       sku: selectedVariant?.sku || product.sku,
-      thuoc_tinh: chon
+      thuoc_tinh: chon,
     };
 
     const existingIndex = cartItems.findIndex(
@@ -224,10 +228,18 @@ const ProductDetail = () => {
 
   const value_attribute = (name, value) => {
     console.log(name, value);
-    setChon( {...chon, [name]: value});
-  }
+    setChon({ ...chon, [name]: value });
+  };
 
-  console.log("Chon", chon);
+  // console.log("Chon", chon);
+
+  useEffect(() => {
+    if (attributes.length > 0) {
+      setIsAllAttributesSelected(
+        Object.keys(selectedAttributes).length === attributes.length
+      );
+    }
+  }, [attributes, selectedAttributes]);
 
   return (
     <div>
@@ -319,19 +331,27 @@ const ProductDetail = () => {
                           <div>
                             <span className="text-xl font-bold text-gray-800">
                               {FomatVND(
-                                parseFloat(selectedVariant?.price || variants[0]?.price) -
-                                  (parseFloat(selectedVariant?.price || variants[0]?.price) *
+                                parseFloat(
+                                  selectedVariant?.price || variants[0]?.price
+                                ) -
+                                  (parseFloat(
+                                    selectedVariant?.price || variants[0]?.price
+                                  ) *
                                     parseFloat(product?.discount?.percent)) /
                                     100
                               )}
                             </span>
                             <span className="text-lg line-through text-gray-500 ml-4">
-                              {FomatVND(selectedVariant?.price || variants[0]?.price)}
+                              {FomatVND(
+                                selectedVariant?.price || variants[0]?.price
+                              )}
                             </span>
                           </div>
                         ) : (
                           <span className="text-xl font-bold text-gray-800">
-                            {FomatVND(selectedVariant?.price || variants[0]?.price)}
+                            {FomatVND(
+                              selectedVariant?.price || variants[0]?.price
+                            )}
                           </span>
                         )
                       ) : (
@@ -383,9 +403,10 @@ const ProductDetail = () => {
                               return (
                                 <button
                                   key={value.id}
-                                  onClick={() =>
-                                    {handleAttributeSelect(attr.id, value.id),value_attribute(attr.name, value.value)}
-                                  }
+                                  onClick={() => {
+                                    handleAttributeSelect(attr.id, value.id),
+                                      value_attribute(attr.name, value.value);
+                                  }}
                                   className={`px-4 py-2 border rounded transition-all duration-150 ${
                                     isSelected
                                       ? "bg-black text-white"
@@ -468,7 +489,10 @@ const ProductDetail = () => {
                           <button
                             className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
                             onClick={handleAddToCart}
-                            disabled={!isAllAttributesSelected}
+                            disabled={
+                              !isAllAttributesSelected ||
+                              attributes.length === 0
+                            }
                           >
                             Thêm vào giỏ hàng
                           </button>
@@ -477,7 +501,6 @@ const ProductDetail = () => {
                     ) : (
                       <button
                         className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                        onClick={handleAddToCart}
                         disabled={true}
                       >
                         Thêm vào giỏ hàng

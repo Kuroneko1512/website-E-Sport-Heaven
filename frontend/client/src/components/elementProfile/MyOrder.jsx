@@ -1,14 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import instanceAxios from "../../config/db";
 import FomatVND from "../../utils/FomatVND";
 import { FomatTime } from "../../utils/FomatTime";
-import { Link } from "react-router-dom";
-import { Divider } from "antd";
+import { Link, useNavigate } from "react-router-dom";
+import { Divider, Modal, Table } from "antd";
 import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
 
-const OrderItem = ({ order_items, status, order_code }) => {
-  console.log("order_code", status);
+const OrderItem = ({ 
+  order_items, 
+  status, 
+  order_code,
+  reviewModalVisible,
+  setReviewModalVisible,
+  reviewColumns,
+  selectedOrder
+}) => {
+  // console.log("order_code", status);
   const statusStyles = {
     "đang xử lý":
       "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
@@ -23,6 +31,20 @@ const OrderItem = ({ order_items, status, order_code }) => {
 
   return (
     <>
+      <Modal
+        title="Chọn sản phẩm để đánh giá"
+        open={reviewModalVisible}
+        onCancel={() => setReviewModalVisible(false)}
+        footer={null}
+        width={800}
+      >
+        <Table
+          columns={reviewColumns}
+          dataSource={selectedOrder?.order_items || []}
+          rowKey={(record) => record.id}
+          pagination={false}
+        />
+      </Modal>
       <h3 className="bg-white dark:bg-gray-800 pb-3 italic">
         Mã đơn hàng: {order_code}
       </h3>
@@ -85,6 +107,58 @@ const OrderItem = ({ order_items, status, order_code }) => {
 };
 
 const MyOrder = () => {
+  const nav = useNavigate();
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  const reviewColumns = [
+    {
+      title: 'Sản phẩm',
+      dataIndex: 'product',
+      key: 'product',
+      render: (_, record) => (
+        <div className="flex items-center">
+          <img
+            alt="Product Image"
+            className="h-16 w-16 rounded-md mr-2"
+            src={`http://127.0.0.1:8000/storage/${
+              record?.product?.image || record?.product_variant?.image
+            }`}
+          />
+          <div>
+            <p className="font-bold">{record?.product?.name}</p>
+            {record?.product_variant?.product_attributes?.length > 0 && (
+              <p className="text-gray-600">
+                {record?.product_variant?.product_attributes.map(
+                  (attr, index) => (
+                    <span key={index}>
+                      {attr?.attribute?.name}: {attr.attribute_value?.value}{' '}
+                    </span>
+                  )
+                )}
+              </p>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Đánh giá',
+      key: 'action',
+      render: (_, record) => (
+        <button
+          onClick={() => {
+            const productId = record.product_id || record.product_variant?.product_id;
+            nav(`/shop/product-detail/${productId}/reviews`);
+            setReviewModalVisible(false);
+          }}
+          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Đánh giá
+        </button>
+      ),
+    },
+  ];
   const {
     data: apiResponse,
     isLoading,
@@ -153,11 +227,23 @@ const MyOrder = () => {
     return actions;
   };
 
-  const handleAction = (action, order) => {
+const handleAction = (action, order) => {
     switch (action) {
       case "đánh giá":
-        // điều hướng đến trang đánh giá
-        console.log(`Thực hiện yêu cầu đánh giá cho đơn ${order.order_code}`);
+        // Check if order has multiple products
+        const productIds = new Set(order.order_items.map(item => 
+          item.product_id || item.product_variant?.product_id
+        ));
+        
+        if (productIds.size > 1) {
+          setSelectedOrder(order);
+          setReviewModalVisible(true);
+        } else {
+          // Single product - navigate directly
+          const productId = order.order_items[0].product_id || 
+                          order.order_items[0].product_variant?.product_id;
+          nav(`/shop/product-detail/${productId}/reviews`);
+        }
         break;
       case "hủy":
         // gọi API hủy
@@ -215,16 +301,20 @@ const MyOrder = () => {
                   <h3 className="m-3 text-lg font-semibold">
                     Ngày mua: {dayLabel}
                   </h3>
-                  <div className="space-y-6">
+                  <div>
                     {orders.map((order, idx) => (
                       <div
                         key={idx}
-                        className="p-3 border rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700"
+                        className="p-3 border hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700"
                       >
                         <OrderItem
                           order_items={order.order_items}
                           status={order.status}
                           order_code={order.order_code}
+                          reviewModalVisible={reviewModalVisible}
+                          setReviewModalVisible={setReviewModalVisible}
+                          reviewColumns={reviewColumns}
+                          selectedOrder={selectedOrder}
                         />
                         {/* Phần Tổng tiền + button */}
                         <div className="flex items-end flex-col gap-2 pt-3 bg-white dark:bg-gray-800">
