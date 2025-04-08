@@ -24,6 +24,9 @@ const ProductDetail = () => {
   const [validOptions, setValidOptions] = useState({});
   const [chon, setChon] = useState([]);
 
+  const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông báo
+  const [canWarn, setCanWarn] = useState(true); // Kiểm soát thời gian chờ thông báo
+
   const { data: productDetailData, isLoading } = useQuery({
     queryKey: ["productDetailData", id],
     queryFn: async () => {
@@ -126,12 +129,12 @@ const ProductDetail = () => {
   const handleAttributeSelect = (attributeId, valueId) => {
     // Check if this value is already selected
     const isAlreadySelected = selectedAttributes[attributeId] === valueId;
-    
+
     // Create updated attributes
     const updatedAttributes = isAlreadySelected
       ? { ...selectedAttributes }
       : { ...selectedAttributes, [attributeId]: valueId };
-    
+
     // If deselecting, remove the attribute
     if (isAlreadySelected) {
       delete updatedAttributes[attributeId];
@@ -167,11 +170,25 @@ const ProductDetail = () => {
       let newQuantity = prev + delta;
 
       if (newQuantity > stock) {
-        return stock; // Không cho phép vượt quá tồn kho
+        if (canWarn) {
+          if (warningCount < 3) {
+            message.warning("Không thể nhập quá số lượng tồn kho!");
+            setWarningCount((prevCount) => prevCount + 1);
+          }
+
+          // Đặt thời gian chờ 3 giây để cho phép thông báo lại
+          setCanWarn(false);
+          setTimeout(() => {
+            setCanWarn(true);
+            setWarningCount(0); // Đặt lại bộ đếm sau 3 giây
+          }, 3000);
+        }
+        return stock; // Giới hạn số lượng bằng tồn kho
       }
 
       if (newQuantity < 1) {
-        return 1; // Không cho phép giảm dưới 1
+        message.warning("Số lượng không thể nhỏ hơn 1!");
+        return 1; // Giới hạn số lượng tối thiểu là 1
       }
 
       return newQuantity;
@@ -187,6 +204,14 @@ const ProductDetail = () => {
         return;
       }
     }
+
+    const stock = selectedVariant ? selectedVariant.stock : product?.stock || 0;
+
+    if (quantity > stock) {
+      message.error("Số lượng vượt quá tồn kho. Vui lòng kiểm tra lại!");
+      return;
+    }
+
     const generateId = () =>
       Date.now() + Math.random().toString(36).substr(2, 9);
     let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -201,7 +226,7 @@ const ProductDetail = () => {
       discount: product.discount?.percent,
       stock: selectedVariant?.stock || product.stock,
       sku: selectedVariant?.sku || product.sku,
-      thuoc_tinh: chon
+      thuoc_tinh: chon,
     };
 
     const existingIndex = cartItems.findIndex(
@@ -211,8 +236,17 @@ const ProductDetail = () => {
     );
 
     if (existingIndex !== -1) {
-      cartItems[existingIndex].quantity += cartItem.quantity;
+      const newQuantity = cartItems[existingIndex].quantity + cartItem.quantity;
+      if (newQuantity > stock) {
+        message.error("Số lượng vượt quá tồn kho. Vui lòng kiểm tra lại!");
+        return;
+      }
+      cartItems[existingIndex].quantity = newQuantity;
     } else {
+      if (cartItem.quantity > stock) {
+        message.error("Số lượng vượt quá tồn kho. Vui lòng kiểm tra lại!");
+        return;
+      }
       cartItems.push(cartItem);
     }
 
@@ -224,8 +258,8 @@ const ProductDetail = () => {
 
   const value_attribute = (name, value) => {
     console.log(name, value);
-    setChon( {...chon, [name]: value});
-  }
+    setChon({ ...chon, [name]: value });
+  };
 
   console.log("Chon", chon);
 
@@ -319,19 +353,27 @@ const ProductDetail = () => {
                           <div>
                             <span className="text-xl font-bold text-gray-800">
                               {FomatVND(
-                                parseFloat(selectedVariant?.price || variants[0]?.price) -
-                                  (parseFloat(selectedVariant?.price || variants[0]?.price) *
+                                parseFloat(
+                                  selectedVariant?.price || variants[0]?.price
+                                ) -
+                                  (parseFloat(
+                                    selectedVariant?.price || variants[0]?.price
+                                  ) *
                                     parseFloat(product?.discount?.percent)) /
                                     100
                               )}
                             </span>
                             <span className="text-lg line-through text-gray-500 ml-4">
-                              {FomatVND(selectedVariant?.price || variants[0]?.price)}
+                              {FomatVND(
+                                selectedVariant?.price || variants[0]?.price
+                              )}
                             </span>
                           </div>
                         ) : (
                           <span className="text-xl font-bold text-gray-800">
-                            {FomatVND(selectedVariant?.price || variants[0]?.price)}
+                            {FomatVND(
+                              selectedVariant?.price || variants[0]?.price
+                            )}
                           </span>
                         )
                       ) : (
@@ -383,9 +425,10 @@ const ProductDetail = () => {
                               return (
                                 <button
                                   key={value.id}
-                                  onClick={() =>
-                                    {handleAttributeSelect(attr.id, value.id),value_attribute(attr.name, value.value)}
-                                  }
+                                  onClick={() => {
+                                    handleAttributeSelect(attr.id, value.id),
+                                      value_attribute(attr.name, value.value);
+                                  }}
                                   className={`px-4 py-2 border rounded transition-all duration-150 ${
                                     isSelected
                                       ? "bg-black text-white"
@@ -438,7 +481,24 @@ const ProductDetail = () => {
                             : product?.stock || 0;
 
                           if (isNaN(value) || value < 1) value = 1;
-                          if (value > stock) value = stock;
+
+                          if (value > stock) {
+                            if (canWarn) {
+                              if (warningCount < 3) {
+                                message.warning(
+                                  "Không thể nhập quá số lượng tồn kho!"
+                                );
+                                setWarningCount((prevCount) => prevCount + 1);
+                              }
+
+                              setCanWarn(false);
+                              setTimeout(() => {
+                                setCanWarn(true);
+                                setWarningCount(0);
+                              }, 3000);
+                            }
+                            value = stock;
+                          }
 
                           setQuantity(value);
                         }}

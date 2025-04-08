@@ -47,6 +47,8 @@ const OrderTracking = () => {
     enabled: !!searchCode, // Chỉ gọi API khi có mã đơn hàng
     staleTime: 60000, // Cache dữ liệu trong 1 phút
   });
+  console.log(orderData);
+  // console.log(orderData.product.discount_percent)
 
   const handleSearch = () => {
     setSearchCode(orderCode);

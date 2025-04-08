@@ -136,6 +136,7 @@ const NewCheckout = () => {
 
       setOrder((prev) => ({
         ...prev,
+        // customer_id: user.customerId||null,
         customer_name: dataform.fullname,
         customer_phone: dataform.mobile,
         customer_email: dataform.email,

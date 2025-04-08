@@ -9,12 +9,14 @@ const LeftNavbar = () => {
 
   const menuItems = [
     { link: "info", icon: "fa-user", label: "Thông tin cá nhân" },
+    { link: "password", icon: "fa-key", label: "Đổi mật khẩu" },
     { link: "orders", icon: "fa-box", label: "Đơn hàng của tôi" },
     { link: "wishlists", icon: "fa-heart", label: "Sản phâm yêu thích" },
     { link: "manage-address", icon: "fa-map-marker-alt", label: "Quản lý địa chỉ" },
     { link: "saved-cards", icon: "fa-credit-card", label: "Thẻ đã lưu" },
     { link: "notifications", icon: "fa-bell", label: "Thông báo" },
     { link: "settings", icon: "fa-cog", label: "Cài đặt" },
+    
   ];
 
   return (
