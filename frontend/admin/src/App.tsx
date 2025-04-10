@@ -34,7 +34,10 @@ import VariantProduct from "./pages/Product/VariantProduct";
 import Category from "./pages/Category/Category";
 import AttributePage from "@pages/Attribute/Attribute";
 import { setCurrentUser, setAuthData, clearAuth } from "./store/reducers/auth";
-
+import Coupon from "@pages/Coupon/Coupon";
+import AddCoupon from "@pages/Coupon/Store";
+import EditCoupon from "@pages/Coupon/Edit";
+import DetailCoupon from "@pages/Coupon/Detail";
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {

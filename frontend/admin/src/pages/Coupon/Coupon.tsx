@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { deleteCoupon, getCoupons, Coupon as ApiCoupon, Pagination } from "@app/services/Coupon/ApiCoupon";
+import { deleteCoupon, getCoupons, Coupon as ApiCoupon } from "@app/services/Coupon/ApiCoupon";
 import { Link, useNavigate } from "react-router-dom";
 
 interface CouponDisplay {
@@ -32,7 +32,7 @@ const Coupon: FC = () => {
       const response = await getCoupons(page, perPage, search);
       console.log("API response:", response);
       
-      // Lưu thông tin phân trang
+    
       setCurrentPage(response.current_page);
       setLastPage(response.last_page);
       setTotal(response.total);
@@ -210,7 +210,7 @@ const Coupon: FC = () => {
                         <td>{coupon.code}</td>
                         <td>{coupon.name}</td>
                         <td>{coupon.discount_value}</td>
-                        <td>{coupon.discount_type}</td>
+                        <td>{coupon.discount_type === 'percentage' ? 'Phần trăm' : 'Giá trị cố định'}</td>
                         <td>
                           <span
                             className={`tag ${coupon.is_active === 1 ? "tag-success" : "tag-danger"}`}

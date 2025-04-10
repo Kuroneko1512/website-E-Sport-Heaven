@@ -114,7 +114,7 @@ const Store = () => {
   const handleOptionChange = (
     newValue: SingleValue<{ value: string; label: string }>
   ) => {
-    if (!newValue) return; // Kiểm tra nếu null thì không làm gì
+    if (!newValue) return; 
     setSelectedProduct(newValue);
     if (newValue.value === "simple") {
       let confirm = window.confirm("Bạn có chắc muốn chuyển không");

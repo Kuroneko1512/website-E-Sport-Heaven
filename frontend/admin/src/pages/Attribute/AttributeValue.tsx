@@ -12,6 +12,8 @@ export const AttributeValueFormComponent = ({ attributeId ,setSelectedAttributeI
   const [attributeValue, setAttributeValue] = useState({ value: "", description: "" });
   const [errors, setErrors] = useState<{ value?: string; description?: string }>({});
   const [attributeValues, setAttributeValues] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [pagination, setPagination] = useState<Pagination>({
     current_page: 1,
     last_page: 1,
@@ -24,7 +26,7 @@ export const AttributeValueFormComponent = ({ attributeId ,setSelectedAttributeI
 
   useEffect(() => {
     fetchAttributeValues();
-  }, );
+  }, []);
 
   const fetchAttributeValues = async (page = 1) => {
     try {
@@ -63,15 +65,20 @@ export const AttributeValueFormComponent = ({ attributeId ,setSelectedAttributeI
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     try {
       if (editingAttributeValue) {
         await AttributeValueService.update(editingAttributeValue.id, { ...attributeValue, attribute_id: attributeId });
 
         toast.success("Cập nhật thành công!");
+        setIsSubmitting(false);
       } else {
         await AttributeValueService.create({ ...attributeValue, attribute_id: attributeId });
+
         toast.success("Thêm thành công!");
+        setIsSubmitting(false);
       }
       fetchAttributeValues();
       setAttributeValue({ value: "", description: "" });
