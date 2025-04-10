@@ -26,6 +26,7 @@ export default function Shop() {
 
   const [currentPage, setCurrentPage] = useState(1);
   // const itemsPerPage = 12;
+  
 
   const startLoading = () => setLoading((prev) => prev + 1);
   const stopLoading = () => setLoading((prev) => Math.max(0, prev - 1));
@@ -219,11 +220,11 @@ export default function Shop() {
     queryKey: ["products", searchQuery, dataToFilter, currentPage],
     queryFn: async () => {
       if (searchQuery && searchQuery.trim() !== "") {
-        const res = await instanceAxios.get(`api/v1/product/search?q=${searchQuery}`);
-        return res.data?.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
+        const res = await instanceAxios.get(`api/v1/product/search?q=${searchQuery}&page=${currentPage}`);
+        return res.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
       } else {
-        const res = await instanceAxios.get(`api/v1/product/fillter`);
-        return res.data?.data?.data;
+        const res = await instanceAxios.get(`api/v1/product/fillter?page=${currentPage}`);
+        return res.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
       }
     },
     staleTime: 600000,
@@ -236,7 +237,7 @@ export default function Shop() {
   // console.log("data", data);
   // const products = productsData?.data?.data || [];
   // const totalPages = productsData?.total || 1;
-  const totalPages = products?.total || 1;
+  const totalPages = products?.last_page || 1;
 
   // console.log("products", products);
 
@@ -264,7 +265,7 @@ export default function Shop() {
                 <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-500 dark:border-gray-400"></div>
                 <p>Đang tải sản phẩm...</p>
               </div>
-            ) : products.length > 0 ? (
+            ) : products?.data?.length > 0 ? (
               <>
                 <ProductList products={products} />
                   <div className="flex justify-end mt-4">
