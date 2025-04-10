@@ -85,10 +85,11 @@ function App() {
     if (userData?.id) {
       try {
         const cookieUser = Cookies.get("user");
-        // const currentUser = cookieUser ? JSON.parse(cookieUser) : {};
+        const currentUser = cookieUser ? JSON.parse(cookieUser) : {};
         
         dispatch(
           updateUser({
+            ...currentUser,
             // Start with initial empty user structure
             customerId: userData.id,
             // avatar: currentUser.avatar || null,
@@ -99,7 +100,7 @@ function App() {
             // ...(userData.avatar && { avatar: userData.avatar }),
             // ...(userData.name && { name: userData.name }),
             // ...(userData.email && { email: userData.email }),
-            ...(userData.phone && { phone: userData.phone }),
+            // ...(userData.phone && { phone: userData.phone }),
           })
         );
       } catch (error) {
