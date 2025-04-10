@@ -1,8 +1,4 @@
-import { useOutletContext } from "react-router-dom";
-
-const Description = () => {
-  const { product } = useOutletContext();
-
+const Description = ({ product }) => {
   return (
     <div>
       <p

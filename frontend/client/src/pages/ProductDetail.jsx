@@ -1,7 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { message, Skeleton } from "antd";
 import React, { useEffect, useState } from "react";
-import { Link, Outlet, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import Description from "../components/elementProduct/Description";
+// import AdditionalInformation from "../components/elementProduct/AdditionalInformation";
+import Review from "../components/elementProduct/Review";
 import instanceAxios from "../config/db";
 import RelatedProducts from "../components/elementProduct/RelatedProducts";
 import ScrollToTop from "../config/ScrollToTop";
@@ -23,9 +26,7 @@ const ProductDetail = () => {
   const [attributes, setAttributes] = useState([]);
   const [validOptions, setValidOptions] = useState({});
   const [chon, setChon] = useState([]);
-
-  const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông báo
-  const [canWarn, setCanWarn] = useState(true); // Kiểm soát thời gian chờ thông báo
+  const [activeTab, setActiveTab] = useState('description');
 
   const { data: productDetailData, isLoading } = useQuery({
     queryKey: ["productDetailData", id],
@@ -174,25 +175,11 @@ const ProductDetail = () => {
       let newQuantity = prev + delta;
 
       if (newQuantity > stock) {
-        if (canWarn) {
-          if (warningCount < 3) {
-            message.warning("Không thể nhập quá số lượng tồn kho!");
-            setWarningCount((prevCount) => prevCount + 1);
-          }
-
-          // Đặt thời gian chờ 3 giây để cho phép thông báo lại
-          setCanWarn(false);
-          setTimeout(() => {
-            setCanWarn(true);
-            setWarningCount(0); // Đặt lại bộ đếm sau 3 giây
-          }, 3000);
-        }
-        return stock; // Giới hạn số lượng bằng tồn kho
+        return stock; // Không cho phép vượt quá tồn kho
       }
 
       if (newQuantity < 1) {
-        message.warning("Số lượng không thể nhỏ hơn 1!");
-        return 1; // Giới hạn số lượng tối thiểu là 1
+        return 1; // Không cho phép giảm dưới 1
       }
 
       return newQuantity;
@@ -208,14 +195,6 @@ const ProductDetail = () => {
         return;
       }
     }
-
-    const stock = selectedVariant ? selectedVariant.stock : product?.stock || 0;
-
-    if (quantity > stock) {
-      message.error("Số lượng vượt quá tồn kho. Vui lòng kiểm tra lại!");
-      return;
-    }
-
     const generateId = () =>
       Date.now() + Math.random().toString(36).substr(2, 9);
     let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -240,17 +219,8 @@ const ProductDetail = () => {
     );
 
     if (existingIndex !== -1) {
-      const newQuantity = cartItems[existingIndex].quantity + cartItem.quantity;
-      if (newQuantity > stock) {
-        message.error("Số lượng vượt quá tồn kho. Vui lòng kiểm tra lại!");
-        return;
-      }
-      cartItems[existingIndex].quantity = newQuantity;
+      cartItems[existingIndex].quantity += cartItem.quantity;
     } else {
-      if (cartItem.quantity > stock) {
-        message.error("Số lượng vượt quá tồn kho. Vui lòng kiểm tra lại!");
-        return;
-      }
       cartItems.push(cartItem);
     }
 
@@ -493,24 +463,7 @@ const ProductDetail = () => {
                             : product?.stock || 0;
 
                           if (isNaN(value) || value < 1) value = 1;
-
-                          if (value > stock) {
-                            if (canWarn) {
-                              if (warningCount < 3) {
-                                message.warning(
-                                  "Không thể nhập quá số lượng tồn kho!"
-                                );
-                                setWarningCount((prevCount) => prevCount + 1);
-                              }
-
-                              setCanWarn(false);
-                              setTimeout(() => {
-                                setCanWarn(true);
-                                setWarningCount(0);
-                              }, 3000);
-                            }
-                            value = stock;
-                          }
+                          if (value > stock) value = stock;
 
                           setQuantity(value);
                         }}
@@ -574,40 +527,30 @@ const ProductDetail = () => {
               <div className="mt-8">
                 <div className="border-b border-gray-200 mb-4">
                   <ul className="flex space-x-4">
-                    <Link
-                      to="descriptions"
-                      className={`pb-2 ${
-                        location.pathname === `/product-detail/${id}` ||
-                        location.pathname.includes("descriptions")
-                          ? "border-b-2 border-black"
-                          : ""
-                      }`}
+                    <button
+                      onClick={() => setActiveTab('description')}
+                      className={`pb-2 ${activeTab === 'description' ? 'border-b-2 border-black' : ''}`}
                     >
                       Mô tả
-                    </Link>
-                    {/* <Link
-                      to="information"
-                      className={`pb-2 ${
-                        location.pathname.includes("information")
-                          ? "border-b-2 border-black"
-                          : ""
-                      }`}
+                    </button>
+                    {/* <button
+                      onClick={() => setActiveTab('information')}
+                      className={`pb-2 ${activeTab === 'information' ? 'border-b-2 border-black' : ''}`}
                     >
                       Thông tin bổ sung
-                    </Link> */}
-                    <Link
-                      to="reviews"
-                      className={`pb-2 ${
-                        location.pathname.includes("reviews")
-                          ? "border-b-2 border-black"
-                          : ""
-                      }`}
+                    </button> */}
+                    <button
+                      onClick={() => setActiveTab('reviews')}
+                      className={`pb-2 ${activeTab === 'reviews' ? 'border-b-2 border-black' : ''}`}
                     >
                       Đánh giá
-                    </Link>
+                    </button>
                   </ul>
                 </div>
-                <Outlet context={{ product }} />
+                
+                {activeTab === 'description' && <Description product={product} />}
+                {activeTab === 'information' && <AdditionalInformation product={product} />}
+                {activeTab === 'reviews' && <Review product={product} />}
               </div>
 
               {/* Sản phẩm gần đây */}

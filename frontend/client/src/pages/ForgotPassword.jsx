@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Typography } from 'antd';
 import { LeftOutlined } from '@ant-design/icons';
+import Cookies from 'js-cookie';
 
 const { Title, Paragraph } = Typography;
 
@@ -9,12 +10,36 @@ const ForgotPassword = () => {
 
     const nav = useNavigate();
 
-  const onFinish = (values) => {
-    console.log('Email gửi OTP:', values.email);
-    // Xử lý gửi OTP ở đây
+  const onFinish = async (values) => {
+    try {
+      console.log('Email gửi OTP:', values.email);
+      
+      // Gọi API gửi OTP đến email
+      // Backend cần triển khai endpoint: POST /api/auth/forgot-password
+      // Request body: { email: string }
+      // Response: { success: boolean, message?: string }
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: values.email }),
+      });
 
-    // Chuyển hướng về trang nhập OTP
-    nav('/otp-enter');
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Gửi OTP thất bại');
+      }
+
+      // Lưu email vào cookies để xác thực
+      Cookies.set('otpEmail', values.email, { expires: 1/24 }); // Expires in 1 hour
+      
+      // Chuyển hướng đến trang nhập OTP
+      nav('/otp-enter');
+    } catch (error) {
+      console.error('Lỗi khi gửi OTP:', error);
+      // TODO: Hiển thị thông báo lỗi cho người dùng
+    }
   };
 
   return (
@@ -33,9 +58,9 @@ const ForgotPassword = () => {
       {/* Form Section */}
       <div className="w-1/2 flex items-center justify-center">
         <div className="w-3/4">
-          <Link className="flex items-center mb-6" to="/login">
+          <Link className="flex items-center text-gray-500 mb-6" to="/login">
             <LeftOutlined />
-            <span className="ml-2 text-gray-500">Trở lại</span>
+            <span className="ml-2">Trở lại</span>
           </Link>
 
           <Title level={2}>Quên mật khẩu</Title>
