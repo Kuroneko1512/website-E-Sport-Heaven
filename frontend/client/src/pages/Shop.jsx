@@ -48,7 +48,6 @@ export default function Shop() {
   // const [products, setProducts] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page")) || 1);
-  const itemsPerPage = 12;
 
   const startLoading = () => setLoading((prev) => prev + 1);
   const stopLoading = () => setLoading((prev) => Math.max(0, prev - 1));
@@ -278,6 +277,7 @@ export default function Shop() {
   //   }
   // });
 
+
   // console.log("dataToFilter", dataToFilter);
   // console.log("filters", filters);
 
@@ -286,14 +286,12 @@ export default function Shop() {
     queryKey: ["products", searchQuery, filters, currentPage],
     queryFn: async () => {
       if (searchQuery && searchQuery.trim() !== "") {
-        const res = await instanceAxios.get(
-          `api/v1/product/search?q=${searchQuery}`
-        );
-        return res.data?.data?.data;
+        const res = await instanceAxios.get(`api/v1/product/search?q=${searchQuery}&page=${currentPage}`);
+        return res.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
       } else {
         // Xây dựng tham số filter
         const params = {
-          category_id: filters.categorys.length > 0 ? filters.categorys.join(',') : undefined,
+          category_id: filters.categorys.length > 0 ? filters.categorys[0] : undefined,
           min_price: filters.priceRange[0],
           max_price: filters.priceRange[1],
           page: currentPage
@@ -307,8 +305,10 @@ export default function Shop() {
             .join(',');
         }
 
-        const res = await instanceAxios.get(`api/v1/product/fillter`, { params });
-        return res.data?.data?.data;
+        const res = await instanceAxios.get(`api/v1/product/fillter?page=${currentPage}`, {
+          params,
+        });
+        return res?.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
       }
     },
     staleTime: 600000,
@@ -321,7 +321,7 @@ export default function Shop() {
   // console.log("data", data);
   // const products = productsData?.data?.data || [];
   // const totalPages = productsData?.total || 1;
-  const totalPages = products?.total || 1;
+  const totalPages = products?.last_page || 1;
 
   // console.log("products", products);
 
@@ -349,7 +349,7 @@ export default function Shop() {
                     <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-500 dark:border-gray-400"></div>
                     <p>Đang tải sản phẩm...</p>
                   </div>
-                ) : products?.length > 0 ? (
+                ) : products?.data?.length > 0 ? (
                   <>
                     <ProductList products={products} />
                     <div className="flex justify-end mt-4">
