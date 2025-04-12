@@ -266,39 +266,6 @@ class ProductService extends BaseService
             }
         }
     }
-    public function getPriceRange()
-    {
-        $minPrice = $this->model->min('price');
-        $maxPrice = $this->model->max('price');
-
-        // Nếu có sản phẩm biến thể, kiểm tra cả giá của biến thể
-        $variantMinPrice = DB::table('product_variants')->min('price');
-        $variantMaxPrice = DB::table('product_variants')->max('price');
-
-        // Lấy giá thấp nhất và cao nhất giữa sản phẩm thường và biến thể
-        $finalMinPrice = min(
-            is_null($minPrice) ? PHP_FLOAT_MAX : $minPrice,
-            is_null($variantMinPrice) ? PHP_FLOAT_MAX : $variantMinPrice
-        );
-
-        $finalMaxPrice = max(
-            is_null($maxPrice) ? 0 : $maxPrice,
-            is_null($variantMaxPrice) ? 0 : $variantMaxPrice
-        );
-
-        // Nếu không có sản phẩm nào, trả về giá trị mặc định
-        if ($finalMinPrice === PHP_FLOAT_MAX) {
-            $finalMinPrice = 0;
-        }
-        if ($finalMaxPrice === 0) {
-            $finalMaxPrice = 10000000; // 10 triệu VND
-        }
-
-        return [
-            'min_price' => (int)$finalMinPrice,
-            'max_price' => (int)$finalMaxPrice
-        ];
-    }
     private function generateSKU($productName, $attributes = [])
     {
         // Chuyển tên sản phẩm thành slug

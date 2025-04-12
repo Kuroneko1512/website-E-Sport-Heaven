@@ -214,20 +214,4 @@ class ProductController extends Controller
             'data' => $products,
         ], 200);
     }
-
-    public function getPriceRange()
-    {
-        try {
-            $priceRange = $this->productService->getPriceRange();
-            return response()->json([
-                'success' => true,
-                'data' => $priceRange
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'message' => 'Lỗi khi xử lý dữ liệu.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
 }
