@@ -47,7 +47,9 @@ export default function Shop() {
   const [loading, setLoading] = useState(0);
   // const [products, setProducts] = useState([]);
 
+
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page")) || 1);
+
 
   const startLoading = () => setLoading((prev) => prev + 1);
   const stopLoading = () => setLoading((prev) => Math.max(0, prev - 1));
@@ -276,13 +278,16 @@ export default function Shop() {
 
   return (
     <div className="bg-white text-gray-800 dark:bg-gray-800 dark:text-white m-10">
+
       {isInitialLoad ? (
+
         <div>
-          <SkeletonLoading />
+            <SkeletonLoading/>
         </div>
       ) : (
         <div>
           <main className="container mx-auto py-8 grid grid-cols-1">
+
             <span className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Trang chủ &gt; <Link to={"/shop"}>Cửa hàng</Link>
             </span>
@@ -313,11 +318,18 @@ export default function Shop() {
                   <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
                     <FaBoxOpen className="text-6xl mb-2" />
                     <p>Không tìm thấy sản phẩm</p>
+
                   </div>
-                )}
+              </>
+            ) : (
+              <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
+                <FaBoxOpen className="text-6xl mb-2" />
+                <p>Không tìm thấy sản phẩm</p>
               </div>
-            </div>
-          </main>
+            )}
+          </div>
+        </div>
+      </main>
         </div>
       )}
     </div>
