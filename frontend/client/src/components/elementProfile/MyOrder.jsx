@@ -1,14 +1,29 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import instanceAxios from "../../config/db";
 import FomatVND from "../../utils/FomatVND";
 import { FomatTime } from "../../utils/FomatTime";
-import { Link } from "react-router-dom";
-import { Divider } from "antd";
+import { Link, useNavigate } from "react-router-dom";
+import { Divider, message, Modal, Table, Form } from "antd";
+import ReviewForm from "./ReviewForm";
+import useReview from "../../hooks/useReview";
 import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
 
-const OrderItem = ({ order_items, status, order_code }) => {
-  console.log("order_code", status);
+const OrderItem = ({ 
+  order_items, 
+  status, 
+  order_code,
+  reviewModalVisible,
+  setReviewModalVisible,
+  selectedProduct,
+  handleReviewSubmit,
+  form,
+  selectedOrder,
+  currentProductIndex,
+  setCurrentProductIndex,
+  reviewedProducts
+}) => {
+  // console.log("order_code", status);
   const statusStyles = {
     "đang xử lý":
       "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
@@ -23,6 +38,58 @@ const OrderItem = ({ order_items, status, order_code }) => {
 
   return (
     <>
+        <Modal
+          title="Đánh giá sản phẩm"
+          open={reviewModalVisible}
+          onCancel={() => {
+            setReviewModalVisible(false);
+            form.resetFields();
+          }}
+          footer={[
+            <button 
+              key="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+              onClick={() => handleReviewSubmit(form.getFieldsValue())}
+            >
+              Đăng đánh giá
+            </button>
+          ]}
+          width={800}
+        >
+          <div className="max-h-[500px] overflow-y-auto">
+            {selectedOrder?.order_items?.map((item, index) => (
+              <div key={index} className="mb-6 border-b pb-4">
+                <div className="flex items-start pb-4">
+                  <img
+                    alt="Product Image"
+                    className="h-24 w-24 rounded-md mr-4"
+                    src={`http://127.0.0.1:8000/storage/${
+                      item?.product?.image || item?.product_variant?.image
+                    }`}
+                  />
+                  <div>
+                    <p className="font-bold text-lg">{item?.product?.name}</p>
+                    {item?.product_variant?.product_attributes?.length > 0 && (
+                      <p className="text-gray-600">
+                        {item?.product_variant?.product_attributes.map(
+                          (attr, index) => (
+                            <span key={index}>
+                              {attr?.attribute?.name}: {attr.attribute_value?.value}{' '}
+                            </span>
+                          )
+                        )}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <ReviewForm 
+                  namePrefix={`product_${index}`}
+                  form={form}
+                />
+              </div>
+            ))}
+          </div>
+        </Modal>
       <h3 className="bg-white dark:bg-gray-800 pb-3 italic">
         Mã đơn hàng: {order_code}
       </h3>
@@ -45,6 +112,7 @@ const OrderItem = ({ order_items, status, order_code }) => {
                   <p className="font-bold text-gray-900 dark:text-gray-200">
                     {item?.product?.name}
                   </p>
+                  {/* Attributes */}
                   {item?.product_variant?.product_attributes?.length > 0 && (
                     <p className="text-gray-600 dark:text-gray-400">
                       {item?.product_variant?.product_attributes.map(
@@ -64,7 +132,7 @@ const OrderItem = ({ order_items, status, order_code }) => {
               </div>
               <span className="text-right">
                 <p className="font-bold text-lg text-gray-900 dark:text-gray-200">
-                  {FomatVND(item?.price)}
+                  {FomatVND(calculateSubtotal(item))}
                 </p>
               </span>
             </div>
@@ -84,7 +152,51 @@ const OrderItem = ({ order_items, status, order_code }) => {
   );
 };
 
+const calculateSubtotal = (item) => {
+  const price = Number(item?.product?.price || item?.product_variant?.price) || 0;
+  const discountPercent = Number(item?.product?.discount_percent || item?.product_variant?.discount_percent) || 0;
+  const quantity = Number(item?.quantity) || 0;
+  
+  // Calculate discounted price
+  const discountedPrice = price - (price * discountPercent / 100);
+  
+  return discountedPrice * quantity;
+};
+
+
+
 const MyOrder = () => {
+  const nav = useNavigate();
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [currentProductIndex, setCurrentProductIndex] = useState(0);
+  const [reviewedProducts, setReviewedProducts] = useState([]);
+  const [form] = Form.useForm();
+  
+  const selectedProduct = selectedOrder?.order_items?.[currentProductIndex] || null;
+  const { submitReview } = useReview(selectedProduct?.product_id || selectedProduct?.product_variant?.product_id);
+
+
+  const handleReviewSubmit = async (values) => {
+    const reviewPromises = selectedOrder.order_items.map((item, index) => {
+      const productId = item.product_id || item.product_variant?.product_id;
+      const reviewData = {
+        rating: values[`product_${index}_rating`],
+        comment: values[`product_${index}_comment`]
+      };
+      return instanceAxios.post(`/api/v1/reviews/${productId}`, reviewData);
+    });
+
+    try {
+      await Promise.all(reviewPromises);
+      message.success('Đã gửi đánh giá thành công');
+      form.resetFields();
+      setReviewModalVisible(false);
+    } catch (error) {
+      message.error('Có lỗi xảy ra khi gửi đánh giá');
+      console.error(error);
+    }
+  };
   const {
     data: apiResponse,
     isLoading,
@@ -152,20 +264,68 @@ const MyOrder = () => {
     return actions;
   };
 
-  const handleAction = (action, order) => {
+const handleAction = async (action, order) => {
     switch (action) {
       case "đánh giá":
-        // điều hướng đến trang đánh giá
-        console.log(`Thực hiện yêu cầu đánh giá cho đơn ${order.order_code}`);
+        setSelectedOrder(order);
+        setCurrentProductIndex(0);
+        setReviewedProducts([]);
+        setReviewModalVisible(true);
         break;
       case "hủy":
-        // gọi API hủy
-        console.log(`Thực hiện yêu cầu đánh giá cho đơn ${order.order_code}`);
-
+        // Redirect to cart page
+        nav("/cart");
         break;
       case "mua lại":
-        // thêm lại sản phẩm vào giỏ
-        console.log(`Thực hiện yêu cầu đánh giá cho đơn ${order.order_code}`);
+        // Check product availability before adding to cart
+        try {
+          const productId = order.order_items[0].product_id || 
+                          order.order_items[0].product_variant?.product_id;
+          const res = await instanceAxios.get(`/api/v1/product/${productId}/Detail`);
+          
+          if (res.data.data.status !== "active") {
+            message.error("Sản phẩm đã ngừng bán");
+            return;
+          }
+
+          // Add all items to cart
+          const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+          const updatedCart = [...cartItems];
+          
+          order.order_items.forEach(item => {
+            const existingIndex = updatedCart.findIndex(
+              cartItem => cartItem.product_id === item.product_id && 
+                         (!item.variant_id || cartItem.variant_id === item.variant_id)
+            );
+
+            if (existingIndex !== -1) {
+              updatedCart[existingIndex].quantity += item.quantity;
+            } else {
+              updatedCart.push({
+                product_id: item.product_id,
+                variant_id: item.variant_id,
+                quantity: item.quantity,
+                image: item.product?.image || item.product_variant?.image,
+                name: item.product?.name,
+                price: Number(item.price), // Ensure price is a number
+                stock: item.product?.stock || item.product_variant?.stock,
+                thuoc_tinh: item.product_variant?.product_attributes?.reduce((acc, attr) => {
+                  acc[attr.attribute.name] = attr.attribute_value.value;
+                  return acc;
+                }, {}) || {},
+                discount: item.product.discount_percent || item.product_variant.discount_percent // Use item's discount if available
+              });
+            }
+          });
+
+          localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+          message.success("Đã thêm sản phẩm vào giỏ hàng");
+          window.dispatchEvent(new CustomEvent("cartUpdated", { detail: updatedCart }));
+          nav("/cart");
+        } catch (error) {
+          console.error("Error checking product:", error);
+          message.error("Không thể kiểm tra sản phẩm");
+        }
         break;
       case "hoàn trả":
         // mở modal hoặc điều hướng đến trang yêu cầu hoàn trả
@@ -214,29 +374,32 @@ const MyOrder = () => {
                   <h3 className="m-3 text-lg font-semibold">
                     Ngày mua: {dayLabel}
                   </h3>
-                  <div className="space-y-6">
+                  <div>
                     {orders.map((order, idx) => (
                       <div
                         key={idx}
-                        className="p-3 border rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700"
+                        className="p-3 border hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700"
                       >
-                        <OrderItem
-                          order_items={order.order_items}
-                          status={order.status}
-                          order_code={order.order_code}
-                        />
+        <OrderItem
+          order_items={order.order_items}
+          status={order.status}
+          order_code={order.order_code}
+          reviewModalVisible={reviewModalVisible}
+          setReviewModalVisible={setReviewModalVisible}
+          selectedProduct={selectedProduct}
+          handleReviewSubmit={handleReviewSubmit}
+          form={form}
+          selectedOrder={selectedOrder}
+          currentProductIndex={currentProductIndex}
+          setCurrentProductIndex={setCurrentProductIndex}
+          reviewedProducts={reviewedProducts}
+        />
                         {/* Phần Tổng tiền + button */}
                         <div className="flex items-end flex-col gap-2 pt-3 bg-white dark:bg-gray-800">
                           <div className="self-end">
                             <span className="mr-2 font-medium">Tổng tiền:</span>
                             <span className="font-bold">
-                              {FomatVND(
-                                order?.order_items?.reduce(
-                                  (sum, item) =>
-                                    sum + item.price * item.quantity,
-                                  0
-                                )
-                              )}
+                              {FomatVND(order.total_amount)}
                             </span>
                           </div>
                           <div className="flex flex-row-reverse bg-white dark:bg-gray-800">

@@ -27,7 +27,6 @@ export default function Shop() {
   const [currentPage, setCurrentPage] = useState(1);
   // const itemsPerPage = 12;
   
-
   const startLoading = () => setLoading((prev) => prev + 1);
   const stopLoading = () => setLoading((prev) => Math.max(0, prev - 1));
 
