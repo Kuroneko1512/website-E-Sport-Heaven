@@ -16,13 +16,26 @@ export default function Shop() {
 
   // Khởi tạo state với giá trị từ URL hoặc mặc định
   const [filters, setFilters] = useState({
-    categorys: searchParams.get("category")?.split(",").filter(Boolean) || [],
+    categorys: searchParams.get("category")?.split(",").filter(Boolean).map(id => id.toString()) || [],
     attributefilter: JSON.parse(searchParams.get("attributes") || "{}"),
     priceRange: [
       parseInt(searchParams.get("min_price")) || 0,
       parseInt(searchParams.get("max_price")) || 10000000
     ],
   });
+
+  // Effect để đồng bộ URL params với state khi trang load
+  useEffect(() => {
+    const newFilters = {
+      categorys: searchParams.get("category")?.split(",").filter(Boolean).map(id => id.toString()) || [],
+      attributefilter: JSON.parse(searchParams.get("attributes") || "{}"),
+      priceRange: [
+        parseInt(searchParams.get("min_price")) || 0,
+        parseInt(searchParams.get("max_price")) || 10000000
+      ],
+    };
+    setFilters(newFilters);
+  }, [location.search]); // Chạy lại khi URL thay đổi
 
   const [dataToFilter, setDataToFilter] = useState({
     priceRange: [0, 10000000], // Giá trị mặc định
@@ -148,7 +161,7 @@ export default function Shop() {
       setDataToFilter((prev) => ({
         ...prev,
         categorys: categories.map((category) => ({
-          id: category.id,
+          id: category.id.toString(), // Đảm bảo id là string
           name: category.name
         }))
       }));
