@@ -49,7 +49,7 @@ const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
       ...prev,
       categorys: prev.categorys.includes(categoryId)
         ? prev.categorys.filter((id) => id !== categoryId)
-        : [categoryId] // Chỉ cho phép chọn một category
+        : [...prev.categorys, categoryId] // Cho phép chọn nhiều category
     }));
   };
 

@@ -295,7 +295,7 @@ export default function Shop() {
       } else {
         // Xây dựng tham số filter
         const params = {
-          category_id: filters.categorys.length > 0 ? filters.categorys[0] : undefined,
+          category_id: filters.categorys.length > 0 ? filters.categorys.join(',') : undefined,
           min_price: filters.priceRange[0],
           max_price: filters.priceRange[1],
           page: currentPage
