@@ -31,7 +31,8 @@ class ProductService extends BaseService
 
         // Lọc theo danh mục sản phẩm
         if (!empty($filters['category_id'])) {
-            $query->where('category_id', $filters['category_id']);
+            $categoryIds = explode(',', $filters['category_id']);
+            $query->whereIn('category_id', $categoryIds);
         }
 
         // Lọc theo khoảng giá

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { FaBoxOpen } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -52,25 +52,65 @@ export default function Shop() {
   const startLoading = () => setLoading((prev) => prev + 1);
   const stopLoading = () => setLoading((prev) => Math.max(0, prev - 1));
 
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  // Fetch all initial data in parallel
+  const handleFilterChange = (newFilters) => {
+    setCurrentPage(1); // Always reset to page 1 when filtering
+    setFilters(newFilters);
+  };
 
-  // Effect để fetch dữ liệu ban đầu
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        startLoading();
-        // Fetch các dữ liệu cần thiết
-        await Promise.all([
-          fetchProducts(),
-          // Các API calls khác nếu cần
-        ]);
-      } finally {
-        stopLoading();
-        setIsInitialLoad(false);
+  const [
+    { data: categories, isLoading: isCategoriesLoading },
+    { data: attributes, isLoading: isAttributesLoading }, 
+    { data: products, isLoading: isProductsLoading }
+  ] = useQueries({
+    queries: [
+      {
+        queryKey: ["categories"],
+        queryFn: async () => {
+          const response = await instanceAxios.get("api/v1/category/indexNoPagination");
+          return response.data?.data;
+        },
+        staleTime: 600000
+      },
+      {
+        queryKey: ["attributes"],
+        queryFn: async () => {
+          const response = await instanceAxios.get("/api/v1/attribute");
+          return response.data?.data?.data;
+        },
+        staleTime: 600000
+      },
+      {
+        queryKey: ["products", searchQuery, filters, currentPage],
+        queryFn: async () => {
+          if (searchQuery && searchQuery.trim() !== "") {
+            const res = await instanceAxios.get(`api/v1/product/search?q=${searchQuery}&page=${currentPage}`);
+            return res.data?.data;
+          } else {
+            const params = {
+              category_id: filters.categorys.length > 0 ? filters.categorys.join(',') : undefined,
+              min_price: filters.priceRange[0],
+              max_price: filters.priceRange[1],
+              page: currentPage
+            };
+
+            if (Object.keys(filters.attributefilter).length > 0) {
+              params.attributes = Object.entries(filters.attributefilter)
+                .flatMap(([_, values]) => values)
+                .filter(Boolean)
+                .join(',');
+            }
+
+            const res = await instanceAxios.get(`api/v1/product/fillter?page=${currentPage}`, { params });
+            return res?.data?.data;
+          }
+        },
+        staleTime: 600000
       }
-    };
-    fetchInitialData();
-  }, []); // Chỉ chạy 1 lần khi component mount
+    ]
+  });
+
+  const isInitialLoad = isCategoriesLoading || isAttributesLoading ;
 
   useEffect(() => {
     const fetchDynamicPriceRange = async () => {
@@ -95,30 +135,6 @@ export default function Shop() {
     fetchDynamicPriceRange();
   }, [dataToFilter.priceRange]);
 
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const response = await instanceAxios.get(
-        "api/v1/category/indexNoPagination"
-      );
-      return response.data?.data;
-    },
-    staleTime: 600000,
-    refetchInterval: 600000,
-  });
-
-  // console.log("categories", categories)
-
-  const { data: attributes } = useQuery({
-    queryKey: ["attributes"],
-    queryFn: async () => {
-      const response = await instanceAxios.get("/api/v1/attribute");
-      return response.data?.data?.data;
-    },
-    staleTime: 600000,
-    refetchInterval: 600000,
-  });
-
   const attributeMutation = useMutation({
     mutationFn: async (attributeIds) => {
       const response = await instanceAxios.post(`/api/v1/attribute/filter`, {
@@ -126,11 +142,10 @@ export default function Shop() {
       });
       return response.data?.data;
     },
-    staleTime: 600000,
-    refetchInterval: 600000,
+    staleTime: 600000
   });
 
-  const attributeFilters = attributeMutation.data;
+  const { data: attributeFilters } = attributeMutation;
 
   useEffect(() => {
     if (
@@ -248,72 +263,6 @@ export default function Shop() {
     }
   }, [filters, currentPage, searchQuery]);
 
-  // Thêm effect để lấy price range động từ server
-  // const { data: priceRangeData } = useQuery({
-  //   queryKey: ['priceRange'],
-  //   queryFn: async () => {
-  //     try {
-  //       const res = await instanceAxios.get('api/v1/product/price-range');
-  //       return res.data?.data || { min_price: 0, max_price: 10000000 };
-  //     } catch (error) {
-  //       console.error('Error fetching price range:', error);
-  //       return { min_price: 0, max_price: 10000000 };
-  //     }
-  //   },
-  //   onSuccess: (data) => {
-  //     setDataToFilter(prev => ({
-  //       ...prev,
-  //       priceRange: [data.min_price, data.max_price]
-  //     }));
-      
-  //     // Cập nhật filters nếu giá trị hiện tại nằm ngoài range mới
-  //     setFilters(prev => ({
-  //       ...prev,
-  //       priceRange: [
-  //         Math.max(prev.priceRange[0], data.min_price),
-  //         Math.min(prev.priceRange[1], data.max_price)
-  //       ]
-  //     }));
-  //   }
-  // });
-
-
-  // console.log("dataToFilter", dataToFilter);
-  // console.log("filters", filters);
-
-  // Gọi API lấy danh sách sản phẩm dựa trên bộ tìm kiếm
-  const { data: products, isLoading: isProductsLoading } = useQuery({
-    queryKey: ["products", searchQuery, filters, currentPage],
-    queryFn: async () => {
-      if (searchQuery && searchQuery.trim() !== "") {
-        const res = await instanceAxios.get(`api/v1/product/search?q=${searchQuery}&page=${currentPage}`);
-        return res.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
-      } else {
-        // Xây dựng tham số filter
-        const params = {
-          category_id: filters.categorys.length > 0 ? filters.categorys[0] : undefined,
-          min_price: filters.priceRange[0],
-          max_price: filters.priceRange[1],
-          page: currentPage
-        };
-
-        // Thêm attributes nếu có
-        if (Object.keys(filters.attributefilter).length > 0) {
-          params.attributes = Object.entries(filters.attributefilter)
-            .flatMap(([_, values]) => values)
-            .filter(Boolean)
-            .join(',');
-        }
-
-        const res = await instanceAxios.get(`api/v1/product/fillter?page=${currentPage}`, {
-          params,
-        });
-        return res?.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
-      }
-    },
-    staleTime: 600000,
-    refetchInterval: 600000,
-  });
   console.log("products", products);
 
   // console.log("productsData", productsData);
@@ -340,7 +289,7 @@ export default function Shop() {
             <div className="flex flex-col md:flex-row">
               <FilterSidebar
                 filters={filters}
-                setFilters={setFilters}
+                setFilters={handleFilterChange}
                 availableFilters={dataToFilter}
               />
               <div className="flex-1">
