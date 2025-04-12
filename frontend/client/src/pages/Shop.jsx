@@ -250,35 +250,33 @@ export default function Shop() {
   }, [filters, currentPage, searchQuery]);
 
   // Thêm effect để lấy price range động từ server
-  const { data: priceRangeData } = useQuery({
-    queryKey: ['priceRange'],
-    queryFn: async () => {
-      try {
-        const res = await instanceAxios.get('api/v1/product/price-range');
-        return res.data?.data || { min_price: 0, max_price: 10000000 };
-      } catch (error) {
-        console.error('Error fetching price range:', error);
-        return { min_price: 0, max_price: 10000000 };
-      }
-    },
-    onSuccess: (data) => {
-      setDataToFilter(prev => ({
-        ...prev,
-        priceRange: [data.min_price, data.max_price]
-      }));
+  // const { data: priceRangeData } = useQuery({
+  //   queryKey: ['priceRange'],
+  //   queryFn: async () => {
+  //     try {
+  //       const res = await instanceAxios.get('api/v1/product/price-range');
+  //       return res.data?.data || { min_price: 0, max_price: 10000000 };
+  //     } catch (error) {
+  //       console.error('Error fetching price range:', error);
+  //       return { min_price: 0, max_price: 10000000 };
+  //     }
+  //   },
+  //   onSuccess: (data) => {
+  //     setDataToFilter(prev => ({
+  //       ...prev,
+  //       priceRange: [data.min_price, data.max_price]
+  //     }));
       
-      // Cập nhật filters nếu giá trị hiện tại nằm ngoài range mới
-      setFilters(prev => ({
-        ...prev,
-        priceRange: [
-          Math.max(prev.priceRange[0], data.min_price),
-          Math.min(prev.priceRange[1], data.max_price)
-        ]
-      }));
-    }
-  });
-
-  const isLoading2 = loading > 0;
+  //     // Cập nhật filters nếu giá trị hiện tại nằm ngoài range mới
+  //     setFilters(prev => ({
+  //       ...prev,
+  //       priceRange: [
+  //         Math.max(prev.priceRange[0], data.min_price),
+  //         Math.min(prev.priceRange[1], data.max_price)
+  //       ]
+  //     }));
+  //   }
+  // });
 
   // console.log("dataToFilter", dataToFilter);
   // console.log("filters", filters);
