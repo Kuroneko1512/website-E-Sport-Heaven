@@ -20,9 +20,25 @@ Route::prefix('v1')->group(function () {
             Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
             Route::post('/update-info', [AdminAuthController::class, 'updateAccount'])->name('update-info');
 
+            // Profile routes
             Route::get('/profile', [AdminProfileController::class, 'getProfile'])->name('profile');
             Route::post('/update-profile', [AdminProfileController::class, 'updateProfile'])->name('update-profile');
 
+            //Product routes
+
+            //Attributes routes
+
+            //Category routes
+
+            //Order routes
+
+            //Customer routes
+
+            //User routes ( Staff)
+
+            //Role and Permission routes
+
+            
             // Location Import Routes
             Route::prefix('locations')->group(function () {
                 Route::post('/import', [LocationImportController::class, 'import'])
