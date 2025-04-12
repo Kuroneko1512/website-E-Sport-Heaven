@@ -362,12 +362,13 @@ export default function Shop() {
                 ) : (
                   <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
                     <FaBoxOpen className="text-6xl mb-2" />
-                    <p>Không tìm thấy sản phẩm</p>
+                    <p>Không tìm thấy sản phẩm hahaha</p>
                   </div>
                 )}
               </div>
             </div>
           </main>
+          
         </div>
       )}
     </div>
