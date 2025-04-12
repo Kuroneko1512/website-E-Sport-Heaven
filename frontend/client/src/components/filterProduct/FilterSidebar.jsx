@@ -2,7 +2,13 @@ import React, { useState } from "react";
 import { Slider, Checkbox } from "antd";
 
 const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
-  // console.log("availableFilters", availableFilters);
+  // Format tiền tệ VND
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(value);
+  };
 
   const [sectionsOpen, setSectionsOpen] = useState({
     categorys: true,
@@ -27,12 +33,12 @@ const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
     }));
   };
 
-  const handleCategoryChange = (category) => {
+  const handleCategoryChange = (categoryId) => {
     setFilters((prev) => ({
       ...prev,
-      categorys: prev?.categorys?.includes(category)
-        ? prev.categorys.filter((c) => c !== category)
-        : [...prev?.categorys, category],
+      categorys: prev.categorys.includes(categoryId)
+        ? prev.categorys.filter((id) => id !== categoryId)
+        : [categoryId] // Chỉ cho phép chọn một category
     }));
   };
 
@@ -43,7 +49,7 @@ const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
         ...prev.attributefilter,
         [attribute]: prev?.attributefilter[attribute]?.includes(value)
           ? prev.attributefilter[attribute].filter((v) => v !== value)
-          : [...(prev.attributefilter[attribute] || []), value], // ✅ FIXED
+          : [...(prev.attributefilter[attribute] || []), value],
       },
     }));
   };
@@ -71,11 +77,11 @@ const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
           {(availableFilters?.categorys || []).map((category) => (
             <Checkbox
               className="flex items-center mt-2 w-max"
-              key={category}
-              checked={(filters?.categorys || []).includes(category)}
-              onChange={() => handleCategoryChange(category)}
+              key={category.id}
+              checked={filters?.categorys.includes(category.id)}
+              onChange={() => handleCategoryChange(category.id)}
             >
-              <span className="dark:text-white">{category}</span>
+              <span className="dark:text-white">{category.name}</span>
             </Checkbox>
           ))}
         </div>
@@ -135,13 +141,16 @@ const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
           <Slider
             range
             min={availableFilters?.priceRange?.[0] || 0}
-            max={availableFilters?.priceRange?.[1] || 2000}
-            step={10}
+            max={availableFilters?.priceRange?.[1] || 10000000}
+            step={100000}
             value={filters?.priceRange}
             onChange={handlePriceChange}
+            tooltip={{
+              formatter: formatCurrency
+            }}
           />
           <p className="text-sm mt-2">
-            Min: ${filters?.priceRange[0]} - Max: ${filters?.priceRange[1]}
+            {formatCurrency(filters?.priceRange[0])} - {formatCurrency(filters?.priceRange[1])}
           </p>
         </div>
       )}

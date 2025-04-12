@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { FaBoxOpen } from "react-icons/fa";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import FilterSidebar from "../components/filterProduct/FilterSidebar";
 import Pagination from "../components/filterProduct/Pagination";
 import ProductList from "../components/filterProduct/ProductList";
@@ -9,22 +9,32 @@ import instanceAxios from "../config/db";
 import SkeletonLoading from "../components/loadingSkeleton/SkeletonLoading";
 
 export default function Shop() {
-  const location = useLocation(); // 🛠 Lấy query params từ URL
+  const location = useLocation();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const searchQuery = searchParams.get("search") || "";
+
+  // Khởi tạo state với giá trị từ URL hoặc mặc định
   const [filters, setFilters] = useState({
-    categorys: [],
-    attributefilter: {},
-    priceRange: [],
+    categorys: searchParams.get("category")?.split(",").filter(Boolean) || [],
+    attributefilter: JSON.parse(searchParams.get("attributes") || "{}"),
+    priceRange: [
+      parseInt(searchParams.get("min_price")) || 0,
+      parseInt(searchParams.get("max_price")) || 10000000
+    ],
   });
+
   const [dataToFilter, setDataToFilter] = useState({
-    priceRange: [0, 3300],
+    priceRange: [0, 10000000], // Giá trị mặc định
+    categorys: [], // Sẽ lưu cả id và name của categories
+    attributs: []
   });
+
   const [add, setAdd] = useState({});
   const [loading, setLoading] = useState(0);
   // const [products, setProducts] = useState([]);
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page")) || 1);
   const itemsPerPage = 12;
 
   const startLoading = () => setLoading((prev) => prev + 1);
@@ -134,16 +144,15 @@ export default function Shop() {
 
   // Cập nhật filters với categories
   useEffect(() => {
-    (async () => {
-      startLoading();
-      if (categories) {
-        setDataToFilter((prev) => ({
-          ...prev,
-          categorys: categories.map((category) => category.name),
-        }));
-      }
-      stopLoading();
-    })();
+    if (categories) {
+      setDataToFilter((prev) => ({
+        ...prev,
+        categorys: categories.map((category) => ({
+          id: category.id,
+          name: category.name
+        }))
+      }));
+    }
   }, [categories]);
 
   // Cập nhật filters với attributes và gọi mutation
@@ -189,6 +198,82 @@ export default function Shop() {
     })();
   }, [add]);
 
+  // Sync filters với URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    
+    // Giữ lại search query nếu có
+    if (searchQuery) {
+      params.set('search', searchQuery);
+    }
+
+    // Thêm các filter vào URL
+    if (filters.categorys.length) {
+      params.set('category', filters.categorys.join(','));
+    } else {
+      params.delete('category');
+    }
+
+    if (filters.priceRange[0] !== 0) {
+      params.set('min_price', filters.priceRange[0]);
+    } else {
+      params.delete('min_price');
+    }
+
+    if (filters.priceRange[1] !== 10000000) {
+      params.set('max_price', filters.priceRange[1]);
+    } else {
+      params.delete('max_price');
+    }
+
+    if (Object.keys(filters.attributefilter).length > 0) {
+      params.set('attributes', JSON.stringify(filters.attributefilter));
+    } else {
+      params.delete('attributes');
+    }
+
+    if (currentPage > 1) {
+      params.set('page', currentPage);
+    } else {
+      params.delete('page');
+    }
+
+    // Cập nhật URL
+    const newSearch = params.toString();
+    if (location.search !== `?${newSearch}`) {
+      navigate(`?${newSearch}`, { replace: true });
+    }
+  }, [filters, currentPage, searchQuery]);
+
+  // Thêm effect để lấy price range động từ server
+  const { data: priceRangeData } = useQuery({
+    queryKey: ['priceRange'],
+    queryFn: async () => {
+      try {
+        const res = await instanceAxios.get('api/v1/product/price-range');
+        return res.data?.data || { min_price: 0, max_price: 10000000 };
+      } catch (error) {
+        console.error('Error fetching price range:', error);
+        return { min_price: 0, max_price: 10000000 };
+      }
+    },
+    onSuccess: (data) => {
+      setDataToFilter(prev => ({
+        ...prev,
+        priceRange: [data.min_price, data.max_price]
+      }));
+      
+      // Cập nhật filters nếu giá trị hiện tại nằm ngoài range mới
+      setFilters(prev => ({
+        ...prev,
+        priceRange: [
+          Math.max(prev.priceRange[0], data.min_price),
+          Math.min(prev.priceRange[1], data.max_price)
+        ]
+      }));
+    }
+  });
+
   const isLoading2 = loading > 0;
 
   // console.log("dataToFilter", dataToFilter);
@@ -224,15 +309,31 @@ export default function Shop() {
 
   // Gọi API lấy danh sách sản phẩm dựa trên bộ tìm kiếm
   const { data: products, isLoading: isProductsLoading } = useQuery({
-    queryKey: ["products", searchQuery, dataToFilter, currentPage],
+    queryKey: ["products", searchQuery, filters, currentPage],
     queryFn: async () => {
       if (searchQuery && searchQuery.trim() !== "") {
         const res = await instanceAxios.get(
           `api/v1/product/search?q=${searchQuery}`
         );
-        return res.data?.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
+        return res.data?.data?.data;
       } else {
-        const res = await instanceAxios.get(`api/v1/product/fillter`);
+        // Xây dựng tham số filter
+        const params = {
+          category_id: filters.categorys.length > 0 ? filters.categorys[0] : undefined,
+          min_price: filters.priceRange[0],
+          max_price: filters.priceRange[1],
+          page: currentPage
+        };
+
+        // Thêm attributes nếu có
+        if (Object.keys(filters.attributefilter).length > 0) {
+          params.attributes = Object.entries(filters.attributefilter)
+            .flatMap(([_, values]) => values)
+            .filter(Boolean)
+            .join(',');
+        }
+
+        const res = await instanceAxios.get(`api/v1/product/fillter`, { params });
         return res.data?.data?.data;
       }
     },
