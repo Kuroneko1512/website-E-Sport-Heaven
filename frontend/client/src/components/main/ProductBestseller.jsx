@@ -7,6 +7,7 @@ const ProductBestseller = ({productData}) => {
   console.log("productData", productData);
   return (
     <div className="px-4 sm:px-6 lg:px-8">
+      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">Sản phẩm mới</h1>
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 md:gap-6">
         {productData?.map((item) => (
           <div
