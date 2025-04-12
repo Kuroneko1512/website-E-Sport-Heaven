@@ -432,7 +432,7 @@ const NewCheckout = () => {
             <Text strong>{FomatVND(calculateGrandTotal())}</Text>
           </div>
 
-          <Button  block className="mt-4 bg-black hover:!bg-gray-700 px-6 py-2" onClick={handleSubmit}>
+          <Button type="primary" block className="mt-4 bg-black hover:!bg-gray-700 px-6 py-2" onClick={handleSubmit}>
             Tiếp tục thanh toán
           </Button>
         </Card>

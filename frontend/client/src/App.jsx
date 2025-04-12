@@ -47,6 +47,8 @@ import instanceAxios from "./config/db";
 import { useEffect } from "react";
 import { message } from "antd";
 import OrderDetail from "./components/elementProfile/OrderDetail";
+import ChangePassword from "./components/elementProfile/ChangePassword";
+import EmailAuthentication from "./components/elementProfile/EmailAuthentication";
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
@@ -138,6 +140,7 @@ function App() {
                 <Route path="" element={<Profile />}>
                   <Route index element={<InfoProfile />} />
                   <Route path="info" element={<InfoProfile />} />
+                  <Route path="password" element={<ChangePassword />} />
                   <Route path="settings" element={<Setting />} />
                   <Route path="orders" element={<MyOrder />} />
                   <Route path="orders/:order_code" element={<OrderDetail />} />
@@ -145,6 +148,7 @@ function App() {
                   <Route path="manage-address" element={<ManageAddress />} />
                   <Route path="saved-cards" element={<PaymentCards />} />
                   <Route path="wishlists" element={<Whishlist />} />
+                  <Route path="emailAuth" element={<EmailAuthentication />} />
                 </Route>
               </Route>
 

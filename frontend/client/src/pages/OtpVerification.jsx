@@ -4,6 +4,9 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Error from "../components/popupmodal/Error";
 import { PasswordChangedSS } from "../components/popupmodal/PasswordChangedSS";
+import { useDispatch } from "react-redux";
+import Cookies from "js-cookie";
+import { login } from "../redux/AuthSide";
 
 const { Title, Text } = Typography;
 
@@ -31,16 +34,52 @@ const OtpVerification = () => {
     }
   };
 
-  const handleSubmit = () => {
-    const otpValue = inputsRef.current.map((input) => input?.value || "").join("");
-    console.log("OTP nhập vào:", otpValue);
-    // Call API verify here
-    setSuccess(true);
-    // message.success("Login successful!");
-    setTimeout(() => {
-      // navigate("/login");
-      setSuccess(false);
-    }, 2000);
+  const handleSubmit = async () => {
+    try {
+      const otpValue = inputsRef.current.map((input) => input?.value || "").join("");
+      console.log("OTP nhập vào:", otpValue);
+      
+      // Lấy email từ cookies
+      const email = Cookies.get('otpEmail');
+      if (!email) {
+        throw new Error('Không tìm thấy email');
+      }
+  
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, otp: otpValue }),
+      });
+  
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'OTP không hợp lệ');
+      }
+  
+      // Lưu thông tin vào Redux và cookies
+      const dispatch = useDispatch();
+      dispatch(login({
+        accessToken: data.token,
+        refreshToken: data.refreshToken,
+        expiresAt: data.expiresAt,
+        user: { email }
+      }));
+  
+      // Xóa cookie OTP sau khi xác thực thành công
+      Cookies.remove('otpEmail');
+  
+      setSuccess(true);
+      setTimeout(() => {
+        navigate("/reset-password");
+        setSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Lỗi xác thực OTP:', error);
+      setError(true);
+      setTimeout(() => setError(false), 2000);
+    }
   };
 
   return (

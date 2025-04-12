@@ -40,6 +40,9 @@ Route::prefix('v1')->group(callback: function () {
 
     Route::get('/review-by-product/{id}',[ReviewController::class,'getByProduct']);
 
+
     Route::apiResource('/coupon', CouponsController::class);
+
 }); 
+
 

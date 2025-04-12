@@ -4,11 +4,12 @@ import {
   Checkbox,
   Col,
   Image,
+  message,
   Modal,
   Row,
   Space,
   Table,
-  Typography
+  Typography,
 } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -17,34 +18,77 @@ import FomatVND from "../utils/FomatVND";
 const { Title, Text } = Typography;
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [checkoutItems, setCheckoutItems] = useState([]);
-  const nav = useNavigate();
+  const [cartItems, setCartItems] = useState([]); // Lưu trữ danh sách sản phẩm trong giỏ hàng
+const [selectedItems, setSelectedItems] = useState([]); // Lưu trữ danh sách sản phẩm được chọn
+const [checkoutItems, setCheckoutItems] = useState([]); // Lưu trữ danh sách sản phẩm để thanh toán
+const nav = useNavigate(); // Điều hướng giữa các trang
+const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông báo
+  const [canWarn, setCanWarn] = useState(true); // Kiểm soát thời gian chờ thông báo
 
   const miniCartData = useMemo(
-    () => JSON.parse(localStorage.getItem("cartItems")) || [],
+    () => JSON.parse(localStorage.getItem("cartItems")) || [],// Lấy dữ liệu giỏ hàng từ localStorage
     []
   );
 
   useEffect(() => {
+
+    const handleCartUpdate = (e) => {
+      const updatedCart = e.detail || JSON.parse(localStorage.getItem("cartItems")) || [];
+      setCartItems(updatedCart);
+      // Also update selectedItems to remove any deleted items
+      setSelectedItems(prev => 
+        prev.filter(selected => 
+          updatedCart.some(item => 
+            item.product_id === selected.product_id && 
+            (!item.variant_id || item.variant_id === selected.variant_id)
+          )
+        )
+      );
+    };
+    
     setCartItems(miniCartData);
+    window.addEventListener("cartUpdated", handleCartUpdate);
+    
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
+
   }, [miniCartData]);
 
   const handleQuantityChange = (productId, variantId, delta) => {
     setCartItems((prev) =>
-      prev.map((item) =>
-        item.product_id === productId &&
-        (!variantId || item.variant_id === variantId)
-          ? {
-              ...item,
-              quantity: Math.max(
-                1,
-                Math.min(item.quantity + delta, item.stock)
-              ),
+      prev.map((item) => {
+        if (
+          item.product_id === productId &&
+          (!variantId || item.variant_id === variantId)
+        ) {
+          const newQuantity = Math.max(
+            1,
+            Math.min(item.quantity + delta, item.stock)
+          );
+  
+          // Kiểm tra nếu vượt quá tồn kho
+          if (item.quantity + delta > item.stock && canWarn) {
+            if (warningCount < 3) {
+              message.warning("Không thể nhập quá số lượng tồn kho!");
+              setWarningCount((prevCount) => prevCount + 1);
             }
-          : item
-      )
+  
+            // Đặt thời gian chờ 3 giây để cho phép thông báo lại
+            setCanWarn(false);
+            setTimeout(() => {
+              setCanWarn(true);
+              setWarningCount(0); // Đặt lại bộ đếm sau 3 giây
+            }, 3000);
+          }
+  
+          return {
+            ...item,
+            quantity: newQuantity,
+          };
+        }
+        return item;
+      })
     );
   };
 
@@ -57,17 +101,26 @@ const Cart = () => {
         const updatedCartItems = cartItems.filter(
           (item) =>
             item.product_id !== productId ||
-            (variantId && item.variant_id !== variantId)
+            (variantId && item.variant_id !== variantId)// Loại bỏ sản phẩm khỏi danh sách
         );
+
+        // Update localStorage and dispatch event with updated cart
+        localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+        window.dispatchEvent(new CustomEvent("cartUpdated", { 
+          detail: updatedCartItems 
+        }));
         setCartItems(updatedCartItems);
+
         setSelectedItems(
           selectedItems.filter(
             (itemId) =>
               itemId.product_id !== productId ||
-              (variantId && itemId.variant_id !== variantId)
+              (variantId && itemId.variant_id !== variantId)// Loại bỏ sản phẩm khỏi danh sách đã chọn
           )
         );
-        localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+
+        localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));// Lưu lại giỏ hàng vào localStorage
+
       },
     });
   };
@@ -77,16 +130,16 @@ const Cart = () => {
     const isSelected = selectedItems.some(
       (item) =>
         item.product_id === productId &&
-        (!variantId || item.variant_id === variantId)
+        (!variantId || item.variant_id === variantId)// Kiểm tra xem sản phẩm đã được chọn chưa
     );
     setSelectedItems((prev) =>
       isSelected
         ? prev.filter(
             (item) =>
               item.product_id !== productId ||
-              (variantId && item.variant_id !== variantId)
+              (variantId && item.variant_id !== variantId)// Bỏ chọn sản phẩm
           )
-        : [...prev, itemKey]
+        : [...prev, itemKey]// Thêm sản phẩm vào danh sách đã chọn
     );
   };
 
@@ -96,7 +149,7 @@ const Cart = () => {
       variant_id: item.variant_id,
     }));
     setSelectedItems((prev) =>
-      prev.length === allItems.length ? [] : allItems
+      prev.length === allItems.length ? [] : allItems// Nếu tất cả đã được chọn, bỏ chọn tất cả; ngược lại, chọn tất cả
     );
   };
 
@@ -109,8 +162,10 @@ const Cart = () => {
             (!item.variant_id || selected.variant_id === item.variant_id)
         )
       )
+
       .reduce((total, item) => total + (item.price - (item.price * item.discount / 100)) * item.quantity, 0)
-      .toFixed(2);
+      .toFixed(2);// Làm tròn đến 2 chữ số thập phân
+
   };
 
   const handleCheckout = () => {
@@ -119,7 +174,7 @@ const Cart = () => {
         selectedItems.some(
           (selected) =>
             selected.product_id === item.product_id &&
-            (!item.variant_id || selected.variant_id === item.variant_id)
+            (!item.variant_id || selected.variant_id === item.variant_id)// Lọc các sản phẩm đã chọn
         )
       )
       .map((item) => ({
@@ -127,10 +182,12 @@ const Cart = () => {
         price: item.price,
         discount: item.discount,
       }));
+
   
-    setCheckoutItems(selectedCartItems);
-    localStorage.setItem("checkoutItems", JSON.stringify(selectedCartItems));
-    nav("/newcheckout");
+    setCheckoutItems(selectedCartItems);// Lưu danh sách sản phẩm để thanh toán
+    localStorage.setItem("checkoutItems", JSON.stringify(selectedCartItems));// Lưu vào localStorage
+    nav("/newcheckout");// Điều hướng đến trang thanh toán
+
   };
 
   const columns = [
@@ -158,7 +215,14 @@ const Cart = () => {
     {
       title: "Hình ảnh",
       dataIndex: "image",
-      render: (image) => <Image width={80} height={100} className="object-cover" src={`http://127.0.0.1:8000/storage/${image}`} />,
+      render: (image) => (
+        <Image
+          width={80}
+          height={100}
+          className="object-cover"
+          src={`http://127.0.0.1:8000/storage/${image}`}
+        />
+      ),
     },
     {
       title: "Tên sản phẩm",
@@ -201,25 +265,37 @@ const Cart = () => {
             <i className="fa-solid fa-minus"></i>
           </button>
           <input
-            type="text"
-            value={item.quantity}
-            min={1}
-            max={item.stock}
-            onChange={(e) => {
-              let value = parseInt(e.target.value, 10);
-              if (isNaN(value) || value < 1) value = 1;
-              if (value > item.stock) value = item.stock;
-              handleQuantityChange(
-                item.product_id,
-                item.variant_id,
-                value - item.quantity
-              );
-            }}
-            className="text-center"
-            style={{
-              width: `${item.quantity.toString().length + 1}ch`,
-            }}
-          />
+  type="text"
+  value={item.quantity}
+  min={1}
+  max={item.stock}
+  onChange={(e) => {
+    let value = parseInt(e.target.value, 10);
+    if (isNaN(value) || value < 1) value = 1;
+
+    if (value > item.stock) {
+      if (canWarn) {
+        if (warningCount < 3) {
+          message.warning("Không thể nhập quá số lượng tồn kho!");
+          setWarningCount((prevCount) => prevCount + 1);
+        }
+
+        setCanWarn(false);
+        setTimeout(() => {
+          setCanWarn(true);
+          setWarningCount(0);
+        }, 3000);
+      }
+      value = item.stock;
+    }
+
+    handleQuantityChange(item.product_id, item.variant_id, value - item.quantity);
+  }}
+  className="text-center"
+  style={{
+    width: `${item.quantity.toString().length + 1}ch`,
+  }}
+/>
           <button
             onClick={() =>
               handleQuantityChange(item.product_id, item.variant_id, 1)
@@ -264,12 +340,12 @@ const Cart = () => {
       <div style={{ background: "#fff", padding: "2rem", borderRadius: 8 }}>
         <Title level={3}>GIỎ HÀNG</Title>
         <Table
-          dataSource={cartItems}
-          columns={columns}
+          dataSource={cartItems}// Dữ liệu giỏ hàng
+          columns={columns}// Cấu hình cột
           rowKey={(record) =>
-            `${record.product_id}_${record.variant_id || "default"}`
+            `${record.product_id}_${record.variant_id || "default"}`// Khóa duy nhất cho mỗi hàng
           }
-          pagination={false}
+          pagination={false}// Không sử dụng phân trang
         />
         <Row justify="end" style={{ marginTop: "2rem" }}>
           <Col>
@@ -277,17 +353,20 @@ const Cart = () => {
               <Text strong>
                 Tổng tiền:{" "}
                 <Text type="danger" strong>
-                  {FomatVND(calculateSubtotal())}
+                  {FomatVND(calculateSubtotal())} {/* Hiển thị tổng tiền */}
                 </Text>
               </Text>
               <Space>
-                <Button onClick={() => nav("/shop")} className="border hover:!border-gray-800 hover:!text-gray-800">
+                <Button
+                  onClick={() => nav("/shop")}
+                  className="border hover:!border-gray-800 hover:!text-gray-800"
+                >
                   Tiếp tục mua hàng
                 </Button>
                 <Button
                   type="primary"
-                  disabled={selectedItems.length === 0}
-                  onClick={handleCheckout}
+                  disabled={selectedItems.length === 0} // Vô hiệu hóa nếu không có sản phẩm nào được chọn
+                  onClick={handleCheckout} // Xử lý thanh toán
                   className="bg-black hover:!bg-gray-700 px-6 py-2"
                 >
                   Đặt hàng
