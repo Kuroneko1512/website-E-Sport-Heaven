@@ -47,7 +47,9 @@ export default function Shop() {
   const [loading, setLoading] = useState(0);
   // const [products, setProducts] = useState([]);
 
+
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page")) || 1);
+
 
   const startLoading = () => setLoading((prev) => prev + 1);
   const stopLoading = () => setLoading((prev) => Math.max(0, prev - 1));
@@ -98,13 +100,9 @@ export default function Shop() {
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const response = await instanceAxios.get(
-        "api/v1/category/indexNoPagination"
-      );
+      const response = await instanceAxios.get("api/v1/category/indexNoPagination");
       return response.data?.data;
     },
-    staleTime: 600000,
-    refetchInterval: 600000,
   });
 
   // console.log("categories", categories)
@@ -115,8 +113,6 @@ export default function Shop() {
       const response = await instanceAxios.get("/api/v1/attribute");
       return response.data?.data?.data;
     },
-    staleTime: 600000,
-    refetchInterval: 600000,
   });
 
   const attributeMutation = useMutation({
@@ -126,8 +122,6 @@ export default function Shop() {
       });
       return response.data?.data;
     },
-    staleTime: 600000,
-    refetchInterval: 600000,
   });
 
   const attributeFilters = attributeMutation.data;
@@ -289,6 +283,7 @@ export default function Shop() {
         const res = await instanceAxios.get(`api/v1/product/search?q=${searchQuery}&page=${currentPage}`);
         return res.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
       } else {
+
         // Xây dựng tham số filter
         const params = {
           category_id: filters.categorys.length > 0 ? filters.categorys[0] : undefined,
@@ -309,6 +304,7 @@ export default function Shop() {
           params,
         });
         return res?.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
+
       }
     },
     staleTime: 600000,
@@ -327,13 +323,16 @@ export default function Shop() {
 
   return (
     <div className="bg-white text-gray-800 dark:bg-gray-800 dark:text-white m-10">
+
       {isInitialLoad ? (
+
         <div>
-          <SkeletonLoading />
+            <SkeletonLoading/>
         </div>
       ) : (
         <div>
           <main className="container mx-auto py-8 grid grid-cols-1">
+
             <span className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Trang chủ &gt; <Link to={"/shop"}>Cửa hàng</Link>
             </span>
@@ -364,11 +363,18 @@ export default function Shop() {
                   <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
                     <FaBoxOpen className="text-6xl mb-2" />
                     <p>Không tìm thấy sản phẩm</p>
+
                   </div>
-                )}
+              </>
+            ) : (
+              <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
+                <FaBoxOpen className="text-6xl mb-2" />
+                <p>Không tìm thấy sản phẩm</p>
               </div>
-            </div>
-          </main>
+            )}
+          </div>
+        </div>
+      </main>
         </div>
       )}
     </div>
