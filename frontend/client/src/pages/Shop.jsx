@@ -53,34 +53,25 @@ export default function Shop() {
   const startLoading = () => setLoading((prev) => prev + 1);
   const stopLoading = () => setLoading((prev) => Math.max(0, prev - 1));
 
-  /**
-   * useEffect(() => {
-  const fetchDynamicPriceRange = async () => {
-    try {
-      startLoading();
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-      const res = await instanceAxios.post("/api/v1/products/price-range", {
-        filters, // hoặc searchQuery, category, attributeIds, tùy backend bạn cần
-      });
-
-      const { minPrice, maxPrice } = res.data?.data;
-
-      if (minPrice != null && maxPrice != null) {
-        setDataToFilter((prev) => ({
-          ...prev,
-          priceRange: [minPrice, maxPrice],
-        }));
+  // Effect để fetch dữ liệu ban đầu
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        startLoading();
+        // Fetch các dữ liệu cần thiết
+        await Promise.all([
+          fetchProducts(),
+          // Các API calls khác nếu cần
+        ]);
+      } finally {
+        stopLoading();
+        setIsInitialLoad(false);
       }
-    } catch (error) {
-      console.error("Lỗi khi lấy giá min/max:", error);
-    } finally {
-      stopLoading();
-    }
-  };
-
-  fetchDynamicPriceRange();
-}, [filters]); 
-   */
+    };
+    fetchInitialData();
+  }, []); // Chỉ chạy 1 lần khi component mount
 
   useEffect(() => {
     const fetchDynamicPriceRange = async () => {
@@ -292,34 +283,6 @@ export default function Shop() {
   // console.log("dataToFilter", dataToFilter);
   // console.log("filters", filters);
 
-  // Tạo query string từ filters
-  // const queryString = useMemo(() => {
-  //   const params = new URLSearchParams();
-  //   if (filters.categorys.length > 0) params.append("category", filters.categorys.join(","));
-  //   if (filters.colors.length > 0) params.append("color", filters.colors.join(","));
-  //   if (filters.sizes.length > 0) params.append("size", filters.sizes.join(","));
-  //   params.append("price_gte", filters.priceRange[0]);
-  //   params.append("price_lte", filters.priceRange[1]);
-  //   params.append("_page", currentPage);
-  //   params.append("_limit", itemsPerPage);
-  //   if (searchQuery) params.append("name_like", searchQuery); // 🛠 Tìm kiếm sản phẩm theo tên
-  //   return params.toString();
-  // }, [filters, currentPage, searchQuery]);
-
-  // console.log("queryString", queryString);
-
-  // Gọi API lấy danh sách sản phẩm dựa trên bộ lọc
-  // const { data, } = useQuery({
-  //   queryKey: ["products", dataToFilter, currentPage, searchQuery],
-  //   queryFn: async () => {
-  //     const res = await instanceAxios.get(`/api/v1/product`)
-  //     return res.data;
-  //   },
-  //   staleTime: 60000,
-  // });
-
-  // console.log("searchQuery", searchQuery);
-
   // Gọi API lấy danh sách sản phẩm dựa trên bộ tìm kiếm
   const { data: products, isLoading: isProductsLoading } = useQuery({
     queryKey: ["products", searchQuery, filters, currentPage],
@@ -366,7 +329,7 @@ export default function Shop() {
 
   return (
     <div className="bg-white text-gray-800 dark:bg-gray-800 dark:text-white m-10">
-      {isLoading2 || isProductsLoading ? (
+      {isInitialLoad ? (
         <div>
           <SkeletonLoading />
         </div>
@@ -383,12 +346,12 @@ export default function Shop() {
                 availableFilters={dataToFilter}
               />
               <div className="flex-1">
-                {isProductsLoading ? (
+                {isProductsLoading && !isInitialLoad ? (
                   <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-500 dark:border-gray-400"></div>
                     <p>Đang tải sản phẩm...</p>
                   </div>
-                ) : products.length > 0 ? (
+                ) : products?.length > 0 ? (
                   <>
                     <ProductList products={products} />
                     <div className="flex justify-end mt-4">
