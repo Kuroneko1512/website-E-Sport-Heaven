@@ -249,7 +249,6 @@ const MyOrder = () => {
       console.error("orders is not an array:", orders);
       return {}; // Trả về object rỗng nếu không phải mảng
     }
-
     return orders.reduce((groups, order) => {
       // FomatTime trả về chuỗi như "Hôm nay", "Hôm qua", hoặc "DD/MM/YYYY"
       const day = FomatTime(order.created_at);
@@ -472,6 +471,7 @@ const handleAction = async (action, order) => {
       )}
     </>
   );
+
 };
 
 export default MyOrder;

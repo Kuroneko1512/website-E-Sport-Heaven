@@ -47,8 +47,9 @@ export default function Shop() {
   const [loading, setLoading] = useState(0);
   // const [products, setProducts] = useState([]);
 
+
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page")) || 1);
-  const itemsPerPage = 12;
+
 
   const startLoading = () => setLoading((prev) => prev + 1);
   const stopLoading = () => setLoading((prev) => Math.max(0, prev - 1));
@@ -99,13 +100,9 @@ export default function Shop() {
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const response = await instanceAxios.get(
-        "api/v1/category/indexNoPagination"
-      );
+      const response = await instanceAxios.get("api/v1/category/indexNoPagination");
       return response.data?.data;
     },
-    staleTime: 600000,
-    refetchInterval: 600000,
   });
 
   // console.log("categories", categories)
@@ -116,8 +113,6 @@ export default function Shop() {
       const response = await instanceAxios.get("/api/v1/attribute");
       return response.data?.data?.data;
     },
-    staleTime: 600000,
-    refetchInterval: 600000,
   });
 
   const attributeMutation = useMutation({
@@ -127,8 +122,6 @@ export default function Shop() {
       });
       return response.data?.data;
     },
-    staleTime: 600000,
-    refetchInterval: 600000,
   });
 
   const attributeFilters = attributeMutation.data;
@@ -278,6 +271,7 @@ export default function Shop() {
   //   }
   // });
 
+
   // console.log("dataToFilter", dataToFilter);
   // console.log("filters", filters);
 
@@ -286,14 +280,13 @@ export default function Shop() {
     queryKey: ["products", searchQuery, filters, currentPage],
     queryFn: async () => {
       if (searchQuery && searchQuery.trim() !== "") {
-        const res = await instanceAxios.get(
-          `api/v1/product/search?q=${searchQuery}`
-        );
-        return res.data?.data?.data;
+        const res = await instanceAxios.get(`api/v1/product/search?q=${searchQuery}&page=${currentPage}`);
+        return res.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
       } else {
+
         // Xây dựng tham số filter
         const params = {
-          category_id: filters.categorys.length > 0 ? filters.categorys.join(',') : undefined,
+          category_id: filters.categorys.length > 0 ? filters.categorys[0] : undefined,
           min_price: filters.priceRange[0],
           max_price: filters.priceRange[1],
           page: currentPage
@@ -307,8 +300,11 @@ export default function Shop() {
             .join(',');
         }
 
-        const res = await instanceAxios.get(`api/v1/product/fillter`, { params });
-        return res.data?.data?.data;
+        const res = await instanceAxios.get(`api/v1/product/fillter?page=${currentPage}`, {
+          params,
+        });
+        return res?.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
+
       }
     },
     staleTime: 600000,
@@ -321,19 +317,22 @@ export default function Shop() {
   // console.log("data", data);
   // const products = productsData?.data?.data || [];
   // const totalPages = productsData?.total || 1;
-  const totalPages = products?.total || 1;
+  const totalPages = products?.last_page || 1;
 
   // console.log("products", products);
 
   return (
     <div className="bg-white text-gray-800 dark:bg-gray-800 dark:text-white m-10">
+
       {isInitialLoad ? (
+
         <div>
-          <SkeletonLoading />
+            <SkeletonLoading/>
         </div>
       ) : (
         <div>
           <main className="container mx-auto py-8 grid grid-cols-1">
+
             <span className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Trang chủ &gt; <Link to={"/shop"}>Cửa hàng</Link>
             </span>
@@ -349,7 +348,7 @@ export default function Shop() {
                     <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-500 dark:border-gray-400"></div>
                     <p>Đang tải sản phẩm...</p>
                   </div>
-                ) : products?.length > 0 ? (
+                ) : products?.data?.length > 0 ? (
                   <>
                     <ProductList products={products} />
                     <div className="flex justify-end mt-4">
@@ -364,11 +363,18 @@ export default function Shop() {
                   <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
                     <FaBoxOpen className="text-6xl mb-2" />
                     <p>Không tìm thấy sản phẩm</p>
+
                   </div>
-                )}
+              </>
+            ) : (
+              <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
+                <FaBoxOpen className="text-6xl mb-2" />
+                <p>Không tìm thấy sản phẩm</p>
               </div>
-            </div>
-          </main>
+            )}
+          </div>
+        </div>
+      </main>
         </div>
       )}
     </div>

@@ -6,7 +6,7 @@ const ProductList = ({ products }) => {
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6">
-        {products.map((item) => (
+        {products?.data?.map((item) => (
           <div
             key={item.id}
             className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col"
