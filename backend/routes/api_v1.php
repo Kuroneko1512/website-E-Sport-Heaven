@@ -41,7 +41,8 @@ Route::prefix('v1')->group(callback: function () {
     Route::get('/review-by-product/{id}',[ReviewController::class,'getByProduct']);
 
 
-    Route::apiResource('/coupon', CouponsController::class); // dùng mỗi để show thì chỉ dùng mỗi cái index thôi Long
+    Route::apiResource('/coupon', CouponsController::class);
+
 }); 
 
 
