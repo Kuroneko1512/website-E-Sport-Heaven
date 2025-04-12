@@ -23,6 +23,11 @@ const OrderItem = ({
   setCurrentProductIndex,
   reviewedProducts
 }) => {
+
+  const totalAmount = order_items.reduce((total, item) => {
+    return total + calculateSubtotal(item);
+  }, 0);
+
   // console.log("order_code", status);
   const statusStyles = {
     "đang xử lý":
@@ -177,22 +182,45 @@ const MyOrder = () => {
   const { submitReview } = useReview(selectedProduct?.product_id || selectedProduct?.product_variant?.product_id);
 
 
-  const handleReviewSubmit = async (values) => {
-    const reviewPromises = selectedOrder.order_items.map((item, index) => {
-      const productId = item.product_id || item.product_variant?.product_id;
-      const reviewData = {
-        rating: values[`product_${index}_rating`],
-        comment: values[`product_${index}_comment`]
-      };
-      return instanceAxios.post(`/api/v1/reviews/${productId}`, reviewData);
-    });
-
+  const handleReviewSubmit = async () => {
     try {
+      // Validate all forms first
+      const values = form.getFieldsValue();
+      const errors = [];
+      
+      selectedOrder.order_items.forEach((item, index) => {
+        if (!values[`product_${index}_rating`]) {
+          errors.push(`Vui lòng đánh giá sản phẩm ${item.product?.name}`);
+        }
+        if (!values[`product_${index}_comment`]) {
+          errors.push(`Vui lòng nhập đánh giá cho sản phẩm ${item.product?.name}`);
+        }
+      });
+
+      if (errors.length > 0) {
+        message.error(errors.join('\n'));
+        return;
+      }
+
+      // Submit all reviews
+      const reviewPromises = selectedOrder.order_items.map((item, index) => {
+        const productId = item.product_id || item.product_variant?.product_id;
+        const reviewData = {
+          title: values[`product_${index}_title`],
+          rating: values[`product_${index}_rating`],
+          comment: values[`product_${index}_comment`]
+        };
+        return instanceAxios.post(`/api/v1/review`, { product_id: productId, ...reviewData});
+      });
+
+      message.loading('Đang gửi đánh giá...', 0);
       await Promise.all(reviewPromises);
+      message.destroy();
       message.success('Đã gửi đánh giá thành công');
       form.resetFields();
       setReviewModalVisible(false);
     } catch (error) {
+      message.destroy();
       message.error('Có lỗi xảy ra khi gửi đánh giá');
       console.error(error);
     }
@@ -301,10 +329,14 @@ const handleAction = async (action, order) => {
             if (existingIndex !== -1) {
               updatedCart[existingIndex].quantity += item.quantity;
             } else {
+              const generateId = () =>
+                Date.now() + Math.random().toString(36).substr(2, 9);
               updatedCart.push({
+                id: generateId(),
                 product_id: item.product_id,
-                variant_id: item.variant_id,
+                variant_id: item.product_variant_id,
                 quantity: item.quantity,
+                sku: item.product_variant?.sku || item.product?.sku,
                 image: item.product?.image || item.product_variant?.image,
                 name: item.product?.name,
                 price: Number(item.price), // Ensure price is a number
@@ -313,7 +345,7 @@ const handleAction = async (action, order) => {
                   acc[attr.attribute.name] = attr.attribute_value.value;
                   return acc;
                 }, {}) || {},
-                discount: item.product.discount_percent || item.product_variant.discount_percent // Use item's discount if available
+                discount: Number(item.product.discount_percent || item.product_variant.discount_percent) // Use item's discount if available
               });
             }
           });
@@ -393,13 +425,14 @@ const handleAction = async (action, order) => {
           currentProductIndex={currentProductIndex}
           setCurrentProductIndex={setCurrentProductIndex}
           reviewedProducts={reviewedProducts}
+          calculateSubtotal={calculateSubtotal}
         />
                         {/* Phần Tổng tiền + button */}
                         <div className="flex items-end flex-col gap-2 pt-3 bg-white dark:bg-gray-800">
                           <div className="self-end">
                             <span className="mr-2 font-medium">Tổng tiền:</span>
                             <span className="font-bold">
-                              {FomatVND(order.total_amount)}
+                            {FomatVND(order.order_items.reduce((total, item) => total + calculateSubtotal(item), 0))}
                             </span>
                           </div>
                           <div className="flex flex-row-reverse bg-white dark:bg-gray-800">

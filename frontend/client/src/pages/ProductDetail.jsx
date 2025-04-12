@@ -199,7 +199,7 @@ const ProductDetail = () => {
     let cartItem = {
       id: generateId(),
       product_id: product.id,
-      variant_id: selectedVariant?.id,
+      variant_id: selectedVariant?.id || null,
       quantity: quantity,
       image: product.image || selectedVariant?.image,
       name: product.name,

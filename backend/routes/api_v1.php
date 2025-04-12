@@ -42,4 +42,3 @@ Route::prefix('v1')->group(callback: function () {
 
     Route::apiResource('/coupon', CouponsController::class);
 }); 
-

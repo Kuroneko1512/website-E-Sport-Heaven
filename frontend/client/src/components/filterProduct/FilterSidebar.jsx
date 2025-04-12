@@ -1,14 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Slider, Checkbox } from "antd";
+import debounce from 'lodash/debounce';
 
 const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
-  // console.log("availableFilters", availableFilters);
+  const [localPriceRange, setLocalPriceRange] = useState(filters.priceRange);
+
+  // Format tiền tệ VND
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(value);
+  };
 
   const [sectionsOpen, setSectionsOpen] = useState({
     categorys: true,
     price: true,
     attributes: {},
   });
+
+  // Debounced function để cập nhật filters
+  const debouncedSetFilters = useCallback(
+    debounce((newValue) => {
+      setFilters(prev => ({ ...prev, priceRange: newValue }));
+    }, 500),
+    []
+  );
 
   const toggleSection = (section) => {
     setSectionsOpen((prev) => ({
@@ -27,12 +44,12 @@ const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
     }));
   };
 
-  const handleCategoryChange = (category) => {
+  const handleCategoryChange = (categoryId) => {
     setFilters((prev) => ({
       ...prev,
-      categorys: prev?.categorys?.includes(category)
-        ? prev.categorys.filter((c) => c !== category)
-        : [...prev?.categorys, category],
+      categorys: prev.categorys.includes(categoryId)
+        ? prev.categorys.filter((id) => id !== categoryId)
+        : [...prev.categorys, categoryId] // Cho phép chọn nhiều category
     }));
   };
 
@@ -43,14 +60,20 @@ const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
         ...prev.attributefilter,
         [attribute]: prev?.attributefilter[attribute]?.includes(value)
           ? prev.attributefilter[attribute].filter((v) => v !== value)
-          : [...(prev.attributefilter[attribute] || []), value], // ✅ FIXED
+          : [...(prev.attributefilter[attribute] || []), value],
       },
     }));
   };
 
   const handlePriceChange = (value) => {
-    setFilters((prev) => ({ ...prev, priceRange: value }));
+    setLocalPriceRange(value); // Cập nhật state local ngay lập tức
+    debouncedSetFilters(value); // Debounce việc cập nhật filters chính
   };
+
+  // Reset local price range khi filters thay đổi từ bên ngoài
+  React.useEffect(() => {
+    setLocalPriceRange(filters.priceRange);
+  }, [filters.priceRange]);
 
   return (
     <aside className="w-full md:w-1/4 p-4 dark:bg-gray-800 dark:text-white mt-10">
@@ -71,13 +94,44 @@ const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
           {(availableFilters?.categorys || []).map((category) => (
             <Checkbox
               className="flex items-center mt-2 w-max"
-              key={category}
-              checked={(filters?.categorys || []).includes(category)}
-              onChange={() => handleCategoryChange(category)}
+              key={category.id}
+              checked={filters?.categorys.includes(category.id)}
+              onChange={() => handleCategoryChange(category.id)}
             >
-              <span className="dark:text-white">{category}</span>
+              <span className="dark:text-white">{category.name}</span>
             </Checkbox>
           ))}
+        </div>
+      )}
+
+      {/* Lọc theo giá */}
+      <h2
+        className="text-lg font-semibold flex justify-between items-center cursor-pointer my-4"
+        onClick={() => toggleSection("price")}
+      >
+        Lọc theo giá
+        <i
+          className={`fa-solid ${
+            sectionsOpen?.price ? "fa-angle-up" : "fa-angle-down"
+          }`}
+        ></i>
+      </h2>
+      {sectionsOpen?.price && (
+        <div>
+          <Slider
+            range
+            min={availableFilters?.priceRange?.[0] || 0}
+            max={availableFilters?.priceRange?.[1] || 10000000}
+            step={100000}
+            value={localPriceRange}
+            onChange={handlePriceChange}
+            tooltip={{
+              formatter: formatCurrency
+            }}
+          />
+          <p className="text-sm mt-2">
+            {formatCurrency(localPriceRange[0])} - {formatCurrency(localPriceRange[1])}
+          </p>
         </div>
       )}
 
@@ -117,34 +171,6 @@ const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
           )}
         </div>
       ))}
-
-      {/* Lọc theo giá */}
-      <h2
-        className="text-lg font-semibold flex justify-between items-center cursor-pointer"
-        onClick={() => toggleSection("price")}
-      >
-        Lọc theo giá
-        <i
-          className={`fa-solid ${
-            sectionsOpen?.price ? "fa-angle-up" : "fa-angle-down"
-          }`}
-        ></i>
-      </h2>
-      {sectionsOpen?.price && (
-        <div>
-          <Slider
-            range
-            min={availableFilters?.priceRange?.[0] || 0}
-            max={availableFilters?.priceRange?.[1] || 2000}
-            step={10}
-            value={filters?.priceRange}
-            onChange={handlePriceChange}
-          />
-          <p className="text-sm mt-2">
-            Min: ${filters?.priceRange[0]} - Max: ${filters?.priceRange[1]}
-          </p>
-        </div>
-      )}
     </aside>
   );
 };

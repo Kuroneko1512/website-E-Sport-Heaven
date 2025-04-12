@@ -31,7 +31,7 @@ const Home = () => {
       },
     });
 
-    // console.log("categories", categories?.slice(0, 8));
+  console.log("categories", categories?.slice(0, 8));
   // console.log("productData", productData);
 
   return (
