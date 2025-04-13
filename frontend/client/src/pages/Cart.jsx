@@ -1,144 +1,337 @@
-import  { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { DeleteOutlined } from "@ant-design/icons";
+import {
+  Button,
+  Checkbox,
+  Col,
+  Image,
+  message,
+  Modal,
+  Row,
+  Space,
+  Table,
+  Typography
+} from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import FomatVND from "../utils/FomatVND";
+
+const { Title, Text } = Typography;
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState([]);
-  const [discountCode, setDiscountCode] = useState('');
-  const [discountAmount, setDiscountAmount] = useState(0);
+  const [cartItems, setCartItems] = useState([]); // Lưu trữ danh sách sản phẩm trong giỏ hàng
+const [selectedItems, setSelectedItems] = useState([]); // Lưu trữ danh sách sản phẩm được chọn
+const [checkoutItems, setCheckoutItems] = useState([]); // Lưu trữ danh sách sản phẩm để thanh toán
+const nav = useNavigate(); // Điều hướng giữa các trang
+const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông báo
+  const [canWarn, setCanWarn] = useState(true); // Kiểm soát thời gian chờ thông báo
 
-  // Lấy dữ liệu từ localStorage khi component mount
+  const miniCartData = useMemo(
+    () => JSON.parse(localStorage.getItem("cartItems")) || [],// Lấy dữ liệu giỏ hàng từ localStorage
+    []
+  );
+
   useEffect(() => {
-    const storedCart = localStorage.getItem('cartItems');
-    console.log(storedCart);
-    if (storedCart) {
-      setCartItems(JSON.parse(storedCart));
-    }
-  }, []);
+    setCartItems(miniCartData);// Cập nhật trạng thái `cartItems` khi dữ liệu thay đổi
+  }, [miniCartData]);
 
-  // Cập nhật localStorage khi giỏ hàng thay đổi
-  const updateLocalStorage = (items) => {
-    localStorage.setItem('cartItems', JSON.stringify(items));
-    setCartItems(items);
+  const handleQuantityChange = (productId, variantId, delta) => {
+    setCartItems((prev) =>
+      prev.map((item) => {
+        if (
+          item.product_id === productId &&
+          (!variantId || item.variant_id === variantId)
+        ) {
+          const newQuantity = Math.max(
+            1,
+            Math.min(item.quantity + delta, item.stock)
+          );
   
-  };
-
-  // Xử lý thay đổi số lượng sản phẩm
-  const handleQuantityChange = (id, delta) => {
-    const updatedCart = cartItems.map(item =>
-      item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
+          // Kiểm tra nếu vượt quá tồn kho
+          if (item.quantity + delta > item.stock && canWarn) {
+            if (warningCount < 3) {
+              message.warning("Không thể nhập quá số lượng tồn kho!");
+              setWarningCount((prevCount) => prevCount + 1);
+            }
+  
+            // Đặt thời gian chờ 3 giây để cho phép thông báo lại
+            setCanWarn(false);
+            setTimeout(() => {
+              setCanWarn(true);
+              setWarningCount(0); // Đặt lại bộ đếm sau 3 giây
+            }, 3000);
+          }
+  
+          return {
+            ...item,
+            quantity: newQuantity,
+          };
+        }
+        return item;
+      })
     );
-    updateLocalStorage(updatedCart);
-    console.log(cartItems)
   };
 
-  // Xóa sản phẩm khỏi giỏ hàng
-  const handleRemoveItem = (id) => {
-
-    if (window.confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
-      const updatedCart = cartItems.filter(item => item.id !== id);
-      console.log(updatedCart)
-      updateLocalStorage(updatedCart);
-    }
+  const handleRemoveItem = (productId, variantId) => {
+    Modal.confirm({
+      title: "Xác nhận xóa sản phẩm",
+      content: "Bạn có chắc muốn xóa sản phẩm này?",
+      cancelText: "Hủy",
+      onOk: () => {
+        const updatedCartItems = cartItems.filter(
+          (item) =>
+            item.product_id !== productId ||
+            (variantId && item.variant_id !== variantId)// Loại bỏ sản phẩm khỏi danh sách
+        );
+        setCartItems(updatedCartItems);// Cập nhật trạng thái giỏ hàng
+        setSelectedItems(
+          selectedItems.filter(
+            (itemId) =>
+              itemId.product_id !== productId ||
+              (variantId && itemId.variant_id !== variantId)// Loại bỏ sản phẩm khỏi danh sách đã chọn
+          )
+        );
+        localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));// Lưu lại giỏ hàng vào localStorage
+      },
+    });
   };
 
-  // Tính tổng tiền hàng
+  const handleSelectItem = (productId, variantId) => {
+    const itemKey = { product_id: productId, variant_id: variantId };
+    const isSelected = selectedItems.some(
+      (item) =>
+        item.product_id === productId &&
+        (!variantId || item.variant_id === variantId)// Kiểm tra xem sản phẩm đã được chọn chưa
+    );
+    setSelectedItems((prev) =>
+      isSelected
+        ? prev.filter(
+            (item) =>
+              item.product_id !== productId ||
+              (variantId && item.variant_id !== variantId)// Bỏ chọn sản phẩm
+          )
+        : [...prev, itemKey]// Thêm sản phẩm vào danh sách đã chọn
+    );
+  };
+
+  const handleSelectAll = () => {
+    const allItems = cartItems.map((item) => ({
+      product_id: item.product_id,
+      variant_id: item.variant_id,
+    }));
+    setSelectedItems((prev) =>
+      prev.length === allItems.length ? [] : allItems// Nếu tất cả đã được chọn, bỏ chọn tất cả; ngược lại, chọn tất cả
+    );
+  };
+
   const calculateSubtotal = () => {
-    const total = cartItems.reduce((total, item) => total + parseFloat(item?.price) * parseFloat(item.quantity), 0).toFixed(2)
-    localStorage.setItem("cartTotal", JSON.stringify(total));
-    return parseFloat(total);
-    
+    return cartItems
+      .filter((item) =>
+        selectedItems.some(
+          (selected) =>
+            selected.product_id === item.product_id &&
+            (!item.variant_id || selected.variant_id === item.variant_id)
+        )
+      )
+      .reduce((total, item) => total + (item.price - (item.price * item.discount / 100)) * item.quantity, 0)
+      .toFixed(2);// Làm tròn đến 2 chữ số thập phân
   };
 
-  // Áp dụng mã giảm giá
-  const handleApplyDiscount = () => {
-    if (discountCode === 'FLAT50') {
-      setDiscountAmount(0.5 * parseFloat(calculateSubtotal()));
-      alert('Mã giảm giá áp dụng thành công!');
-    } else {
-      setDiscountAmount(0);
-      alert('Mã giảm giá không hợp lệ!');
-    }
-  };
-
-  // Tính tổng tiền sau khi áp dụng giảm giá
-  const calculateGrandTotal = () => {
-    return (parseFloat(calculateSubtotal()) + 5.00 - discountAmount).toFixed(2);
-  };
+  const handleCheckout = () => {
+    const selectedCartItems = cartItems
+      .filter((item) =>
+        selectedItems.some(
+          (selected) =>
+            selected.product_id === item.product_id &&
+            (!item.variant_id || selected.variant_id === item.variant_id)// Lọc các sản phẩm đã chọn
+        )
+      )
+      .map((item) => ({
+        ...item,
+        price: item.price,
+        discount: item.discount,
+      }));
   
-  return (
-    <div className="bg-white text-gray-800">
-      <main className="max-w-6xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">Thanh toán</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="col-span-2">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left">
-                  <th className="pb-4">Sản phẩm</th>
-                  <th className="pb-4"></th>
-                  <th className="pb-4">Giá</th>
-                  <th className="pb-4">Số lượng</th>
-                  <th className="pb-4">Tổng</th>
-                  <th className="pb-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {cartItems.map((item) => (
-                  <tr key={item.id} className="border-b border-gray-200">
-                    <td className="py-4">
-                      {item.product?.image && (
-                        <img src={item.product.image} alt={item.product.name} className="h-16" width="50" height="50" />
-                      )}
-                    </td>
-                    <td className="py-4">
-                      <h2 className="text-lg font-semibold">{item?.name || 'Sản phẩm'}</h2>
-                      <p className="text-gray-600">Sku: {item?.sku || 'N/A'}</p>
-                    </td>
-                    <td className="py-4 text-lg">${parseFloat(item?.price || 0).toFixed(2)}</td>
-                    <td className="py-4">
-                      <div className="flex items-center border border-gray-300 rounded w-fit">
-                        <button className="px-2 py-1" onClick={() => handleQuantityChange(item.id, -1)}>-</button>
-                        <span className="px-4 py-1">{item.quantity}</span>
-                        <button className="px-2 py-1" onClick={() => handleQuantityChange(item.id, 1)}>+</button>
-                      </div>
-                    </td>
-                    <td className="py-4 text-lg">${(parseFloat(item?.price) * parseFloat(item.quantity)).toFixed(2)}</td>
-                    <td className="py-4">
-                      <button className="text-red-500" onClick={() => handleRemoveItem(item.id)}>
-                        <i className="fas fa-trash-alt"></i>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="border border-gray-200 p-6 rounded-lg">
-            <div className="flex justify-between mb-4">
-              <span className="text-lg">Tổng phụ</span>
-              <span className="text-lg">${calculateSubtotal()}</span>
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-600 mb-2">Nhập mã giảm giá</label>
-              <div className="flex">
-                <input type="text" className="border border-gray-300 rounded-l px-4 py-2 w-full" value={discountCode} onChange={(e) => setDiscountCode(e.target.value)} />
-                <button className="bg-black text-white px-4 py-2 rounded-r" onClick={handleApplyDiscount}>Áp dụng</button>
+    setCheckoutItems(selectedCartItems);// Lưu danh sách sản phẩm để thanh toán
+    localStorage.setItem("checkoutItems", JSON.stringify(selectedCartItems));// Lưu vào localStorage
+    nav("/newcheckout");// Điều hướng đến trang thanh toán
+  };
+
+  const columns = [
+    {
+      title: (
+        <Checkbox
+          checked={selectedItems.length === cartItems.length}
+          onChange={handleSelectAll}
+        />
+      ),
+      dataIndex: "checkbox",
+      render: (_, record) => (
+        <Checkbox
+          checked={selectedItems.some(
+            (selected) =>
+              selected.product_id === record.product_id &&
+              (!record.variant_id || selected.variant_id === record.variant_id)
+          )}
+          onChange={() =>
+            handleSelectItem(record.product_id, record.variant_id)
+          }
+        />
+      ),
+    },
+    {
+      title: "Hình ảnh",
+      dataIndex: "image",
+      render: (image) => <Image width={80} height={100} className="object-cover" src={`http://127.0.0.1:8000/storage/${image}`} />,
+    },
+    {
+      title: "Tên sản phẩm",
+      dataIndex: "name",
+      render: (_, item) => (
+        <>
+          <div>{item.name}</div>
+          <div>
+            {Object.entries(item.thuoc_tinh || {}).map(([key, value]) => (
+              <div key={key}>
+                <Text type="secondary" style={{ fontSize: 13 }}>
+                  {key}: {value}
+                </Text>
               </div>
-            </div>
-            <div className="flex justify-between mb-4">
-              <span className="text-lg">Phí vận chuyển</span>
-              <span className="text-lg">$5.00</span>
-            </div>
-            <div className="flex justify-between mb-4">
-              <span className="text-lg font-bold">Tổng cộng</span>
-              <span className="text-lg font-bold">${calculateGrandTotal()}</span>
-            </div>
-            <button className="bg-black text-white w-full py-3 rounded">
-              <Link to={`/newcheckout`}>Tiếp tục thanh toán</Link>
-            </button>
+            ))}
           </div>
+        </>
+      ),
+    },
+    {
+      title: "Đơn giá",
+      dataIndex: "price",
+      render: (_, item) =>
+        FomatVND(
+          parseFloat(item.price) -
+            (parseFloat(item.discount) * parseFloat(item.price)) / 100
+        ),
+    },
+    {
+      title: "Số lượng",
+      dataIndex: "quantity",
+      render: (_, item) => (
+        <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 space-x-4 w-fit">
+          <button
+            onClick={() =>
+              handleQuantityChange(item.product_id, item.variant_id, -1)
+            }
+            className="text-gray-600"
+          >
+            <i className="fa-solid fa-minus"></i>
+          </button>
+          <input
+  type="text"
+  value={item.quantity}
+  min={1}
+  max={item.stock}
+  onChange={(e) => {
+    let value = parseInt(e.target.value, 10);
+    if (isNaN(value) || value < 1) value = 1;
+
+    if (value > item.stock) {
+      if (canWarn) {
+        if (warningCount < 3) {
+          message.warning("Không thể nhập quá số lượng tồn kho!");
+          setWarningCount((prevCount) => prevCount + 1);
+        }
+
+        setCanWarn(false);
+        setTimeout(() => {
+          setCanWarn(true);
+          setWarningCount(0);
+        }, 3000);
+      }
+      value = item.stock;
+    }
+
+    handleQuantityChange(item.product_id, item.variant_id, value - item.quantity);
+  }}
+  className="text-center"
+  style={{
+    width: `${item.quantity.toString().length + 1}ch`,
+  }}
+/>
+          <button
+            onClick={() =>
+              handleQuantityChange(item.product_id, item.variant_id, 1)
+            }
+            className="text-gray-600"
+          >
+            <i className="fa-solid fa-plus"></i>
+          </button>
         </div>
-      </main>
+      ),
+    },
+    {
+      title: "Thành tiền",
+      dataIndex: "total",
+      render: (_, item) =>
+        FomatVND(
+          parseFloat(
+            (parseFloat(item.price) -
+              (parseFloat(item.discount) * parseFloat(item.price)) / 100) *
+              item.quantity
+          ).toFixed(0)
+        ),
+    },
+    {
+      title: "Xóa",
+      dataIndex: "remove",
+      render: (_, item) => (
+        <Button
+          type="link"
+          danger
+          icon={<DeleteOutlined />}
+          onClick={() => handleRemoveItem(item.product_id, item.variant_id)}
+        >
+          Xóa
+        </Button>
+      ),
+    },
+  ];
+
+  return (
+    <div style={{ background: "#f5f5f5", padding: "2rem" }}>
+      <div style={{ background: "#fff", padding: "2rem", borderRadius: 8 }}>
+        <Title level={3}>GIỎ HÀNG</Title>
+        <Table
+          dataSource={cartItems}// Dữ liệu giỏ hàng
+          columns={columns}// Cấu hình cột
+          rowKey={(record) =>
+            `${record.product_id}_${record.variant_id || "default"}`// Khóa duy nhất cho mỗi hàng
+          }
+          pagination={false}// Không sử dụng phân trang
+        />
+        <Row justify="end" style={{ marginTop: "2rem" }}>
+          <Col>
+            <Space direction="vertical">
+              <Text strong>
+                Tổng tiền:{" "}
+                <Text type="danger" strong>
+                  {FomatVND(calculateSubtotal())} {/* Hiển thị tổng tiền */}
+                </Text>
+              </Text>
+              <Space>
+                <Button onClick={() => nav("/shop")} className="border hover:!border-gray-800 hover:!text-gray-800">
+                  Tiếp tục mua hàng
+                </Button>
+                <Button
+                  type="primary"
+                  disabled={selectedItems.length === 0} // Vô hiệu hóa nếu không có sản phẩm nào được chọn
+                  onClick={handleCheckout} // Xử lý thanh toán
+                  className="bg-black hover:!bg-gray-700 px-6 py-2"
+                >
+                  Đặt hàng
+                </Button>
+              </Space>
+            </Space>
+          </Col>
+        </Row>
+      </div>
     </div>
   );
 };

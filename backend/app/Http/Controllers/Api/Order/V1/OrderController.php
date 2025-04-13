@@ -11,6 +11,7 @@ use App\Mail\Order\AdminOrderMail;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Jobs\Mail\Order\NewOrderJob;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Order\CustomerOrderMail;
 
@@ -138,6 +139,10 @@ class OrderController extends Controller
     }
     private function payment($data, $ip)
     {
+        Log::info('vnpay', [
+            'data' => $data,
+            'ip' => $ip,
+        ]);
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl =  env('VNP_RETURN_URL');
         $vnp_TmnCode = "NJJ0R8FS"; // Merchant code at VNPAY
@@ -146,7 +151,7 @@ class OrderController extends Controller
         $vnp_TxnRef = $data['order_code']; // Transaction reference (unique per order)
         $vnp_OrderInfo = 'Thanh toán đơn hàng test'; // Order information
         $vnp_OrderType = 'other';
-        $vnp_Amount = $data['total_amount']; // Amount in VND (VNPAY expects amount in cents)
+        $vnp_Amount = ($data['total_amount'])*100; // Amount in VND (VNPAY expects amount in cents)
         $vnp_Locale = 'vn'; // Locale
 
         $vnp_IpAddr = $ip; // Use Laravel's request to get IP

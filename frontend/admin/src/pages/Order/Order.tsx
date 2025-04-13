@@ -76,10 +76,10 @@ const Orders = () => {
                 <div className="card-body p-0">
                     {loading ? (
                         <div className="overlay h-[30rem]">
-                        <div className="spinner-border text-primary" role="status">
+                            <div className="spinner-border text-primary" role="status">
+                            </div>
+                            <span className="visually-hidden">Đang tải...</span>
                         </div>
-                          <span className="visually-hidden">Đang tải...</span>
-                      </div>
                     ) : (
                         <table className="table table-striped projects">
                             <thead>
@@ -87,9 +87,10 @@ const Orders = () => {
                                     <th>#</th>
                                     <th>Thông tin khách hàng</th>
                                     <th>Mã Đơn hàng</th>
-                                    
                                     <th>Tổng Tiền</th>
-                                    <th className="text-center">Trạng thái</th>
+                                    <th>Ngày đặt hàng</th>
+                                    <th>Trạng Thái Thanh Toán</th>
+                                    <th className="text-center">Trạng thái Đơn</th>
 
                                 </tr>
                             </thead>
@@ -104,6 +105,13 @@ const Orders = () => {
                                         </td>
                                         <td>{order.order_code}</td>
                                         <td>{FomatVND(order.total_amount)}</td>
+                                        <td>{new Date(order.created_at).toLocaleDateString("vi-VI")}
+                                        </td>
+                                        <td>
+                                            <span className={`badge ${order.payment_status === "đã thanh toán" ? "badge-success" : "badge-warning"}`}>
+                                                {order.payment_status}
+                                            </span>
+                                        </td>
                                         <td className="project-state">
                                             <span className={`badge ${order.status === "success" ? "badge-success" : "badge-warning"}`}>
                                                 {order.status}

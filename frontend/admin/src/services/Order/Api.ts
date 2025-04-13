@@ -14,6 +14,8 @@ export interface Order {
   total_amount: number;
   status: string;
   customer_id: number;
+  created_at: string;
+  payment_status: string;
 }
 interface OrderResponse {
     message: string;
