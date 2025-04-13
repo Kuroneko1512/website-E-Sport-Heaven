@@ -24,7 +24,7 @@ class OrderStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'customer_id' => 'nullable|exists:customer_profiles,id',
+            'customer_id' => 'nullable|exists:customers,id',
 
             // Nếu không có customer_id thì bắt buộc nhập các thông tin khách hàng
             'customer_name' => 'required_without:customer_id|string|max:255',
@@ -38,6 +38,7 @@ class OrderStoreRequest extends FormRequest
             'order_items.*.product_variant_id' => 'nullable|exists:product_variants,id',
             'order_items.*.quantity' => 'required|integer|min:1',
             'order_items.*.price' => 'required|numeric|min:0',
+            'payment_method'    => 'required|string|in:vnpay,cod',
         ];
     }
     public function messages()
@@ -67,6 +68,7 @@ class OrderStoreRequest extends FormRequest
         'order_items.*.price.required' => 'Giá sản phẩm là bắt buộc.',
         'order_items.*.price.numeric' => 'Giá sản phẩm phải là số.',
         'order_items.*.price.min' => 'Giá sản phẩm không hợp lệ.',
+        'payment_method.in'         => 'Phương thức thanh toán không hợp lệ (chỉ hỗ trợ VNPay hoặc COD).',
     ];
 }
 

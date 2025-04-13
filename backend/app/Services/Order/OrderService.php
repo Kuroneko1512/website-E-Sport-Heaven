@@ -3,6 +3,9 @@
 namespace App\Services\Order;
 
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Services\BaseService;
 use Illuminate\Support\Str;
 
@@ -36,7 +39,7 @@ class OrderService extends BaseService
         return $this->model->with([
             'orderItems.product',
             'orderItems.productVariant'
-        ])->get();
+        ])->orderBy('id', 'desc')->get(); ;
     }
 
 
@@ -44,19 +47,27 @@ class OrderService extends BaseService
     {
         return $this->model->with([
             'orderItems.product',
-            'orderItems.productVariant'
+            'orderItems.productVariant.productAttributes.attribute',
+            'orderItems.productVariant.productAttributes.attributeValue'
         ])->findOrFail($id);
     }
 
     public function updateStatus($id, $status)
     {
         $order = $this->model->find($id);
+
         if (!$order) {
             return ['success' => false, 'message' => 'Order not found'];
         }
 
+        // Cập nhật trạng thái của đơn hàng
         $order->status = $status;
         $order->save();
+
+        // Nếu status được cập nhật là "đã hủy", hoàn trả lại stock
+        if ($status === 'đã hủy') {
+            $this->returnStockForOrder($order->order_code);
+        }
 
         return [
             'success' => true,
@@ -65,26 +76,52 @@ class OrderService extends BaseService
         ];
     }
 
+    public function deleteOrder($orderCode)
+    {
+        // Tìm và xóa đơn hàng dựa trên order_code
+        $order =  $this->model->where('order_code', $orderCode)->first();
+
+        if ($order) {
+            // Xóa tất cả order_items liên quan (nếu có)
+            $order->orderItems()->delete();
+
+            // Xóa đơn hàng
+            $order->delete();
+        }
+    }
+    public function updatePaymentStatus($orderCode, $status)
+    {
+        // Tìm đơn hàng theo order_code và cập nhật trạng thái thanh toán
+        return $this->model->where('order_code', $orderCode)->update(['payment_status' => $status]);
+    }
+
+
     /**
      * Lấy đơn hàng theo mã order_code
      */
     public function getOrderByCode($orderCode)
     {
-        return $this->model->with('orderItems')->where('order_code', $orderCode)->firstOrFail();
+        return $this->model
+            ->with([
+                'orderItems.product',  // Load thông tin sản phẩm
+                'orderItems.productVariant' // Load thông tin biến thể (nếu có)
+            ])
+            ->where('order_code', $orderCode)
+            ->firstOrFail();
     }
     /**
      * Xử lý dữ liệu khách hàng trước khi tạo đơn hàng
      */
     private function prepareOrderData($data)
     {
-        // Nếu có `customer_id`, xóa thông tin khách hàng
-        if (!empty($data['customer_id'])) {
-            $data['customer_name'] = null;
-            $data['customer_email'] = null;
-            $data['customer_phone'] = null;
-            $data['shipping_address'] = null;
-        }
 
+        // Nếu có `customer_id`, xóa thông tin khách hàng
+        // if (!empty($data['customer_id'])) {
+        //     $data['customer_name'] = null;
+        //     $data['customer_email'] = null;
+        //     $data['customer_phone'] = null;
+        //     $data['shipping_address'] = null;
+        // }
         return [
             'customer_id' => $data['customer_id'] ?? null,
             'customer_name' => $data['customer_name'] ?? null,
@@ -92,7 +129,7 @@ class OrderService extends BaseService
             'customer_phone' => $data['customer_phone'] ?? null,
             'shipping_address' => $data['shipping_address'] ?? null,
             'total_amount' => 0,
-            'order_code' => $this->generateOrderCode(),
+            'order_code' => $this->generateUniqueOrderCode(),
             'status' => 'đang xử lý',
         ];
     }
@@ -119,8 +156,112 @@ class OrderService extends BaseService
 
         return $totalAmount;
     }
-    public function generateOrderCode()
+    public function generateUniqueOrderCode()
     {
-        return substr(str_replace('-', '', base_convert(Str::uuid()->getHex(), 16, 36)), 0, 10);
+        do {
+            // Tạo mã order code ngẫu nhiên
+            $order_code = substr(str_replace('-', '', base_convert(Str::uuid()->getHex(), 16, 36)), 0, 10);
+
+            // Kiểm tra sự tồn tại trong cơ sở dữ liệu (tránh trùng lặp)
+            $orderExists = Order::where('order_code', $order_code)->exists();
+        } while ($orderExists);  // Lặp lại nếu mã bị trùng
+
+        return $order_code;  // Trả về mã duy nhất
+    }
+    public function updateStockForOrder($orderCode)
+    {
+        $order = Order::where('order_code', $orderCode)->first();
+        if (!$order) {
+            return false;  // Trả về false nếu không tìm thấy đơn hàng
+        }
+        // Lấy danh sách các sản phẩm và số lượng từ bảng order_items
+        $orderItems = OrderItem::where('order_id', $order->id)->get();
+
+        foreach ($orderItems as $item) {
+            // Nếu có product_variant_id, giảm stock trong bảng product_variants
+            if ($item->product_variant_id) {
+                ProductVariant::where('id', $item->product_variant_id)->decrement('stock', $item->quantity);
+            }
+            // Nếu không có product_variant_id, giảm stock trong bảng products
+            else {
+                Product::where('id', $item->product_id)->decrement('stock', $item->quantity);
+            }
+        }
+        return true;  // Trả về true nếu đã cập nhật stock thành công
+    }
+
+    public function returnStockForOrder($orderCode)
+    {
+        $order = Order::where('order_code', $orderCode)->first();
+
+        if (!$order) {
+            return false;  // Trả về false nếu không tìm thấy đơn hàng
+        }
+
+        // Lấy danh sách các sản phẩm và số lượng từ bảng order_items
+        $orderItems = OrderItem::where('order_id', $order->id)->get();
+
+        foreach ($orderItems as $item) {
+            // Nếu có product_variant_id, cộng lại stock trong bảng product_variants
+            if ($item->product_variant_id) {
+                ProductVariant::where('id', $item->product_variant_id)->increment('stock', $item->quantity);
+            }
+            // Nếu không có product_variant_id, cộng lại stock trong bảng products
+            else {
+                Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+            }
+        }
+
+        return true;  // Trả về true nếu hoàn trả stock thành công
+    }
+
+    /**
+     * Lấy danh sách đơn hàng của một khách hàng với tìm kiếm và phân trang
+     * 
+     * @param int $customerId ID của khách hàng
+     * @param array $searchParams Các tham số tìm kiếm
+     * @param int $perPage Số lượng kết quả mỗi trang
+     * @return \Illuminate\Pagination\LengthAwarePaginator
+     */
+    public function getOrdersByCustomerId($customerId, $searchParams = [], $perPage = 10)
+    {
+        $query = $this->model->with([
+            'orderItems.product',
+            'orderItems.productVariant.productAttributes.attribute',
+            'orderItems.productVariant.productAttributes.attributeValue'
+        ])
+            ->where('customer_id', $customerId);
+
+        // Tìm kiếm theo mã đơn hàng
+        if (!empty($searchParams['order_code'])) {
+            $query->where('order_code', 'like', '%' . $searchParams['order_code'] . '%');
+        }
+
+        // Tìm kiếm theo tên sản phẩm
+        if (!empty($searchParams['product_name'])) {
+            $productName = $searchParams['product_name'];
+            $query->whereHas('orderItems.product', function ($q) use ($productName) {
+                $q->where('name', 'like', '%' . $productName . '%');
+            });
+        }
+
+        // Sắp xếp theo thời gian tạo, mới nhất lên đầu
+        return $query->orderBy('created_at', 'desc')->paginate($perPage);
+    }
+
+    /**
+     * Lấy danh sách đơn hàng của người dùng hiện tại
+     * 
+     * @param \App\Models\User $user Người dùng hiện tại
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getOrdersByUser($user, $searchParams = [], $perPage = 10)
+    {
+        // Kiểm tra xem user có phải là customer không
+        if ($user->account_type !== 'customer' || !$user->customer) {
+            return collect(); // Trả về collection rỗng nếu không phải customer
+        }
+
+        return $this->getOrdersByCustomerId($user->customer->id, $searchParams, $perPage);
     }
 }

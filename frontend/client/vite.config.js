@@ -1,7 +1,14 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-})
+  define: {
+    __WS_TOKEN__: JSON.stringify(process.env.WS_TOKEN || "default-token"),
+  },
+  resolve: {
+    alias: {
+      "@config": "/src/config", // Alias cho thư mục src/config
+    },
+  },
+});

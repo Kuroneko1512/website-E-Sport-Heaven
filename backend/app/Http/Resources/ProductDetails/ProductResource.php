@@ -28,10 +28,12 @@ class ProductResource extends JsonResource
             'description' => $this->description,
             'product_type' => $this->product_type,
             'status' => $this->status,
+            'stock'=> $this->stock,
             'category' => [
                 'id' => $this->category->id ?? null,
                 'name' => $this->category->name ?? null,
             ],
+           
             'variants' => $this->variants->map(fn ($variant) => [
                 'id' => $variant->id,
                 'sku' => $variant->sku,

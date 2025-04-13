@@ -1,4 +1,5 @@
 import { getOrders, Order, Pagination } from "@app/services/Order/Api";
+import FomatVND from "@app/utils/FomatVND";
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -50,9 +51,9 @@ const Orders = () => {
                         <div className="col-sm-6">
                             <ol className="breadcrumb float-sm-right">
                                 <li className="breadcrumb-item">
-                                    <a href="#">Home</a>
+                                    <a href="#">Trang chủ</a>
                                 </li>
-                                <li className="breadcrumb-item active">Orders</li>
+                                <li className="breadcrumb-item active">Đơn hàng</li>
                             </ol>
                         </div>
                     </div>
@@ -61,7 +62,7 @@ const Orders = () => {
 
             <div className="card">
                 <div className="card-header">
-                    <h3 className="card-title">Orders</h3>
+                    <h3 className="card-title">Đơn hàng</h3>
                     <div className="card-tools">
                         <button type="button" className="btn btn-tool" data-card-widget="collapse" title="Collapse">
                             <i className="fas fa-minus"></i>
@@ -74,7 +75,11 @@ const Orders = () => {
 
                 <div className="card-body p-0">
                     {loading ? (
-                        <p>Loading...</p>
+                        <div className="overlay h-[30rem]">
+                            <div className="spinner-border text-primary" role="status">
+                            </div>
+                            <span className="visually-hidden">Đang tải...</span>
+                        </div>
                     ) : (
                         <table className="table table-striped projects">
                             <thead>
@@ -83,7 +88,9 @@ const Orders = () => {
                                     <th>Thông tin khách hàng</th>
                                     <th>Mã Đơn hàng</th>
                                     <th>Tổng Tiền</th>
-                                    <th className="text-center">Trạng thái</th>
+                                    <th>Ngày đặt hàng</th>
+                                    <th>Trạng Thái Thanh Toán</th>
+                                    <th className="text-center">Trạng thái Đơn</th>
 
                                 </tr>
                             </thead>
@@ -97,7 +104,14 @@ const Orders = () => {
                                             <small>{order.customer_phone}</small>
                                         </td>
                                         <td>{order.order_code}</td>
-                                        <td>{order.total_amount} VND</td>
+                                        <td>{FomatVND(order.total_amount)}</td>
+                                        <td>{new Date(order.created_at).toLocaleDateString("vi-VI")}
+                                        </td>
+                                        <td>
+                                            <span className={`badge ${order.payment_status === "đã thanh toán" ? "badge-success" : "badge-warning"}`}>
+                                                {order.payment_status}
+                                            </span>
+                                        </td>
                                         <td className="project-state">
                                             <span className={`badge ${order.status === "success" ? "badge-success" : "badge-warning"}`}>
                                                 {order.status}

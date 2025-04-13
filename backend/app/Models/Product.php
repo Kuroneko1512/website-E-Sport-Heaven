@@ -13,7 +13,7 @@ class Product extends Model
     protected $fillable = [
         'name', 'price', 'discount_percent', 'discount_start', 
         'discount_end', 'sku', 'description', 'image', 
-        'product_type', 'status', 'category_id'
+        'product_type', 'status', 'category_id' ,'stock'
     ];
     public function variants()
     {

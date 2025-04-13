@@ -5,10 +5,10 @@ const TopFooter = () => {
     <div className="bg-white dark:bg-gray-800 py-10">
       <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center">
         {[
-          { icon: "fas fa-box", title: "Free Shipping", desc: "For orders above $150" },
-          { icon: "fas fa-dollar-sign", title: "Money Guarantee", desc: "30-day exchange policy" },
-          { icon: "fas fa-headset", title: "Online Support", desc: "24/7 customer support" },
-          { icon: "fas fa-credit-card", title: "Flexible Payment", desc: "Multiple payment methods" },
+          { icon: "fas fa-box", title: "Miễn phí vận chuyển", desc: "Cho các đơn hàng hơn 200.000VNĐ" },
+          { icon: "fas fa-dollar-sign", title: "Đảm bảo hoàn tiền", desc: "Chính sách đổi/trả trong 15 ngày" },
+          { icon: "fas fa-headset", title: "Hỗ trợ trực tuyến", desc: "Hỗ trợ khách hàng 24/7" },
+          { icon: "fas fa-credit-card", title: "Thanh toán linh hoạt", desc: "Nhiều phương thức thanh toán" },
         ].map((item, index) => (
           <div 
             key={index} 

@@ -29,13 +29,14 @@ const ForgotPassword = () => {
     <div className="login-box">
       <div className="card card-outline card-primary">
         <div className="card-header text-center">
-          <Link to="/" className="h1">
-            <b>Admin</b>
-            <span>LTE</span>
+        <Link to="/" className="h2">
+            <b>Quản trị viên</b>
+            <br />
+            <span>SPORT HEAVEN</span>
           </Link>
         </div>
         <div className="card-body">
-          <p className="login-box-msg">{t('recover.forgotYourPassword')}</p>
+          <p className="login-box-msg">Bạn quên mật khẩu của mình? Không sao, tại đây bạn có thể đổi mật khẩu mới.</p>
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <InputGroup className="mb-3">
@@ -64,12 +65,12 @@ const ForgotPassword = () => {
             </div>
             <div className="row">
               <div className="col-12">
-                <Button>{t('recover.requestNewPassword')}</Button>
+                <Button>Gửi yêu cầu mật khẩu</Button>
               </div>
             </div>
           </form>
           <p className="mt-3 mb-1">
-            <Link to="/login">{t('login.button.signIn.label')}</Link>
+            <Link to="/login">Trở về trang đăng nhập</Link>
           </p>
         </div>
       </div>

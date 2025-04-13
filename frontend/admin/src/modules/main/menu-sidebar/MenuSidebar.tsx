@@ -15,29 +15,39 @@ export interface IMenuItem {
 
 export const MENU: IMenuItem[] = [
   {
-    name: i18n.t('menusidebar.label.dashboard'),
-    icon: 'fas fa-tachometer-alt nav-icon',
+    name: 'Bảng điều khiển',
+    icon: 'fas fa-tachometer-alt nav-icon', // Bảng điều khiển -> biểu tượng dashboard
     path: '/',
   },
   {
     name: i18n.t('menusidebar.label.blank'),
-    icon: 'fas fa-wrench nav-icon',
+    icon: 'fas fa-wrench nav-icon', // Tạm giữ nguyên vì không rõ nội dung cụ thể
     path: '/blank',
   },
   {
-    name: 'Product',
-    icon: 'fas fa-box nav-icon',
+    name: 'Sản phẩm',
+    icon: 'fas fa-box-open nav-icon', // Sản phẩm -> hộp mở, phù hợp cho product
     path: '/Product',
   },
   {
-    name: 'Attribute',
-    icon: 'fas fa-box nav-icon',
+    name: 'Danh mục',
+    icon: 'fas fa-th-list nav-icon', // Danh mục -> danh sách lưới
+    path: '/Category',
+  },
+  {
+    name: 'Thuộc tính',
+    icon: 'fas fa-tags nav-icon', // Thuộc tính -> thẻ/tag là biểu tượng hợp lý
     path: '/Attribute',
   },
   {
-    name: 'Order',
-    icon: 'fas fa-box nav-icon',
+    name: 'Đơn hàng',
+    icon: 'fas fa-shopping-cart nav-icon', // Đơn hàng -> giỏ hàng
     path: '/Order',
+  },
+  {
+    name: 'Mã giảm giá',
+    icon: 'fas fa-tags nav-icon', // Mã giảm giá -> thẻ/tag là biểu tượng hợp lý
+    path: '/Coupon',
   },
   {
     name: i18n.t('menusidebar.label.mainMenu'),
@@ -87,7 +97,7 @@ const MenuSidebar = () => {
           height={33}
           rounded
         />
-        <span className="brand-text font-weight-light">AdminLTE 3</span>
+        <span className="brand-text font-weight-light">Quản trị viên</span>
       </Link>
       <div className="sidebar">
         <div className="user-panel mt-3 pb-3 mb-3 d-flex">

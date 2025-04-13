@@ -48,7 +48,7 @@ const Profile = () => {
                     />
                   </div>
                   <h3 className="profile-username text-center">
-                    {currentUser?.displayName}
+                    {currentUser?.name}
                   </h3>
                   <p className="text-muted text-center">Software Engineer</p>
                   <ul className="list-group list-group-unbordered mb-3">

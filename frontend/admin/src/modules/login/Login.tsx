@@ -1,114 +1,179 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { useFormik } from 'formik';
-import { useTranslation } from 'react-i18next';
-import { setCurrentUser } from '@store/reducers/auth';
-import { setWindowClass } from '@app/utils/helpers';
-import { Checkbox } from '@profabric/react-components';
-import * as Yup from 'yup';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useFormik } from "formik";
+import { useTranslation } from "react-i18next";
+import { setCurrentUser, setAuthData } from "@store/reducers/auth";
+import { setWindowClass } from "@app/utils/helpers";
+import { Checkbox } from "@profabric/react-components";
+import * as Yup from "yup";
 
-import { Form, InputGroup } from 'react-bootstrap';
-import { Button } from '@app/styles/common';
-import { loginWithEmail, signInByGoogle } from '@app/services/auth';
-import { useAppDispatch } from '@app/store/store';
+import { Form, InputGroup } from "react-bootstrap";
+import { Button } from "@app/styles/common";
+import { useAppDispatch } from "@app/store/store";
+import { AuthService } from "@app/services/auth.service";
 
 const Login = () => {
   const [isAuthLoading, setAuthLoading] = useState(false);
   const [isGoogleAuthLoading, setGoogleAuthLoading] = useState(false);
   const [isFacebookAuthLoading, setFacebookAuthLoading] = useState(false);
-  const dispatch = useAppDispatch();
+  const [identifierError, setIdentifierError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [t] = useTranslation();
 
-  const login = async (email: string, password: string) => {
-    try {
-      setAuthLoading(true);
-      const { user } = await loginWithEmail(email, password);
-      dispatch(setCurrentUser(user));
-      toast.success('Login is succeed!');
-      setAuthLoading(false);
-      navigate('/');
-    } catch (error: any) {
-      setAuthLoading(false);
-      toast.error(error.message || 'Failed');
-    }
-  };
 
-  const loginByGoogle = async () => {
+    const handleLogin = async (identifier: string, password: string) => {
+        try {
+            setAuthLoading(true);
+            setIdentifierError(null);
+            setPasswordError(null);
+    
+            console.log("Attempting to login with:", { identifier, password });
+            const response = await AuthService.login({ identifier, password });
+            console.log("Login response:", response);
+    
+            // Kiểm tra dữ liệu user
+            if (!response.user) {
+                console.error("No user data in response");
+                throw new Error("No user data in response");
+            }
+    
+            // Cập nhật Redux store với đầy đủ thông tin
+            dispatch(setAuthData({
+                accessToken: response.access_token,
+                refreshToken: response.refresh_token,
+                createdAt: response.created_at,
+                expiresAt: response.expires_at,
+                expiresIn: response.expires_in,
+                permissions: response.permission,
+                roles: response.role,
+                user: response.user
+            }));
+    
+            toast.success("Login successful");
+            navigate("/");
+            // Kiểm tra token sau khi login
+            console.log(
+                "Access token after login:",
+                localStorage.getItem("access_token")
+            );
+        } catch (error: any) {
+            console.error("Login error:", error.response?.data);
+            // Xử lý lỗi cho từng trường
+            if (error.response?.data?.errors?.identifier) {
+                setIdentifierError(error.response?.data.errors.identifier[0]);
+            }
+            if (error.response?.data?.errors?.password) {
+                setPasswordError(error.response?.data.errors.password[0]);
+            }
+            // Nếu không có lỗi cụ thể, hiển thị thông báo chung
+            else {
+                toast.error(error.response?.data?.message || "Login failed");
+            }
+        } finally {
+            setAuthLoading(false);
+        }
+    };
+    
+
+
+  const handleGoogleLogin = async () => {
     try {
       setGoogleAuthLoading(true);
-      await signInByGoogle();
-      toast.success('Login is succeed!');
-      setGoogleAuthLoading(false);
+      // TODO: Implement Google login API
+      toast.info("Google login is not implemented yet");
     } catch (error: any) {
+      toast.error(error.message || "Google login failed");
+    } finally {
       setGoogleAuthLoading(false);
-      toast.error(error.message || 'Failed');
     }
   };
 
-  const loginByFacebook = async () => {
+  const handleFacebookLogin = async () => {
     try {
       setFacebookAuthLoading(true);
-      throw new Error('Not implemented');
+      // TODO: Implement Facebook login API
+      toast.info("Facebook login is not implemented yet");
     } catch (error: any) {
+      toast.error(error.message || "Facebook login failed");
+    } finally {
       setFacebookAuthLoading(false);
-      toast.error(error.message || 'Failed');
     }
   };
 
   const { handleChange, values, handleSubmit, touched, errors } = useFormik({
     initialValues: {
-      email: '',
-      password: '',
+      identifier: "",
+      password: "",
     },
     validationSchema: Yup.object({
-      email: Yup.string().email('Invalid email address').required('Required'),
+      identifier: Yup.string()
+        .test(
+          "is-valid-identifier",
+          "Please enter a valid email or phone number",
+          (value) => {
+            if (!value) return false;
+            // Kiểm tra nếu là email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(value)) return true;
+
+            // Kiểm tra nếu là phone (ví dụ: bắt đầu bằng số và có độ dài tối thiểu 10 số)
+            const phoneRegex = /^\d{10,}$/;
+            return phoneRegex.test(value);
+          }
+        )
+        .required("Required"),
       password: Yup.string()
-        .min(5, 'Must be 5 characters or more')
-        .max(30, 'Must be 30 characters or less')
-        .required('Required'),
+        .min(5, "Must be 5 characters or more")
+        .max(30, "Must be 30 characters or less")
+        .required("Required"),
     }),
     onSubmit: (values) => {
-      login(values.email, values.password);
+      handleLogin(values.identifier, values.password);
     },
   });
 
-  setWindowClass('hold-transition login-page');
+  const [isShowPassword, setIsShowPassword] = useState(false);
 
+  setWindowClass("hold-transition login-page");
   return (
     <div className="login-box">
       <div className="card card-outline card-primary">
         <div className="card-header text-center">
-          <Link to="/" className="h1">
-            <b>Admin</b>
-            <span>LTE</span>
+          <Link to="/" className="h2">
+            <b>Quản trị viên</b>
+            <br />
+            <span>SPORT HEAVEN</span>
           </Link>
         </div>
         <div className="card-body">
-          <p className="login-box-msg">{t('login.label.signIn')}</p>
+          <p className="login-box-msg">
+            Đăng nhập để bắt đầu phiên làm việc của bạn.
+          </p>
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <InputGroup className="mb-3">
                 <Form.Control
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="Email"
+                  id="identifier"
+                  name="identifier"
+                  type="text"
+                  placeholder="Email hoặc số điện thoại"
                   onChange={handleChange}
-                  value={values.email}
-                  isValid={touched.email && !errors.email}
-                  isInvalid={touched.email && !!errors.email}
+                  value={values.identifier || ""}
+                  isValid={touched.identifier && !errors.identifier}
+                  isInvalid={touched.identifier && !!errors.identifier}
                 />
-                {touched.email && errors.email ? (
+                {touched.identifier && errors.identifier ? (
                   <Form.Control.Feedback type="invalid">
-                    {errors.email}
+                    {identifierError}
                   </Form.Control.Feedback>
                 ) : (
                   <InputGroup.Append>
                     <InputGroup.Text>
-                      <i className="fas fa-envelope" />
+                      <i className="fas fa-user" />
                     </InputGroup.Text>
                   </InputGroup.Append>
                 )}
@@ -119,8 +184,8 @@ const Login = () => {
                 <Form.Control
                   id="password"
                   name="password"
-                  type="password"
-                  placeholder="Password"
+                  type={isShowPassword ? "text" : "password"}
+                  placeholder="Mật khẩu"
                   onChange={handleChange}
                   value={values.password}
                   isValid={touched.password && !errors.password}
@@ -128,12 +193,12 @@ const Login = () => {
                 />
                 {touched.password && errors.password ? (
                   <Form.Control.Feedback type="invalid">
-                    {errors.password}
+                    {passwordError}
                   </Form.Control.Feedback>
                 ) : (
                   <InputGroup.Append>
-                    <InputGroup.Text>
-                      <i className="fas fa-lock" />
+                    <InputGroup.Text onClick={() => setIsShowPassword(!isShowPassword)}>
+                      <i className={isShowPassword ? "fas fa-lock-open" : "fas fa-lock"} />
                     </InputGroup.Text>
                   </InputGroup.Append>
                 )}
@@ -141,21 +206,32 @@ const Login = () => {
             </div>
 
             <div className="row">
-              <div className="col-8">
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div className="col-6">
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
                   <Checkbox checked={false} />
-                  <label style={{ margin: 0, padding: 0, paddingLeft: '4px' }}>
-                    {t('login.label.rememberMe')}
+                  <label
+                    style={{
+                      margin: 0,
+                      padding: 0,
+                      paddingLeft: "4px",
+                    }}
+                  >
+                    Ghi nhớ tài khoản
                   </label>
                 </div>
               </div>
-              <div className="col-4">
+              <div className="col-6">
                 <Button
                   loading={isAuthLoading}
                   disabled={isFacebookAuthLoading || isGoogleAuthLoading}
                   onClick={handleSubmit as any}
                 >
-                  {t('login.button.signIn.label')}
+                  Đăng nhập
                 </Button>
               </div>
             </div>
@@ -163,31 +239,31 @@ const Login = () => {
           <div className="social-auth-links text-center mt-2 mb-3">
             <Button
               className="mb-2"
-              onClick={loginByFacebook}
+              onClick={handleFacebookLogin}
               loading={isFacebookAuthLoading}
               disabled={true || isAuthLoading || isGoogleAuthLoading}
             >
               <i className="fab fa-facebook mr-2" />
-              {t('login.button.signIn.social', {
-                what: 'Facebook',
-              })}
+              Đăng nhập với Facebook
             </Button>
             <Button
               variant="danger"
-              onClick={loginByGoogle}
+              onClick={handleGoogleLogin}
               loading={isGoogleAuthLoading}
               disabled={isAuthLoading || isFacebookAuthLoading}
             >
               <i className="fab fa-google mr-2" />
-              {t('login.button.signIn.social', { what: 'Google' })}
+              Đăng nhập với Google
             </Button>
           </div>
           <p className="mb-1">
-            <Link to="/forgot-password">{t('login.label.forgotPass')}</Link>
+            <Link to="/forgot-password">Quên mật khẩu?</Link>
           </p>
           <p className="mb-0">
-            <Link to="/register" className="text-center">
-              {t('login.label.registerNew')}
+            <Link
+            to="#" 
+            className="text-center">
+              Đăng ký thành viên
             </Link>
           </p>
         </div>

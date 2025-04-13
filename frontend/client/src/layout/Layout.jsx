@@ -4,7 +4,7 @@ import Navbar from "../components/header/Navbar";
 
 const Layout = () => {
   return (
-    <div>
+    <div className="dark:bg-gray-800 min-h-screen">
       {/* Header */}
         <Navbar />
 
