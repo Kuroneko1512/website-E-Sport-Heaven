@@ -344,6 +344,11 @@ const NewCheckout = () => {
                       setWards([]);
                       setSelectedDistrict("");
                       setSelectedWard("");
+                      // Reset giá trị trên form
+      form.setFieldsValue({
+        district: undefined, // Reset quận/huyện
+        ward: undefined, // Reset phường/xã
+      });
                     }}
                     disabled={dataform?.province}
                   >
@@ -376,6 +381,10 @@ const NewCheckout = () => {
                       setSelectedDistrict(value);
                       setWards([]);
                       setSelectedWard("");
+                      form.setFieldsValue({
+        
+        ward: undefined, // Reset phường/xã
+      });
                     }}
                     disabled={!selectedProvince}
                   >

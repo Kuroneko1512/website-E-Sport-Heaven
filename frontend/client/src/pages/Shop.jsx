@@ -102,6 +102,7 @@ export default function Shop() {
           }
         },
         staleTime: 600000
+
       }
     ]
   });
@@ -136,7 +137,9 @@ export default function Shop() {
       });
       return response.data?.data;
     },
+
     staleTime: 600000
+
   });
 
   const { data: attributeFilters } = attributeMutation;
@@ -250,6 +253,7 @@ export default function Shop() {
       navigate(`?${newSearch}`, { replace: true });
     }
   }, [filters, currentPage, searchQuery]);
+
 
   console.log("products", products);
 
