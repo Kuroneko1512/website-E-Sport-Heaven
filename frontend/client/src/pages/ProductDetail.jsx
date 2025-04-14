@@ -130,12 +130,10 @@ const ProductDetail = () => {
   const handleAttributeSelect = (attributeId, valueId) => {
     // Check if this value is already selected
     const isAlreadySelected = selectedAttributes[attributeId] === valueId;
-
     // Create updated attributes
     const updatedAttributes = isAlreadySelected
       ? { ...selectedAttributes }
       : { ...selectedAttributes, [attributeId]: valueId };
-
     // If deselecting, remove the attribute
     if (isAlreadySelected) {
       delete updatedAttributes[attributeId];
@@ -201,7 +199,7 @@ const ProductDetail = () => {
     let cartItem = {
       id: generateId(),
       product_id: product.id,
-      variant_id: selectedVariant?.id,
+      variant_id: selectedVariant?.id || null,
       quantity: quantity,
       image: product.image || selectedVariant?.image,
       name: product.name,
@@ -568,4 +566,7 @@ const ProductDetail = () => {
   );
 };
 
+
+
 export default ProductDetail;
+
