@@ -82,7 +82,7 @@ export const AttributeValueFormComponent = ({ attributeId ,setSelectedAttributeI
       }
       fetchAttributeValues();
       setAttributeValue({ value: "", description: "" });
-      setEditingAttributeValue(null); // Reset form về trạng thái thêm mới
+      setEditingAttributeValue(null); 
     } catch (error: any) {
       if (error.response?.status === 422) {
         console.log(error.response.data);
@@ -95,7 +95,7 @@ export const AttributeValueFormComponent = ({ attributeId ,setSelectedAttributeI
   };
 
   const handleEdit = (attribute: any) => {
-    setEditingAttributeValue(attribute); // Lưu id của giá trị đang sửa
+    setEditingAttributeValue(attribute);
     setAttributeValue({ value: attribute.value, description: attribute.description });
   };
 

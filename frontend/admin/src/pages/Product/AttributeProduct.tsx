@@ -5,16 +5,13 @@ import { toast } from "react-toastify";
 
 import { getAttributes } from "@app/services/Attribute/ApiAttribute";
 
-// API URL (thay thế bằng API thực tế của bạn)
-// const API_URL = "https://your-api.com/api/attributes";
 
-// Định nghĩa kiểu dữ liệu cho thuộc tính
 interface AttributeOption {
   value: number;
   label: string;
 }
 
-// Định nghĩa kiểu dữ liệu cho errors
+
 interface ValidationErrors {
   name?: string;
   price?: string;
@@ -25,7 +22,7 @@ interface ValidationErrors {
   image?: string;
 }
 
-// Hàm lấy thuộc tính từ API
+
 const fetchAttributes = async (): Promise<AttributeOption[]> => {
 
   try {
@@ -41,26 +38,26 @@ const fetchAttributes = async (): Promise<AttributeOption[]> => {
 };
 
 const AttributeProduct = () => {
-  const { product, setProduct, errors, setErrors } = useOutletContext<{
+  const { product, setProduct } = useOutletContext<{
     product: any;
     setProduct: React.Dispatch<React.SetStateAction<any>>;
     errors: ValidationErrors;
     setErrors: React.Dispatch<React.SetStateAction<ValidationErrors>>;
   }>();
 
-  // State để lưu danh sách thuộc tính từ API
+  
   const [allAttributes, setAllAttributes] = useState<AttributeOption[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // State tạm lưu giá trị thuộc tính đã chọn
+
   const [tempAttributes, setTempAttributes] = useState<AttributeOption[]>([]);
 
-  // Gọi API khi component mount
+
   useEffect(() => {
     fetchAttributes()
       .then((data) => {
         setAllAttributes(data);
-        // Nếu product đã có thuộc tính, cập nhật vào state tạm
+       
         setTempAttributes(
           data.filter((attr) => product.selected_attributes.includes(attr.value))
         );
@@ -69,12 +66,11 @@ const AttributeProduct = () => {
       .finally(() => setLoading(false));
   }, [product.selected_attributes]);
 
-  // Cập nhật state tạm khi thay đổi Select
+
   const handleChange = (selectedOptions: MultiValue<AttributeOption>) => {
     setTempAttributes(selectedOptions as AttributeOption[]);
   };
 
-  // Khi nhấn Submit, lưu vào product
   const handleSubmitAttribute = () => {
     const selectedValues = tempAttributes.map((option) => option.value);
     setProduct((prev: any) => ({
@@ -95,8 +91,8 @@ const AttributeProduct = () => {
         ) : (
           <Select
             isMulti
-            options={allAttributes} // ✅ Hiển thị tất cả thuộc tính từ API
-            value={tempAttributes} // ✅ Dùng state tạm để lưu giá trị chọn
+            options={allAttributes} 
+            value={tempAttributes} 
             getOptionLabel={(e) => e.label}
             getOptionValue={(e) => e.value.toString()}
             onChange={handleChange}
