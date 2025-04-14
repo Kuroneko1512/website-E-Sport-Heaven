@@ -44,15 +44,9 @@ export default function Shop() {
   });
 
   const [add, setAdd] = useState({});
-  const [loading, setLoading] = useState(0);
   // const [products, setProducts] = useState([]);
 
-
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page")) || 1);
-
-
-  const startLoading = () => setLoading((prev) => prev + 1);
-  const stopLoading = () => setLoading((prev) => Math.max(0, prev - 1));
 
   // Fetch all initial data in parallel
   const handleFilterChange = (newFilters) => {
@@ -117,7 +111,6 @@ export default function Shop() {
   useEffect(() => {
     const fetchDynamicPriceRange = async () => {
       try {
-        startLoading();
         const [currentMin, currentMax] = filters.priceRange;
         const [newMin, newMax] = dataToFilter.priceRange;
         // Cập nhật chỉ khi giá trị khác nhau
@@ -130,7 +123,6 @@ export default function Shop() {
       } catch (error) {
         console.error("Lỗi khi lấy giá min/max:", error);
       } finally {
-        stopLoading();
       }
     };
 
@@ -178,7 +170,6 @@ export default function Shop() {
   // Cập nhật filters với attributes và gọi mutation
   useEffect(() => {
     (async () => {
-      startLoading();
       if (attributes) {
         setDataToFilter((prev) => ({
           ...prev,
@@ -187,14 +178,12 @@ export default function Shop() {
         const attributeIds = attributes.map((attr) => attr.id);
         attributeMutation.mutate(attributeIds);
       }
-      stopLoading();
     })();
   }, [attributes]);
 
   // Cập nhật state 'add' khi attributeFilters có dữ liệu
   useEffect(() => {
     (async () => {
-      startLoading();
       if (attributeFilters) {
         const newAdd = {};
         attributeFilters.forEach((attr) => {
@@ -202,19 +191,16 @@ export default function Shop() {
         });
         setAdd(newAdd);
       }
-      stopLoading();
     })();
   }, [attributeFilters]);
 
   // Cập nhật filters với giá trị 'add' vừa nhận được
   useEffect(() => {
     (async () => {
-      startLoading();
       setDataToFilter((prev) => ({
         ...prev,
         attributefilter: add,
       }));
-      stopLoading();
     })();
   }, [add]);
 
@@ -234,7 +220,7 @@ export default function Shop() {
       params.delete('category');
     }
 
-    if (filters.priceRange[0] !== 0) {
+    if (filters.priceRange[0] !== 1 && filters.priceRange[0] !== 0) {
       params.set('min_price', filters.priceRange[0]);
     } else {
       params.delete('min_price');
@@ -278,16 +264,13 @@ export default function Shop() {
 
   return (
     <div className="bg-white text-gray-800 dark:bg-gray-800 dark:text-white m-10">
-
       {isInitialLoad ? (
-
         <div>
-            <SkeletonLoading/>
+          <SkeletonLoading />
         </div>
       ) : (
         <div>
           <main className="container mx-auto py-8 grid grid-cols-1">
-
             <span className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Trang chủ &gt; <Link to={"/shop"}>Cửa hàng</Link>
             </span>

@@ -36,9 +36,32 @@ class ProductService extends BaseService
         }
 
         // Lọc theo khoảng giá
-        if (!empty($filters['min_price']) && !empty($filters['max_price'])) {
-            $query->whereBetween('price', [$filters['min_price'], $filters['max_price']]);
-            // return $query;
+        if (!empty($filters['min_price']) || !empty($filters['max_price'])) {
+            $min = $filters['min_price'];
+            $max = $filters['max_price'] ?? PHP_INT_MAX;
+            
+            $query->where(function($q) use ($min, $max) {
+                // Sản phẩm đơn giản (simple)
+                $q->where('product_type', 'simple')
+                  ->whereRaw('CASE 
+                    WHEN discount_percent IS NOT NULL AND 
+                         (discount_start IS NULL OR discount_start <= NOW()) AND 
+                         (discount_end IS NULL OR discount_end >= NOW())
+                    THEN price * (1 - discount_percent/100)
+                    ELSE price
+                  END BETWEEN ? AND ?', [$min, $max]);
+                
+                // Sản phẩm biến thể (variable)
+                $q->orWhereHas('variants', function($variantQuery) use ($min, $max) {
+                    $variantQuery->whereRaw('CASE 
+                      WHEN discount_percent IS NOT NULL AND 
+                           (discount_start IS NULL OR discount_start <= NOW()) AND 
+                           (discount_end IS NULL OR discount_end >= NOW())
+                      THEN price * (1 - discount_percent/100)
+                      ELSE price
+                    END BETWEEN ? AND ?', [$min, $max]);
+                });
+            });
         }
         // Lọc theo thuộc tính sản phẩm
         if (!empty($filters['attributes'])) {
