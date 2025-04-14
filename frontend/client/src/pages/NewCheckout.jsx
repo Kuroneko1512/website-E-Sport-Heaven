@@ -16,6 +16,7 @@ import {
   Modal,
 } from "antd";
 import { useSelector } from "react-redux";
+import Cookies from "js-cookie";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -41,34 +42,41 @@ const NewCheckout = () => {
   const [order, setOrder] = useState({});
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submit, setSubmit] = useState(false);
+  // console.log("User:", user);
 
-  console.log(order);
-
+  // console.log("order", order);
   // Load dữ liệu provinces, districts, wards một lần khi mount
   useEffect(() => {
-    const loadData = async () => {
-      const provincesData = await fetch("/data/provinces.json").then((res) =>
-        res.json()
-      );
-      const districtsData = await fetch("/data/districts.json").then((res) =>
-        res.json()
-      );
-      const wardsData = await fetch("/data/wards.json").then((res) =>
-        res.json()
-      );
+    axios.get('http://127.0.0.1:8000/api/v1/address/provinces/')
+      .then(response => setProvinces(response?.data?.data))
+      .catch(error => console.error('Lỗi khi tải tỉnh/thành phố:', error));
 
-      setProvinces(provincesData);
-      setDistricts(districtsData);
-      setWards(wardsData);
-    };
-
-    loadData();
-    const cartItems = localStorage.getItem("checkoutItems");
-    const cartTotal = localStorage.getItem("cartTotal");
+    const cartItems = localStorage.getItem('checkoutItems');
+    const cartTotal = localStorage.getItem('cartTotal');
 
     if (cartItems) setCartItems(JSON.parse(cartItems));
     if (cartTotal) setCartTotal(JSON.parse(cartTotal));
-  }, [selectedProvince, selectedDistrict, selectedWard]);
+  }, []);
+
+  console.log("provinces", provinces);
+  console.log("districts", districts);
+  console.log("wards", wards);
+
+  useEffect(() => {
+    if (selectedProvince) {
+      axios.get(`http://127.0.0.1:8000/api/v1/address/districts?province_code=${selectedProvince}`)
+        .then(response => setDistricts(response?.data?.data))
+        .catch(error => console.error('Lỗi khi tải quận/huyện:', error));
+    }
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    if (selectedDistrict) {
+      axios.get(`http://127.0.0.1:8000/api/v1/address/communes?district_code=${selectedDistrict}`)
+        .then(response => setWards(response?.data?.data))
+        .catch(error => console.error('Lỗi khi tải phường/xã:', error));
+    }
+  }, [selectedDistrict]);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -77,7 +85,15 @@ const NewCheckout = () => {
 
   // Khi đăng nhập, load địa chỉ từ localStorage
   useEffect(() => {
+    const userRaw = Cookies.get("user");
+    if (!userRaw) return;
+
+  const user = JSON.parse(userRaw);
     if (isLogin) {
+      setOrder((prev) => ({
+        ...prev,
+        customer_id: user.customerId || null,
+      }));
       const savedAddresses =
         JSON.parse(localStorage.getItem("addresses")) || [];
       setAddresses(savedAddresses);
@@ -112,8 +128,7 @@ const NewCheckout = () => {
         provinces.find((p) => p.name === dataform.province)?.code || "";
       const districtCode =
         districts.find((d) => d.name === dataform.district)?.code || "";
-      const wardCode =
-        wards.find((w) => w.name === dataform.ward)?.code || "";
+      const wardCode = wards.find((w) => w.name === dataform.ward)?.code || "";
 
       setSelectedProvince(provinceCode);
       setSelectedDistrict(districtCode);
@@ -121,6 +136,7 @@ const NewCheckout = () => {
 
       setOrder((prev) => ({
         ...prev,
+        // customer_id: user.customerId||null,
         customer_name: dataform.fullname,
         customer_phone: dataform.mobile,
         customer_email: dataform.email,
@@ -164,7 +180,19 @@ const NewCheckout = () => {
         })),
       }));
     }
-  }, [selectedAddress, addresses, specificAddress, selectedProvince, selectedDistrict, selectedWard, form, cartItems, provinces, districts, wards]);
+  }, [
+    selectedAddress,
+    addresses,
+    specificAddress,
+    selectedProvince,
+    selectedDistrict,
+    selectedWard,
+    form,
+    cartItems,
+    provinces,
+    districts,
+    wards,
+  ]);
 
   // Xử lý chọn địa chỉ từ modal
   const handleSelectAddress = (id) => {
@@ -212,8 +240,6 @@ const NewCheckout = () => {
         amount: calculateGrandTotal(),
         payment_method: paymentMethod,
       };
-
-      console.log("orderData",orderData);
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/order",
         orderData
@@ -414,7 +440,16 @@ const NewCheckout = () => {
                 <List.Item>
                   <List.Item.Meta
                     title={`${item.name} (x${item.quantity})`}
-                    description={`SKU: ${item.sku}`}
+                    description={<>
+                      <div>SKU: {item.sku}</div>
+                      {Object.entries(item.thuoc_tinh || {}).map(([key, value]) => (
+                        <div key={key}>
+                          <Text type="secondary" style={{ fontSize: 13 }}>
+                            {key}: {value}
+                          </Text>
+                        </div>
+                      ))}
+                    </>}
                   />
                   <Text>
                     {FomatVND(
@@ -464,6 +499,7 @@ const NewCheckout = () => {
               className="mt-4"
               onClick={handleSubmit}
               disabled={submit || (order && order?.order_items?.length === 0)}
+              // loading={mutation.isPending}
             >
               Tiếp tục thanh toán
             </Button>

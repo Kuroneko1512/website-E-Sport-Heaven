@@ -97,7 +97,7 @@ const DetailOrder: React.FC = () => {
               <p><strong>Điện thoại:</strong> {order.customer_phone}</p>
               <p><strong>Địa chỉ:</strong> {order.shipping_address}</p>
               <p><strong>Tổng tiền:</strong> {order.total_amount} VND</p>
-              <p><strong>trạng thái thanh toán:</strong> {order['payment-status']}</p>
+              <p><strong>trạng thái thanh toán:</strong> {order.payment_status}</p>
 
               <p><strong>Trạng thái:</strong> <span className="badge badge-info">{order.status}</span></p>
 

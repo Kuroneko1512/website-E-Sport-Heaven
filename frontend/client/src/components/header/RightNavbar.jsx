@@ -17,6 +17,7 @@ import {
 } from "@ant-design/icons";
 import { logout } from "../../redux/AuthSide";
 import LoginAlert from "../popupmodal/LoginAlert";
+import Cookies from "js-cookie";
 
 const RightNavbar = () => {
   const isLogin = useSelector((state) => state.auth.isLogin, shallowEqual);
@@ -33,6 +34,40 @@ const RightNavbar = () => {
   const [miniCartData, setMiniCartData] = useState(
     JSON.parse(localStorage.getItem("cartItems")) || []
   );
+
+  const user = useSelector((state) => state.auth.user, shallowEqual);
+  const [nameU, setNameU] = useState(null);
+
+  useEffect(() => {
+    if (!isLogin) {
+      setNameU(null);
+      return;
+    }
+    
+    // First try to get from Redux store
+    if (user && user.name) {
+      setNameU({ user });
+      return;
+    }
+
+    // Fallback to cookies if Redux state not available
+    try {
+      const userRaw = Cookies.get("user");
+      if (!userRaw || userRaw === "undefined") {
+        setNameU(null);
+        return;
+      }
+      const cookieUser = JSON.parse(userRaw);
+      if (cookieUser && typeof cookieUser === "object") {
+        setNameU({ user: cookieUser });
+      } else {
+        setNameU(null);
+      }
+    } catch (err) {
+      console.warn("Invalid user cookie:", err);
+      setNameU(null);
+    }
+  }, [isLogin, user]);
 
   // Click outside search box to close
   useEffect(() => {
@@ -51,19 +86,31 @@ const RightNavbar = () => {
       setMiniCartData(JSON.parse(localStorage.getItem("cartItems")) || []);
     };
 
+    const handleCartUpdated = (e) => {
+      // Use event detail if available, otherwise fallback to localStorage
+      if (e.detail) {
+        setMiniCartData(e.detail);
+      } else {
+        handleStorageChange();
+      }
+    };
+
     window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("cartUpdated", handleStorageChange);
+    window.addEventListener("cartUpdated", handleCartUpdated);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("cartUpdated", handleStorageChange);
+      window.removeEventListener("cartUpdated", handleCartUpdated);
     };
   }, []);
 
   const updateCart = (newCart) => {
     localStorage.setItem("cartItems", JSON.stringify(newCart));
     setMiniCartData(newCart);
-    window.dispatchEvent(new Event("cartUpdated")); // Kích hoạt cập nhật ngay lập tức
+    // Dispatch event with the updated cart data
+    window.dispatchEvent(new CustomEvent("cartUpdated", { 
+      detail: newCart 
+    }));
   };
 
   const removeFromCart = (id, vid) => {
@@ -126,7 +173,8 @@ const RightNavbar = () => {
 
   // Mini cart content
   const cartContent = (
-    <div className="w-72 max-h-80 overflow-y-auto bg-white dark:bg-gray-800 dark:text-white">
+    <div className="w-72 bg-white dark:bg-gray-800 dark:text-white">
+      <div className=" overflow-y-auto max-h-80">
       <h2 className="font-semibold mb-3">
         Bạn có {miniCartData.length} sản phẩm
       </h2>
@@ -134,7 +182,7 @@ const RightNavbar = () => {
         <div className="flex items-center mb-3" key={idx}>
           <div className="flex items-center">
             <img
-              src={item.image}
+              src={`http://127.0.0.1:8000/storage/${item.image}`}
               alt={item.name}
               className="w-12 h-16 object-cover mr-3"
             />
@@ -148,6 +196,7 @@ const RightNavbar = () => {
           </i>
         </div>
       ))}
+      </div>
       <Link
         to="/cart"
         className="block text-center bg-black text-white dark:bg-blue-600 dark:text-white py-2 rounded mt-4"
@@ -183,7 +232,7 @@ const RightNavbar = () => {
       {/* Cart */}
       <Popover
         content={cartContent}
-        trigger="click"
+        trigger={["click"]}
         open={cartVisible}
         onOpenChange={setCartVisible}
         getPopupContainer={(triggerNode) => triggerNode.parentNode}
@@ -207,11 +256,20 @@ const RightNavbar = () => {
       ) : (
         <Dropdown
           overlay={userMenu}
-          trigger={["hover"]}
+          trigger={["click"]}
           getPopupContainer={(triggerNode) => triggerNode.parentNode}
           overlayClassName="dark:bg-gray-800 dark:text-white"
         >
-          <UserOutlined className="text-2xl cursor-pointer dark:text-white" />
+          <div className="flex items-center gap-2">
+            <UserOutlined className="text-2xl cursor-pointer dark:text-white" />
+            <span>
+              {nameU?.user?.name 
+                ? nameU?.user.name.length > 10 
+                  ? `${nameU?.user.name.substring(0, 8)}...`
+                  : nameU?.user.name
+                : ''}
+            </span>
+          </div>
         </Dropdown>
       )}
 

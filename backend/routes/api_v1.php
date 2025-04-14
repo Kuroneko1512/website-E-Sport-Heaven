@@ -1,16 +1,17 @@
 <?php
 
-use App\Http\Controllers\Api\Attribute\V1\AttributeController;
-use App\Http\Controllers\Api\Attribute\V1\AttributeValueController;
-use App\Http\Controllers\Api\Blog\V1\BlogCategoryController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\Blog\V1\BlogController;
 use App\Http\Controllers\Api\Order\V1\OrderController;
+use App\Http\Controllers\Api\Location\AddressController;
 use App\Http\Controllers\Api\Product\V1\ProductController;
-use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\Blog\V1\BlogCategoryController;
 use App\Http\Controllers\Api\Category\V1\CategoryController;
-use App\Http\Controllers\Api\location\V1\ImportController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Attribute\V1\AttributeController;
+use App\Http\Controllers\Api\Attribute\V1\AttributeValueController;
 
+use App\Http\Controllers\Api\Coupons\CouponsController;
 
 Route::prefix('v1')->group(callback: function () {
     Route::apiResource('/attribute', AttributeController::class);
@@ -29,6 +30,15 @@ Route::prefix('v1')->group(callback: function () {
     Route::apiResource('/review', ReviewController::class);
     Route::apiResource('/blog-categories', BlogCategoryController::class);
     Route::apiResource('/blogs', BlogController::class);
-    Route::post('/import', [ImportController::class, 'import']);
-    Route::get('/import-progress', [ImportController::class, 'importProgress']);
-});
+
+    // Address API Routes
+    Route::prefix('address')->group(function () {
+        Route::get('/provinces', [AddressController::class, 'getProvinces']);
+        Route::get('/districts', [AddressController::class, 'getDistricts']);
+        Route::get('/communes', [AddressController::class, 'getCommunes']);
+    });
+
+    Route::get('/review-by-product/{id}',[ReviewController::class,'getByProduct']);
+
+    Route::apiResource('/coupon', CouponsController::class);
+}); 

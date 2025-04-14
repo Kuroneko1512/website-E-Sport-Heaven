@@ -37,17 +37,89 @@ import OtpVerification from "./pages/OtpVerification";
 import PrivateRouter from "./pages/PrivateRouter";
 import BlogDetail from "./pages/BlogDetail";
 import OrderTracking from "./pages/OrderTracking";
-
+import useTokenRefresh from "./hooks/useTokenRefresh";
+import GoogleAuthCallback from "./components/elementLogin/GoogleAuthCallback";
+import { useDispatch } from "react-redux";
+import Cookies from "js-cookie";
+import { logout, updateUser } from "./redux/AuthSide";
+import { useQuery } from "@tanstack/react-query";
+import instanceAxios from "./config/db";
+import { useEffect } from "react";
+import { message } from "antd";
+import OrderDetail from "./components/elementProfile/OrderDetail";
+import ChangePassword from "./components/elementProfile/ChangePassword";
+import EmailAuthentication from "./components/elementProfile/EmailAuthentication";
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
+  const dispatch = useDispatch();
 
+  // const user = JSON.parse(Cookies.get("user"));
+
+  const { data: userData, isLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const isLogin = Cookies.get("isLogin") === "true";
+      if (!isLogin) {
+        return null;
+      }
+      try {
+        const res = await instanceAxios.get("/api/v1/customer/profile");
+        return res?.data?.data;
+      } catch (error) {
+        if (error.response?.status === 401) {
+          // Handle unauthorized (token expired/invalid)
+          dispatch(logout());
+        }
+        throw error;
+      }
+    },
+    onError: (error) => {
+      if (error.response?.status !== 401) {
+        message.error("Không thể tải thông tin hồ sơ, vui lòng thử lại.");
+      }
+    },
+    enabled: Cookies.get("isLogin") === "true", // Only run query if logged in
+  });
+
+  console.log("userData", userData);
+
+  useEffect(() => {
+    if (userData?.id) {
+      try {
+        const cookieUser = Cookies.get("user");
+        const currentUser = cookieUser ? JSON.parse(cookieUser) : {};
+        
+        dispatch(
+          updateUser({
+            ...currentUser,
+            // Start with initial empty user structure
+            customerId: userData.id,
+            // avatar: currentUser.avatar || null,
+            // name: currentUser.name || null,
+            // email: currentUser.email || null,
+            // phone: currentUser.phone || null,
+            // // Explicitly include any other fields from userData that should be synced
+            // ...(userData.avatar && { avatar: userData.avatar }),
+            // ...(userData.name && { name: userData.name }),
+            // ...(userData.email && { email: userData.email }),
+            // ...(userData.phone && { phone: userData.phone }),
+          })
+        );
+      } catch (error) {
+        console.error("Error updating user data:", error);
+      }
+    }
+  }, [userData]);
+  useTokenRefresh();
   return (
     <ThemeProvider>
-      <SwitchTransition>
-        <CSSTransition key={location.pathname} classNames="page" timeout={300}>
+      {/* <SwitchTransition>
+        <CSSTransition key={location.pathname} classNames="page" timeout={300}> */}
           <Routes location={location}>
             <Route path="/login" element={<Login />} />
+            {/* callback google */}
+            <Route path="/auth/google-callback" element={<GoogleAuthCallback />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/otp-enter" element={<OtpVerification />} />
@@ -68,12 +140,15 @@ function App() {
                 <Route path="" element={<Profile />}>
                   <Route index element={<InfoProfile />} />
                   <Route path="info" element={<InfoProfile />} />
+                  <Route path="password" element={<ChangePassword />} />
                   <Route path="settings" element={<Setting />} />
                   <Route path="orders" element={<MyOrder />} />
+                  <Route path="orders/:order_code" element={<OrderDetail />} />
                   <Route path="notifications" element={<Notification />} />
                   <Route path="manage-address" element={<ManageAddress />} />
                   <Route path="saved-cards" element={<PaymentCards />} />
                   <Route path="wishlists" element={<Whishlist />} />
+                  <Route path="emailAuth" element={<EmailAuthentication />} />
                 </Route>
               </Route>
 
@@ -90,8 +165,8 @@ function App() {
               <Route path="thankyou" element={<ThankYou />}></Route>
             </Route>
           </Routes>
-        </CSSTransition>
-      </SwitchTransition>
+        {/* </CSSTransition>
+      </SwitchTransition> */}
     </ThemeProvider>
   );
 }

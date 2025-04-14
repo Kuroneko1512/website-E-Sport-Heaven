@@ -1,20 +1,33 @@
-import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Checkbox, message } from "antd";
-import Logo from "../components/header/Logo";
-import Success from "../components/popupmodal/Success";
-import Error from "../components/popupmodal/Error";
 import { useMutation } from "@tanstack/react-query";
+import { Button, Divider, Form, Input, message } from "antd";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { login } from "../redux/AuthSide";
+import Logo from "../components/header/Logo";
+import Success from "../components/popupmodal/Success";
 import instanceAxios from "../config/db";
-import axios from "axios";
+import { login } from "../redux/AuthSide";
 
 const Login = () => {
   const nav = useNavigate();
   const dispatch = useDispatch();
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(false);
+  // const [error, setError] = useState(false);
+  const [googleLoginUrl, setGoogleLoginUrl] = useState(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Lấy URL đăng nhập Google
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/v1/customer/auth/social/google/redirect", {
+      headers: new Headers({ accept: "application/json" }),
+    })
+      .then((response) => response.ok ? response.json() : Promise.reject("Lỗi lấy URL đăng nhập Google"))
+      .then((data) => setGoogleLoginUrl(data.data.url))
+      .catch((error) => {
+        console.error("Error fetching Google login URL:", error);
+        message.error("Không thể kết nối với dịch vụ đăng nhập Google");
+      });
+  }, []);
 
   useEffect(() => {
     const authTokens = document.cookie
@@ -27,28 +40,69 @@ const Login = () => {
 
   const mutation = useMutation({
     mutationFn: async (dataUser) => {
-      return await axios.post(`http://localhost:3000/login`, dataUser);
+      return await instanceAxios.post(`/api/v1/customer/login`, dataUser);
     },
-    onSuccess: async () => {
-      dispatch(login());
-      setSuccess(true);
-      // message.success("Login successful!");
+    onSuccess: (res) => {
+      const { access_token, refresh_token, user, expires_at, expires_in } =
+        res.data.data;
+
+      dispatch(
+        login({
+          accessToken: access_token,
+          refreshToken: refresh_token,
+          user: {
+            customerId: user.id,
+            avatar: user.avatar,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+          },
+          expiresAt: expires_at, // Lưu thời gian hết hạn
+          expiresIn: expires_in, // Lưu thời gian sống của token
+        })
+      );
+
+      // setSuccess(true);
+      message.success("Đăng nhập thành công!");
       setTimeout(() => {
-        nav("/");
-        setSuccess(false);
+        nav("/"); // hoặc '/home'
+        // setSuccess(false);
       }, 2000);
     },
-    onError: async () => {
-      setError(true);
-      setTimeout(() => {
-        setError(false);
-      }, 100);
-      // message.error("Login failed. Please try again.");
+    onError: (err) => {
+      // setError(true);
+      message.error(
+        err.response?.data?.message ||
+          "Đăng nhập thất bại, vui lòng thử lại sau."
+      );
     },
   });
 
   const onFinish = (values) => {
-    mutation.mutate(values);
+    const { email, password } = values;
+
+    const dataUser = {
+      identifier: email,
+      password: password,
+    };
+
+    mutation.mutate(dataUser);
+  };
+
+  // Xử lý đăng nhập Google
+  const handleGoogleLogin = () => {
+    if (!googleLoginUrl) {
+      message.error("URL đăng nhập Google không khả dụng");
+      return;
+    }
+    
+    setGoogleLoading(true);
+    
+    // Lưu lại URL hiện tại để sau khi đăng nhập có thể quay lại
+    localStorage.setItem('redirectAfterLogin', window.location.pathname);
+    
+    // Chuyển hướng đến trang đăng nhập Google
+    window.location.href = googleLoginUrl;
   };
 
   return (
@@ -108,14 +162,13 @@ const Login = () => {
             label={<span className="text-gray-700">Mật khẩu</span>}
             name="password"
             rules={[
-              { required: true, message: "Please enter your password!" },
+              { required: true, message: "Hãy nhập mật khẩu của bạn!" },
               { min: 8, message: "Mật khẩu phải hơn 8 ký tự!" },
             ]}
             className="w-full"
           >
             <Input.Password
               placeholder="••••••••••••••"
-              // visibilityToggle={{ visible: !hidden, onVisibleChange: setHidden }}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </Form.Item>
@@ -128,7 +181,10 @@ const Login = () => {
                   Đăng ký
                 </Link>
               </span>
-              <Link to={`/forgot-password`} className="text-sm text-blue-600 hover:underline">
+              <Link
+                to={`/forgot-password`}
+                className="text-sm text-blue-600 hover:underline"
+              >
                 Quên mật khẩu?
               </Link>
             </div>
@@ -138,16 +194,33 @@ const Login = () => {
             <Button
               type="primary"
               htmlType="submit"
-              className="w-full bg-black text-white py-2 rounded-lg  hover:!bg-gray-800"
+              className="w-full bg-black text-white py-2 rounded-lg hover:!bg-gray-800"
               loading={mutation.isPending}
             >
               Đăng nhập
             </Button>
           </Form.Item>
+
+          <div className="grid grid-cols-5 items-center justify-items-center">
+            <Divider className="col-span-2" /> <span>Hoặc</span>{" "}
+            <Divider className="col-span-2" />
+          </div>
+
+          {/* Google login */}
+          <Form.Item>
+            <Button
+              type="default"
+              className="w-full bg-red-500 text-white py-2 rounded-lg hover:!text-white hover:!border-white hover:!bg-red-600 disabled:opacity-50 disabled:hover:!bg-gray-100 disabled:cursor-not-allowed"
+              onClick={handleGoogleLogin}
+              loading={googleLoading}
+              disabled={!googleLoginUrl}
+            >
+              Đăng nhập bằng Google
+            </Button>
+          </Form.Item>
         </Form>
       </div>
-      {success && <Success />}
-      {error && <Error />}
+      {/* {success && <Success />} */}
     </div>
   );
 };

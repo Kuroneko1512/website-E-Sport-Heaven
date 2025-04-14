@@ -1,7 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { message, Skeleton } from "antd";
 import React, { useEffect, useState } from "react";
-import { Link, Outlet, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import Description from "../components/elementProduct/Description";
+// import AdditionalInformation from "../components/elementProduct/AdditionalInformation";
+import Review from "../components/elementProduct/Review";
 import instanceAxios from "../config/db";
 import RelatedProducts from "../components/elementProduct/RelatedProducts";
 import ScrollToTop from "../config/ScrollToTop";
@@ -22,8 +25,8 @@ const ProductDetail = () => {
   const [selectedAttributes, setSelectedAttributes] = useState({});
   const [attributes, setAttributes] = useState([]);
   const [validOptions, setValidOptions] = useState({});
-
-  const [add, setAdd] = useState({});
+  const [chon, setChon] = useState([]);
+  const [activeTab, setActiveTab] = useState('description');
 
   const { data: productDetailData, isLoading } = useQuery({
     queryKey: ["productDetailData", id],
@@ -125,18 +128,40 @@ const ProductDetail = () => {
 
   // Xử lý biến thể khi người dùng chọn
   const handleAttributeSelect = (attributeId, valueId) => {
-    const updatedAttributes = { ...selectedAttributes, [attributeId]: valueId };
-    setSelectedAttributes(updatedAttributes);
+    // Check if this value is already selected
+    const isAlreadySelected = selectedAttributes[attributeId] === valueId;
 
-    const matchingVariant = variants.find((variant) =>
-      variant.attributes.every(
-        (attr) => updatedAttributes[attr.attribute_id] === attr.value_id
-      )
+    // Create updated attributes
+    const updatedAttributes = isAlreadySelected
+      ? { ...selectedAttributes }
+      : { ...selectedAttributes, [attributeId]: valueId };
+
+    // If deselecting, remove the attribute
+    if (isAlreadySelected) {
+      delete updatedAttributes[attributeId];
+    }
+
+    setIsAllAttributesSelected(
+      Object.keys(updatedAttributes).length === attributes.length
     );
 
-    if (matchingVariant) {
-      setSelectedVariant(matchingVariant);
-      setDisplayImage(matchingVariant.image || product?.image);
+    setSelectedAttributes(updatedAttributes);
+
+    // Find matching variant only if all attributes are selected
+    if (Object.keys(updatedAttributes).length === attributes.length) {
+      const matchingVariant = variants.find((variant) =>
+        variant.attributes.every(
+          (attr) => updatedAttributes[attr.attribute_id] === attr.value_id
+        )
+      );
+
+      if (matchingVariant) {
+        setSelectedVariant(matchingVariant);
+        setDisplayImage(matchingVariant.image || product?.image);
+      }
+    } else {
+      // If not all attributes selected, reset variant
+      setSelectedVariant(null);
     }
 
     updateValidOptions(updatedAttributes);
@@ -160,7 +185,6 @@ const ProductDetail = () => {
       return newQuantity;
     });
   };
-  
 
   const handleAddToCart = () => {
     if (product?.variants?.length > 0) {
@@ -171,19 +195,21 @@ const ProductDetail = () => {
         return;
       }
     }
-    const generateId = () => Date.now() + Math.random().toString(36).substr(2, 9);
+    const generateId = () =>
+      Date.now() + Math.random().toString(36).substr(2, 9);
     let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
     let cartItem = {
-      id: generateId(), 
+      id: generateId(),
       product_id: product.id,
       variant_id: selectedVariant?.id,
       quantity: quantity,
-      image: product.image, 
+      image: product.image || selectedVariant?.image,
       name: product.name,
       price: selectedVariant?.price || product.price,
       discount: product.discount?.percent,
       stock: selectedVariant?.stock || product.stock,
       sku: selectedVariant?.sku || product.sku,
+      thuoc_tinh: chon,
     };
 
     const existingIndex = cartItems.findIndex(
@@ -204,10 +230,20 @@ const ProductDetail = () => {
     window.dispatchEvent(event);
   };
 
-  const handleSelett = (name, value) => {
-    console.log("name", name, "value", value);
-    setAdd({ ...add, [name]: value });
+  const value_attribute = (name, value) => {
+    console.log(name, value);
+    setChon({ ...chon, [name]: value });
   };
+
+  // console.log("Chon", chon);
+
+  useEffect(() => {
+    if (attributes.length > 0) {
+      setIsAllAttributesSelected(
+        Object.keys(selectedAttributes).length === attributes.length
+      );
+    }
+  }, [attributes, selectedAttributes]);
 
   return (
     <div>
@@ -233,7 +269,7 @@ const ProductDetail = () => {
                 <div className="md:w-1/3">
                   <img
                     alt={product?.name}
-                    className="w-full mb-4"
+                    className="w-full h-[400px] object-cover mb-4"
                     src={`http://127.0.0.1:8000/storage/${displayImage}`}
                   />
                 </div>
@@ -294,23 +330,45 @@ const ProductDetail = () => {
                     </div>
                   ) : (
                     <div className="flex items-center mb-4">
-                      {parseFloat(product?.discount?.percent) > 0 ? (
-                        <div>
+                      {selectedVariant || isAllAttributesSelected ? (
+                        parseFloat(product?.discount?.percent) > 0 ? (
+                          <div>
+                            <span className="text-xl font-bold text-gray-800">
+                              {FomatVND(
+                                parseFloat(
+                                  selectedVariant?.price || variants[0]?.price
+                                ) -
+                                  (parseFloat(
+                                    selectedVariant?.price || variants[0]?.price
+                                  ) *
+                                    parseFloat(product?.discount?.percent)) /
+                                    100
+                              )}
+                            </span>
+                            <span className="text-lg line-through text-gray-500 ml-4">
+                              {FomatVND(
+                                selectedVariant?.price || variants[0]?.price
+                              )}
+                            </span>
+                          </div>
+                        ) : (
                           <span className="text-xl font-bold text-gray-800">
                             {FomatVND(
-                              (parseFloat(selectedVariant?.price) *
-                                parseFloat(product?.discount?.percent)) /
-                                100
+                              selectedVariant?.price || variants[0]?.price
                             )}
                           </span>
-                          <span className="text-lg line-through text-gray-500 ml-4 ">
-                            {FomatVND(selectedVariant?.price)}
-                          </span>
-                        </div>
+                        )
                       ) : (
-                        <span className="text-xl font-bold text-gray-800">
-                          {FomatVND(selectedVariant?.price)}
-                        </span>
+                        <div>
+                          <span className="text-xl font-bold text-gray-800">
+                            {FomatVND(variants[0]?.price || product?.price)}
+                          </span>
+                          {hasVariants && !isAllAttributesSelected && (
+                            <span className="text-sm text-gray-500 ml-2">
+                              (Chọn đầy đủ thuộc tính)
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}
@@ -320,43 +378,65 @@ const ProductDetail = () => {
 
                   {/* Chọn thuộc tính */}
                   {hasVariants &&
-                    attributes.map((attr) => (
-                      <div key={attr.id} className="mb-4">
-                        <span>{attr.name}:</span>
-                        <div className="flex space-x-2 mt-2">
-                          {attr.values.map((value) => (
-                            <button
-                              key={value.id}
-                              onClick={() => (
-                                handleAttributeSelect(attr.id, value.id),
-                                handleSelett(attr.name, value.value)
-                              )}
-                              className={`px-4 py-2 border rounded ${
-                                selectedAttributes[attr.id] === value.id
-                                  ? "bg-black text-white"
-                                  : "border-gray-300"
-                              } ${
-                                validOptions[attr.id]?.includes(value.id)
-                                  ? ""
-                                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                              }`}
-                              disabled={
-                                !validOptions[attr.id]?.includes(value.id)
-                              }
-                            >
-                              {value.value}
-                            </button>
-                          ))}
+                    attributes.map((attr) => {
+                      // Lọc ra những giá trị thực sự tồn tại trong các biến thể
+                      const validValueIdsInVariants = new Set();
+                      variants.forEach((variant) => {
+                        variant.attributes.forEach((a) => {
+                          if (a.attribute_id === attr.id) {
+                            validValueIdsInVariants.add(a.value_id);
+                          }
+                        });
+                      });
+
+                      const filteredValues = attr.values.filter((v) =>
+                        validValueIdsInVariants.has(v.id)
+                      );
+
+                      return (
+                        <div key={attr.id} className="mb-4">
+                          <span>{attr.name}:</span>
+                          <div className="flex space-x-2 mt-2 flex-wrap">
+                            {filteredValues.map((value) => {
+                              const isSelected =
+                                selectedAttributes[attr.id] === value.id;
+                              const isDisabled =
+                                !validOptions[attr.id]?.includes(value.id) &&
+                                !isSelected; // luôn cho phép chọn lại, chỉ disabled nếu không hợp lệ và chưa chọn
+
+                              return (
+                                <button
+                                  key={value.id}
+                                  onClick={() => {
+                                    handleAttributeSelect(attr.id, value.id),
+                                      value_attribute(attr.name, value.value);
+                                  }}
+                                  className={`px-4 py-2 border rounded transition-all duration-150 ${
+                                    isSelected
+                                      ? "bg-black text-white"
+                                      : "border-gray-300 hover:bg-gray-100"
+                                  } ${
+                                    isDisabled
+                                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                  disabled={isDisabled}
+                                >
+                                  {value.value}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
 
                   {/* Hiển thị số lượng tồn kho của biến thể */}
                   <p className="text-gray-600 mb-2">
                     <strong>Kho:</strong>{" "}
-                    {product?.stock > 0
-                      ? product?.stock
-                      : selectedVariant?.stock || 0}{" "}
+                    {hasVariants && !isAllAttributesSelected
+                      ? variants[0]?.stock || 0
+                      : selectedVariant?.stock || product?.stock || 0}{" "}
                   </p>
 
                   <div className="flex space-x-4 mt-8">
@@ -413,7 +493,10 @@ const ProductDetail = () => {
                           <button
                             className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
                             onClick={handleAddToCart}
-                            disabled={!isAllAttributesSelected}
+                            disabled={
+                              !isAllAttributesSelected ||
+                              attributes.length === 0
+                            }
                           >
                             Thêm vào giỏ hàng
                           </button>
@@ -422,7 +505,6 @@ const ProductDetail = () => {
                     ) : (
                       <button
                         className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                        onClick={handleAddToCart}
                         disabled={true}
                       >
                         Thêm vào giỏ hàng
@@ -445,42 +527,31 @@ const ProductDetail = () => {
               <div className="mt-8">
                 <div className="border-b border-gray-200 mb-4">
                   <ul className="flex space-x-4">
-                    <Link
-                      to="descriptions"
-                      className={`pb-2 ${
-                        location.pathname === `/product-detail/${id}` ||
-                        location.pathname.includes("descriptions")
-                          ? "border-b-2 border-black"
-                          : ""
-                      }`}
+                    <button
+                      onClick={() => setActiveTab('description')}
+                      className={`pb-2 ${activeTab === 'description' ? 'border-b-2 border-black' : ''}`}
                     >
                       Mô tả
-                    </Link>
-                    {/* <Link
-                      to="information"
-                      className={`pb-2 ${
-                        location.pathname.includes("information")
-                          ? "border-b-2 border-black"
-                          : ""
-                      }`}
+                    </button>
+                    {/* <button
+                      onClick={() => setActiveTab('information')}
+                      className={`pb-2 ${activeTab === 'information' ? 'border-b-2 border-black' : ''}`}
                     >
                       Thông tin bổ sung
-                    </Link> */}
-                    <Link
-                      to="reviews"
-                      className={`pb-2 ${
-                        location.pathname.includes("reviews")
-                          ? "border-b-2 border-black"
-                          : ""
-                      }`}
+                    </button> */}
+                    <button
+                      onClick={() => setActiveTab('reviews')}
+                      className={`pb-2 ${activeTab === 'reviews' ? 'border-b-2 border-black' : ''}`}
                     >
                       Đánh giá
-                    </Link>
+                    </button>
                   </ul>
                 </div>
-                <Outlet context={{ product }} />
+                
+                {activeTab === 'description' && <Description product={product} />}
+                {activeTab === 'information' && <AdditionalInformation product={product} />}
+                {activeTab === 'reviews' && <Review product={product} />}
               </div>
-
 
               {/* Sản phẩm gần đây */}
               <div className="my-8">

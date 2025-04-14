@@ -1,6 +1,6 @@
 // src/hooks/useAuth.ts
 import { AuthService } from "@app/services/auth.service";
-import { setCurrentUser } from "@app/store/reducers/auth";
+import { clearAuth, setAuthData } from "@app/store/reducers/auth";
 import { useAppDispatch } from "@app/store/store";
 import { useState, useCallback } from "react";
 
@@ -15,7 +15,18 @@ export const useAuth = () => {
                 setLoading(true);
                 setError(null);
                 const response = await AuthService.login({ identifier, password });
-                dispatch(setCurrentUser(response.user));
+                
+                dispatch(setAuthData({
+                    accessToken: response.access_token,
+                    refreshToken: response.refresh_token,
+                    createAt: response.created_at,
+                    expiresAt: response.expires_at,
+                    expiresIn: response.expires_in,
+                    permissions: response.permission,
+                    roles: response.role,
+                    user: response.user
+                }));
+                
                 return response;
             } catch (err: any) {
                 setError(err.message);
@@ -27,35 +38,13 @@ export const useAuth = () => {
         [dispatch]
     );
 
-    const register = useCallback(
-        async (identifier: string, password: string, name: string, phone: string) => {
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await AuthService.register({
-                    identifier,
-                    password,
-                    name,
-                    phone
-                });
-                dispatch(setCurrentUser(response.user));
-                return response;
-            } catch (err: any) {
-                setError(err.message);
-                throw err;
-            } finally {
-                setLoading(false);
-            }
-        },
-        [dispatch]
-    );
 
     const logout = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
             await AuthService.logout();
-            dispatch(setCurrentUser(null));
+            dispatch(clearAuth());
         } catch (err: any) {
             setError(err.message);
             throw err;
@@ -68,7 +57,6 @@ export const useAuth = () => {
         loading,
         error,
         login,
-        register,
         logout,
     };
 };
