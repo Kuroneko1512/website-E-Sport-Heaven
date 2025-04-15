@@ -7,6 +7,7 @@ import Pagination from "../components/filterProduct/Pagination";
 import ProductList from "../components/filterProduct/ProductList";
 import instanceAxios from "../config/db";
 import SkeletonLoading from "../components/loadingSkeleton/SkeletonLoading";
+import ScrollToTop from "../config/ScrollToTop";
 
 export default function Shop() {
   const location = useLocation();
@@ -275,6 +276,7 @@ export default function Shop() {
       ) : (
         <div>
           <main className="container mx-auto py-8 grid grid-cols-1">
+            <ScrollToTop/>
             <span className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Trang chủ &gt; <Link to={"/shop"}>Cửa hàng</Link>
             </span>
