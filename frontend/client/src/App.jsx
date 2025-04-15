@@ -17,24 +17,14 @@ import ProductDetail from "./pages/ProductDetail";
 import Description from "./components/elementProduct/Description";
 import AdditionalInformation from "./components/elementProduct/AdditionalInformation";
 import Review from "./components/elementProduct/Review";
-
 import Profile from "./pages/Profile";
 import InfoProfile from "./components/elementProfile/InfoProfile";
 import Setting from "./components/elementProfile/Setting";
-<<<<<<< HEAD
-import { ThemeProvider } from "./contexts/ThemeContext";
-=======
 import MyOrder from "./components/elementProfile/MyOrder";
->>>>>>> db955ace8d6f54502e30146a99d84ede3e3fef90
 import Notification from "./components/elementProfile/Notification";
 import ManageAddress from "./components/elementProfile/ManageAddress";
 import PaymentCards from "./components/elementProfile/PaymentCards";
 import Whishlist from "./components/elementProfile/Whishlist";
-<<<<<<< HEAD
-import Cart from "./pages/Cart";
-import NewCheckout from "./pages/NewCheckout";
-import ThankYou from "./pages/ThankYou";
-=======
 import NewCheckout from "./pages/NewCheckout";
 import ReviewOrder from "./pages/ReviewOrder";
 import ThankYou from "./pages/ThankYou";
@@ -56,7 +46,6 @@ import OrderDetail from "./components/elementProfile/OrderDetail";
 import ChangePassword from "./components/elementProfile/ChangePassword";
 import EmailAuthentication from "./components/elementProfile/EmailAuthentication";
 import Cart from "./pages/Cart";
->>>>>>> db955ace8d6f54502e30146a99d84ede3e3fef90
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
