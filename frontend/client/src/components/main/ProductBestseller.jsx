@@ -38,12 +38,12 @@ const ProductBestseller = ({productData}) => {
               to={`/shop/product-detail/${item?.id}`}
               className="flex-1 p-4"
             >
-              <h2 className="text-sm md:text-base font-medium text-gray-900 line-clamp-2 mb-2">
+              <h2 className="text-sm md:text-xl text-center font-medium text-gray-900 line-clamp-2 mb-2">
                 {item?.name}
               </h2>
               
               <div className="mt-auto">
-                <div className="flex items-center gap-2 min-h-[1.5rem]">
+                <div className="flex items-center justify-center gap-2 min-h-[1.5rem]">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-base md:text-lg font-bold text-gray-900">
                       {FomatVND(
