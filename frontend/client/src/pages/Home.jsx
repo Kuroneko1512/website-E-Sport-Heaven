@@ -9,6 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import instanceAxios from "../config/db";
 
 
+
+
 const Home = () => {
 
   const {data: productData, isLoading: productloading} = useQuery({
@@ -39,7 +41,7 @@ const Home = () => {
         {/* Banner */}
         <Banner />
         <CategorySlider categories={categories?.slice(0, 8)}/>
-        <ProductBestseller productData={productData}/>
+        <ProductBestseller productData={productData?.slice(0, 8)}/>
         <DealsOfTheMonth />
         <CustomerSay />
       </div>
