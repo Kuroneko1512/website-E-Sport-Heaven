@@ -41,10 +41,8 @@ const Review = () => {
         <div key={review.id} className="mb-6">
           <div className="flex items-start pb-4 mb-4 border-b-2">
             <img
-              src={
-                "https://storage.googleapis.com/a1aa/image/lVaG3OqMK5GaSouNStIkQdtyMf8qhjTQ3QEyPm1wZs0.jpg"
-              }
-              alt={`Profile picture of ${review.name}`}
+              src={review?.images}
+              alt={`Profile picture of ${review.title}`}
               className="w-12 h-12 rounded-full mr-4"
               width="50"
               height="50"
