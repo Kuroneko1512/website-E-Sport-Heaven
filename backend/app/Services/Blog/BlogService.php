@@ -22,15 +22,15 @@ class BlogService extends BaseService
     public function getBlogs($request)
     {
         try {
-            // Validate pagination parameters
+            // Kiểm tra tham số phân trang hợp lệ
             $perPage = $request->input('per_page', 10);
             if ($perPage <= 0 || $perPage > 100) {
-                throw new Exception('Invalid pagination parameters. Per page must be between 1 and 100.');
+                throw new Exception('Tham số phân trang không hợp lệ. Số lượng mỗi trang phải từ 1 đến 100.');
             }
 
-            $query = Blog::query();
+            $query = Blog::query(); // Bắt đầu truy vấn
 
-            // Search by keyword (in title or content) with index optimization
+           // Tìm kiếm theo từ khóa (title hoặc content)
             if ($request->filled('keyword')) {
                 $keyword = trim($request->input('keyword'));
                 if (strlen($keyword) >= 3) {
@@ -41,28 +41,29 @@ class BlogService extends BaseService
                 }
             }
 
-            // Filter by category with eager loading optimization
+            // Lọc theo category_id
             if ($request->filled('category_id')) {
                 $categoryId = $request->input('category_id');
                 $query->where('category_id', $categoryId);
             }
 
-            // Filter by featured status
+            // Lọc theo trạng thái nổi bật
             if ($request->filled('is_featured')) {
                 $query->where('is_featured', $request->boolean('is_featured'));
             }
 
-            // Date range filter
+            // Lọc theo ngày bắt đầu
             if ($request->filled('start_date')) {
                 $query->where('publish_date', '>=', $request->input('start_date'));
             }
+            // Lọc theo ngày kết thúc, xử lý timezone
             if ($request->filled('end_date')) {
                 $timestamp = strtotime(str_replace('GMT+0700 (Indochina Time)', '+0700', $request->input('end_date')));
                 $end_date = date('Y-m-d 23:59:59', $timestamp);
                 $query->where('publish_date', '<=', $end_date);
             }
 
-            // Apply sorting
+            // Sắp xếp kết quả
             $sortBy = $request->input('sort_by', 'publish_date');
             $sortOrder = $request->input('sort_order', 'desc');
             $allowedSortFields = ['publish_date', 'title', 'created_at'];
@@ -73,16 +74,16 @@ class BlogService extends BaseService
                 $query->orderByDesc('publish_date');
             }
 
-            // Eager load relationships
+            // Tải kèm dữ liệu liên quan category
             $query->with(['category']);
 
-            // Return paginated or all results
+            // Trả về kết quả có phân trang hoặc không
             return $request->boolean('paginate', true)
                 ? $query->paginate($perPage)
                 : $query->get();
 
         } catch (Exception $e) {
-            throw new Exception('Error retrieving blog list: ' . $e->getMessage());
+            throw new Exception('Lỗi khi lấy danh sách blog: ' . $e->getMessage());
         }
     }
 
@@ -96,7 +97,7 @@ class BlogService extends BaseService
                 throw new ValidationException($validator);
             }
 
-            // Tự động tạo slug từ title nếu không được cung cấp
+            // Nếu chưa có slug thì tự tạo từ title
             if (!isset($data['slug'])) {
                 $data['slug'] = Str::slug($data['title']);
             }

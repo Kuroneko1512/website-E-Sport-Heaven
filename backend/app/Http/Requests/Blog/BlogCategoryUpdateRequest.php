@@ -38,7 +38,9 @@ class BlogCategoryUpdateRequest extends FormRequest
     
         // Nếu 'name' thay đổi, kiểm tra 'unique'
         $category = $this->route('category'); // hoặc bạn có thể dùng model để kiểm tra
+        // Nếu có danh mục và tên hiện tại khác tên mới được nhập
         if ($category && $category->name !== $this->input('name')) {
+            // Thêm quy tắc kiểm tra duy nhất (unique), bỏ qua ID hiện tại để không báo trùng chính nó
             $rules['name'][] = Rule::unique('blog_categories')->ignore($id);
         }
 

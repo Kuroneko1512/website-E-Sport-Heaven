@@ -28,7 +28,7 @@ class BlogCategoryService extends BaseService
         try {
             return $this->getAll($paginate);
         } catch (Exception $e) {
-            throw new Exception('Error getting blog categories: ' . $e->getMessage());
+            throw new Exception('Lỗi khi lấy danh sách danh mục blog: ' . $e->getMessage()); // Nếu có lỗi thì ném ra exception
         }
     }
 
@@ -36,21 +36,26 @@ class BlogCategoryService extends BaseService
     public function createCategory(array $data)
     {
         try {
+            // Kiểm tra dữ liệu đầu vào theo $rules
             $validator = Validator::make($data, $this->rules);
             
             if ($validator->fails()) {
+                // Nếu lỗi validate, ném ra ngoại lệ ValidationException
                 throw new ValidationException($validator);
             }
 
+            // Nếu không nhập slug, thì tự động tạo từ name
             if (!isset($data['slug']) || empty($data['slug'])) {
                 $data['slug'] = Str::slug($data['name']);
             }
 
             return $this->create($data);
+
         } catch (ValidationException $e) {
-            throw new Exception('Validation error: ' . implode(', ', $e->validator->errors()->all()));
+            // Ném ra lỗi validate với tất cả thông báo lỗi gom lại
+            throw new Exception('Lỗi xác thực: ' . implode(', ', $e->validator->errors()->all()));
         } catch (Exception $e) {
-            throw new Exception('Error creating category: ' . $e->getMessage());
+            throw new Exception('Lỗi khi tạo danh mục: ' . $e->getMessage());
         }
     }
 
@@ -60,10 +65,9 @@ class BlogCategoryService extends BaseService
         try {
             $category = $this->model->find($id);
             if (!$category) {
-                throw new Exception('Category not found');
+                throw new Exception('Không tìm thấy danh mục.');// Nếu không tìm thấy
             }
 
-            // Modify validation rules for update to ignore current slug
             $rules = $this->rules;
             if (isset($data['slug'])) {
                 $rules['slug'] = 'nullable|string|max:255|unique:blog_categories,slug,' . $id;
@@ -74,16 +78,17 @@ class BlogCategoryService extends BaseService
                 throw new ValidationException($validator);
             }
 
+            // Nếu đổi tên => cập nhật lại slug theo tên mới
             if (isset($data['name']) && $data['name'] !== $category->name) {
                 $data['slug'] = Str::slug($data['name']);
             }
 
             $category->update($data);
-            return $category->fresh();
+            return $category->fresh(); // Trả về dữ liệu
         } catch (ValidationException $e) {
-            throw new Exception('Validation error: ' . implode(', ', $e->validator->errors()->all()));
+            throw new Exception('Lỗi xác thực: ' . implode(', ', $e->validator->errors()->all()));
         } catch (Exception $e) {
-            throw new Exception('Error updating category: ' . $e->getMessage());
+            throw new Exception('Lỗi khi cập nhật danh mục: ' . $e->getMessage());
         }
     }
 
@@ -93,17 +98,17 @@ class BlogCategoryService extends BaseService
         try {
             $category = $this->model->find($id);
             if (!$category) {
-                throw new Exception('Category not found');
+                throw new Exception('Không tìm thấy danh mục.');
             }
 
-            // Check if category has associated blogs
+            // Nếu danh mục có bài viết liên kết thì không cho xoá
             if ($category->blogs()->count() > 0) {
-                throw new Exception('Cannot delete category with associated blogs');
+                throw new Exception('Không thể xoá danh mục vì đang có bài viết liên kết.');
             }
 
             return $this->delete($id);
         } catch (Exception $e) {
-            throw new Exception('Error deleting category: ' . $e->getMessage());
+            throw new Exception('Lỗi khi xoá danh mục: ' . $e->getMessage());
         }
     }
 
@@ -113,11 +118,11 @@ class BlogCategoryService extends BaseService
         try {
             $category = $this->show($id);
             if (!$category) {
-                throw new Exception('Category not found');
+                throw new Exception('Không tìm thấy danh mục.');
             }
             return $category;
         } catch (Exception $e) {
-            throw new Exception('Error finding category: ' . $e->getMessage());
+            throw new Exception('Lỗi khi tìm danh mục: ' . $e->getMessage());
         }
     }
 }

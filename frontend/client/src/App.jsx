@@ -17,7 +17,6 @@ import ProductDetail from "./pages/ProductDetail";
 import Description from "./components/elementProduct/Description";
 import AdditionalInformation from "./components/elementProduct/AdditionalInformation";
 import Review from "./components/elementProduct/Review";
-
 import Profile from "./pages/Profile";
 import InfoProfile from "./components/elementProfile/InfoProfile";
 import Setting from "./components/elementProfile/Setting";
