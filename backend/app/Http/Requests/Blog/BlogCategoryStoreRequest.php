@@ -26,7 +26,9 @@ class BlogCategoryStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255|unique:blog_categories,name'
+            'name' => 'required|string|max:255|unique:blog_categories,name',
+            'slug' => 'nullable|string|max:255|unique:blog_categories,slug',
+            'description' => 'nullable|string|max:255'
         ];
     }
 

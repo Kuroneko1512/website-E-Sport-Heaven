@@ -26,10 +26,13 @@ class BlogStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255|unique:blogs,title',
+            'title' => 'required|string|max:255',
             'content' => 'required|string',
             'category_id' => 'required|exists:blog_categories,id',
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'slug' => 'nullable|string|max:255',
+            'publish_date' => 'nullable|date',
+            'is_featured' => 'nullable|boolean',
+            'thumbnail' => 'nullable',
         ];
     }
 
@@ -47,9 +50,10 @@ class BlogStoreRequest extends FormRequest
             'content.string' => 'Nội dung phải là chuỗi.',
             'category_id.required' => 'Danh mục không được để trống.',
             'category_id.exists' => 'Danh mục không tồn tại.',
-            'thumbnail.image' => 'Thumbnail phải là hình ảnh.',
-            'thumbnail.mimes' => 'Ảnh thumbnail phải có định dạng: jpeg, png, jpg, gif.',
-            'thumbnail.max' => 'Kích thước ảnh tối đa là 2MB.',
+            'slug.string' => 'Slug phải là chuỗi.',
+            'slug.max' => 'Slug không được vượt quá 255 ký tự.',
+            'publish_date.date' => 'Ngày xuất bản phải là định dạng ngày.',
+            'is_featured.boolean' => 'Trường nổi bật phải là boolean.'
         ];
     }
 
