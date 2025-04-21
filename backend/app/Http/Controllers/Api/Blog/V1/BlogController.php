@@ -100,7 +100,7 @@ class BlogController extends Controller
         try {
             Log::error('Request data: '. json_encode($request->all()));
             $data = $request->validated();
-            $blog = $this->blogService->update($id, $data);
+            $blog = $this->blogService->updateBlog($id, $data);
 
             return response()->json([
                 'success' => true,

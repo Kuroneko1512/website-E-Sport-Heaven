@@ -30,7 +30,7 @@ class BlogStoreRequest extends FormRequest
             'content' => 'required|string',
             'category_id' => 'required|exists:blog_categories,id',
             'slug' => 'nullable|string|max:255',
-            'publish_date' => 'nullable|date',
+            'publish_date' => 'nullable|date|after:today',
             'is_featured' => 'nullable|boolean',
             'thumbnail' => 'nullable',
         ];
@@ -45,7 +45,7 @@ class BlogStoreRequest extends FormRequest
             'title.required' => 'Tiêu đề không được để trống.',
             'title.string' => 'Tiêu đề phải là chuỗi.',
             'title.max' => 'Tiêu đề không được vượt quá 255 ký tự.',
-            'title.unique' => 'Tiêu đề đã tồn tại.',
+            // 'title.unique' => 'Tiêu đề đã tồn tại.',
             'content.required' => 'Nội dung không được để trống.',
             'content.string' => 'Nội dung phải là chuỗi.',
             'category_id.required' => 'Danh mục không được để trống.',
@@ -53,6 +53,7 @@ class BlogStoreRequest extends FormRequest
             'slug.string' => 'Slug phải là chuỗi.',
             'slug.max' => 'Slug không được vượt quá 255 ký tự.',
             'publish_date.date' => 'Ngày xuất bản phải là định dạng ngày.',
+            'publish_date.after' => 'Ngày xuất bản phải sau ngày hiện tại.',
             'is_featured.boolean' => 'Trường nổi bật phải là boolean.'
         ];
     }

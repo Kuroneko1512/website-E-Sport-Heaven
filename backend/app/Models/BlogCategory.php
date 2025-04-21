@@ -9,7 +9,7 @@ class BlogCategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'slug'];
+    protected $fillable = ['name', 'slug','description'];
     protected $appends = ['blogs_count'];
     public function getBlogsCountAttribute()
     {
@@ -18,6 +18,6 @@ class BlogCategory extends Model
 
     public function blogs()
     {
-        return $this->hasMany(Blog::class);
+        return $this->hasMany(Blog::class, 'category_id', 'id');
     }
 }

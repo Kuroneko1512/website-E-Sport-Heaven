@@ -27,13 +27,16 @@ class BlogCategoryController extends Controller
         try {
             $categories = $this->blogCategoryService->getCategories(); // Changed here
             return response()->json([
-                'status' => 200,
-                'data' => $categories
+                'success' => true,
+                'data' => $categories,
+                'message' => 'Lấy danh sách danh mục blog thành công'
             ], 200);
         } catch (Exception $e) {
+            Log::error('BlogCategory index error: ' . $e->getMessage());
             return response()->json([
-                'error' => 'Lỗi khi lấy danh mục blog.',
-                'message' => $e->getMessage(),
+                'success' => false,
+                'message' => 'Lỗi khi lấy danh mục blog',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -48,7 +51,7 @@ class BlogCategoryController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $category,
-                'message' => 'Danh mục blog đã được tạo thành công!' 
+                'message' => 'Danh mục blog đã được tạo thành công' 
             ], 201);
         } catch (ValidationException $e) {
             return response()->json([
@@ -102,7 +105,7 @@ class BlogCategoryController extends Controller
             $this->blogCategoryService->deleteCategory($id); // Changed here
             return response()->json([
                 'success' => true,
-                'message' => 'Danh mục blog đã được xóa thành công!'
+                'message' => 'Danh mục blog đã được xóa thành công'
             ], 200);
         } catch (Exception $e) {
             Log::error('Lỗi khi xóa danh mục blog: ' . $e->getMessage());
@@ -121,8 +124,8 @@ class BlogCategoryController extends Controller
             $category = $this->blogCategoryService->findCategory($id); // Changed here
             return response()->json([
                 'success' => true,
-                'status' => 200,
-                'data' => $category
+                'data' => $category,
+                'message' => 'Lấy thông tin danh mục blog thành công'
             ], 200);
         } catch (Exception $e) {
             Log::error('Lỗi khi lấy thông tin danh mục blog: ' . $e->getMessage());
