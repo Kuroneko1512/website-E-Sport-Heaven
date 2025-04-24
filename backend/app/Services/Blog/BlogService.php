@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Exception;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class BlogService extends BaseService
 {
@@ -54,13 +55,12 @@ class BlogService extends BaseService
 
             // Lọc theo ngày bắt đầu
             if ($request->filled('start_date')) {
-                $query->where('publish_date', '>=', $request->input('start_date'));
+                $query->whereDate('publish_date', '>=', $request->input('start_date'));
             }
             // Lọc theo ngày kết thúc, xử lý timezone
             if ($request->filled('end_date')) {
-                $timestamp = strtotime(str_replace('GMT+0700 (Indochina Time)', '+0700', $request->input('end_date')));
-                $end_date = date('Y-m-d 23:59:59', $timestamp);
-                $query->where('publish_date', '<=', $end_date);
+                Log::info('end_date'.$request->input('end_date'));
+                $query->whereDate('publish_date', '<=', $request->input('end_date'));
             }
 
             // Sắp xếp kết quả
