@@ -6,7 +6,6 @@ import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../components/header/Logo";
 import Error from "../components/popupmodal/Error";
-import Success from "../components/popupmodal/Success";
 import instanceAxios from "../config/db";
 import { login } from "../redux/AuthSide";
 
@@ -40,14 +39,15 @@ const Register = () => {
         })
       );
 
-      setSuccess(true);
+      message.success("Đăng ký thành công!");
+      // setSuccess(true);
       setTimeout(() => {
         nav("/"); // hoặc '/home'
-        setSuccess(false);
+        // setSuccess(false);
       }, 2000);
     },
     onError: (err) => {
-      setError(true);
+      // setError(true);
       message.error(err.response?.data?.message || "Đăng ký thất bại, vui lòng thử lại sau.");
     //   setTimeout(() => setError(false), 200);
     },
@@ -223,7 +223,7 @@ const Register = () => {
         </p>
       </div>
 
-      {success && <Success />}
+      {/* {success && <Success />} */}
     </div>
   );
 };
