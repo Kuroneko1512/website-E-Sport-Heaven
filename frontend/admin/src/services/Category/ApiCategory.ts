@@ -1,7 +1,7 @@
 // src/api/attributeApi.ts
 import axios from 'axios';
 
-const API_URL = 'http://127.0.0.1:8000/api/v1/category';
+const API_URL = 'http://127.0.0.1:8000/api/v1/admin/category';
 
 
 

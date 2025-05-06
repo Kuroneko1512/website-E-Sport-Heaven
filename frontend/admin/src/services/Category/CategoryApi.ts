@@ -26,7 +26,7 @@ export interface ApiResponse<T> {
   status?: number;
 }
 
-const Category_API = "/api/v1/category";
+const Category_API = "/api/v1/admin/category";
 
 export const CategoryService = {
   getAll: (page = 1, perPage = 5) =>

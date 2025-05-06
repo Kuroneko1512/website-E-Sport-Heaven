@@ -42,7 +42,10 @@ export interface api4 {
   selected_attributes: AttributeSelection[];
   variants: Variant[];
 }
-
+interface ProductResponse {
+  message: string;
+  data?: any;
+}
 // Tạo sản phẩm mới
 export const createProduct = async (product: api4): Promise<api4> => {
   try {
