@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\Auth\v1\SocialAuthController;
 use App\Http\Controllers\Api\Auth\v1\CustomerAuthController;
 use App\Http\Controllers\Api\Profile\V1\CustomerProfileController;
 use App\Http\Controllers\Api\Profile\V1\ShippingAddressController;
-
+use App\Http\Controllers\Api\ReviewController;
 
 Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'customer', 'as' => 'customer.'], function () {

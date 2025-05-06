@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\Blog\V1\BlogController;
 use App\Http\Controllers\Api\Order\V1\OrderController;
 use App\Http\Controllers\Api\Location\AddressController;
