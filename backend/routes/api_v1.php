@@ -27,7 +27,6 @@ Route::prefix('v1')->group(callback: function () {
     Route::apiResource('/order', OrderController::class);
     Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
     Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
-    Route::apiResource('/review', ReviewController::class);// chưa sửa hả Ngân
     Route::apiResource('/blog-categories', BlogCategoryController::class);
     Route::apiResource('/blogs', BlogController::class);
 
@@ -38,7 +37,7 @@ Route::prefix('v1')->group(callback: function () {
         Route::get('/communes', [AddressController::class, 'getCommunes']);
     });
 
-    Route::get('/review-by-product/{id}',[ReviewController::class,'getByProduct']);
+    
 
 
     Route::apiResource('/coupon', CouponsController::class);

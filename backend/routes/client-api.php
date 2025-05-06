@@ -32,6 +32,8 @@ Route::prefix('v1')->group(function () {
                 ->name('callback');
         });
 
+        Route::get('/review-by-product/{id}',[ReviewController::class,'getByProduct']);
+
         // Protected routes - yêu cầu đăng nhập
         Route::middleware('auth:customer')->group(function () {
             Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
@@ -54,6 +56,8 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [OrderController::class, 'myOrders'])->name('orders.my');
                 Route::get('/{orderCode}', [OrderController::class, 'myOrderDetail'])->name('orders.my.detail');
             });
+
+            Route::apiResource('/review', ReviewController::class);
         });
 
         //test route
