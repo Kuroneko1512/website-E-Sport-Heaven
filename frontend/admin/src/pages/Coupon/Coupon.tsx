@@ -9,8 +9,11 @@ interface CouponDisplay {
   description: string;
   discount_value: number;
   discount_type: string;
+  max_uses_per_user: number;
+  user_usage: any;
   is_active: number;
   start_date: string;
+  end_date: string;
   max_uses: number;
   used_count: number;
 }
@@ -44,8 +47,11 @@ const Coupon: FC = () => {
         description: item.description || '',
         discount_value: item.discount_value,
         discount_type: item.discount_type,
+        max_uses_per_user: item.max_uses_per_user || 0,
+        user_usage: item.user_usage || {},
         is_active: 1,
         start_date: item.start_date || '',
+        end_date: item.end_date || '',
         max_uses: item.max_uses || 0,
         used_count: item.used_count || 0,
       }));
@@ -181,13 +187,7 @@ const Coupon: FC = () => {
         </div>
 
         <div className="card-body p-0">
-          {loading ? (
-            <div className="text-center p-4">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Đang tải...</span>
-              </div>
-            </div>
-          ) : (
+        
             <>
               <table className="table table-hover text-nowrap">
                 <thead>
@@ -200,6 +200,8 @@ const Coupon: FC = () => {
                     <th>Mô tả</th>
                     <th>Hạn sử dụng</th>
                     <th>Số lượt sử dụng</th>
+                    <th>Số lượt/User</th>
+                    <th>Người dùng đã sử dụng</th>
                     <th colSpan={3}>Thao tác</th>
                   </tr>
                 </thead>
@@ -223,7 +225,13 @@ const Coupon: FC = () => {
                           {coupon.start_date && new Date(coupon.start_date) >= new Date(new Date().toISOString().split('T')[0]) ? "Còn hạn" : "Hết hạn"}
                         </td>
                         <td>
-                          {coupon.max_uses < coupon.used_count ? "Hết lượt sử dụng" : coupon.max_uses - coupon.used_count}
+                          {coupon.max_uses < coupon.used_count ? "Hết lượt sử dụng" : `${coupon.used_count}/${coupon.max_uses}`}
+                        </td>
+                        <td>
+                          {coupon.max_uses_per_user || 'Không giới hạn'}
+                        </td>
+                        <td>
+                          {Object.keys(coupon.user_usage || {}).length} người dùng
                         </td>
                         <td>
                           <button className="btn btn-primary" onClick={() => navigate(`/detail-coupon/${coupon.id}`)}>Chi tiết</button>
@@ -257,19 +265,7 @@ const Coupon: FC = () => {
 
               {/* Phân trang */}
               <div className="d-flex justify-content-between align-items-center p-3 border-top">
-                <div>
-                  {searchTerm ? (
-                    <span className="text-muted">
-                      <i className="fas fa-search me-1"></i>
-                      Kết quả tìm kiếm cho "<strong>{searchTerm}</strong>": {total} mã giảm giá
-                    </span>
-                  ) : (
-                    <span className="text-muted">
-                      <i className="fas fa-list me-1"></i>
-                      Hiển thị {coupons.length} / {total} mã giảm giá
-                    </span>
-                  )}
-                </div>
+               
                 <div className="pagination">
                   <ul className="pagination mb-0">
                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -308,7 +304,7 @@ const Coupon: FC = () => {
                 </button>
               </div>
             </>
-          )}
+      
         </div>
       </div>
     </section>

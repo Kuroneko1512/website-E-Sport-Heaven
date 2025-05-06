@@ -1,41 +1,9 @@
-import { FC, useState } from "react";
-import { createCoupon, Coupon as ApiCoupon, getCouponById } from "@app/services/Coupon/ApiCoupon";
+import { FC, useEffect, useState } from "react";
+import { createCoupon, Coupon as ApiCoupon } from "@app/services/Coupon/ApiCoupon";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import { CouponForm, FormErrors } from "./type";
+import { UserList, getUserList } from "@app/services/User/Type";
 
-const API_URL = 'http://127.0.0.1:8000/api/v1/coupon';
-
-// Hàm kiểm tra mã coupon đã tồn tại hay chưa
-const checkCouponCodeExists = async (code: string): Promise<boolean> => {
-    try {
-        const response = await axios.get(`${API_URL}/check-code/${code}`);
-        return response.data.exists;
-    } catch (error) {
-        console.error("Lỗi khi kiểm tra mã:", error);
-        return false;
-    }
-};
-
-// Type địa phương cho form
-type CouponForm = {
-  
-    code: string;
-    name: string;
-    description: string;
-    discount_value: number;
-    start_date: string;
-    end_date: string;
-    discount_type: string; 
-    min_purchase: number;
-    max_uses: number;
-    used_count: number;
-
-}
-
-// Type cho errors
-type FormErrors = {
-    [key in keyof Omit<CouponForm, 'id' | 'is_active'>]?: string;
-}
 
 const Store: FC = () => {
     const navigate = useNavigate();
@@ -51,11 +19,20 @@ const Store: FC = () => {
         min_purchase: 0,
         max_uses: 0,
         used_count: 0,
-        
+        max_uses_per_user: 0,
+        user_usage: {},
+        is_active: 1
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [submitted, setSubmitted] = useState(false);
-
+    const [userList, setUserList] = useState<UserList>({data: []});
+    const fetchUserList = async () => {
+        const response = await getUserList();
+        setUserList(response.data);
+    }
+    useEffect(() => {
+        fetchUserList();
+    }, []);
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {  
         const { name, value, type } = e.target;
         
@@ -238,6 +215,9 @@ const Store: FC = () => {
                 start_date: coupon.start_date,
                 end_date: coupon.end_date,
                 max_uses: coupon.max_uses,
+                max_uses_per_user: 0,
+                user_usage: {},
+                is_active: 1
             };
             
            await createCoupon(apiCoupon);
@@ -247,7 +227,7 @@ const Store: FC = () => {
             alert('Tạo mã giảm giá thành công!');
          
             setCoupon({
-                id: 0,
+              
                 code: "",
                 name: "",
                 description: "",
@@ -258,6 +238,9 @@ const Store: FC = () => {
                 min_purchase: 0,
                 max_uses: 0,
                 used_count: 0,
+                max_uses_per_user: 0,
+                user_usage: {},
+                is_active: 1
             });
             setSubmitted(false);
             navigate('/coupon');
@@ -385,11 +368,40 @@ const Store: FC = () => {
                         onChange={handleChange}
                    
                     />
-                    <small className="form-text text-muted">Trường này sẽ được cập nhật tự động khi mã giảm giá được sử dụng.</small>
+                    
                 </div>
-               
+               <div className="form-group">
+                <label htmlFor="max_uses_per_user">Số lần sử dụng/User</label>
+                <input 
+                    type="number" 
+                    className="form-control" 
+                    id="max_uses_per_user" 
+                    name="max_uses_per_user"     
+                    value={coupon.max_uses_per_user} 
+                    onChange={handleChange}
+                    min="0"
+                />
+                </div>
                 <button type="submit" className="btn btn-primary">Thêm</button>
             </form>
+            <div className="form-group">
+                <label htmlFor="users">Chọn user áp dụng</label>
+                <select
+                    multiple
+                    className="form-control"
+                    id="users"
+                    name="users"
+                    value={coupon.user_usage}
+                    onChange={e => {
+                        const selected = Array.from(e.target.selectedOptions, option => Number(option.value));
+                        setCoupon({ ...coupon, user_usage: selected });
+                    }}
+                >
+                    {userList.data.map(user => (
+                        <option key={user.id} value={user.id}>{user.name}</option>
+                    ))}
+                </select>
+            </div>
         </div>
     );
 };

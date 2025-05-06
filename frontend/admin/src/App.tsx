@@ -33,11 +33,12 @@ import AttributeProduct from "./pages/Product/AttributeProduct";
 import VariantProduct from "./pages/Product/VariantProduct";
 import Category from "./pages/Category/Category";
 import AttributePage from "@pages/Attribute/Attribute";
-import { setCurrentUser, setAuthData, clearAuth } from "./store/reducers/auth";
+import {  setAuthData, clearAuth } from "./store/reducers/auth";
 import Coupon from "@pages/Coupon/Coupon";
 import AddCoupon from "@pages/Coupon/Store";
 import EditCoupon from "@pages/Coupon/Edit";
 import DetailCoupon from "@pages/Coupon/Detail";
+import { UserList } from "@pages/User/index";
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {
@@ -80,13 +81,13 @@ const App = () => {
             user: user
           }));
 
-          console.log("Auth data restored from localStorage");
+        
         } catch (error) {
           console.error("Error parsing user data from localStorage:", error);
           dispatch(clearAuth());
         }
       } else {
-        console.error("No user data in localStorage");
+    
         dispatch(clearAuth());
       }
 
@@ -167,7 +168,8 @@ const App = () => {
             <Route path="add-coupon" element={<AddCoupon />} />
             <Route path="edit-coupon/:id" element={<EditCoupon />} />
             <Route path="detail-coupon/:id" element={<DetailCoupon />} />
-          
+            {/*Route user*/}
+            <Route path="User" element={<UserList />} />
            
           </Route>
         </Route>
