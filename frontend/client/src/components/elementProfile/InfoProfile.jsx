@@ -4,7 +4,16 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Input, Modal, Select, Upload, message, DatePicker } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  Select,
+  Upload,
+  message,
+  DatePicker,
+} from "antd";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
@@ -59,11 +68,13 @@ const InfoProfile = () => {
   const handleSaveProfile = async () => {
     try {
       const values = await form.validateFields();
-  
+
       const profilePayload = {
         first_name: values.firstname,
         last_name: values.lastname,
-        birthdate: values.birthDate ? values.birthDate.format("YYYY-MM-DD") : null,
+        birthdate: values.birthDate
+          ? values.birthDate.format("YYYY-MM-DD")
+          : null,
         gender: values.gender,
       };
       const infoPayload = {
@@ -71,34 +82,41 @@ const InfoProfile = () => {
         email: values.email,
         phone: values.phone,
       };
-  
-      await instanceAxios.post("/api/v1/customer/update-profile", profilePayload);
+
+      await instanceAxios.post(
+        "/api/v1/customer/update-profile",
+        profilePayload
+      );
       await instanceAxios.post("/api/v1/customer/update-info", infoPayload);
-      
+
       message.success("Cập nhật hồ sơ thành công!");
       queryClient.invalidateQueries(["user"]);
 
       // Update user in Redux
-      dispatch(updateUser({
-        ...user,
-        name: values.name,
-        email: values.email,
-        phone: values.phone,
-      }));
-  
+      dispatch(
+        updateUser({
+          ...user,
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+        })
+      );
+
       setIsEditing(false);
     } catch (error) {
       console.log("Error:", error);
       if (error.errorFields && error.errorFields.length > 0) {
         const firstError = error.errorFields[0];
         console.log("First Error:", firstError);
-        message.error(firstError.errors[0] || "Vui lòng kiểm tra lại thông tin.");
-      } 
-      if (error.status  === 400) {
+        message.error(
+          firstError.errors[0] || "Vui lòng kiểm tra lại thông tin."
+        );
+      }
+      if (error.status === 400) {
         const messageError = error?.response?.data?.message;
         message.error(messageError || "Vui lòng kiểm tra lại thông tin.");
       }
-      if (error.status  === 422) {
+      if (error.status === 422) {
         const messageError = error?.response?.data?.message;
         message.error(messageError || "Vui lòng kiểm tra lại thông tin.");
       }
@@ -109,12 +127,16 @@ const InfoProfile = () => {
     setUploading(true);
     const formData = new FormData();
     formData.append("avatar", file);
-  
+
     try {
-      const res = await instanceAxios.post("/api/v1/customer/update-info", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-  
+      const res = await instanceAxios.post(
+        "/api/v1/customer/update-info",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
       const newAvatar = res?.data?.data?.avatar;
       if (newAvatar) {
         setPreviewAvatar(newAvatar);
@@ -149,7 +171,11 @@ const InfoProfile = () => {
         <>
           <div className="flex justify-between items-center mb-6">
             <div className="relative">
-              <img alt="Profile" className="w-20 h-20 rounded-full object-cover" src={avatar} />
+              <img
+                alt="Profile"
+                className="w-20 h-20 rounded-full object-cover"
+                src={avatar}
+              />
               <div
                 className="absolute bottom-0 right-0 bg-gray-700 dark:bg-gray-500 text-white dark:text-black rounded-full p-2 cursor-pointer"
                 onClick={() => setIsAvatarModalOpen(true)}
@@ -168,37 +194,108 @@ const InfoProfile = () => {
 
           <Form form={form} layout="vertical" disabled={!isEditing}>
             <div className="grid grid-cols-2 gap-4">
-              <Form.Item label="Tên đăng nhập" name="name" rules={[{ required: true ,message: "Phải nhập tên đăng nhập!" }]}>
-                <Input />
+              <Form.Item
+                label="Tên đăng nhập"
+                name="name"
+                rules={[
+                  { required: true, message: "Phải nhập tên đăng nhập!" },
+                ]}
+              >
+                <Input className="!bg-white !border !border-gray-300 !text-black" />
               </Form.Item>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Form.Item label="Họ" name="firstname" rules={[{ required: true ,message: "Phải nhập họ!" }]}>
-                <Input />
+              <Form.Item
+                label="Họ"
+                name="firstname"
+                rules={[{ required: true, message: "Phải nhập họ!" }]}
+              >
+                <Input className="!bg-white !border !border-gray-300 !text-black" />
               </Form.Item>
-              <Form.Item label="Tên" name="lastname" rules={[{ required: true ,message:"Phải nhập tên!" }]}>
-                <Input />
+              <Form.Item
+                label="Tên"
+                name="lastname"
+                rules={[{ required: true, message: "Phải nhập tên!" }]}
+              >
+                <Input className="!bg-white !border !border-gray-300 !text-black" />
               </Form.Item>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Form.Item label="Số điện thoại" name="phone" rules={[{ required: true,message:"Phải nhập số điện thoại!" }]}>
-                <Input />
+              <Form.Item
+                label="Số điện thoại"
+                name="phone"
+                rules={[
+                  { required: true, message: "Phải nhập số điện thoại!" },
+                ]}
+              >
+                <Input className="!bg-white !border !border-gray-300 !text-black" />
               </Form.Item>
-              <Form.Item label="Email" name="email" rules={[{ required: true,message:"Phải nhập email"},{ type: "email", message:"Không đúng định dạng email!" }]}>
-                <Input />
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[
+                  { required: true, message: "Phải nhập email" },
+                  { type: "email", message: "Không đúng định dạng email!" },
+                ]}
+              >
+                <Input className="!bg-white !border !border-gray-300 !text-black" />
               </Form.Item>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Form.Item label="Ngày sinh" name="birthDate" rules={[{ required: true, message:"Phải nhập ngày sinh!" }]}>
-                <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
-              </Form.Item>
-              <Form.Item label="Giới tính" name="gender" rules={[{ required: true , message:"Phải chọn giới tính!" }]}>
-                <Select>
-                  <Option value="male">Nam</Option>
-                  <Option value="female">Nữ</Option>
-                  <Option value="other">Khác</Option>
-                </Select>
-              </Form.Item>
+              {!isEditing ? (
+                <>
+                  <Form.Item label="Ngày sinh">
+                    <Input
+                      value={
+                        form.getFieldValue("birthDate")?.format("YYYY-MM-DD") ||
+                        "Chưa cập nhật"
+                      }
+                      disabled
+                      className="!bg-white !border !border-gray-300 !text-black"
+                    />
+                  </Form.Item>
+                  <Form.Item label="Giới tính">
+                    <Input
+                      value={
+                        form.getFieldValue("gender") === "male"
+                          ? "Nam"
+                          : form.getFieldValue("gender") === "female"
+                          ? "Nữ"
+                          : form.getFieldValue("gender") === "other"
+                          ? "Khác"
+                          : "Chưa cập nhật"
+                      }
+                      disabled
+                      className="!bg-white !border !border-gray-300 !text-black"
+                    />
+                  </Form.Item>
+                </>
+              ) : (
+                <>
+                  <Form.Item
+                    label="Ngày sinh"
+                    name="birthDate"
+                    rules={[
+                      { required: true, message: "Phải nhập ngày sinh!" },
+                    ]}
+                  >
+                    <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
+                  </Form.Item>
+                  <Form.Item
+                    label="Giới tính"
+                    name="gender"
+                    rules={[
+                      { required: true, message: "Phải chọn giới tính!" },
+                    ]}
+                  >
+                    <Select>
+                      <Option value="male">Nam</Option>
+                      <Option value="female">Nữ</Option>
+                      <Option value="other">Khác</Option>
+                    </Select>
+                  </Form.Item>
+                </>
+              )}
             </div>
           </Form>
 
@@ -207,15 +304,30 @@ const InfoProfile = () => {
             open={isAvatarModalOpen}
             onCancel={() => setIsAvatarModalOpen(false)}
             footer={[
-              <Button key="cancel" onClick={() => setIsAvatarModalOpen(false)}>Hủy</Button>,
-              <Button key="confirm" type="primary" onClick={handleConfirmAvatar} disabled={uploading}>Xác nhận</Button>,
+              <Button key="cancel" onClick={() => setIsAvatarModalOpen(false)}>
+                Hủy
+              </Button>,
+              <Button
+                key="confirm"
+                type="primary"
+                onClick={handleConfirmAvatar}
+                disabled={uploading}
+              >
+                Xác nhận
+              </Button>,
             ]}
           >
             <div className="flex justify-center mb-4">
-              <img alt="Preview Avatar" className="w-32 h-32 rounded-full object-cover" src={previewAvatar} />
+              <img
+                alt="Preview Avatar"
+                className="w-32 h-32 rounded-full object-cover"
+                src={previewAvatar}
+              />
             </div>
             <Upload showUploadList={false} customRequest={handleUpload}>
-              <Button icon={<UploadOutlined />} loading={uploading}>Tải lên ảnh đại diện</Button>
+              <Button icon={<UploadOutlined />} loading={uploading}>
+                Tải lên ảnh đại diện
+              </Button>
             </Upload>
           </Modal>
         </>

@@ -1,7 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { message, Skeleton } from "antd";
 import React, { useEffect, useState } from "react";
-import { Link, Outlet, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import Description from "../components/elementProduct/Description";
+// import AdditionalInformation from "../components/elementProduct/AdditionalInformation";
+import Review from "../components/elementProduct/Review";
 import instanceAxios from "../config/db";
 import RelatedProducts from "../components/elementProduct/RelatedProducts";
 import ScrollToTop from "../config/ScrollToTop";
@@ -22,6 +25,8 @@ const ProductDetail = () => {
   const [selectedAttributes, setSelectedAttributes] = useState({});
   const [attributes, setAttributes] = useState([]);
   const [validOptions, setValidOptions] = useState({});
+  const [chon, setChon] = useState([]);
+  const [activeTab, setActiveTab] = useState('description');
 
   const { data: productDetailData, isLoading } = useQuery({
     queryKey: ["productDetailData", id],
@@ -123,18 +128,38 @@ const ProductDetail = () => {
 
   // Xử lý biến thể khi người dùng chọn
   const handleAttributeSelect = (attributeId, valueId) => {
-    const updatedAttributes = { ...selectedAttributes, [attributeId]: valueId };
-    setSelectedAttributes(updatedAttributes);
+    // Check if this value is already selected
+    const isAlreadySelected = selectedAttributes[attributeId] === valueId;
+    // Create updated attributes
+    const updatedAttributes = isAlreadySelected
+      ? { ...selectedAttributes }
+      : { ...selectedAttributes, [attributeId]: valueId };
+    // If deselecting, remove the attribute
+    if (isAlreadySelected) {
+      delete updatedAttributes[attributeId];
+    }
 
-    const matchingVariant = variants.find((variant) =>
-      variant.attributes.every(
-        (attr) => updatedAttributes[attr.attribute_id] === attr.value_id
-      )
+    setIsAllAttributesSelected(
+      Object.keys(updatedAttributes).length === attributes.length
     );
 
-    if (matchingVariant) {
-      setSelectedVariant(matchingVariant);
-      setDisplayImage(matchingVariant.image || product?.image);
+    setSelectedAttributes(updatedAttributes);
+
+    // Find matching variant only if all attributes are selected
+    if (Object.keys(updatedAttributes).length === attributes.length) {
+      const matchingVariant = variants.find((variant) =>
+        variant.attributes.every(
+          (attr) => updatedAttributes[attr.attribute_id] === attr.value_id
+        )
+      );
+
+      if (matchingVariant) {
+        setSelectedVariant(matchingVariant);
+        setDisplayImage(matchingVariant.image || product?.image);
+      }
+    } else {
+      // If not all attributes selected, reset variant
+      setSelectedVariant(null);
     }
 
     updateValidOptions(updatedAttributes);
@@ -174,7 +199,7 @@ const ProductDetail = () => {
     let cartItem = {
       id: generateId(),
       product_id: product.id,
-      variant_id: selectedVariant?.id,
+      variant_id: selectedVariant?.id || null,
       quantity: quantity,
       image: product.image || selectedVariant?.image,
       name: product.name,
@@ -182,6 +207,7 @@ const ProductDetail = () => {
       discount: product.discount?.percent,
       stock: selectedVariant?.stock || product.stock,
       sku: selectedVariant?.sku || product.sku,
+      thuoc_tinh: chon,
     };
 
     const existingIndex = cartItems.findIndex(
@@ -201,6 +227,21 @@ const ProductDetail = () => {
     const event = new CustomEvent("cartUpdated", { detail: cartItems });
     window.dispatchEvent(event);
   };
+
+  const value_attribute = (name, value) => {
+    console.log(name, value);
+    setChon({ ...chon, [name]: value });
+  };
+
+  // console.log("Chon", chon);
+
+  useEffect(() => {
+    if (attributes.length > 0) {
+      setIsAllAttributesSelected(
+        Object.keys(selectedAttributes).length === attributes.length
+      );
+    }
+  }, [attributes, selectedAttributes]);
 
   return (
     <div>
@@ -287,23 +328,45 @@ const ProductDetail = () => {
                     </div>
                   ) : (
                     <div className="flex items-center mb-4">
-                      {parseFloat(product?.discount?.percent) > 0 ? (
-                        <div>
+                      {selectedVariant || isAllAttributesSelected ? (
+                        parseFloat(product?.discount?.percent) > 0 ? (
+                          <div>
+                            <span className="text-xl font-bold text-gray-800">
+                              {FomatVND(
+                                parseFloat(
+                                  selectedVariant?.price || variants[0]?.price
+                                ) -
+                                  (parseFloat(
+                                    selectedVariant?.price || variants[0]?.price
+                                  ) *
+                                    parseFloat(product?.discount?.percent)) /
+                                    100
+                              )}
+                            </span>
+                            <span className="text-lg line-through text-gray-500 ml-4">
+                              {FomatVND(
+                                selectedVariant?.price || variants[0]?.price
+                              )}
+                            </span>
+                          </div>
+                        ) : (
                           <span className="text-xl font-bold text-gray-800">
                             {FomatVND(
-                              (parseFloat(selectedVariant?.price) *
-                                parseFloat(product?.discount?.percent)) /
-                                100
+                              selectedVariant?.price || variants[0]?.price
                             )}
                           </span>
-                          <span className="text-lg line-through text-gray-500 ml-4 ">
-                            {FomatVND(selectedVariant?.price)}
-                          </span>
-                        </div>
+                        )
                       ) : (
-                        <span className="text-xl font-bold text-gray-800">
-                          {FomatVND(selectedVariant?.price)}
-                        </span>
+                        <div>
+                          <span className="text-xl font-bold text-gray-800">
+                            {FomatVND(variants[0]?.price || product?.price)}
+                          </span>
+                          {hasVariants && !isAllAttributesSelected && (
+                            <span className="text-sm text-gray-500 ml-2">
+                              (Chọn đầy đủ thuộc tính)
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}
@@ -342,9 +405,10 @@ const ProductDetail = () => {
                               return (
                                 <button
                                   key={value.id}
-                                  onClick={() =>
-                                    handleAttributeSelect(attr.id, value.id)
-                                  }
+                                  onClick={() => {
+                                    handleAttributeSelect(attr.id, value.id),
+                                      value_attribute(attr.name, value.value);
+                                  }}
                                   className={`px-4 py-2 border rounded transition-all duration-150 ${
                                     isSelected
                                       ? "bg-black text-white"
@@ -368,9 +432,9 @@ const ProductDetail = () => {
                   {/* Hiển thị số lượng tồn kho của biến thể */}
                   <p className="text-gray-600 mb-2">
                     <strong>Kho:</strong>{" "}
-                    {product?.stock > 0
-                      ? product?.stock
-                      : selectedVariant?.stock || 0}{" "}
+                    {hasVariants && !isAllAttributesSelected
+                      ? variants[0]?.stock || 0
+                      : selectedVariant?.stock || product?.stock || 0}{" "}
                   </p>
 
                   <div className="flex space-x-4 mt-8">
@@ -427,7 +491,10 @@ const ProductDetail = () => {
                           <button
                             className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
                             onClick={handleAddToCart}
-                            disabled={!isAllAttributesSelected}
+                            disabled={
+                              !isAllAttributesSelected ||
+                              attributes.length === 0
+                            }
                           >
                             Thêm vào giỏ hàng
                           </button>
@@ -436,7 +503,6 @@ const ProductDetail = () => {
                     ) : (
                       <button
                         className="bg-black hover:bg-gray-800 text-white rounded-lg px-16 py-2 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                        onClick={handleAddToCart}
                         disabled={true}
                       >
                         Thêm vào giỏ hàng
@@ -459,40 +525,30 @@ const ProductDetail = () => {
               <div className="mt-8">
                 <div className="border-b border-gray-200 mb-4">
                   <ul className="flex space-x-4">
-                    <Link
-                      to="descriptions"
-                      className={`pb-2 ${
-                        location.pathname === `/product-detail/${id}` ||
-                        location.pathname.includes("descriptions")
-                          ? "border-b-2 border-black"
-                          : ""
-                      }`}
+                    <button
+                      onClick={() => setActiveTab('description')}
+                      className={`pb-2 ${activeTab === 'description' ? 'border-b-2 border-black' : ''}`}
                     >
                       Mô tả
-                    </Link>
-                    {/* <Link
-                      to="information"
-                      className={`pb-2 ${
-                        location.pathname.includes("information")
-                          ? "border-b-2 border-black"
-                          : ""
-                      }`}
+                    </button>
+                    {/* <button
+                      onClick={() => setActiveTab('information')}
+                      className={`pb-2 ${activeTab === 'information' ? 'border-b-2 border-black' : ''}`}
                     >
                       Thông tin bổ sung
-                    </Link> */}
-                    <Link
-                      to="reviews"
-                      className={`pb-2 ${
-                        location.pathname.includes("reviews")
-                          ? "border-b-2 border-black"
-                          : ""
-                      }`}
+                    </button> */}
+                    <button
+                      onClick={() => setActiveTab('reviews')}
+                      className={`pb-2 ${activeTab === 'reviews' ? 'border-b-2 border-black' : ''}`}
                     >
                       Đánh giá
-                    </Link>
+                    </button>
                   </ul>
                 </div>
-                <Outlet context={{ product }} />
+                
+                {activeTab === 'description' && <Description product={product} />}
+                {activeTab === 'information' && <AdditionalInformation product={product} />}
+                {activeTab === 'reviews' && <Review product={product} />}
               </div>
 
               {/* Sản phẩm gần đây */}
@@ -510,4 +566,7 @@ const ProductDetail = () => {
   );
 };
 
+
+
 export default ProductDetail;
+

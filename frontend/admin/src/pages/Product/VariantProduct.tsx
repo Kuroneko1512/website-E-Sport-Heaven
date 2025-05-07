@@ -185,7 +185,7 @@ const VariantProduct = () => {
 
                       <div className="d-flex justify-content-end my-2 ms-4">
                         <img
-                          src={variant.image ? (typeof variant.image === "string" ? variant.image : URL.createObjectURL(variant.image)) : NoImage}
+                          src={`http://127.0.0.1:8000/storage/${variant.image ? (typeof variant.image === "string" ? variant.image : URL.createObjectURL(variant.image)) : NoImage}`}
                           alt="Preview"
                           className="img-thumbnail"
                           style={{ height: "129px", marginRight: "48px", objectFit: "cover" }}

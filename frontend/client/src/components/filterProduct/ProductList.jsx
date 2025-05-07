@@ -1,15 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import FomatVND from "../../utils/FomatVND";
 
 const ProductList = ({ products }) => {
-
-  console.log("products", products);
-
   return (
-    <div>
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {products.map((item) => (
+    <div className="px-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6">
+        {products?.data?.map((item) => (
           <div
           key={item.id}
           className="group bg-white shadow-md rounded-lg overflow-hidden hover:shadow-xl duration-300 transition-transform transform hover:scale-105 h-[34rem]"
@@ -41,9 +38,43 @@ const ProductList = ({ products }) => {
                 {FomatVND(item.price || item.variants[0]?.price)}
               </span>
             </div>
+
+            {/* Text section */}
+            <Link 
+              to={`/shop/product-detail/${item.id}`}
+              className="flex-1 p-4"
+            >
+              <h2 className="text-sm md:text-xl text-center font-medium text-gray-900 line-clamp-2 mb-2">
+                {item?.name}
+              </h2>
+              
+              <div className="mt-auto">
+                <div className="flex items-center justify-center gap-2 min-h-[1.5rem]">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-base md:text-lg font-bold text-gray-900">
+                      {FomatVND(
+                        item.price - (item.price * item.discount_percent) / 100 ||
+                          item.variants[0].price -
+                            (item.variants[0].price *
+                              item.variants[0].discount_percent) /
+                              100
+                      )}
+                    </span>
+                    {item.discount_percent > 0 && (
+                      <>
+                        <span className="text-xs md:text-sm text-gray-500 line-through">
+                          {FomatVND(item.price || item.variants[0].price)}
+                        </span>
+                        <span className="text-xs font-medium text-white bg-red-500 rounded px-1.5 py-0.5">
+                          -{parseFloat(item.discount_percent)}%
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Link>
           </div>
-        </Link>
-        </div>
         ))}
       </div>
     </div>

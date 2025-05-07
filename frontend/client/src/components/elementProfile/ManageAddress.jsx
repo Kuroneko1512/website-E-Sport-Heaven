@@ -1,5 +1,6 @@
 
 import { Button, Form, Input, Modal, Select, Typography } from "antd";
+import axios from "axios";
 import { useEffect, useState } from "react";
 
 const { Title } = Typography;
@@ -19,24 +20,36 @@ const ManageAddress = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    const loadData = async () => {
-      const provincesData = await fetch("/data/provinces.json").then((res) =>
-        res.json()
-      );
-      const districtsData = await fetch("/data/districts.json").then((res) =>
-        res.json()
-      );
-      const wardsData = await fetch("/data/wards.json").then((res) =>
-        res.json()
-      );
+    axios.get('http://127.0.0.1:8000/api/v1/address/provinces/')
+      .then(response => setProvinces(response?.data?.data))
+      .catch(error => console.error('Lỗi khi tải tỉnh/thành phố:', error));
 
-      setProvinces(provincesData);
-      setDistricts(districtsData);
-      setWards(wardsData);
-    };
+    // const cartItems = localStorage.getItem('checkoutItems');
+    // const cartTotal = localStorage.getItem('cartTotal');
 
-    loadData();
+    // if (cartItems) setCartItems(JSON.parse(cartItems));
+    // if (cartTotal) setCartTotal(JSON.parse(cartTotal));
   }, []);
+
+  console.log("provinces", provinces);
+  console.log("districts", districts);
+  console.log("wards", wards);
+
+  useEffect(() => {
+    if (selectedProvince) {
+      axios.get(`http://127.0.0.1:8000/api/v1/address/districts?province_code=${selectedProvince}`)
+        .then(response => setDistricts(response?.data?.data))
+        .catch(error => console.error('Lỗi khi tải quận/huyện:', error));
+    }
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    if (selectedDistrict) {
+      axios.get(`http://127.0.0.1:8000/api/v1/address/communes?district_code=${selectedDistrict}`)
+        .then(response => setWards(response?.data?.data))
+        .catch(error => console.error('Lỗi khi tải phường/xã:', error));
+    }
+  }, [selectedDistrict]);
 
   // console.log(wards);
 
@@ -228,33 +241,56 @@ const ManageAddress = () => {
           </Form.Item>
 
           <Form.Item label="Tỉnh/Thành phố" name="province" rules={[{ required: true, message: "Hãy chọn tỉnh/thành phố" }]}>
-            <Select
-              placeholder="Chọn Tỉnh/Thành phố"
-              value={selectedProvince}
-              onChange={(val) => setSelectedProvince(val)}
-            >
-              {provinces.map((p) => (
-                <Option key={p.code} value={p.code}>
-                  {p.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+  <Select
+    placeholder="Chọn Tỉnh/Thành phố"
+    value={selectedProvince}
+    onChange={(val) => {
+      setSelectedProvince(val); // Cập nhật tỉnh/thành phố được chọn
+      setSelectedDistrict(""); // Reset quận/huyện
+      setDistricts([]); // Xóa dữ liệu quận/huyện
+      setSelectedWard(""); // Reset phường/xã
+      setWards([]); // Xóa dữ liệu phường/xã
 
-          <Form.Item label="Quận/Huyện" name="district" rules={[{ required: true, message: "Hãy chọn quận/huyện" }]}>
-            <Select
-              placeholder="Chọn Quận/Huyện"
-              value={selectedDistrict}
-              onChange={(val) => setSelectedDistrict(val)}
-              disabled={!selectedProvince}
-            >
-              {districts.map((d) => (
-                <Option key={d.code} value={d.code}>
-                  {d.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+      // Reset giá trị trên form
+      form.setFieldsValue({
+        district: undefined, // Reset quận/huyện
+        ward: undefined, // Reset phường/xã
+      });
+    }}
+    disabled={!provinces.length} // Disable nếu không có tỉnh/thành phố
+  >
+    {provinces.map((p) => (
+      <Option key={p.code} value={p.code}>
+        {p.name}
+      </Option>
+    ))}
+  </Select>
+</Form.Item>
+
+<Form.Item label="Quận/Huyện" name="district" rules={[{ required: true, message: "Hãy chọn quận/huyện" }]}>
+  <Select
+    placeholder="Chọn Quận/Huyện"
+    value={selectedDistrict}
+    onChange={(val) => {
+      setSelectedDistrict(val);
+      
+      setSelectedWard(""); // Reset phường/xã
+      setWards([]);
+      // Reset giá trị trên form
+      form.setFieldsValue({
+        
+        ward: undefined, // Reset phường/xã
+      }); // Xóa dữ liệu phường/xã
+    }}
+    disabled={!selectedProvince}
+  >
+    {districts.map((d) => (
+      <Option key={d.code} value={d.code}>
+        {d.name}
+      </Option>
+    ))}
+  </Select>
+</Form.Item>
 
           <Form.Item label="Phường/Xã" name="ward" rules={[{ required: true, message: "Hãy chọn phường/xã" }]}>
             <Select

@@ -31,19 +31,43 @@ class ProductService extends BaseService
 
         // Lọc theo danh mục sản phẩm
         if (!empty($filters['category_id'])) {
-            $query->where('category_id', $filters['category_id']);
+            $categoryIds = explode(',', $filters['category_id']);
+            $query->whereIn('category_id', $categoryIds);
         }
 
         // Lọc theo khoảng giá
-        if (!empty($filters['min_price']) && !empty($filters['max_price'])) {
-            $query->whereBetween('price', [$filters['min_price'], $filters['max_price']]);
-            // return $query;
+        if (!empty($filters['min_price']) || !empty($filters['max_price'])) {
+            $min = $filters['min_price'];
+            $max = $filters['max_price'] ?? PHP_INT_MAX;
+            
+            $query->where(function($q) use ($min, $max) {
+                // Sản phẩm đơn giản (simple)
+                $q->where('product_type', 'simple')
+                  ->whereRaw('CASE 
+                    WHEN discount_percent IS NOT NULL AND 
+                         (discount_start IS NULL OR discount_start <= NOW()) AND 
+                         (discount_end IS NULL OR discount_end >= NOW())
+                    THEN price * (1 - discount_percent/100)
+                    ELSE price
+                  END BETWEEN ? AND ?', [$min, $max]);
+                
+                // Sản phẩm biến thể (variable)
+                $q->orWhereHas('variants', function($variantQuery) use ($min, $max) {
+                    $variantQuery->whereRaw('CASE 
+                      WHEN discount_percent IS NOT NULL AND 
+                           (discount_start IS NULL OR discount_start <= NOW()) AND 
+                           (discount_end IS NULL OR discount_end >= NOW())
+                      THEN price * (1 - discount_percent/100)
+                      ELSE price
+                    END BETWEEN ? AND ?', [$min, $max]);
+                });
+            });
         }
         // Lọc theo thuộc tính sản phẩm
         if (!empty($filters['attributes'])) {
             $query->whereHas('variants.productAttributes.attributeValue', function ($q) use ($filters) {
                 $q->whereIn('value', $filters['attributes']);
-            });  
+            });
         }
         return $query->paginate($paginate);
     }
@@ -153,10 +177,10 @@ class ProductService extends BaseService
             foreach ($data['selected_attributes'] as $attributeId) {
                 $product->selectedAttributes()->create(['attribute_id' => $attributeId]);
             }
-    
+
             // Lấy danh sách các thuộc tính bắt buộc từ sản phẩm
             $requiredAttributes = $product->selectedAttributes->pluck('attribute_id')->toArray();
-    
+
             // Kiểm tra và cập nhật hoặc tạo mới biến thể cho sản phẩm
             if (!empty($data['variants']) && is_array($data['variants'])) {
                 foreach ($data['variants'] as $variantData) {
@@ -172,7 +196,7 @@ class ProductService extends BaseService
                                 'discount_start' => $variantData['discount_start'] ?? null,
                                 'discount_end' => $variantData['discount_end'] ?? null,
                             ]);
-                        }       
+                        }
                     } else {
                         // Tạo mới biến thể nếu không có ID
                         $variant = $product->variants()->create([
@@ -183,41 +207,40 @@ class ProductService extends BaseService
                             'discount_start' => $variantData['discount_start'] ?? null,
                             'discount_end' => $variantData['discount_end'] ?? null,
                         ]);
-                        if (!empty($variantData['attributes']) && is_array($variantData['attributes']))
-                        {
-                           foreach ($variantData['attributes'] as $attributeData) {
-                               // Lấy attribute_value_id và attribute_id từ dữ liệu gửi đến
-                               $attributeValue = AttributeValue::find($attributeData['attribute_value_id']);
-                               if (!$attributeValue) {
-                                   throw new \Exception("Giá trị thuộc tính không hợp lệ.");
-                               }
-                               $exists = $variant->productAttributes()->where([
-                                   'product_variant_id' => $variant->id,
-                                   'attribute_id' => $attributeData['attribute_id'],
-                                   'attribute_value_id' => $attributeData['attribute_value_id'],
-                               ])->exists();
-                       
-                               if ($exists) {
-                                   // Nếu tồn tại thì bỏ qua hoặc xử lý khác nếu muốn
-                                   continue;
-                               }
-                             //  Cập nhật hoặc tạo mới thuộc tính cho biến thể
-                               $variant->productAttributes()->updateOrCreate(
-                                   [
-                                       'product_variant_id' => $variant->id,
-                                       'attribute_id' => $attributeData['attribute_id'],
-                                   ],
-                                   [
-                                       'attribute_value_id' => $attributeData['attribute_value_id'],
-                                   ]
-                               );
-                           }
-                       }
+                        if (!empty($variantData['attributes']) && is_array($variantData['attributes'])) {
+                            foreach ($variantData['attributes'] as $attributeData) {
+                                // Lấy attribute_value_id và attribute_id từ dữ liệu gửi đến
+                                $attributeValue = AttributeValue::find($attributeData['attribute_value_id']);
+                                if (!$attributeValue) {
+                                    throw new \Exception("Giá trị thuộc tính không hợp lệ.");
+                                }
+                                $exists = $variant->productAttributes()->where([
+                                    'product_variant_id' => $variant->id,
+                                    'attribute_id' => $attributeData['attribute_id'],
+                                    'attribute_value_id' => $attributeData['attribute_value_id'],
+                                ])->exists();
+
+                                if ($exists) {
+                                    // Nếu tồn tại thì bỏ qua hoặc xử lý khác nếu muốn
+                                    continue;
+                                }
+                                //  Cập nhật hoặc tạo mới thuộc tính cho biến thể
+                                $variant->productAttributes()->updateOrCreate(
+                                    [
+                                        'product_variant_id' => $variant->id,
+                                        'attribute_id' => $attributeData['attribute_id'],
+                                    ],
+                                    [
+                                        'attribute_value_id' => $attributeData['attribute_value_id'],
+                                    ]
+                                );
+                            }
+                        }
                     }
-    
+
                     // Kiểm tra và cập nhật hoặc tạo mới các thuộc tính của biến thể
 
-                    }
+                }
             }
         }
 
@@ -274,7 +297,22 @@ class ProductService extends BaseService
 
         // Nếu có thuộc tính (biến thể), nối chúng lại
         if (!empty($attributes)) {
-            $attrPart = collect($attributes)->map(fn($attr) => $attr['attribute_value_id'])->implode('-');
+            // Lấy danh sách các giá trị thuộc tính
+            $attrValues = [];
+            foreach ($attributes as $attr) {
+                // Lấy giá trị của attribute_value từ database
+                $attributeValue = AttributeValue::find($attr['attribute_value_id']);
+                if ($attributeValue) {
+                    // Sử dụng giá trị thay vì ID
+                    $attrValues[] = Str::slug($attributeValue->value);
+                }
+            }
+
+            // Sắp xếp các giá trị để đảm bảo tính nhất quán
+            sort($attrValues);
+
+            // Nối các giá trị thuộc tính
+            $attrPart = implode('-', $attrValues);
             $sku = strtoupper($slug . '-' . $attrPart);
         } else {
             $sku = strtoupper($slug);

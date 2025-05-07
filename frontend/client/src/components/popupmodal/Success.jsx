@@ -6,8 +6,8 @@ const MySwal = withReactContent(Swal)
 const Success = () => {
     MySwal.fire({
         icon: "success",
-        title: "Success!",
-        text: "Your action was completed successfully.",
+        title: "Thành Công!",
+        text: "Đăng nhập thành công.",
         confirmButtonColor: "green",
       });
 }

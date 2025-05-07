@@ -33,12 +33,22 @@ import AttributeProduct from "./pages/Product/AttributeProduct";
 import VariantProduct from "./pages/Product/VariantProduct";
 import Category from "./pages/Category/Category";
 import AttributePage from "@pages/Attribute/Attribute";
+<<<<<<< HEAD
 import {  setAuthData, clearAuth } from "./store/reducers/auth";
 import Coupon from "@pages/Coupon/Coupon";
 import AddCoupon from "@pages/Coupon/Store";
 import EditCoupon from "@pages/Coupon/Edit";
 import DetailCoupon from "@pages/Coupon/Detail";
 import { UserList } from "@pages/User/index";
+=======
+import { setCurrentUser, setAuthData, clearAuth } from "./store/reducers/auth";
+import  Coupon  from "@pages/Coupon/Coupon";
+import DetailCoupon from "@pages/Coupon/Detail";
+import EditCoupon from "@pages/Coupon/Edit";
+import AddCoupon from "@pages/Coupon/Store";
+
+
+>>>>>>> 55a4b7c52a306f2faf185fd595153172c71039aa
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {
