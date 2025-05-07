@@ -19,7 +19,7 @@ const ProductList = ({ products }) => {
             <img
               alt={item.name}
               className="w-full h-full object-cover"
-              src={`http://127.0.0.1:8000/storage/${item.image || item.variants[0].image}`}
+              src={`http://127.0.0.1:8000/storage/${item.image || item.variants[0]?.image}`}
             />
             
             {/* Overlay hover */}
@@ -35,10 +35,10 @@ const ProductList = ({ products }) => {
             {/* <p className="text-gray-600">{item.name}</p> */}
             <div className="flex items-center mt-2">
               <span className="text-lg font-bold text-black">
-                {FomatVND((item.price - item.price * 0.1) || item.variants[0].price - item.variants[0].price * 0.1)}
+                {FomatVND((item.price - item.price * 0.1) || item.variants[0]?.price - item.variants[0]?.price * 0.1)}
               </span>
               <span className="text-gray-400 line-through ml-2">
-                {FomatVND(item.price || item.variants[0].price)}
+                {FomatVND(item.price || item.variants[0]?.price)}
               </span>
             </div>
           </div>

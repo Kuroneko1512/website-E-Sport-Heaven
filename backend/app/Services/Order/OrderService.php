@@ -39,7 +39,7 @@ class OrderService extends BaseService
         return $this->model->with([
             'orderItems.product',
             'orderItems.productVariant'
-        ])->get();
+        ])->latest()->get();
     }
 
 

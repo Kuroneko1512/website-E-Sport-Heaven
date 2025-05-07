@@ -96,19 +96,21 @@ const Store = () => {
     
   
     
-    if (product.product_type === "simple") {
-      if (product.price <= 1) {
-        newErrors.price = "Giá sản phẩm phải lớn hơn  hoặc bằng   1";
-      }
+    // if (product.product_type === "simple") {
+    //   if (product.price <= 1) {
+    //     newErrors.price = "Giá sản phẩm phải lớn hơn  hoặc bằng   1";
+    //   }
   
-      if (product.stock <= 1) {
-        newErrors.stock = "Số lượng trong kho phải lớn  hơn hoặc bằng  1";
-      }
-    }
+    //   if (product.stock <= 1) {
+    //     newErrors.stock = "Số lượng trong kho phải lớn  hơn hoặc bằng  1";
+    //   }
+    // }
  
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+
+  
   };
 
   const handleOptionChange = (
@@ -248,15 +250,16 @@ const Store = () => {
  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    console.log(validateForm());  
     if (!validateForm()) {
-    
       window.scrollTo(0, 0);
+      console.log(validateForm());
       return;
+ 
     }else{
       console.log("hi",product);
     }
-
+    
     try {
    
       if (isEdit && id) {
