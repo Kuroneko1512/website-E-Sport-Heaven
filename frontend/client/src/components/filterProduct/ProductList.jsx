@@ -8,35 +8,26 @@ const ProductList = ({ products }) => {
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6">
         {products?.data?.map((item) => (
           <div
-          key={item.id}
-          className="group bg-white shadow-md rounded-lg overflow-hidden hover:shadow-xl duration-300 transition-transform transform hover:scale-105 h-[34rem]"
-        >
-          {/* Image section */}
-          <div className="relative h-3/4">
-            <img
-              alt={item.name}
-              className="w-full h-full object-cover"
-              src={`http://127.0.0.1:8000/storage/${item.image || item.variants[0]?.image}`}
-            />
-            
-            {/* Overlay hover */}
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-              <i className="far fa-heart absolute text-black top-5 right-5 border rounded-full border-[#D9D9D9] p-3 bg-[#D9D9D9] hover:bg-white"> </i>
-            </div>
-          </div>
+            key={item.id}
+            className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col"
+          >
+            {/* Image section */}
+            <div className="relative aspect-square overflow-hidden">
+              <img
+                alt={item?.name}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                src={`http://127.0.0.1:8000/storage/${
+                  item?.image || item?.variants[0].image
+                }`}
+                loading="lazy"
+              />
 
-          {/* Text section */}
-        <Link to={`/shop/product-detail/${item.id}`}>
-          <div className="p-4">
-            <h2 className="text-lg font-bold">{item.name}</h2>
-            {/* <p className="text-gray-600">{item.name}</p> */}
-            <div className="flex items-center mt-2">
-              <span className="text-lg font-bold text-black">
-                {FomatVND((item.price - item.price * 0.1) || item.variants[0]?.price - item.variants[0]?.price * 0.1)}
-              </span>
-              <span className="text-gray-400 line-through ml-2">
-                {FomatVND(item.price || item.variants[0]?.price)}
-              </span>
+              {/* Overlay hover */}
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                <button className="absolute top-3 right-3 py-1 px-2 bg-white/80 rounded-full hover:bg-white transition-colors duration-200">
+                  <i className="far fa-heart text-gray-700"></i>
+                </button>
+              </div>
             </div>
 
             {/* Text section */}
