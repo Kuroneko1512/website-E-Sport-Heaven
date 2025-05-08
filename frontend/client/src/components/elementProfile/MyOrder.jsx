@@ -8,6 +8,7 @@ import { Divider, message, Modal, Table, Form } from "antd";
 import ReviewForm from "./ReviewForm";
 import useReview from "../../hooks/useReview";
 import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
+import Cookies from "js-cookie";
 
 const OrderItem = ({
   order_items,
@@ -215,10 +216,12 @@ const MyOrder = () => {
       }
 
       // Submit all reviews
+      const user = JSON.parse(Cookies.get("user"));
       const reviewPromises = selectedOrder.order_items.map((item, index) => {
         const productId = item.product_id || item.product_variant?.product_id;
         const reviewData = {
-          title: values[`product_${index}_title`],
+          images: user.avatar,
+          title: user.name,
           rating: values[`product_${index}_rating`],
           comment: values[`product_${index}_comment`],
         };

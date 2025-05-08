@@ -8,7 +8,7 @@ const SkeletonLoadingHome = () => {
         {Array.from({ length: 6 }).map((_, index) => (
           <Col span={8} key={index}>
             <Card style={{ marginBottom: '16px' }}>
-              <Skeleton active paragraph={{ rows: 4 }} />
+              <Skeleton active paragraph={{ rows: 1 }} />
             </Card>
           </Col>
         ))}
