@@ -12,7 +12,9 @@ import Cookies from "js-cookie";
 
 const OrderItem = ({
   order_items,
+  customer_name,
   status,
+  shipping_address,
   order_code,
   reviewModalVisible,
   setReviewModalVisible,
@@ -93,9 +95,9 @@ const OrderItem = ({
           ))}
         </div>
       </Modal>
-      <h3 className="bg-white flex justify-between border-b border-gray-200 items-center dark:bg-gray-800 pb-3 italic">
+      <h3 className="bg-white flex justify-between border-b border-gray-200 items-center dark:bg-gray-800 pb-3">
         <span>Mã đơn hàng: <strong>{order_code}</strong></span>
-
+        <span className="text-sm">{customer_name}, {shipping_address.substring(0, 30)}...</span>
         <span className={`px-2 py-1 rounded text-base ${statusStyles[status]}`}>
           {status}
         </span>
@@ -445,6 +447,8 @@ const MyOrder = () => {
                         <OrderItem
                           order_items={order.order_items}
                           status={order.status}
+                          shipping_address={order.shipping_address}
+                          customer_name={order.customer_name}
                           order_code={order.order_code}
                           reviewModalVisible={reviewModalVisible}
                           setReviewModalVisible={setReviewModalVisible}
