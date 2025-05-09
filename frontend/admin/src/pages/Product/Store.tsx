@@ -21,7 +21,7 @@ interface Variant {
   price: number;
   stock: number;
   image?: File | string | null;
-  attributes: AttributeSelection[];
+  product_attributes: AttributeSelection[];
 }
 
 // Định nghĩa interface cho errors
@@ -29,7 +29,7 @@ interface ValidationErrors {
   name?: string;
   price?: string;
   discount_percent?: string;
-  category_id?: string;
+  category_id?: number;
   stock?: string;
   description?: string;
   image?: string;
@@ -40,12 +40,13 @@ const NoImage =
 
 const Store = () => {
   const navigate = useNavigate();
-  const { id: paramId } = useParams(); // Lấy `id` từ URL
+  const { id: paramId } = useParams(); 
   const [id, setId] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isEdit, setIsEdit] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  
 
   const [product, setProduct] = useState<api4>({
     name: "",
@@ -53,17 +54,18 @@ const Store = () => {
     discount_percent: "",
     product_type: "simple",
     status: "active",
-    category_id: "",
+    category_id: 0,
     stock: 1,
+    sku: "",
     image: null as File | null,
     description: "",
     selected_attributes: [],
-    variants: [],
+    variants: [] as Variant[],
   });
 
   const ProductOptions = [
-    { value: "simple", label: "simple" },
-    { value: "variable", label: "variable" },
+    { value: "simple", label: "Đơn giản" },
+    { value: "variable", label: "Biến thể" },
   ];
   const [selectedProduct, setSelectedProduct] = useState<{
     value: string;
@@ -72,7 +74,8 @@ const Store = () => {
 
  
   const validateForm = (): boolean => {
-    const newErrors: ValidationErrors = {};
+    const newErrors: ValidationErrors = {
+    };
     
   
     if (!product.name.trim()) {
@@ -82,10 +85,7 @@ const Store = () => {
     }
     
     
-    // if (product.price <= 1) {
-    //   newErrors.price = "Giá sản phẩm phải lớn hơn hoặc bằng 1";
-    // }
-    
+
    
     
    
@@ -94,18 +94,7 @@ const Store = () => {
     }
     
     
-  
-    
-    // if (product.product_type === "simple") {
-    //   if (product.price <= 1) {
-    //     newErrors.price = "Giá sản phẩm phải lớn hơn  hoặc bằng   1";
-    //   }
-  
-    //   if (product.stock <= 1) {
-    //     newErrors.stock = "Số lượng trong kho phải lớn  hơn hoặc bằng  1";
-    //   }
-    // }
- 
+
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -162,9 +151,6 @@ const Store = () => {
       ...prev,
       description: content,
     }));
-    
-    
-  
   };
 
 
@@ -243,21 +229,16 @@ const Store = () => {
     fetchData();
   }, [id]);
 
-  const ProductOptionsDefault =
-  product?.product_type === ProductOptions[1].value
-    ? ProductOptions[1]
-    : ProductOptions[0];
  
   const handleSubmit = async (e: React.FormEvent) => {
+  
     e.preventDefault(); 
     if (!validateForm()) {
       window.scrollTo(0, 0);
       console.log(validateForm());
       return;
- 
-    }else{
-      console.log("hi",product);
     }
+   
     
     try {
    
@@ -320,8 +301,8 @@ const Store = () => {
                     ? ["ValueProduct"].map((item, index) => (
                         <li key={index} className="my-2">
                           <Link to={item} className="text-black mx-4">
-                            {item}
-                          </Link> 
+                            {selectedProduct.label}
+                          </Link>
                         </li>
                       ))
                     : ["Attribute", "Variant"].map((item, index) => (
@@ -336,8 +317,9 @@ const Store = () => {
                                 : {}
                             }
                           >
-                            {item}
+                            {item === "Attribute" ? "Thuộc tính" : "Biến thể"}
                           </Link>
+                        
                         </li>
                       ))}
                 </ul>

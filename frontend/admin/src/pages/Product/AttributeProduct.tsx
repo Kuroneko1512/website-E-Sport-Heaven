@@ -73,10 +73,25 @@ const AttributeProduct = () => {
 
   const handleSubmitAttribute = () => {
     const selectedValues = tempAttributes.map((option) => option.value);
+    
+    // Kiểm tra xem có thay đổi gì so với thuộc tính đã lưu không
+    const isSameAttributes = JSON.stringify(selectedValues.sort()) === JSON.stringify(product.selected_attributes.sort());
+    
+    if (isSameAttributes) {
+      toast.warning("Thuộc tính này đã được lưu trước đó!");
+      return;
+    }
+
+    if(selectedValues.length === 0){
+      toast.error("Vui lòng chọn thuộc tính!");
+      return;
+    }
+
     setProduct((prev: any) => ({
       ...prev,
       selected_attributes: selectedValues,
     }));
+
     toast.success("Lưu thuộc tính thành công!");
   };
 

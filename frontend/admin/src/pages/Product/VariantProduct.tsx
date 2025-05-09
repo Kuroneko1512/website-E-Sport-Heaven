@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
 import { useOutletContext } from "react-router-dom";
-import axios from "axios";
+
 import NoImage from "../../../public/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
 import { getAttributesByIds } from "@app/services/Attribute/ApiAttribute";
 
@@ -115,7 +115,15 @@ const VariantProduct = () => {
     console.log("Đã lưu vào product:", product);
     alert("Lưu biến thể thành công!");
   };
-
+const handleDeleteVariant = (id: number) => {
+  const id_variant = variants[id];
+  console.log(id_variant);
+  
+  setProduct((prev: any) => ({
+    ...prev,
+    variants: prev.variants.filter((_ : any, i: number) => i !== id)
+  }));
+}
   return (
     <div>
       <div className="p-3 border rounded shadow-sm bg-white">
@@ -175,6 +183,9 @@ const VariantProduct = () => {
                         return `${attrData?.name}: ${attrValue?.value}`;
                       })
                       .join(", ")} 
+                  </td>
+                  <td>
+                    <button type="button" className="btn btn-danger" onClick={() => handleDeleteVariant(index)}>Xóa</button>
                   </td>
                 </tr>
 
