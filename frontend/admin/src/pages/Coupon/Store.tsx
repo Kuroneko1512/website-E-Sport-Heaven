@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from "react";
 import { createCoupon, Coupon as ApiCoupon } from "@app/services/Coupon/ApiCoupon";
 import { useNavigate } from "react-router-dom";
 import { CouponForm, FormErrors } from "./type";
-import { UserList, getUserList } from "@app/services/User/Type";
+
 
 
 const Store: FC = () => {
@@ -20,19 +20,12 @@ const Store: FC = () => {
         max_uses: 0,
         used_count: 0,
         max_uses_per_user: 0,
-        user_usage: {},
         is_active: 1
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [submitted, setSubmitted] = useState(false);
-    const [userList, setUserList] = useState<UserList>({data: []});
-    const fetchUserList = async () => {
-        const response = await getUserList();
-        setUserList(response.data);
-    }
-    useEffect(() => {
-        fetchUserList();
-    }, []);
+   
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {  
         const { name, value, type } = e.target;
         
@@ -305,14 +298,14 @@ const Store: FC = () => {
                     <label htmlFor="start_date">Ngày bắt đầu <span className="text-danger">*</span></label>
                     <input 
                         type="date" 
-                        className={`form-control ${errors.start_date ? 'is-invalid' : ''}`}
+                        className="form-control"
                         id="start_date" 
                         name="start_date" 
                         value={coupon.start_date} 
                         onChange={handleChange}
-                         
+                       min={new Date().toISOString().split('T')[0]}
                     />
-                    {errors.start_date && <div className="invalid-feedback">{errors.start_date}</div>}
+                  
                 </div>
                 <div className="form-group">
                     <label htmlFor="end_date">Ngày kết thúc <span className="text-danger">*</span></label>
@@ -323,6 +316,7 @@ const Store: FC = () => {
                         name="end_date" 
                         value={coupon.end_date} 
                         onChange={handleChange}
+                        min={coupon.start_date}
                       
                     />
                     {errors.end_date && <div className="invalid-feedback">{errors.end_date}</div>}
@@ -384,24 +378,7 @@ const Store: FC = () => {
                 </div>
                 <button type="submit" className="btn btn-primary">Thêm</button>
             </form>
-            <div className="form-group">
-                <label htmlFor="users">Chọn user áp dụng</label>
-                <select
-                    multiple
-                    className="form-control"
-                    id="users"
-                    name="users"
-                    value={coupon.user_usage}
-                    onChange={e => {
-                        const selected = Array.from(e.target.selectedOptions, option => Number(option.value));
-                        setCoupon({ ...coupon, user_usage: selected });
-                    }}
-                >
-                    {userList.data.map(user => (
-                        <option key={user.id} value={user.id}>{user.name}</option>
-                    ))}
-                </select>
-            </div>
+      
         </div>
     );
 };

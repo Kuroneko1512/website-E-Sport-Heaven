@@ -82,9 +82,9 @@ const Store = () => {
     }
     
     
-    if (product.price <= 1) {
-      newErrors.price = "Giá sản phẩm phải lớn hơn hoặc bằng 1";
-    }
+    // if (product.price <= 1) {
+    //   newErrors.price = "Giá sản phẩm phải lớn hơn hoặc bằng 1";
+    // }
     
    
     
@@ -249,8 +249,7 @@ const Store = () => {
     : ProductOptions[0];
  
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(validateForm());  
+    e.preventDefault(); 
     if (!validateForm()) {
       window.scrollTo(0, 0);
       console.log(validateForm());

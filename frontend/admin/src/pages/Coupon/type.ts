@@ -11,7 +11,6 @@ export type CouponForm = {
     max_uses: number;
     used_count: number;
     max_uses_per_user: number;
-    user_usage: any;
     is_active: number;
 }
 

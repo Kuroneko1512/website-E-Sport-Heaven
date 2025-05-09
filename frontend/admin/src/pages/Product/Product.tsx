@@ -140,7 +140,7 @@ const Product = () => {
                       {product.status === "active" ? "Đang bán" : "Ngừng"}
                     </span>
                   </td>
-                  <td>{product.stock}</td>
+                  <td>{product.variants.length > 0 ? product.variants[0].stock : product.stock}</td>
                   <td>
                     <button
                       className="btn btn-warning btn-sm me-2"

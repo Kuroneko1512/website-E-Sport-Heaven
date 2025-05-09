@@ -1,6 +1,7 @@
 import { FC, useEffect, useState } from "react";
 import { deleteCoupon, getCoupons, Coupon as ApiCoupon } from "@app/services/Coupon/ApiCoupon";
 import { Link, useNavigate } from "react-router-dom";
+import { Text } from "react-bootstrap";
 
 interface CouponDisplay {
   id: number;
@@ -194,15 +195,12 @@ const Coupon: FC = () => {
                   <tr>
                     <th>Mã</th>
                     <th>Tên</th>
-                    <th>Giá</th>
+                   
                     <th>Loại</th>
                     <th>Trạng thái</th>
-                    <th>Mô tả</th>
                     <th>Hạn sử dụng</th>
                     <th>Số lượt sử dụng</th>
-                    <th>Số lượt/User</th>
-                    <th>Người dùng đã sử dụng</th>
-                    <th colSpan={3}>Thao tác</th>
+                    <th colSpan={3} className="text-center">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -211,7 +209,7 @@ const Coupon: FC = () => {
                       <tr key={coupon.id}>
                         <td>{coupon.code}</td>
                         <td>{coupon.name}</td>
-                        <td>{coupon.discount_value}</td>
+                      
                         <td>{coupon.discount_type === 'percentage' ? 'Phần trăm' : 'Giá trị cố định'}</td>
                         <td>
                           <span
@@ -220,18 +218,12 @@ const Coupon: FC = () => {
                             {coupon.is_active === 1 ? "Hoạt động" : "Ngừng"}
                           </span>
                         </td>
-                        <td>{coupon.description}</td>
+                        
                         <td>
                           {coupon.start_date && new Date(coupon.start_date) >= new Date(new Date().toISOString().split('T')[0]) ? "Còn hạn" : "Hết hạn"}
                         </td>
                         <td>
-                          {coupon.max_uses < coupon.used_count ? "Hết lượt sử dụng" : `${coupon.used_count}/${coupon.max_uses}`}
-                        </td>
-                        <td>
-                          {coupon.max_uses_per_user || 'Không giới hạn'}
-                        </td>
-                        <td>
-                          {Object.keys(coupon.user_usage || {}).length} người dùng
+                        {coupon.max_uses_per_user}
                         </td>
                         <td>
                           <button className="btn btn-primary" onClick={() => navigate(`/detail-coupon/${coupon.id}`)}>Chi tiết</button>

@@ -18,6 +18,16 @@ export interface UserList {
 
 
 export const getUserList = async () => {
-    const response = await fetch('http://localhost:8000/api/users');
+    const response = await fetch('http://localhost:8000/api/v1/user');
+    return response.json();
+}
+
+export const updateUserStatus = async (id : number) => {
+    const response = await fetch(`http://localhost:8000/api/v1/user/${id}/status`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    });
     return response.json();
 }
