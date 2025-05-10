@@ -17,7 +17,7 @@ const ProductList = ({ products }) => {
                 alt={item?.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 src={`http://127.0.0.1:8000/storage/${
-                  item?.image || item?.variants[0].image
+                  item?.image || item?.variants[0]?.image
                 }`}
                 loading="lazy"
               />

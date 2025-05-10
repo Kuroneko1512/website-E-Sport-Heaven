@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getOrderById, updateOrderStatus } from "@app/services/Order/Api";
+import { ORDER_STATUS, ORDER_STATUS_LABELS ,PAYMENT_STATUS_LABELS} from "@app/constants/OrderConstants";
 
 // Định nghĩa kiểu dữ liệu cho đơn hàng
 interface OrderItem {
@@ -24,9 +25,20 @@ interface Order {
   customer_phone: string;
   shipping_address: string;
   total_amount: number;
-  status: string;
+  status: number;
+  payment_status: number;
   order_items: OrderItem[];
 }
+
+const statusList = [
+  ORDER_STATUS.PENDING,        // 0
+  ORDER_STATUS.CONFIRMED,      // 1
+  ORDER_STATUS.PREPARING,      // 2
+  ORDER_STATUS.READY_TO_SHIP,  // 3
+  ORDER_STATUS.SHIPPING,       // 4
+  ORDER_STATUS.DELIVERED,      // 5
+  ORDER_STATUS.COMPLETED       // 6
+];
 
 const DetailOrder: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -52,7 +64,7 @@ const DetailOrder: React.FC = () => {
     if (!order) return;
     const confirmUpdate = window.confirm("Bạn có chắc muốn chuyển sang trạng thái tiếp theo?");
     if (!confirmUpdate) return;
-    const statusList = ["đang xử lý", "đã xác nhận", "đang giao", "hoàn thành"];
+
     const currentIndex = statusList.indexOf(order.status);
     if (currentIndex < statusList.length - 1) {
       const newStatus = statusList[currentIndex + 1];
@@ -70,8 +82,8 @@ const DetailOrder: React.FC = () => {
     const confirmCancel = window.confirm("Bạn có chắc muốn đánh dấu đơn hàng là thất bại?");
     if (!confirmCancel) return;
     try {
-      await updateOrderStatus(Number(id), "đã hủy");
-      setOrder({ ...order, status: "đã hủy" });
+      await updateOrderStatus(Number(id), ORDER_STATUS.CANCELLED); // Truyền giá trị số 10
+      setOrder({ ...order, status: ORDER_STATUS.CANCELLED });
     } catch (error) {
       console.error("Lỗi khi cập nhật trạng thái:", error);
     }
@@ -97,12 +109,12 @@ const DetailOrder: React.FC = () => {
               <p><strong>Điện thoại:</strong> {order.customer_phone}</p>
               <p><strong>Địa chỉ:</strong> {order.shipping_address}</p>
               <p><strong>Tổng tiền:</strong> {order.total_amount} VND</p>
-              <p><strong>trạng thái thanh toán:</strong> {order.payment_status}</p>
+              <p><strong>Trạng thái thanh toán:</strong> <span className="badge badge-info">{PAYMENT_STATUS_LABELS[order.payment_status]}</span></p>
 
-              <p><strong>Trạng thái:</strong> <span className="badge badge-info">{order.status}</span></p>
+              <p><strong>Trạng thái:</strong> <span className="badge badge-info">{ORDER_STATUS_LABELS[order.status]}</span></p>
 
               {/* Nút cập nhật trạng thái */}
-              {order.status !== "đã hủy" && order.status !== "hoàn thành" && (
+              {order.status !== ORDER_STATUS.COMPLETED && order.status !== ORDER_STATUS.CANCELLED && (
                 <>
                   <button className="btn btn-success mr-2" onClick={nextStatus}>
                     Tiến đến trạng thái tiếp theo
@@ -125,7 +137,7 @@ const DetailOrder: React.FC = () => {
                     <th>Sản phẩm</th>
                     <th>Biến thể</th>
                     <th>Số lượng</th>
-                 
+
                     <th>Giá</th>
                   </tr>
                 </thead>
@@ -141,7 +153,7 @@ const DetailOrder: React.FC = () => {
                         <td>{item.product?.name || "Không có dữ liệu"}</td>
                         <td>{item.product_variant?.sku || "N/A"}</td>
                         <td>{item.quantity}</td>
-                       
+
                         <td>{item.price} VND</td>
                       </tr>
                     ))
