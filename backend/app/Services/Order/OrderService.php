@@ -465,8 +465,9 @@ class OrderService extends BaseService
             $this->updatePaymentStatus(
                 $order->order_code,
                 Order::PAYMENT_STATUS_PAID,
-            null,
-                $adminId);
+                null,
+                $adminId
+            );
         }
         // Increment delivery attempts if status is RETURN_TO_SHOP
         // Tăng số lần giao hàng thất bại nếu trạng thái là RETURN_TO_SHOP

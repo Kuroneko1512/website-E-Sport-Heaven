@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getOrderById, updateOrderStatus } from "@app/services/Order/Api";
-import { ORDER_STATUS, ORDER_STATUS_LABELS ,PAYMENT_STATUS_LABELS} from "@app/constants/OrderConstants";
+import { ORDER_STATUS, ORDER_STATUS_LABELS, PAYMENT_STATUS, PAYMENT_STATUS_LABELS } from "@app/constants/OrderConstants";
 
 // Định nghĩa kiểu dữ liệu cho đơn hàng
 interface OrderItem {
@@ -70,7 +70,9 @@ const DetailOrder: React.FC = () => {
       const newStatus = statusList[currentIndex + 1];
       try {
         await updateOrderStatus(Number(id), newStatus);
-        setOrder({ ...order, status: newStatus });
+        // Sau khi cập nhật thành công, gọi lại API để lấy dữ liệu mới nhất
+        const updatedOrderResponse = await getOrderById(Number(id));
+        setOrder(updatedOrderResponse.data.data);
       } catch (error) {
         console.error("Lỗi khi cập nhật trạng thái:", error);
       }
@@ -153,7 +155,6 @@ const DetailOrder: React.FC = () => {
                         <td>{item.product?.name || "Không có dữ liệu"}</td>
                         <td>{item.product_variant?.sku || "N/A"}</td>
                         <td>{item.quantity}</td>
-
                         <td>{item.price} VND</td>
                       </tr>
                     ))

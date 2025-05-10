@@ -14,10 +14,10 @@ export interface Order {
   shipping_address: string;
   order_code: string;
   total_amount: number;
-  status: string;
+  status: number;
   customer_id: number;
   created_at: string;
-  payment_status: string;
+  payment_status: number;
 }
 interface OrderResponse {
     message: string;
