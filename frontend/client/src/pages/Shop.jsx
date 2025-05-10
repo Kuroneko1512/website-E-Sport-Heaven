@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { FaBoxOpen } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ import Pagination from "../components/filterProduct/Pagination";
 import ProductList from "../components/filterProduct/ProductList";
 import instanceAxios from "../config/db";
 import SkeletonLoading from "../components/loadingSkeleton/SkeletonLoading";
+import ScrollToTop from "../config/ScrollToTop";
 
 export default function Shop() {
   const location = useLocation();
@@ -44,40 +45,74 @@ export default function Shop() {
   });
 
   const [add, setAdd] = useState({});
-  const [loading, setLoading] = useState(0);
   // const [products, setProducts] = useState([]);
-
 
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page")) || 1);
 
+  // Fetch all initial data in parallel
+  const handleFilterChange = (newFilters) => {
+    setCurrentPage(1); // Always reset to page 1 when filtering
+    setFilters(newFilters);
+  };
 
-  const startLoading = () => setLoading((prev) => prev + 1);
-  const stopLoading = () => setLoading((prev) => Math.max(0, prev - 1));
+  const [
+    { data: categories, isLoading: isCategoriesLoading },
+    { data: attributes, isLoading: isAttributesLoading }, 
+    { data: products, isLoading: isProductsLoading }
+  ] = useQueries({
+    queries: [
+      {
+        queryKey: ["categories"],
+        queryFn: async () => {
+          const response = await instanceAxios.get("api/v1/category/indexNoPagination");
+          return response.data?.data;
+        },
+        staleTime: 600000
+      },
+      {
+        queryKey: ["attributes"],
+        queryFn: async () => {
+          const response = await instanceAxios.get("/api/v1/attribute");
+          return response.data?.data?.data;
+        },
+        staleTime: 600000
+      },
+      {
+        queryKey: ["products", searchQuery, filters, currentPage],
+        queryFn: async () => {
+          if (searchQuery && searchQuery.trim() !== "") {
+            const res = await instanceAxios.get(`api/v1/product/search?q=${searchQuery}&page=${currentPage}`);
+            return res.data?.data;
+          } else {
+            const params = {
+              category_id: filters.categorys.length > 0 ? filters.categorys.join(',') : undefined,
+              min_price: filters.priceRange[0],
+              max_price: filters.priceRange[1],
+              page: currentPage
+            };
 
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+            if (Object.keys(filters.attributefilter).length > 0) {
+              params.attributes = Object.entries(filters.attributefilter)
+                .flatMap(([_, values]) => values)
+                .filter(Boolean)
+                .join(',');
+            }
 
-  // Effect để fetch dữ liệu ban đầu
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        startLoading();
-        // Fetch các dữ liệu cần thiết
-        await Promise.all([
-          fetchProducts(),
-          // Các API calls khác nếu cần
-        ]);
-      } finally {
-        stopLoading();
-        setIsInitialLoad(false);
+            const res = await instanceAxios.get(`api/v1/product/fillter?page=${currentPage}`, { params });
+            return res?.data?.data;
+          }
+        },
+        staleTime: 600000
+
       }
-    };
-    fetchInitialData();
-  }, []); // Chỉ chạy 1 lần khi component mount
+    ]
+  });
+
+  const isInitialLoad = isCategoriesLoading || isAttributesLoading ;
 
   useEffect(() => {
     const fetchDynamicPriceRange = async () => {
       try {
-        startLoading();
         const [currentMin, currentMax] = filters.priceRange;
         const [newMin, newMax] = dataToFilter.priceRange;
         // Cập nhật chỉ khi giá trị khác nhau
@@ -90,30 +125,11 @@ export default function Shop() {
       } catch (error) {
         console.error("Lỗi khi lấy giá min/max:", error);
       } finally {
-        stopLoading();
       }
     };
 
     fetchDynamicPriceRange();
   }, [dataToFilter.priceRange]);
-
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const response = await instanceAxios.get("api/v1/category/indexNoPagination");
-      return response.data?.data;
-    },
-  });
-
-  // console.log("categories", categories)
-
-  const { data: attributes } = useQuery({
-    queryKey: ["attributes"],
-    queryFn: async () => {
-      const response = await instanceAxios.get("/api/v1/attribute");
-      return response.data?.data?.data;
-    },
-  });
 
   const attributeMutation = useMutation({
     mutationFn: async (attributeIds) => {
@@ -122,9 +138,12 @@ export default function Shop() {
       });
       return response.data?.data;
     },
+
+    staleTime: 600000
+
   });
 
-  const attributeFilters = attributeMutation.data;
+  const { data: attributeFilters } = attributeMutation;
 
   useEffect(() => {
     if (
@@ -155,7 +174,6 @@ export default function Shop() {
   // Cập nhật filters với attributes và gọi mutation
   useEffect(() => {
     (async () => {
-      startLoading();
       if (attributes) {
         setDataToFilter((prev) => ({
           ...prev,
@@ -164,14 +182,12 @@ export default function Shop() {
         const attributeIds = attributes.map((attr) => attr.id);
         attributeMutation.mutate(attributeIds);
       }
-      stopLoading();
     })();
   }, [attributes]);
 
   // Cập nhật state 'add' khi attributeFilters có dữ liệu
   useEffect(() => {
     (async () => {
-      startLoading();
       if (attributeFilters) {
         const newAdd = {};
         attributeFilters.forEach((attr) => {
@@ -179,19 +195,16 @@ export default function Shop() {
         });
         setAdd(newAdd);
       }
-      stopLoading();
     })();
   }, [attributeFilters]);
 
   // Cập nhật filters với giá trị 'add' vừa nhận được
   useEffect(() => {
     (async () => {
-      startLoading();
       setDataToFilter((prev) => ({
         ...prev,
         attributefilter: add,
       }));
-      stopLoading();
     })();
   }, [add]);
 
@@ -211,7 +224,7 @@ export default function Shop() {
       params.delete('category');
     }
 
-    if (filters.priceRange[0] !== 0) {
+    if (filters.priceRange[0] !== 1 && filters.priceRange[0] !== 0) {
       params.set('min_price', filters.priceRange[0]);
     } else {
       params.delete('min_price');
@@ -242,74 +255,7 @@ export default function Shop() {
     }
   }, [filters, currentPage, searchQuery]);
 
-  // Thêm effect để lấy price range động từ server
-  // const { data: priceRangeData } = useQuery({
-  //   queryKey: ['priceRange'],
-  //   queryFn: async () => {
-  //     try {
-  //       const res = await instanceAxios.get('api/v1/product/price-range');
-  //       return res.data?.data || { min_price: 0, max_price: 10000000 };
-  //     } catch (error) {
-  //       console.error('Error fetching price range:', error);
-  //       return { min_price: 0, max_price: 10000000 };
-  //     }
-  //   },
-  //   onSuccess: (data) => {
-  //     setDataToFilter(prev => ({
-  //       ...prev,
-  //       priceRange: [data.min_price, data.max_price]
-  //     }));
-      
-  //     // Cập nhật filters nếu giá trị hiện tại nằm ngoài range mới
-  //     setFilters(prev => ({
-  //       ...prev,
-  //       priceRange: [
-  //         Math.max(prev.priceRange[0], data.min_price),
-  //         Math.min(prev.priceRange[1], data.max_price)
-  //       ]
-  //     }));
-  //   }
-  // });
 
-
-  // console.log("dataToFilter", dataToFilter);
-  // console.log("filters", filters);
-
-  // Gọi API lấy danh sách sản phẩm dựa trên bộ tìm kiếm
-  const { data: products, isLoading: isProductsLoading } = useQuery({
-    queryKey: ["products", searchQuery, filters, currentPage],
-    queryFn: async () => {
-      if (searchQuery && searchQuery.trim() !== "") {
-        const res = await instanceAxios.get(`api/v1/product/search?q=${searchQuery}&page=${currentPage}`);
-        return res.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
-      } else {
-
-        // Xây dựng tham số filter
-        const params = {
-          category_id: filters.categorys.length > 0 ? filters.categorys[0] : undefined,
-          min_price: filters.priceRange[0],
-          max_price: filters.priceRange[1],
-          page: currentPage
-        };
-
-        // Thêm attributes nếu có
-        if (Object.keys(filters.attributefilter).length > 0) {
-          params.attributes = Object.entries(filters.attributefilter)
-            .flatMap(([_, values]) => values)
-            .filter(Boolean)
-            .join(',');
-        }
-
-        const res = await instanceAxios.get(`api/v1/product/fillter?page=${currentPage}`, {
-          params,
-        });
-        return res?.data?.data; // cập nhật theo cấu trúc dữ liệu trả về của bạn
-
-      }
-    },
-    staleTime: 600000,
-    refetchInterval: 600000,
-  });
   console.log("products", products);
 
   // console.log("productsData", productsData);
@@ -323,23 +269,21 @@ export default function Shop() {
 
   return (
     <div className="bg-white text-gray-800 dark:bg-gray-800 dark:text-white m-10">
-
       {isInitialLoad ? (
-
         <div>
-            <SkeletonLoading/>
+          <SkeletonLoading />
         </div>
       ) : (
         <div>
           <main className="container mx-auto py-8 grid grid-cols-1">
-
+            <ScrollToTop/>
             <span className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Trang chủ &gt; <Link to={"/shop"}>Cửa hàng</Link>
             </span>
             <div className="flex flex-col md:flex-row">
               <FilterSidebar
                 filters={filters}
-                setFilters={setFilters}
+                setFilters={handleFilterChange}
                 availableFilters={dataToFilter}
               />
               <div className="flex-1">
@@ -362,13 +306,12 @@ export default function Shop() {
                 ) : (
                   <div className="text-center text-gray-500 dark:text-gray-400 w-full py-10 flex flex-col items-center">
                     <FaBoxOpen className="text-6xl mb-2" />
-                    <p>Không tìm thấy sản phẩm hahaha</p>
+                    <p>Không tìm thấy sản phẩm</p>
                   </div>
                 )}
               </div>
             </div>
           </main>
-          
         </div>
       )}
     </div>

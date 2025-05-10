@@ -7,13 +7,10 @@ use App\Services\Order\OrderService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use App\Mail\Order\AdminOrderMail;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Jobs\Mail\Order\NewOrderJob;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\Order\CustomerOrderMail;
 
 class OrderController extends Controller
 {
@@ -23,24 +20,7 @@ class OrderController extends Controller
     {
         $this->orderService = $orderService;
     }
-    public function index()
-    {
-        try {
-            // Gọi service để lấy dữ liệu
-            $Product = $this->orderService->getOrderAll();
-            return response()->json([
-                'status' => 200,
-                'data' => $Product, // Trả về dữ liệu thuộc tính
-            ], 200);
-        } catch (\Throwable $th) {
-            // Trường hợp có lỗi xảy ra khi lấy dữ liệu
-            return response()->json([
-                'errnor' => 'lấy thất bại',
-                'mess' => $th,
-                'status' => 500
-            ], 500); // Trả về mã lỗi 500 (Internal Server Error)
-        }
-    }
+
     public function store(OrderStoreRequest $request)
     {
 
@@ -49,8 +29,11 @@ class OrderController extends Controller
 
             // Validate và lấy dữ liệu từ request
             $data = $request->validated();
+            Log::info('data', $data);
             //tạo sp
             $Order = $this->orderService->createOrder($data);
+
+            // Thanh toán vn pay sẽ xử lý ở PaymentController
             if ($data['payment_method'] === 'vnpay') {
                 $vnpUrl = $this->payment($Order, $request->ip());
 
@@ -75,49 +58,44 @@ class OrderController extends Controller
 
         } catch (Exception $e) {
             DB::rollBack();
+            Log::error('Error creating order: ' . $e->getMessage());
             // Trường hợp có lỗi xảy ra khi tạo thuộc tính
             return response()->json([
-                'message' => 'Lỗi khi xử lý dữ liệu.',
+                'message' => 'Order creation failed.',
                 'error' => $e->getMessage(), // Lỗi cụ thể
                 'status' => 500
             ], 500); // Trả về mã lỗi 500 (Internal Server Error)
         }
     }
 
-
-    public function show(string $id)
+    /**
+     * Hiển thị chi tiết đơn hàng theo mã đơn hàng
+     *
+     * @param string $orderCode Mã đơn hàng
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showOrderByCode(string $orderCode)
     {
         try {
-            // Gọi service để lấy thông tin chi tiết thuộc tính
-            $order = $this->orderService->getOrderById($id);
+            // Gọi service để lấy thông tin chi tiết đơn hàng
+            $order = $this->orderService->getOrderByCode($orderCode);
+            Log::info( $order);
 
             return response()->json([
-                'message' => 'lấy thành công', // Thông báo thành công
-                'data' => $order, // Dữ liệu thuộc tính chi tiết
-                'status' => 200 // Trả về mã trạng thái 200 (OK)
-            ], 200);
+                'message' => 'Order details retrieved successfully',
+                'data' => $order,
+                'status' => 200
+            ], 200); // 200 OK
         } catch (Exception $e) {
+            Log::error('Error fetching order by code: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'order_code' => $orderCode
+            ]);
+
             return response()->json([
-                'message' => 'Lỗi khi xử lý dữ liệu.',
+                'message' => 'Error processing request',
                 'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-    public function showOrderBycode(string $code)
-    {
-        try {
-            // Gọi service để lấy thông tin chi tiết thuộc tính
-            $order = $this->orderService->getOrderByCode($code);
-            return response()->json([
-                'message' => 'lấy thành công', // Thông báo thành công
-                'data' => $order, // Dữ liệu thuộc tính chi tiết
-                'status' => 200 // Trả về mã trạng thái 200 (OK)
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'message' => 'Lỗi khi xử lý dữ liệu.',
-                'error' => $e->getMessage()
-            ], 500);
+            ], 500); // 500 Internal Server Error
         }
     }
     public function updateStatus(Request $request, $id)
@@ -126,7 +104,9 @@ class OrderController extends Controller
             'status' => 'required|string',
         ]);
 
-        $result = $this->orderService->updateStatus($id, $request->status);
+        $userId = auth()->user()->id;
+
+        $result = $this->orderService->updateStatus($id, $request->status, null, $userId);
 
         if (!$result['success']) {
             return response()->json(['message' => $result['message']], 404);
@@ -151,7 +131,7 @@ class OrderController extends Controller
         $vnp_TxnRef = $data['order_code']; // Transaction reference (unique per order)
         $vnp_OrderInfo = 'Thanh toán đơn hàng test'; // Order information
         $vnp_OrderType = 'other';
-        $vnp_Amount = ($data['total_amount'])*100; // Amount in VND (VNPAY expects amount in cents)
+        $vnp_Amount = ($data['total_amount']) * 100; // Amount in VND (VNPAY expects amount in cents)
         $vnp_Locale = 'vn'; // Locale
 
         $vnp_IpAddr = $ip; // Use Laravel's request to get IP
@@ -250,7 +230,7 @@ class OrderController extends Controller
 
     /**
      * Lấy chi tiết một đơn hàng của khách hàng đang đăng nhập
-     * 
+     *
      * @param Request $request
      * @param string $orderCode Mã đơn hàng
      * @return \Illuminate\Http\JsonResponse

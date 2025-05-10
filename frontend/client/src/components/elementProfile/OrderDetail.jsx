@@ -7,7 +7,7 @@ import ScrollToTop from "../../config/ScrollToTop";
 const OrderDetail = () => {
   const { order_code } = useParams();
 
-  const { data: orderData, isLoading } = useQuery({
+  const { data: orderData, isLoading, error } = useQuery({
     queryKey: ["order", order_code],
     queryFn: async () => {
       const res = await instanceAxios.get(
@@ -18,21 +18,8 @@ const OrderDetail = () => {
   });
 
   console.log("orderData", orderData);
-  console.log("image", orderData?.data?.order_items);
-  //   const {
-  //     order_code,
-  //     customer_name,
-  //     customer_email,
-  //     customer_phone,
-  //     shipping_address,
-  //     total_amount,
-  //     status,
-  //     "payment-status": paymentStatus,
-  //     created_at,
-  //     updated_at,
-  //     order_items,
-  //   } = orderData;
 
+  // Hàm định dạng giá tiền
   const formatPrice = (value) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -40,6 +27,7 @@ const OrderDetail = () => {
     }).format(value);
   };
 
+  // Hàm định dạng ngày giờ
   const formatDateTime = (iso) => {
     const date = new Date(iso);
     return date.toLocaleString("vi-VN", {
@@ -49,6 +37,35 @@ const OrderDetail = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // Hàm tính giá sản phẩm sau khi giảm giá
+  const getDiscountedPrice = (item) => {
+    // Chuyển đổi giá từ string sang số
+    const basePrice = parseFloat(item.price);
+    let discountPercent = 0;
+
+    // Ưu tiên dùng discount của sản phẩm nếu có
+    if (item.product && item.product.discount_percent != null) {
+      discountPercent = parseFloat(item.product.discount_percent);
+    } else if (item.product_variant && item.product_variant.discount_percent != null) {
+      discountPercent = parseFloat(item.product_variant.discount_percent);
+    }
+    // Tính giá đã giảm
+    return basePrice * (1 - discountPercent / 100);
+  };
+
+  // Hàm tính tổng giá tiền của đơn hàng (cộng giá đã giảm của từng mặt hàng nhân với số lượng)
+  const calculateTotalAmount = () => {
+    if (!orderData || !orderData.data || !orderData.data.order_items) {
+      return 0;
+    }
+    return orderData.data.order_items.reduce((acc, item) => {
+      const discountedPrice = getDiscountedPrice(item);
+      // Lấy số lượng (số lượng có thể là kiểu string, nên chuyển sang số)
+      const quantity = parseInt(item.quantity, 10) || 0;
+      return acc + discountedPrice * quantity;
+    }, 0);
   };
 
   if (isLoading) {
@@ -62,18 +79,29 @@ const OrderDetail = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="h-screen flex justify-center items-center">
+        <p className="text-red-500">Đã có lỗi xảy ra: {error.message}</p>
+      </div>
+    );
+  }
+
+  // Tính tổng giá tiền theo logic đã cập nhật
+  const computedTotalAmount = calculateTotalAmount();
+
   return (
     <div className="bg-white text-gray-800 p-6 max-w-4xl mx-auto">
-      <ScrollToTop/>
+      <ScrollToTop />
       <header className="mb-8 border-b pb-4 flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900">Chi tiết đơn hàng</h1>
-        <span className="text-sm italic">
-          Mã đơn hàng: <strong>{order_code}</strong>
+        <span className="text-lg">
+          Mã đơn hàng: <strong>{order_code}</strong> | <span className="text-red-500 text-base font-bold">{orderData?.data?.status}</span>
         </span>
       </header>
 
-      <section className="grid grid-cols-1 gap-6 mb-8">
-        <div className="bg-gray-100 p-4 rounded-lg shadow">
+      <section className="grid grid-cols-1 gap-6 mb-8 border-b">
+        <div className="p-4">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             Thông tin khách hàng
           </h2>
@@ -87,21 +115,20 @@ const OrderDetail = () => {
             <strong>Điện thoại:</strong> {orderData?.data?.customer_phone}
           </p>
           <p>
-            <strong>Địa chỉ:</strong>
-            {orderData?.data?.shipping_address}
+            <strong>Địa chỉ:</strong> {orderData?.data?.shipping_address}
           </p>
         </div>
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+        <h2 className="text-xl font-semibold text-gray-900 ml-4">
           Sản phẩm đã đặt
         </h2>
         <div className="space-y-4">
           {orderData?.data?.order_items?.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow"
+              className="flex items-center justify-between p-4 border-b"
             >
               <div className="flex items-center space-x-4">
                 <img
@@ -110,6 +137,7 @@ const OrderDetail = () => {
                   }`}
                   alt={item.product.name}
                   className="w-16 h-16 object-cover rounded"
+                  loading="lazy"
                 />
                 <div>
                   <h3 className="font-semibold">{item.product.name}</h3>
@@ -123,7 +151,13 @@ const OrderDetail = () => {
                   Số lượng: <strong>{item.quantity}</strong>
                 </p>
                 <p>
-                  Giá: <strong>{formatPrice(item.price)}</strong>
+                  Giá:{" "}
+                  <strong>
+                    {formatPrice(getDiscountedPrice(item))}
+                  </strong>
+                  {(item.product?.discount_percent > 0 || item.product_variant?.discount_percent > 0) && (
+                      <span className="line-through text-gray-500 mr-2"> {formatPrice(item.price)}</span>
+                  )}
                 </p>
               </div>
             </div>
@@ -131,36 +165,48 @@ const OrderDetail = () => {
         </div>
       </section>
 
-      <section className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-gray-100 p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Tổng giá trị
-          </h2>
-          <p className="text-2xl font-bold text-red-500">
-            {formatPrice(orderData?.data?.total_amount)}
-          </p>
+      <section className="mb-8 text-right">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+          <div className="col-span-4">
+            Tổng tiền hàng:{" "}
+          </div>
+          <span className="col-span-2">{formatPrice(computedTotalAmount)}</span>
         </div>
-        <div className="bg-gray-100 p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Trạng thái
-          </h2>
-          <p>
-            <strong>Đơn hàng:</strong>{" "}
-            <span className="text-red-500">{orderData?.data?.status}</span>
-          </p>
-          <p>
-            <strong>Thanh toán:</strong>{" "}
-            <span className="text-red-500">
-              {orderData?.data["payment-status"]}
-            </span>
-          </p>
+
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+          <div className="col-span-4">
+            Phí vận chuyển:{" "}
+          </div>
+          <span className="col-span-2">{formatPrice(orderData?.data?.shipping_fee)}</span>
+        </div>
+
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+          <div className="col-span-4">
+          Giảm giá:{" "}
+          </div>
+          <span className="col-span-2">{formatPrice(orderData?.data?.discount_amount)}</span>
+        </div>
+
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+          <div className="col-span-4">
+          Tổng thanh toán:{" "}
+          </div>
+          <span className="text-2xl font-bold text-red-500 col-span-2">
+            {formatPrice(
+              computedTotalAmount + orderData?.data?.shipping_fee -
+                orderData?.data?.discount_amount
+            )}
+          </span>
+        </div>
+        
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+          <div className="col-span-4">
+            Phương thức thanh toán:{" "}
+          </div>
+          <span className="col-span-2">{orderData?.data?.payment_method}</span>
         </div>
       </section>
 
-      <footer className="text-center text-sm text-gray-500">
-        <p>Ngày tạo: {formatDateTime(orderData?.data?.created_at)}</p>
-        <p>Cập nhật: {formatDateTime(orderData?.data?.updated_at)}</p>
-      </footer>
     </div>
   );
 };

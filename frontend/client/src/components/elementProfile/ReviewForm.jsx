@@ -18,7 +18,7 @@ const ReviewForm = ({
       const reviewData = {
         rating: values[`${namePrefix}_rating`],
         comment: values[`${namePrefix}_comment`],
-        title: values[`${namePrefix}_title`]
+        // title: values[`${namePrefix}_title`]
       };
       
       const success = await onSubmitReview(reviewData);
@@ -48,7 +48,7 @@ const ReviewForm = ({
       </div>
 
       {/* Input nhập tên */}
-      <div className="mt-4">
+      {/* <div className="mt-4">
         <Typography.Text strong>Tên người dùng</Typography.Text>
         <Form.Item
           name={`${namePrefix}_title`}
@@ -56,7 +56,7 @@ const ReviewForm = ({
         >
           <Input placeholder="Nhập tên người dùng" />
         </Form.Item>
-      </div>
+      </div> */}
 
       {/* Textarea nhập đánh giá */}
       <div className="mt-4">

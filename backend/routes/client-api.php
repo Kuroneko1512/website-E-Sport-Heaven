@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\Auth\v1\SocialAuthController;
 use App\Http\Controllers\Api\Auth\v1\CustomerAuthController;
 use App\Http\Controllers\Api\Profile\V1\CustomerProfileController;
 use App\Http\Controllers\Api\Profile\V1\ShippingAddressController;
-
+use App\Http\Controllers\Api\ReviewController;
 
 Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'customer', 'as' => 'customer.'], function () {
@@ -32,6 +32,8 @@ Route::prefix('v1')->group(function () {
                 ->name('callback');
         });
 
+        Route::get('/review-by-product/{id}',[ReviewController::class,'getByProduct']);
+
         // Protected routes - yêu cầu đăng nhập
         Route::middleware('auth:customer')->group(function () {
             Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
@@ -54,6 +56,8 @@ Route::prefix('v1')->group(function () {
                 Route::get('/', [OrderController::class, 'myOrders'])->name('orders.my');
                 Route::get('/{orderCode}', [OrderController::class, 'myOrderDetail'])->name('orders.my.detail');
             });
+
+            Route::apiResource('/review', ReviewController::class);
         });
 
         //test route

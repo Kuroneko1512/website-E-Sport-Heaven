@@ -2,6 +2,7 @@ import { getOrders, Order, Pagination } from "@app/services/Order/Api";
 import FomatVND from "@app/utils/FomatVND";
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { ORDER_STATUS, ORDER_STATUS_LABELS, PAYMENT_STATUS, PAYMENT_STATUS_LABELS } from "@app/constants/OrderConstants";
 
 const Orders = () => {
     const navigate = useNavigate();
@@ -108,13 +109,13 @@ const Orders = () => {
                                         <td>{new Date(order.created_at).toLocaleDateString("vi-VI")}
                                         </td>
                                         <td>
-                                            <span className={`badge ${order.payment_status === "đã thanh toán" ? "badge-success" : "badge-warning"}`}>
-                                                {order.payment_status}
+                                            <span className={`badge ${order.payment_status === PAYMENT_STATUS.PAID ? "badge-success" : "badge-warning"}`}>
+                                                {PAYMENT_STATUS_LABELS[order.payment_status]}
                                             </span>
                                         </td>
                                         <td className="project-state">
-                                            <span className={`badge ${order.status === "success" ? "badge-success" : "badge-warning"}`}>
-                                                {order.status}
+                                            <span className={`badge ${ order.status === ORDER_STATUS.COMPLETED ? "badge-success" : "badge-warning"}`}>
+                                                {ORDER_STATUS_LABELS[order.status]}
                                             </span>
                                         </td>
                                         <td className="project-actions text-right">

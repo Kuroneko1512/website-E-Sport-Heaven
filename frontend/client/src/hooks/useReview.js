@@ -8,11 +8,11 @@ const useReview = (productId) => {
   const submitReview = async (values) => {
     try {
       const reviewData = { product_id: productId, ...values };
-      await instanceAxios.post("/api/v1/review", reviewData);
+      await instanceAxios.post("/api/v1/customer/review", reviewData);
       
       // Refresh reviews data
       const updatedReviews = await instanceAxios.get(
-        `/api/v1/review-by-product/${productId}`
+        `/api/v1/customer/review-by-product/${productId}`
       );
       queryClient.setQueryData(["datareviews", productId], updatedReviews?.data);
       
