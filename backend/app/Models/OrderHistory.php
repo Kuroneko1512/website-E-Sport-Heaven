@@ -64,6 +64,7 @@ class OrderHistory extends Model
         'actor_role',
         'status_from',
         'status_to',
+        'order_status',
         'action_type',
         'notes',
         'metadata'
@@ -82,6 +83,15 @@ class OrderHistory extends Model
     public function getActionTypeLabelAttribute()
     {
         return self::$actionTypeLabels[$this->action_type] ?? 'Unknown';
+    }
+
+    public function getOrderStatusLabelAttribute()
+    {
+        if ($this->order_status === null) {
+            return 'Unknown';
+        }
+
+        return Order::$statusLabels[$this->order_status] ?? 'Unknown';
     }
 
     /**
@@ -177,6 +187,15 @@ class OrderHistory extends Model
 
         if (isset($data['status_to'])) {
             $history->status_to = $data['status_to'];
+        }
+
+        // Lấy tên trạng thái hiện tại của đơn hàng
+        if ($orderId) {
+            $order = Order::find($orderId);
+            if ($order) {
+                // Lưu tên trạng thái (label) thay vì giá trị số
+                $history->order_status = Order::$statusLabels[$order->status];
+            }
         }
 
         // Xử lý ghi chú
