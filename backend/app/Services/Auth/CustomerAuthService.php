@@ -158,7 +158,7 @@ class CustomerAuthService extends AuthService
             if ($validator->fails()) {
                 return [
                     'success' => false,
-                    'message' => 'Dữ liệu không hợp lệ',
+                    'message' => 'Wrong request',
                     'data' => $validator->errors(),
                     'code' => 422
                 ];
