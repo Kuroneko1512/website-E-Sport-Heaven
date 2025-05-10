@@ -225,7 +225,7 @@ const MyOrder = () => {
           rating: values[`product_${index}_rating`],
           comment: values[`product_${index}_comment`],
         };
-        return instanceAxios.post(`/api/v1/review`, {
+        return instanceAxios.post(`/api/v1/customer/review`, {
           product_id: productId,
           ...reviewData,
         });
