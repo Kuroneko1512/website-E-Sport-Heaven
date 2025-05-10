@@ -193,6 +193,7 @@ const ProductDetail = () => {
         return;
       }
     }
+
     const generateId = () =>
       Date.now() + Math.random().toString(36).substr(2, 9);
     let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -217,8 +218,22 @@ const ProductDetail = () => {
     );
 
     if (existingIndex !== -1) {
-      cartItems[existingIndex].quantity += cartItem.quantity;
+      const existingItem = cartItems[existingIndex];
+      const newQuantity = existingItem.quantity + cartItem.quantity;
+      const stock = selectedVariant?.stock || product.stock;
+
+      if (newQuantity > stock) {
+        message.error("Số lượng vượt quá tồn kho. Vui lòng kiểm tra lại.");
+        return;
+      }
+
+      cartItems[existingIndex].quantity = newQuantity;
     } else {
+      if (cartItem.quantity > (selectedVariant?.stock || product.stock)) {
+        message.error("Số lượng vượt quá tồn kho. Vui lòng kiểm tra lại.");
+        return;
+      }
+
       cartItems.push(cartItem);
     }
 
