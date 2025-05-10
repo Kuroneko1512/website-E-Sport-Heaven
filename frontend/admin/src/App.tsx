@@ -38,7 +38,10 @@ import  Coupon  from "@pages/Coupon/Coupon";
 import DetailCoupon from "@pages/Coupon/Detail";
 import EditCoupon from "@pages/Coupon/Edit";
 import AddCoupon from "@pages/Coupon/Store";
-
+import Blog from "./pages/Blog/Blog";
+import BlogCategory from "./pages/BlogCategory/BlogCategory";
+import DetailBlog from "./pages/Blog/DetailBlog";
+import DetailBlogCategory from "./pages/BlogCategory/DetailBlogCategory";
 
 const { VITE_NODE_ENV } = import.meta.env;
 
@@ -169,8 +172,17 @@ const App = () => {
             <Route path="add-coupon" element={<AddCoupon />} />
             <Route path="edit-coupon/:id" element={<EditCoupon />} />
             <Route path="detail-coupon/:id" element={<DetailCoupon />} />
-          
-           
+            {/*Route blog*/}
+            <Route path="blog" element={<Blog />} />
+            <Route path="add-blog" element={<DetailBlog />} />
+            <Route path="edit-blog/:id" element={<DetailBlog />} />
+            <Route path="detail-blog/:id" element={<DetailBlog />} />
+            
+            <Route path="blog-category" element={<BlogCategory />} />
+            <Route path="add-blog-category" element={<DetailBlogCategory />} />
+            <Route path="edit-blog-category/:id" element={<DetailBlogCategory />} />
+            <Route path="detail-blog-category/:id" element={<DetailBlogCategory />} />
+
           </Route>
         </Route>
       </Routes>

@@ -49,3 +49,7 @@
 .control-sidebar-slide-open .control-sidebar::before {
   transition: none;
 }
+
+table td, table th {
+  vertical-align: middle !important;
+}
