@@ -16,12 +16,11 @@ const CategoryForm = ({  onCategoryAdded, editingCategory, setEditingCategory }:
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [categories, setCategories] = useState<Category[]>([]);
 
-  
-  // Hàm fetch dữ liệu danh mục
+
   const fetchCategories = async (page = 1) => {
     try {
       const response  = await CategoryService.getAllNoPagination();
-      setCategories(response.data as Category); // Giả sử API trả về `data.data` là danh sách category
+      setCategories(response.data as Category); 
   
       console.log(categories);
     } catch (error) {
@@ -60,7 +59,7 @@ const CategoryForm = ({  onCategoryAdded, editingCategory, setEditingCategory }:
     }
   
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // Trả về true nếu không có lỗi
+    return Object.keys(newErrors).length === 0; 
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,7 +84,7 @@ const CategoryForm = ({  onCategoryAdded, editingCategory, setEditingCategory }:
         if (error.response && error.response.status === 422) {
           console.log(error.response.data);
           const errorMessage = error.response.data.errors.name[0];
-          toast.error(`Lỗi: ${errorMessage}`); // Hiển thị lỗi từ API
+          toast.error(`Lỗi: ${errorMessage}`); 
         } else {
           console.error("Lỗi khi gửi dữ liệu:", error);
           toast.error("Có lỗi xảy ra khi gửi dữ liệu!");

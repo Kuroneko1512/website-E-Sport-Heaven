@@ -85,8 +85,7 @@ class ProductService extends BaseService
     public function getProduct($id)
     {
         return $this->model->with([
-            'variants.productAttributes.attributeValue:id,value', // Lấy giá trị thuộc tính
-            'selectedAttributes', // Lấy attributes từ Product
+            'variants.productAttributes.attributeValue:id,value',
         ])->findOrFail($id);
     }
     public function getProductForDetail($id)

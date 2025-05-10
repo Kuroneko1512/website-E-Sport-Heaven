@@ -1,6 +1,7 @@
 import { FC, useEffect, useState } from "react";
-import { deleteCoupon, getCoupons, Coupon as ApiCoupon, Pagination } from "@app/services/Coupon/ApiCoupon";
+import { deleteCoupon, getCoupons, Coupon as ApiCoupon } from "@app/services/Coupon/ApiCoupon";
 import { Link, useNavigate } from "react-router-dom";
+import { Text } from "react-bootstrap";
 
 interface CouponDisplay {
   id: number;
@@ -9,8 +10,11 @@ interface CouponDisplay {
   description: string;
   discount_value: number;
   discount_type: string;
+  max_uses_per_user: number;
+  user_usage: any;
   is_active: number;
   start_date: string;
+  end_date: string;
   max_uses: number;
   used_count: number;
 }
@@ -32,7 +36,7 @@ const Coupon: FC = () => {
       const response = await getCoupons(page, perPage, search);
       console.log("API response:", response);
       
-      // Lưu thông tin phân trang
+    
       setCurrentPage(response.current_page);
       setLastPage(response.last_page);
       setTotal(response.total);
@@ -44,8 +48,11 @@ const Coupon: FC = () => {
         description: item.description || '',
         discount_value: item.discount_value,
         discount_type: item.discount_type,
+        max_uses_per_user: item.max_uses_per_user || 0,
+        user_usage: item.user_usage || {},
         is_active: 1,
         start_date: item.start_date || '',
+        end_date: item.end_date || '',
         max_uses: item.max_uses || 0,
         used_count: item.used_count || 0,
       }));
@@ -181,26 +188,19 @@ const Coupon: FC = () => {
         </div>
 
         <div className="card-body p-0">
-          {loading ? (
-            <div className="text-center p-4">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Đang tải...</span>
-              </div>
-            </div>
-          ) : (
+        
             <>
               <table className="table table-hover text-nowrap">
                 <thead>
                   <tr>
                     <th>Mã</th>
                     <th>Tên</th>
-                    <th>Giá</th>
+                   
                     <th>Loại</th>
                     <th>Trạng thái</th>
-                    <th>Mô tả</th>
                     <th>Hạn sử dụng</th>
                     <th>Số lượt sử dụng</th>
-                    <th colSpan={3}>Thao tác</th>
+                    <th colSpan={3} className="text-center">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -209,8 +209,8 @@ const Coupon: FC = () => {
                       <tr key={coupon.id}>
                         <td>{coupon.code}</td>
                         <td>{coupon.name}</td>
-                        <td>{coupon.discount_value}</td>
-                        <td>{coupon.discount_type}</td>
+                      
+                        <td>{coupon.discount_type === 'percentage' ? 'Phần trăm' : 'Giá trị cố định'}</td>
                         <td>
                           <span
                             className={`tag ${coupon.is_active === 1 ? "tag-success" : "tag-danger"}`}
@@ -218,12 +218,12 @@ const Coupon: FC = () => {
                             {coupon.is_active === 1 ? "Hoạt động" : "Ngừng"}
                           </span>
                         </td>
-                        <td>{coupon.description}</td>
+                        
                         <td>
                           {coupon.start_date && new Date(coupon.start_date) >= new Date(new Date().toISOString().split('T')[0]) ? "Còn hạn" : "Hết hạn"}
                         </td>
                         <td>
-                          {coupon.max_uses < coupon.used_count ? "Hết lượt sử dụng" : coupon.max_uses - coupon.used_count}
+                        {coupon.max_uses_per_user}
                         </td>
                         <td>
                           <button className="btn btn-primary" onClick={() => navigate(`/detail-coupon/${coupon.id}`)}>Chi tiết</button>
@@ -257,19 +257,7 @@ const Coupon: FC = () => {
 
               {/* Phân trang */}
               <div className="d-flex justify-content-between align-items-center p-3 border-top">
-                <div>
-                  {searchTerm ? (
-                    <span className="text-muted">
-                      <i className="fas fa-search me-1"></i>
-                      Kết quả tìm kiếm cho "<strong>{searchTerm}</strong>": {total} mã giảm giá
-                    </span>
-                  ) : (
-                    <span className="text-muted">
-                      <i className="fas fa-list me-1"></i>
-                      Hiển thị {coupons.length} / {total} mã giảm giá
-                    </span>
-                  )}
-                </div>
+               
                 <div className="pagination">
                   <ul className="pagination mb-0">
                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -308,7 +296,7 @@ const Coupon: FC = () => {
                 </button>
               </div>
             </>
-          )}
+      
         </div>
       </div>
     </section>

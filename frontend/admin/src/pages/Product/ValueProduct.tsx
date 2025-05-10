@@ -100,7 +100,7 @@ const ValueProduct = () => {
                 value={product.discount_percent} 
                 onChange={handleChange}
               >
-                <option value="">Chọn</option>
+                <option value="0" selected>Chọn</option>
                 <option value="10">10%</option>
                 <option value="15">15%</option>
                 <option value="20">20%</option>

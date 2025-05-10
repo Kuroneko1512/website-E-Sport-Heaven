@@ -36,7 +36,8 @@ export interface api4 {
   discount_percent?: string;
   product_type: "simple" | "variable";
   status: "active" | "inactive";
-  category_id: string;
+  category_id: number;
+  sku: string;
   stock: number;
   image?: File | null;
   selected_attributes: AttributeSelection[];

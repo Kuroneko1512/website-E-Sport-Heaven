@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\Blog\V1\BlogCategoryController;
 use App\Http\Controllers\Api\Category\V1\CategoryController;
 use App\Http\Controllers\Api\Attribute\V1\AttributeController;
 use App\Http\Controllers\Api\Attribute\V1\AttributeValueController;
-
+use App\Http\Controllers\Api\User\UserController;
 use App\Http\Controllers\Api\Coupons\CouponsController;
 
 Route::prefix('v1')->group(callback: function () {
@@ -28,7 +28,9 @@ Route::prefix('v1')->group(callback: function () {
     Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
     Route::apiResource('/blog-categories', BlogCategoryController::class);
     Route::apiResource('/blogs', BlogController::class);
-
+    // User API Routes
+    Route::apiResource('/user', UserController::class);
+    Route::put('/user/{id}/status', [UserController::class, 'updateStatus']);
     // Address API Routes
     Route::prefix('address')->group(function () {
         Route::get('/provinces', [AddressController::class, 'getProvinces']);
