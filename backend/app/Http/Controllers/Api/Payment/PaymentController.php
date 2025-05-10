@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api\Payment;
 
-use App\Http\Controllers\Controller;
-use App\Services\Order\OrderService;
 use Carbon\Carbon;
+use App\Models\Order;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Jobs\Mail\Order\NewOrderJob;
+use App\Services\Order\OrderService;
 
 class PaymentController extends Controller
 {
@@ -124,13 +126,29 @@ class PaymentController extends Controller
         // $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
         if ($secureHash === $vnpSecureHash) {
             $orderCode = $request->query('vnp_TxnRef'); // Lấy mã đơn hàng từ query
+            $transactionId = $request->query('vnp_TransactionNo'); // Lấy mã giao dịch VNPay
 
             if ($request->query('vnp_ResponseCode') === "00") {
                 // Giao dịch thành công
-                $this->orderService->updatePaymentStatus($orderCode, 'đã thanh toán'); // Cập nhật trạng thái thành công
-                $this->orderService->updateStockForOrder($orderCode);
+                // 1. Cập nhật trạng thái thanh toán và lưu mã giao dịch
+                app(OrderService::class)->updatePaymentStatus(
+                    $orderCode,
+                    Order::PAYMENT_STATUS_PAID,
+                    $transactionId,
+                    null,
+                    'Thanh toán thành công qua VNPay'
+                );
 
-                // Chuyển hướng đến trang "ThankYou" với orderCode
+                // 2. Cập nhật tồn kho (vì chưa được cập nhật khi tạo đơn hàng VNPay)
+                app(OrderService::class)->updateStockForOrder($orderCode);
+
+                // 3. Lấy thông tin đơn hàng để gửi email
+                $order = app(OrderService::class)->getOrderByCode($orderCode);
+
+                // 4. Gửi email xác nhận đơn hàng
+                NewOrderJob::dispatch($order);
+
+                // 5. Chuyển hướng đến trang "ThankYou" với orderCode
                 return redirect()->away(env('FRONTEND_URL') . "/thankyou?orderCode={$orderCode}");
             } else {
                 // Giao dịch thất bại: Xóa đơn hàng và chuyển hướng người dùng về trang "Checkout"

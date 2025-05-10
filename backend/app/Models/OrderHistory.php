@@ -161,6 +161,10 @@ class OrderHistory extends Model
                 // Thêm thông tin về hạng khách hàng (tương đương với role của admin)
                 $history->actor_role = $customer->customer_rank; // Lưu hạng khách hàng vào trường actor_role
             }
+        } elseif (isset($data['actor_name'])) {
+            $history->actor_name = $data['actor_name'];
+            $history->actor_email = $data['actor_email'];
+            $history->actor_type = self::ACTOR_TYPE_CUSTOMER;
         } else {
             $history->actor_type = self::ACTOR_TYPE_SYSTEM;
             $history->actor_name = 'System';
