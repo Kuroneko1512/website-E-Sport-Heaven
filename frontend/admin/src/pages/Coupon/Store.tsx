@@ -8,23 +8,27 @@ import { CouponForm, FormErrors } from "./type";
 const Store: FC = () => {
     const navigate = useNavigate();
     const [coupon, setCoupon] = useState<CouponForm>({
-       
         code: "",
         name: "",
         description: "",
         discount_value: 0,
+        discount_type: 0,
         start_date:new Date().toISOString().split('T')[0],
         end_date: "",
-        discount_type: "percentage",
         min_purchase: 0,
         max_uses: 0,
         used_count: 0,
-        max_uses_per_user: 0,
+        max_uses_per_user: 1,
         is_active: 1
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [submitted, setSubmitted] = useState(false);
    
+
+    const discountTypeOptions = [
+        { value: 0, label: 'Phần trăm' },
+        { value: 1, label: 'Giá tiền' }
+    ];
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {  
         const { name, value, type } = e.target;
@@ -33,7 +37,9 @@ const Store: FC = () => {
             const target = e.target as HTMLInputElement;
             setCoupon({ ...coupon, [name]: target.checked });
         } else {
-            setCoupon({ ...coupon, [name]: value });
+            setCoupon({ ...coupon, [name]: name === "discount_value" || name === "max_uses_per_user" || name === "max_uses" 
+                ? Number(value) 
+                : value });
         }
         
         // Xóa lỗi khi người dùng chỉnh sửa trường
@@ -70,7 +76,7 @@ const Store: FC = () => {
                 if (value <= 0) {
                     newErrors.discount_value = 'Giá trị giảm giá phải lớn hơn 0';
                     isValid = false;
-                } else if (coupon.discount_type === 'percentage' && value > 70  ) {
+                } else if (coupon.discount_type === 0 && value > 70  ) {
                     newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 70%';
                     isValid = false;
                 } else {
@@ -102,7 +108,7 @@ const Store: FC = () => {
                     newErrors.min_purchase = 'Số tiền tối thiểu phải lớn hơn 0';
                     isValid = false;
                 } else {
-                    if(coupon.discount_type === 'percentage'){
+                    if(coupon.discount_type === 0){
                     console.log(value);
                     
                         newErrors.min_purchase = 'Số phần trăm tối thiểu phải lớn hơn 0';
@@ -153,7 +159,7 @@ const Store: FC = () => {
         if (coupon.discount_value <= 0) {
             newErrors.discount_value = 'Giá trị giảm giá phải lớn hơn 0';
             isValid = false;
-        } else if (coupon.discount_type === 'percentage' && coupon.discount_value > 70)  {
+        } else if (coupon.discount_type === 0 && coupon.discount_value > 70)  {
             newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 70%';
             isValid = false;
         }
@@ -203,7 +209,7 @@ const Store: FC = () => {
                 name: coupon.name,
                 description: coupon.description,
                 discount_value: coupon.discount_value,
-                discount_type: coupon.discount_type as 'percentage' | 'fixed',
+                discount_type: coupon.discount_type === 0 ? 'percentage' : 'fixed',
                 min_purchase: coupon.min_purchase,
                 start_date: coupon.start_date,
                 end_date: coupon.end_date,
@@ -225,13 +231,13 @@ const Store: FC = () => {
                 name: "",
                 description: "",
                 discount_value: 0,
+                discount_type: 0,
                 start_date: "",
                 end_date: "",
-                discount_type: "percentage",
                 min_purchase: 0,
                 max_uses: 0,
                 used_count: 0,
-                max_uses_per_user: 0,
+                max_uses_per_user: 1,
                 user_usage: {},
                 is_active: 1
             });
@@ -322,17 +328,18 @@ const Store: FC = () => {
                     {errors.end_date && <div className="invalid-feedback">{errors.end_date}</div>}
                 </div>
                 <div className="form-group">
-                    <label htmlFor="discount_type">Loại giảm giá <span className="text-danger">*</span></label>
-                    <select 
-                        className="form-control" 
-                        id="discount_type" 
-                        name="discount_type" 
-                        value={coupon.discount_type} 
+                    <label>Loại giảm giá</label>
+                    <select
+                        name="discount_type"
+                        className="form-control"
+                        value={coupon.discount_type}
                         onChange={handleChange}
-                        
                     >
-                        <option value="percentage">Giảm giá theo phần trăm</option>
-                        <option value="fixed">Giảm giá theo số tiền</option>
+                        {discountTypeOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
                     </select>
                 </div>
                 <div className="form-group">
@@ -345,7 +352,7 @@ const Store: FC = () => {
                         value={coupon.discount_value} 
                         onChange={handleChange}
                         min="0"
-                        step={coupon.discount_type === 'percentage' ? '0.1' : '1000'}
+                        step={coupon.discount_type === 0 ? '0.1' : '1000'}
                          
                     />
                     {errors.discount_value && <div className="invalid-feedback">{errors.discount_value}</div>}

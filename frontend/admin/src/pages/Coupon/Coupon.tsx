@@ -1,7 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { deleteCoupon, getCoupons, Coupon as ApiCoupon } from "@app/services/Coupon/ApiCoupon";
 import { Link, useNavigate } from "react-router-dom";
-import { Text } from "react-bootstrap";
 
 interface CouponDisplay {
   id: number;
@@ -9,7 +8,7 @@ interface CouponDisplay {
   name: string;
   description: string;
   discount_value: number;
-  discount_type: string;
+  discount_type: number;
   max_uses_per_user: number;
   user_usage: any;
   is_active: number;
@@ -209,8 +208,7 @@ const Coupon: FC = () => {
                       <tr key={coupon.id}>
                         <td>{coupon.code}</td>
                         <td>{coupon.name}</td>
-                      
-                        <td>{coupon.discount_type === 'percentage' ? 'Phần trăm' : 'Giá trị cố định'}</td>
+                        <td>{coupon.discount_type === 0 ? 'Phần trăm' : 'Giá tiền'}</td>
                         <td>
                           <span
                             className={`tag ${coupon.is_active === 1 ? "tag-success" : "tag-danger"}`}

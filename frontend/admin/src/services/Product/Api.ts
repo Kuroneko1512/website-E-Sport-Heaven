@@ -1,5 +1,3 @@
-// src/api/productApi.ts
-import Product from "@app/pages/Product/Product";
 import axios from "axios";
 
 const API_URL = "http://127.0.0.1:8000/api/v1/product";
@@ -42,6 +40,7 @@ export interface api4 {
   image?: File | null;
   selected_attributes: AttributeSelection[];
   variants: Variant[];
+  delete_variant_id?: number[];
 }
 
 // Tạo sản phẩm mới
@@ -183,7 +182,9 @@ export const getProducts = async (page: number = 1, limit: number = 5): Promise<
 
 export const getProductById = async (id: number): Promise<api4> => {
   try {
-    const response = await axios.get<api4>(`${API_URL}/${id}`);
+    const response = await axios.get<api4>(`${API_URL}/${id}/edit`);
+    
+    
     return response.data;
   } catch (error) {
     console.error("Error fetching product:", error);

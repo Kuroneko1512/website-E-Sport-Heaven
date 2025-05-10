@@ -123,9 +123,7 @@ const Product = () => {
                   <td>{product.name}</td>
                   <td>
                     {FomatVND(
-                      product.variants.length > 0
-                        ? product.variants[0].price
-                        : product.price
+                      product.variants.length > 0 ? product.variants[0].price || 0 : product.price || 0
                     )}
                   </td>
                   <td>
@@ -140,7 +138,7 @@ const Product = () => {
                       {product.status === "active" ? "Đang bán" : "Ngừng"}
                     </span>
                   </td>
-                  <td>{product.variants.length > 0 ? product.variants[0].stock : product.stock}</td>
+                  <td>{product.variants.length > 0 ? product.variants[0].stock || 0 : product.stock || 0}</td>
                   <td>
                     <button
                       className="btn btn-warning btn-sm me-2"

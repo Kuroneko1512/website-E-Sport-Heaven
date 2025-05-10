@@ -86,7 +86,17 @@ class ProductService extends BaseService
     {
         return $this->model->with([
             'variants.productAttributes.attributeValue:id,value',
+        ])->findOrFail(id: $id);
+    }
+
+    public function getProductById($id)
+    {
+        $products = $this->model->with([
+                'category',
+                'variants.productAttributes.attributeValue',
+          
         ])->findOrFail($id);
+        return $products;
     }
     public function getProductForDetail($id)
     {
@@ -150,9 +160,8 @@ class ProductService extends BaseService
     public function updateProduct($data, $id)
     {
         $isVariable = $data['product_type'] === 'variable';
-
         // Cập nhật sản phẩm
-        $product = $this->model->findOrFail($id); // Tìm sản phẩm trước khi cập nhật
+        $product = $this->model->findOrFail($id);
         $product->update([
             'name' => $data['name'],
             'price' => $isVariable ? null : $data['price'],
@@ -162,28 +171,38 @@ class ProductService extends BaseService
             'discount_end' => $data['discount_end'] ?? null,
             'description' => $data['description'] ?? null,
             'product_type' => $data['product_type'],
-            'status' => 'active', // Sản phẩm sẽ là bản nháp ban đầu
+            'status' => 'active',
             'category_id' => $data['category_id'] ?? null
-
         ]);
+
         if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
             $imagePath = $data['image']->store('products', 'public');
             $product->update(['image' => $imagePath]);
         }
 
         if ($isVariable) {
-            // Lưu các thuộc tính đã chọn cho sản phẩm
-            foreach ($data['selected_attributes'] as $attributeId) {
-                $product->selectedAttributes()->create(['attribute_id' => $attributeId]);
+            // Xóa variant nếu có yêu cầu xóa
+            if (isset($data['delete_variant_id']) && is_array($data['delete_variant_id'])) {
+                foreach ($data['delete_variant_id'] as $variantId) {
+                    $variant = $product->variants()->find($variantId);
+                    if ($variant) {
+                        // Xóa các product attributes của variant trước
+                        $variant->productAttributes()->delete();
+                        // Sau đó xóa variant
+                        $variant->delete();
+                    }
+                }
             }
 
-            // Lấy danh sách các thuộc tính bắt buộc từ sản phẩm
-            $requiredAttributes = $product->selectedAttributes->pluck('attribute_id')->toArray();
-
-            // Kiểm tra và cập nhật hoặc tạo mới biến thể cho sản phẩm
-            if (!empty($data['variants']) && is_array($data['variants'])) {
+            // Nếu không có variants trong request, xóa tất cả variants hiện có
+            if (empty($data['variants'])) {
+                $product->variants()->each(function($variant) {
+                    $variant->productAttributes()->delete();
+                    $variant->delete();
+                });
+            } else {
+                // Cập nhật hoặc tạo mới biến thể cho sản phẩm
                 foreach ($data['variants'] as $variantData) {
-                    // Kiểm tra xem biến thể có ID không (cập nhật nếu có ID, tạo mới nếu không có ID)
                     if (isset($variantData['id'])) {
                         // Cập nhật biến thể nếu đã tồn tại
                         $variant = $product->variants()->find($variantData['id']);
@@ -195,6 +214,21 @@ class ProductService extends BaseService
                                 'discount_start' => $variantData['discount_start'] ?? null,
                                 'discount_end' => $variantData['discount_end'] ?? null,
                             ]);
+
+                            // Cập nhật thuộc tính của biến thể
+                            if (!empty($variantData['attributes'])) {
+                                foreach ($variantData['attributes'] as $attributeData) {
+                                    $variant->productAttributes()->updateOrCreate(
+                                        [
+                                            'product_variant_id' => $variant->id,
+                                            'attribute_id' => $attributeData['attribute_id'],
+                                        ],
+                                        [
+                                            'attribute_value_id' => $attributeData['attribute_value_id'],
+                                        ]
+                                    );
+                                }
+                            }
                         }
                     } else {
                         // Tạo mới biến thể nếu không có ID
@@ -206,44 +240,22 @@ class ProductService extends BaseService
                             'discount_start' => $variantData['discount_start'] ?? null,
                             'discount_end' => $variantData['discount_end'] ?? null,
                         ]);
-                        if (!empty($variantData['attributes']) && is_array($variantData['attributes'])) {
+
+                        // Thêm thuộc tính cho biến thể mới
+                        if (!empty($variantData['attributes'])) {
                             foreach ($variantData['attributes'] as $attributeData) {
-                                // Lấy attribute_value_id và attribute_id từ dữ liệu gửi đến
-                                $attributeValue = AttributeValue::find($attributeData['attribute_value_id']);
-                                if (!$attributeValue) {
-                                    throw new \Exception("Giá trị thuộc tính không hợp lệ.");
-                                }
-                                $exists = $variant->productAttributes()->where([
-                                    'product_variant_id' => $variant->id,
+                                $variant->productAttributes()->create([
                                     'attribute_id' => $attributeData['attribute_id'],
                                     'attribute_value_id' => $attributeData['attribute_value_id'],
-                                ])->exists();
-
-                                if ($exists) {
-                                    // Nếu tồn tại thì bỏ qua hoặc xử lý khác nếu muốn
-                                    continue;
-                                }
-                                //  Cập nhật hoặc tạo mới thuộc tính cho biến thể
-                                $variant->productAttributes()->updateOrCreate(
-                                    [
-                                        'product_variant_id' => $variant->id,
-                                        'attribute_id' => $attributeData['attribute_id'],
-                                    ],
-                                    [
-                                        'attribute_value_id' => $attributeData['attribute_value_id'],
-                                    ]
-                                );
+                                ]);
                             }
                         }
                     }
-
-                    // Kiểm tra và cập nhật hoặc tạo mới các thuộc tính của biến thể
-
                 }
             }
         }
 
-        return $product->fresh(); // Trả về dữ liệu mới nhất của sản phẩm
+        return $product->fresh();
     }
     private function handelVariant($isVariable, $product, $data)
     {

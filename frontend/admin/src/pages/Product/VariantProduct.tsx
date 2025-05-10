@@ -9,9 +9,10 @@ import { getAttributesByIds } from "@app/services/Attribute/ApiAttribute";
 
 const VariantProduct = () => {
 
-  const { product, setProduct } = useOutletContext<{
+  const { product, setProduct, handleDeleteVariant } = useOutletContext<{
     product: any;
     setProduct: React.Dispatch<React.SetStateAction<any>>;
+    handleDeleteVariant: (id: number) => void;
   }>();
 
   const [attributes, setAttributes] = useState<any[]>([]);
@@ -115,15 +116,14 @@ const VariantProduct = () => {
     console.log("Đã lưu vào product:", product);
     alert("Lưu biến thể thành công!");
   };
-const handleDeleteVariant = (id: number) => {
-  const id_variant = variants[id];
-  console.log(id_variant);
-  
-  setProduct((prev: any) => ({
-    ...prev,
-    variants: prev.variants.filter((_ : any, i: number) => i !== id)
-  }));
-}
+
+  const onDeleteVariant = (variantId: number) => {
+    const  confirm = window.confirm("Bạn có chắc chắn muốn xóa biến thể này không?");
+    if(confirm){
+      handleDeleteVariant(variantId);
+    }
+  };
+
   return (
     <div>
       <div className="p-3 border rounded shadow-sm bg-white">
@@ -162,6 +162,7 @@ const handleDeleteVariant = (id: number) => {
               <th>Giá</th>
               <th>Số lượng</th>
               <th>Thuộc tính</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -185,7 +186,7 @@ const handleDeleteVariant = (id: number) => {
                       .join(", ")} 
                   </td>
                   <td>
-                    <button type="button" className="btn btn-danger" onClick={() => handleDeleteVariant(index)}>Xóa</button>
+                    <button type="button" className="btn btn-danger" onClick={() => onDeleteVariant(variant.id)}>Xóa</button>
                   </td>
                 </tr>
 

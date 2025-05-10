@@ -31,6 +31,7 @@ Route::prefix('v1')->group(function () {
 
             //Product routes
             Route::apiResource('/product', ProductController::class);
+          
             //Attributes routes
             Route::apiResource('/attribute', AttributeController::class);
             //Category routes

@@ -12,7 +12,7 @@ use App\Http\Controllers\Api\Attribute\V1\AttributeController;
 use App\Http\Controllers\Api\Attribute\V1\AttributeValueController;
 use App\Http\Controllers\Api\User\UserController;
 use App\Http\Controllers\Api\Coupons\CouponsController;
-
+use App\Http\Controllers\Api\Admin\V1\ProductController as ProductControllerAdmin;
 Route::prefix('v1')->group(callback: function () {
     Route::apiResource('/attribute', AttributeController::class);
     Route::get('/category/indexNoPagination', [CategoryController::class, 'indexNoPagination']);
@@ -21,6 +21,7 @@ Route::prefix('v1')->group(callback: function () {
     Route::get('/product/fillter', [ProductController::class, 'getProductFillterAll']);
     Route::apiResource('/product', ProductController::class);
     Route::get('/product/{id}/Detail', [ProductController::class, 'showForDetails']);
+    Route::get('/product/{id}/edit', [ProductControllerAdmin::class, 'getProductByIdEdit']);
     Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
     Route::post('/attribute/filter', [AttributeController::class, 'getAttributeForIds']);
     Route::apiResource('/attributeValue', AttributeValueController::class)->except(['index']);

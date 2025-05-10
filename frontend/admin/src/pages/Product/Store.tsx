@@ -2,7 +2,6 @@ import { useState, useEffect, ChangeEvent } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { getCategory, Category } from "@app/services/Category/ApiCategory";
-// import NoImage from "../../../public/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
 import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
 import {
   createProduct,
@@ -130,12 +129,13 @@ const Store = () => {
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    console.log(product);
+    
     setProduct((prev) => ({
       ...prev,
-      [name]: name === "price" || name === "stock" ? Number(value) : value,
+      [name]: name === "price" || name === "stock" 
+        ? value 
+        : value,
     }));
-    
     
     if (errors[name as keyof ValidationErrors]) {
       setErrors(prev => ({
@@ -183,22 +183,21 @@ const Store = () => {
 
   useEffect(() => {
     if (paramId) {
-      setId(paramId); // Lưu `id` vào state khi `id` có trong URL
+      setId(paramId);
     }
     const fetchProduct = async () => {
-    
       if (id) {
         try {
           const productData = await getProductById(Number(id));
-
-          // Chuyển đổi selected_attributes thành mảng dạng [[2], [3]]
-          const selected_attributes: number[] = [];
-
-          productData.data.selected_attributes.forEach((attr) => {
-            selected_attributes.push(attr.attribute_id);
-            console.log(selected_attributes);
-          });
-
+          console.log(productData.data);
+          
+          // Lấy danh sách các attribute_id duy nhất từ variants
+          const selected_attributes = [...new Set(
+            productData.data.variants.flatMap(variant => 
+              variant.product_attributes.map(attr => attr.attribute_id)
+            )
+          )];
+          
           setProduct({
             ...productData.data,
             selected_attributes: selected_attributes,
@@ -223,6 +222,7 @@ const Store = () => {
           console.error("Lỗi khi lấy thông tin sản phẩm:", error);
         }
       }
+   
     };
 
     fetchProduct();
@@ -231,7 +231,6 @@ const Store = () => {
 
  
   const handleSubmit = async (e: React.FormEvent) => {
-  
     e.preventDefault(); 
     if (!validateForm()) {
       window.scrollTo(0, 0);
@@ -239,20 +238,49 @@ const Store = () => {
       return;
     }
    
-    
     try {
-   
       if (isEdit && id) {
-     await updateProduct(Number(id), product);
-    
+        // Chuyển đổi giá trị số trước khi gửi lên server
+        const submitData = {
+          ...product,
+          price: product.price ? Number(product.price) : 0,
+          stock: product.stock ? Number(product.stock) : 0,
+        };
+        await updateProduct(Number(id), submitData);
         alert("Cập nhật sản phẩm thành công!");
       } else {
-        await createProduct(product);
+        const submitData = {
+          ...product,
+          price: product.price ? Number(product.price) : 0,
+          stock: product.stock ? Number(product.stock) : 0,
+        };
+        await createProduct(submitData);
         alert("Tạo sản phẩm thành công!");
       }
       navigate("/product");
     } catch (error) {
       alert(isEdit ? "Lỗi khi cập nhật sản phẩm!" : "Lỗi khi tạo sản phẩm!");
+    }
+  };
+
+  const handleDeleteVariant = async (variantId: number) => {
+    console.log(variantId);
+
+    try {
+      // Xóa variant ở database
+      await updateProduct(Number(id), {
+        ...product,
+        delete_variant_id: [variantId]
+      });
+      
+      // Cập nhật state sau khi xóa thành công
+      setProduct(prev => ({
+        ...prev,
+        variants: prev.variants.filter(variant => variant.id !== variantId)
+      }));
+    } catch (error) {
+      console.error("Lỗi khi xóa variant:", error);
+      alert("Có lỗi xảy ra khi xóa variant!");
     }
   };
 
@@ -319,13 +347,12 @@ const Store = () => {
                           >
                             {item === "Attribute" ? "Thuộc tính" : "Biến thể"}
                           </Link>
-                        
                         </li>
                       ))}
                 </ul>
               </div>
               <div className="col-9 p-3 bg-light border">
-                <Outlet context={{ product, setProduct, errors, setErrors }} />
+                <Outlet context={{ product, setProduct, errors, setErrors, handleDeleteVariant }} />
               </div>
             </div>
           </div>
