@@ -23,9 +23,12 @@ Route::prefix('v1')->group(callback: function () {
     Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
     Route::post('/attribute/filter', [AttributeController::class, 'getAttributeForIds']);
     Route::apiResource('/attributeValue', AttributeValueController::class)->except(['index']);
-    Route::apiResource('/order', OrderController::class);
+
+    // Order API Routes
+    Route::apiResource('/order', OrderController::class)->only(['store']);
     Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
     Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
+
     Route::apiResource('/blog-categories', BlogCategoryController::class);
     Route::apiResource('/blogs', BlogController::class);
 
@@ -41,6 +44,6 @@ Route::prefix('v1')->group(callback: function () {
 
     Route::apiResource('/coupon', CouponsController::class);
 
-}); 
+});
 
 
