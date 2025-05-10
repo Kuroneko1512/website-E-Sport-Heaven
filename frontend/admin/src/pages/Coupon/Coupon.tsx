@@ -226,7 +226,28 @@ const Coupon: FC = () => {
                           </td>
                           <td className="d-none d-lg-table-cell">{coupon.description}</td>
                           <td className="d-none d-md-table-cell">
-                            {/* logic format date giữ nguyên */}
+                            {(() => {
+                            const now = new Date(new Date().toISOString().split('T')[0]);
+                            const startDate = coupon.start_date ? new Date(coupon.start_date.split(' ')[0]) : null;
+                            const endDate = coupon.end_date ? new Date(coupon.end_date.split(' ')[0]) : null;
+                            const formatDate = (date: Date) => {
+                              const day = date.getDate().toString().padStart(2, '0');
+                              const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                              const year = date.getFullYear();
+                              return `${day}/${month}/${year}`;
+                            };
+                            if (startDate && endDate) {
+                              const dateRange = `${formatDate(startDate)} đến ${formatDate(endDate)}`;
+                              if (now < startDate) {
+                                return `Chưa sẵn sàng (${dateRange})`;
+                              } else if (now >= startDate && now <= endDate) {
+                                return `Sẵn sàng (${dateRange})`;
+                              } else {
+                                return `Không hoạt động (${dateRange})`;
+                              }
+                            }
+                            return "";
+                          })()}
                           </td>
                           <td className="d-none d-md-table-cell">
                             {coupon.max_uses < coupon.used_count

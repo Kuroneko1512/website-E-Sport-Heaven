@@ -1,23 +1,23 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { getShippingFee } from "../config/ghtk";
-import FomatVND from "../utils/FomatVND";
 import {
+  Button,
+  Card,
+  Divider,
   Form,
   Input,
-  Select,
-  Button,
-  Radio,
-  Typography,
-  Divider,
-  Card,
   List,
   message,
   Modal,
+  Radio,
+  Select,
+  Typography,
 } from "antd";
-import { useSelector } from "react-redux";
+import axios from "axios";
 import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import apiGhtk from "../config/ghtk";
+import FomatVND from "../utils/FomatVND";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -53,32 +53,35 @@ const NewCheckout = () => {
     ward: "",
     address: "",
     weight: 10000,
-    value: 3000000,
+    // value: 3000000,
     transport: "road",
-    deliver_option: "xteam",
+    deliver_option: "none",
   });
-
   // console.log("order", order);
+
+  console.log("shippingFee", shippingFee);
 
   // Tự động tính phí vận chuyển khi các trường địa chỉ được chọn đầy đủ
   useEffect(() => {
-    const { province, district, ward, address } = formData;
+    const { province, district, ward } = formData;
 
     // Kiểm tra nếu tất cả các trường cần thiết đã được chọn
-    if (province && district && ward && address) {
+    if (province && district && ward) {
       const calculateShippingFee = async () => {
-        try {
-          const response = await getShippingFee(formData);
-          if (response.success) {
-            setShippingFee(response.fee.ship_fee_only); // Lưu phí vận chuyển
-            message.success("Tính phí vận chuyển thành công!");
-          } else {
+        // try {
+          const response = await apiGhtk.get(`/services/shipment/fee`, {params:formData});
+          console.log("response", response?.data);
+          if (response?.data?.success === true) {
+            setShippingFee(response?.data?.fee?.ship_fee_only); // Lưu phí vận chuyển
+            // message.success("Tính phí vận chuyển thành công!");
+          } 
+          if (response?.data?.success === false) {
             message.error(response.message || "Không thể tính phí vận chuyển!");
           }
-        } catch (error) {
-          message.error("Lỗi khi tính phí vận chuyển!");
-        }
-      };
+        // } catch (error) {
+        //   message.error("Lỗi khi tính phí vận chuyển!");
+        // }
+        };
 
       calculateShippingFee();
     }
@@ -97,10 +100,6 @@ const NewCheckout = () => {
     if (cartItems) setCartItems(JSON.parse(cartItems));
     if (cartTotal) setCartTotal(JSON.parse(cartTotal));
   }, []);
-
-  console.log("provinces", provinces);
-  console.log("districts", districts);
-  console.log("wards", wards);
 
   useEffect(() => {
     if (selectedProvince) {
@@ -254,7 +253,6 @@ const NewCheckout = () => {
         (item.price - (item.price * item.discount) / 100) * item.quantity,
       0
     );
-    const shippingFee = 5000;
     const discount = discountCode ? 10000 : 0;
     return subtotal + shippingFee - discount;
   };
@@ -385,7 +383,7 @@ const NewCheckout = () => {
                     placeholder="Chọn Tỉnh/Thành phố"
                     value={selectedProvince}
                     onChange={(value) => {
-                      setFormData({ ...formData, province: value });
+                      setFormData({ ...formData, province: provinces.find((p) => p.code === value)?.name });
                       setSelectedProvince(value);
                       setDistricts([]);
                       setWards([]);
@@ -425,7 +423,7 @@ const NewCheckout = () => {
                     placeholder="Chọn Quận/Huyện"
                     value={selectedDistrict}
                     onChange={(value) => {
-                      setFormData({ ...formData, district: value });
+                      setFormData({ ...formData, district: districts.find((d) => d.code === value)?.name });
                       setSelectedDistrict(value);
                       setWards([]);
                       setSelectedWard("");
@@ -458,7 +456,10 @@ const NewCheckout = () => {
                   <Select
                     placeholder="Chọn Phường/Xã"
                     value={selectedWard}
-                    onChange={(value)=>{setSelectedWard;setFormData({ ...formData, ward: value })}}
+                    onChange={(value)=>{
+                    setFormData({ ...formData, ward: wards.find((w) => w.code === value)?.name });
+                    setSelectedWard;
+                    }}
                     disabled={!selectedDistrict}
                   >
                     {wards?.map((w) => (
@@ -547,7 +548,7 @@ const NewCheckout = () => {
 
             <div className="flex justify-between mb-2">
               <Text>Phí vận chuyển</Text>
-              <Text>{shippingFee}</Text>
+              <Text>{shippingFee ? FomatVND(shippingFee) : "Hãy chọn địa điểm"} </Text>
             </div>
             <div className="flex justify-between font-bold">
               <Text strong>Tổng cộng</Text>
