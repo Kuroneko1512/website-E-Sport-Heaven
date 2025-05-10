@@ -1,122 +1,147 @@
 import { Button, Form, Input, Modal, Select, Typography, message } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../../config/db";
 
 const { Title } = Typography;
 const { Option } = Select;
 
-const ManageAddress = () => {
+export default function ManageAddress() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
   const [form] = Form.useForm();
-
   const queryClient = useQueryClient();
 
-  // Fetch provinces on mount
-  useEffect(() => {
-    axiosInstance
-      .get("/api/v1/address/provinces/")
-      .then((response) => setProvinces(response?.data?.data))
-      .catch(() => message.error("Lỗi khi tải tỉnh/thành phố"));
-  }, []);
-
-  useEffect(() => {
-    if (selectedProvince) {
-      axiosInstance
-        .get(`/api/v1/address/districts?province_code=${selectedProvince}`)
-        .then((response) => setDistricts(response?.data?.data))
-        .catch(() => message.error("Lỗi khi tải quận/huyện"));
-    } else {
-      setDistricts([]);
-      setSelectedDistrict("");
-    }
-  }, [selectedProvince]);
-
-  useEffect(() => {
-    if (selectedDistrict) {
-      axiosInstance
-        .get(`/api/v1/address/communes?district_code=${selectedDistrict}`)
-        .then((response) => setWards(response?.data?.data))
-        .catch(() => message.error("Lỗi khi tải phường/xã"));
-    } else {
-      setWards([]);
-      setSelectedWard("");
-    }
-  }, [selectedDistrict]);
-
+  // 1. Fetch provinces
   const {
-    data: addressesData,
-    isLoading,
-    isError,
+    data: provinces = [],
+    isLoading: provincesLoading,
+    isError: provincesError,
   } = useQuery({
-    queryKey: ["addresses"],
-    queryFn: async () => axiosInstance.get("/api/v1/customer/shipping-address").then((res) => res.data.data),
+    queryKey: ["provinces"],
+    queryFn: () =>
+      axiosInstance
+        .get("/api/v1/address/provinces/")
+        .then((res) => res.data.data),
     refetchOnWindowFocus: false,
   });
 
-  console.log("addressesData", addressesData);
+  // 2. Fetch districts when province selected
+  const {
+    data: districts = [],
+    isFetching: districtsLoading,
+  } = useQuery({
+    queryKey: ["districts", selectedProvince],
+    queryFn: () =>
+      axiosInstance
+        .get(
+          `/api/v1/address/districts?province_code=${selectedProvince}`
+        )
+        .then((res) => res.data.data),
+    enabled: Boolean(selectedProvince),
+  });
 
-  const createMutation = (mutationFn, successMessage, errorMessage) =>
-    useMutation({
-      mutationFn,
-      onSuccess: () => {
-        message.success(successMessage);
-        queryClient.invalidateQueries(["addresses"]);
-        setIsModalOpen(false);
-        form.resetFields();
-        setSelectedProvince("");
-        setSelectedDistrict("");
-        setSelectedWard("");
-      },
-      onError: () => {
-        message.error(errorMessage);
-      },
-    });
+  // 3. Fetch wards when district selected
+  const {
+    data: wards = [],
+    isFetching: wardsLoading,
+  } = useQuery({
+    queryKey: ["wards", selectedDistrict],
+    queryFn: () =>
+      axiosInstance
+        .get(
+          `/api/v1/address/communes?district_code=${selectedDistrict}`
+        )
+        .then((res) => res.data.data),
+    enabled: Boolean(selectedDistrict),
+  });
 
-  const addAddressMutation = createMutation(
-    async (newAddress) => await axiosInstance.post("/api/v1/customer/shipping-address", newAddress),
-    "Thêm địa chỉ thành công",
-    "Thêm địa chỉ thất bại"
-  );
+  // 4. Fetch current addresses
+  const {
+    data: addresses = [],
+    isLoading: addressesLoading,
+    isError: addressesError,
+  } = useQuery({
+    queryKey: ["addresses"],
+    queryFn: () =>
+      axiosInstance
+        .get("/api/v1/customer/shipping-address")
+        .then((res) => res.data.data),
+    refetchOnWindowFocus: false,
+  });
 
-  const updateAddressMutation = createMutation(
-    async ({ id, updatedAddress }) => await axiosInstance.put(`/api/v1/customer/shipping-address/${id}`, updatedAddress),
-    "Cập nhật địa chỉ thành công",
-    "Cập nhật địa chỉ thất bại"
-  );
+  // 5. Mutations
+  const addAddressMutation = useMutation({
+    mutationFn: (newAddress) =>
+      axiosInstance.post(
+        "/api/v1/customer/shipping-address",
+        newAddress
+      ),
+    onSuccess: () => {
+      message.success("Thêm địa chỉ thành công");
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      form.resetFields();
+      setSelectedProvince("");
+      setSelectedDistrict("");
+      setSelectedWard("");
+      setIsModalOpen(false);
+    },
+    onError: () => message.error("Thêm địa chỉ thất bại"),
+  });
+
+  const updateAddressMutation = useMutation({
+    mutationFn: ({ id, updatedAddress }) =>
+      axiosInstance.put(
+        `/api/v1/customer/shipping-address/${id}`,
+        updatedAddress
+      ),
+    onSuccess: () => {
+      message.success("Cập nhật địa chỉ thành công");
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      form.resetFields();
+      setSelectedProvince("");
+      setSelectedDistrict("");
+      setSelectedWard("");
+      setIsModalOpen(false);
+    },
+    onError: () => message.error("Cập nhật địa chỉ thất bại"),
+  });
 
   const deleteAddressMutation = useMutation({
-    mutationFn: (id) => axiosInstance.delete(`/api/v1/customer/shipping-address/${id}`),
+    mutationFn: (id) =>
+      axiosInstance.delete(
+        `/api/v1/customer/shipping-address/${id}`
+      ),
     onSuccess: () => {
       message.success("Xóa địa chỉ thành công");
-      queryClient.invalidateQueries(["addresses"]);
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
     },
-    onError: () => {
-      message.error("Xóa địa chỉ thất bại");
-    },
+    onError: () => message.error("Xóa địa chỉ thất bại"),
   });
 
   const setDefaultAddressMutation = useMutation({
-    mutationFn: (id) => axiosInstance.post(`/api/v1/customer/shipping-address/${id}/set-default`),
+    mutationFn: (id) =>
+      axiosInstance.post(
+        `/api/v1/customer/shipping-address/${id}/set-default`
+      ),
     onSuccess: () => {
-      message.success("Cài đặt địa chỉ mặc định thành công");
-      queryClient.invalidateQueries(["addresses"]);
+      message.success(
+        "Cài đặt địa chỉ mặc định thành công"
+      );
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
     },
-    onError: () => {
-      message.error("Cài đặt địa chỉ mặc định thất bại");
-    },
+    onError: () =>
+      message.error("Cài đặt địa chỉ mặc định thất bại"),
   });
 
+  // 6. Open add modal
   const openAddModal = () => {
     setIsEditMode(false);
+    setEditingAddress(null);
     form.resetFields();
     setSelectedProvince("");
     setSelectedDistrict("");
@@ -124,29 +149,52 @@ const ManageAddress = () => {
     setIsModalOpen(true);
   };
 
+  // 7. Open edit modal with prefetch
   const openEditModal = (address) => {
     setIsEditMode(true);
     setEditingAddress(address);
-    form.setFieldsValue(address);
 
-    const provinceObj = provinces.find((p) => p.name === address.province);
-    const districtObj = districts.find((d) => d.name === address.district);
-    const wardObj = wards.find((w) => w.name === address.ward);
+    // Prefetch districts & wards
+    queryClient.prefetchQuery({
+      queryKey: ["districts", address.province_code],
+      queryFn: () =>
+        axiosInstance
+          .get(
+            `/api/v1/address/districts?province_code=${address.province_code}`
+          )
+          .then((res) => res.data.data),
+    });
+    queryClient.prefetchQuery({
+      queryKey: ["wards", address.district_code],
+      queryFn: () =>
+        axiosInstance
+          .get(
+            `/api/v1/address/communes?district_code=${address.district_code}`
+          )
+          .then((res) => res.data.data),
+    });
 
-    setSelectedProvince(provinceObj ? provinceObj.code : "");
-    setSelectedDistrict(districtObj ? districtObj.code : "");
-    setSelectedWard(wardObj ? wardObj.code : "");
+    // Set form + selections immediately
+    form.setFieldsValue({
+      ...address,
+      province_code: address.province_code,
+      district_code: address.district_code,
+      commune_code: address.commune_code,
+    });
+    setSelectedProvince(address.province_code);
+    setSelectedDistrict(address.district_code);
+    setSelectedWard(address.commune_code);
+
     setIsModalOpen(true);
   };
 
+  // 8. Handlers
   const handleDelete = (id) => {
     Modal.confirm({
       title: "Xác nhận xóa điểm giao hàng",
       content: "Bạn có chắc muốn xóa điểm giao hàng này?",
       cancelText: "Hủy",
-      onOk: () => {
-        deleteAddressMutation.mutate(id);
-      },
+      onOk: () => deleteAddressMutation.mutate(id),
     });
   };
 
@@ -155,36 +203,59 @@ const ManageAddress = () => {
   };
 
   const handleFinish = (values) => {
-    console.log("Form values:", values);
-    const provinceName = provinces.find((p) => Number(p.code) === Number(selectedProvince))?.name;
-    const districtName = districts.find((d) => Number(d.code) === Number(selectedDistrict))?.name;
-    const wardName = wards.find((w) => Number(w.code) === Number(selectedWard))?.name;
+    const provinceName = provinces.find(
+      (p) => String(p.code) === String(selectedProvince)
+    )?.name;
+    const districtName = districts.find(
+      (d) => String(d.code) === String(selectedDistrict)
+    )?.name;
+    const wardName = wards.find(
+      (w) => String(w.code) === String(selectedWard)
+    )?.name;
 
-    const addressPayload = {
+    const payload = {
       ...values,
-      is_default: true,
+      is_default: editingAddress?.is_default ? editingAddress.is_default : true, // Set default to true if not editing
       province: provinceName,
       district: districtName,
       ward: wardName,
     };
 
     if (isEditMode && editingAddress) {
-      updateAddressMutation.mutate({ id: editingAddress.id, updatedAddress: addressPayload });
+      // Check if data changed before updating
+      const isChanged =
+        editingAddress.recipient_name !== payload.recipient_name ||
+        editingAddress.phone !== payload.phone ||
+        editingAddress.province_code !== selectedProvince ||
+        editingAddress.district_code !== selectedDistrict ||
+        editingAddress.commune_code !== selectedWard ||
+        editingAddress.address_line1 !== payload.address_line1;
+
+      if (isChanged) {
+        updateAddressMutation.mutate({
+          id: editingAddress.id,
+          updatedAddress: payload,
+        });
+      } else {
+        message.info("Không có thay đổi nào để cập nhật");
+        setIsModalOpen(false);
+      }
     } else {
-      addAddressMutation.mutate(addressPayload);
+      addAddressMutation.mutate(payload);
     }
   };
 
-  if (isLoading) {
-    return <div>Đang tải địa chỉ...</div>;
+  console.log("editingAddress", editingAddress);
+
+  // 9. Loading/Error states
+  if (provincesLoading || addressesLoading) {
+    return <div>Đang tải dữ liệu...</div>;
+  }
+  if (provincesError || addressesError) {
+    return <div>Lỗi khi tải dữ liệu</div>;
   }
 
-  if (isError) {
-    return <div>Lỗi khi tải địa chỉ</div>;
-  }
-
-  const addresses = addressesData || [];
-
+  // 10. Render
   return (
     <div className="p-6 dark:bg-gray-800 px-10 py-6">
       <Title className="text-black dark:text-white" level={3}>
@@ -193,7 +264,7 @@ const ManageAddress = () => {
       <Button
         type="primary"
         onClick={openAddModal}
-        className="mb-4 bg-black dark:bg-gray-800 text-white py-2 px-4 rounded hover:!bg-white hover:!border-gray-800 hover:!text-black dark:hover:bg-gray-700"
+        className="mb-4 bg-black dark:bg-gray-800 text-white"
       >
         + Thêm địa chỉ
       </Button>
@@ -217,7 +288,7 @@ const ManageAddress = () => {
                   {address.province.name}
                 </p>
               </div>
-              <div className="col-span-1">
+              <div className="col-span-1 text-center">
                 {address.is_default ? (
                   <span className="text-black dark:text-white">Mặc định</span>
                 ) : (
@@ -255,7 +326,11 @@ const ManageAddress = () => {
         onCancel={() => setIsModalOpen(false)}
         footer={null}
       >
-        <Form form={form} layout="vertical" onFinish={handleFinish}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFinish}
+        >
           <Form.Item
             name="recipient_name"
             label="Tên"
@@ -263,11 +338,12 @@ const ManageAddress = () => {
           >
             <Input placeholder="Tên" />
           </Form.Item>
+
           <Form.Item
             name="phone"
             label="Số điện thoại"
             rules={[
-              { required: true, message: "Hãy nhập số diện thoại" },
+              { required: true, message: "Hãy nhập số điện thoại" },
               {
                 pattern: /^[0-9]{10,11}$/,
                 message: "Số điện thoại không hợp lệ",
@@ -277,36 +353,24 @@ const ManageAddress = () => {
             <Input placeholder="Số điện thoại" maxLength={11} />
           </Form.Item>
 
-          {/* <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, type: "email", message: "Email không hợp lệ" },
-            ]}
-          >
-            <Input placeholder="Email" />
-          </Form.Item> */}
-
           <Form.Item
-            label="Tỉnh/Thành phố"
             name="province_code"
-            rules={[{ required: true, message: "Hãy chọn tỉnh/thành phố" }]}
+            label="Tỉnh/Thành phố"
+            rules={[{ required: true, message: "Chọn tỉnh/thành phố" }]}
           >
             <Select
-              placeholder="Chọn Tỉnh/Thành phố"
+              placeholder="Chọn tỉnh/thành phố"
+              loading={provincesLoading}
               value={selectedProvince}
               onChange={(val) => {
                 setSelectedProvince(val);
                 setSelectedDistrict("");
-                setDistricts([]);
                 setSelectedWard("");
-                setWards([]);
                 form.setFieldsValue({
-                  district: undefined,
-                  ward: undefined,
+                  district_code: undefined,
+                  commune_code: undefined,
                 });
               }}
-              disabled={!provinces.length}
             >
               {provinces.map((p) => (
                 <Option key={p.code} value={p.code}>
@@ -317,22 +381,20 @@ const ManageAddress = () => {
           </Form.Item>
 
           <Form.Item
-            label="Quận/Huyện"
             name="district_code"
-            rules={[{ required: true, message: "Hãy chọn quận/huyện" }]}
+            label="Quận/Huyện"
+            rules={[{ required: true, message: "Chọn quận/huyện" }]}
           >
             <Select
-              placeholder="Chọn Quận/Huyện"
+              placeholder="Chọn quận/huyện"
+              loading={districtsLoading}
+              disabled={!selectedProvince}
               value={selectedDistrict}
               onChange={(val) => {
                 setSelectedDistrict(val);
                 setSelectedWard("");
-                setWards([]);
-                form.setFieldsValue({
-                  ward: undefined,
-                });
+                form.setFieldsValue({ commune_code: undefined });
               }}
-              disabled={!selectedProvince}
             >
               {districts.map((d) => (
                 <Option key={d.code} value={d.code}>
@@ -343,15 +405,16 @@ const ManageAddress = () => {
           </Form.Item>
 
           <Form.Item
-            label="Phường/Xã"
             name="commune_code"
-            rules={[{ required: true, message: "Hãy chọn phường/xã" }]}
+            label="Phường/Xã"
+            rules={[{ required: true, message: "Chọn phường/xã" }]}
           >
             <Select
-              placeholder="Chọn Phường/Xã"
+              placeholder="Chọn phường/xã"
+              loading={wardsLoading}
+              disabled={!selectedDistrict}
               value={selectedWard}
               onChange={(val) => setSelectedWard(val)}
-              disabled={!selectedDistrict}
             >
               {wards.map((w) => (
                 <Option key={w.code} value={w.code}>
@@ -364,7 +427,7 @@ const ManageAddress = () => {
           <Form.Item
             name="address_line1"
             label="Địa chỉ cụ thể"
-            rules={[{ required: true, message: "Hãy nhập điểm chỉ cụ thể" }]}
+            rules={[{ required: true, message: "Nhập địa chỉ cụ thể" }]}
           >
             <Input placeholder="Địa chỉ cụ thể" />
           </Form.Item>
@@ -378,6 +441,4 @@ const ManageAddress = () => {
       </Modal>
     </div>
   );
-};
-
-export default ManageAddress;
+}
