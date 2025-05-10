@@ -33,7 +33,7 @@ return new class extends Migration
             $table->tinyInteger('action_type'); // Loại hành động
             
             $table->text('notes')->nullable(); // Ghi chú
-            $table->json('metadata')->nullable(); // Dữ liệu bổ sung
+            $table->json('metadata')->nullable(); // Dữ liệu bổ sung - dùng để liên kết lỏng lẻo với shipping_logs
             
             $table->timestamps();
         });
