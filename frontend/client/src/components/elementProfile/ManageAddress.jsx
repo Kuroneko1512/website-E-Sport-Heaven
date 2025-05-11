@@ -215,7 +215,6 @@ export default function ManageAddress() {
 
     const payload = {
       ...values,
-      is_default: editingAddress?.is_default ? editingAddress.is_default : true, // Set default to true if not editing
       province: provinceName,
       district: districtName,
       ward: wardName,
@@ -234,6 +233,7 @@ export default function ManageAddress() {
       if (isChanged) {
         updateAddressMutation.mutate({
           id: editingAddress.id,
+          is_default: editingAddress.is_default,
           updatedAddress: payload,
         });
       } else {
@@ -241,7 +241,7 @@ export default function ManageAddress() {
         setIsModalOpen(false);
       }
     } else {
-      addAddressMutation.mutate(payload);
+      addAddressMutation.mutate({...payload, is_default: true});
     }
   };
 
