@@ -14,6 +14,13 @@ export const ORDER_STATUS = {
 
 };
 
+
+
+  
+
+   
+
+
 export const ORDER_STATUS_LABELS = {
     [ORDER_STATUS.PENDING]: "Đang xử lý",
     [ORDER_STATUS.CONFIRMED]: "Đã xác nhận",
@@ -37,4 +44,20 @@ export const PAYMENT_STATUS = {
 export const PAYMENT_STATUS_LABELS = {
     [PAYMENT_STATUS.UNPAID]: "Chưa thanh toán",
     [PAYMENT_STATUS.PAID]: "Đã thanh toán"
+};
+
+export const ORDER_REASON = {
+    PRODUCT_DEFECT: 0,           // Lỗi sản phẩm
+    WRONG_ITEM: 1,               // Sản phẩm sai
+    CUSTOMER_CHANGE_MIND: 2,     // Khách hàng thay đổi ý định
+    LATE_DELIVERY: 3,            // Giao hàng trễ
+    OTHER: 4                     // Lý do khác
+};
+
+export const ORDER_REASON_LABELS = {
+    [ORDER_REASON.PRODUCT_DEFECT]: "Lỗi sản phẩm",
+    [ORDER_REASON.WRONG_ITEM]: "Sản phẩm sai",
+    [ORDER_REASON.CUSTOMER_CHANGE_MIND]: "Khách hàng thay đổi ý định",
+    [ORDER_REASON.LATE_DELIVERY]: "Giao hàng trễ",
+    [ORDER_REASON.OTHER]: "Lý do khác"
 };

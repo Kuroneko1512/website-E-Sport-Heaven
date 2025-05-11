@@ -38,6 +38,8 @@ import  Coupon  from "@pages/Coupon/Coupon";
 import DetailCoupon from "@pages/Coupon/Detail";
 import EditCoupon from "@pages/Coupon/Edit";
 import AddCoupon from "@pages/Coupon/Store";
+import OrderReturn from "./pages/OrderReurn/OrderReturn";
+import DetailReturnOrder from "./pages/OrderReurn/DetailReturnOrder";
 
 
 const { VITE_NODE_ENV } = import.meta.env;
@@ -169,6 +171,8 @@ const App = () => {
             <Route path="add-coupon" element={<AddCoupon />} />
             <Route path="edit-coupon/:id" element={<EditCoupon />} />
             <Route path="detail-coupon/:id" element={<DetailCoupon />} />
+            <Route path="order-return" element={<OrderReturn />} />
+            <Route path="order-return/:id" element={<DetailReturnOrder />} />
           
            
           </Route>

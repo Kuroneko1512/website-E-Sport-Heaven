@@ -76,9 +76,7 @@ class AuthService
                 'scope' => '*',
             ];
 
-            Log::info('Client ID:', [env('DB_DATABASE')]);
-            Log::info('check:', [env('DB_DATABASE')]);
-Log::info('Client Secret:', [env('PASSPORT_CLIENT_SECRET')]);
+
             Log::info('Sending request to OAuth token endpoint', [
                 'url' => config('app.url') . '/oauth/token',
                 'data' => $dataToSend,

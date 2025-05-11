@@ -45,6 +45,11 @@ export const MENU: IMenuItem[] = [
     path: '/Order',
   },
   {
+    name: 'hoàn hàng',
+    icon: 'fas fa-shopping-cart nav-icon', // Đơn hàng -> giỏ hàng
+    path: '/order-return',
+  },
+  {
     name: 'Mã giảm giá',
     icon: 'fas fa-tags nav-icon', // Mã giảm giá -> thẻ/tag là biểu tượng hợp lý
     path: '/Coupon',
