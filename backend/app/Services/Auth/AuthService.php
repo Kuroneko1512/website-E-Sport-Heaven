@@ -76,6 +76,9 @@ class AuthService
                 'scope' => '*',
             ];
 
+            Log::info('Client ID:', [env('DB_DATABASE')]);
+            Log::info('check:', [env('DB_DATABASE')]);
+Log::info('Client Secret:', [env('PASSPORT_CLIENT_SECRET')]);
             Log::info('Sending request to OAuth token endpoint', [
                 'url' => config('app.url') . '/oauth/token',
                 'data' => $dataToSend,
@@ -148,7 +151,8 @@ class AuthService
                 'success' => false,
                 'message' => 'Đã xảy ra lỗi trong quá trình đăng nhập',
                 'data' => [
-                    'message' => 'Lỗi hệ thống, vui lòng thử lại sau.'
+                    'message' => 'Lỗi hệ thống, vui lòng thử lại sau.' 
+                    
                 ],
                 'code' => 500
             ];
