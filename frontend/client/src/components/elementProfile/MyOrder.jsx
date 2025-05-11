@@ -10,6 +10,8 @@ import useReview from "../../hooks/useReview";
 import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
 import Cookies from "js-cookie";
 import { ORDER_STATUS_LABELS, ORDER_STATUS, PAYMENT_STATUS_LABELS, PAYMENT_STATUS } from "../../constants/OrderConstants";
+import Pagination from "../filterProduct/Pagination";
+import useScrollToTop from "../../hooks/useScrollToTop";
 
 const OrderItem = ({
   order_items,
@@ -192,6 +194,10 @@ const MyOrder = () => {
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
   const [reviewedProducts, setReviewedProducts] = useState([]);
   const [form] = Form.useForm();
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Sử dụng hook scroll to top khi currentPage thay đổi
+  useScrollToTop(currentPage);
 
   const selectedProduct =
     selectedOrder?.order_items?.[currentProductIndex] || null;
@@ -254,9 +260,9 @@ const MyOrder = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["orders"],
+    queryKey: ["orders", currentPage],
     queryFn: async () => {
-      const res = await instanceAxios.get(`/api/v1/customer/orders`);
+      const res = await instanceAxios.get(`/api/v1/customer/orders?page=${currentPage}`);
       return res?.data;
     },
   });
@@ -265,6 +271,7 @@ const MyOrder = () => {
 
   // Truy cập đúng mảng đơn hàng từ cấu trúc phản hồi API
   const orders = apiResponse?.data?.data || [];
+  const totalPages = apiResponse?.data?.last_page || 1;
 
   // 1. Dùng useMemo để group orders theo ngày (string)
   const ordersByDate = useMemo(() => {
@@ -414,7 +421,6 @@ const MyOrder = () => {
         </>
       ) : (
         <div className="dark:bg-gray-800 min-h-screen p-6">
-          {/* … filter, search bar … */}
           <div className="flex justify-between items-center mb-3">
             <div className="px-2 py-1">Tất cả</div>
             <div className="px-2 py-1">Chờ thanh toán</div>
@@ -508,6 +514,15 @@ const MyOrder = () => {
                 <p className="text-gray-500 dark:text-gray-400">
                   Bạn chưa có đơn hàng nào
                 </p>
+              </div>
+            )}
+            {totalPages > 1 && (
+              <div className="flex justify-end mt-4">
+                <Pagination
+                  totalPages={totalPages}
+                  currentPage={currentPage}
+                  onPageChange={setCurrentPage}
+                />
               </div>
             )}
           </div>
