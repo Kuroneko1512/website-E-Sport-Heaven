@@ -9,6 +9,7 @@ import ReviewForm from "./ReviewForm";
 import useReview from "../../hooks/useReview";
 import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
 import Cookies from "js-cookie";
+import { ORDER_STATUS_LABELS, ORDER_STATUS, PAYMENT_STATUS_LABELS, PAYMENT_STATUS } from "../../constants/OrderConstants";
 
 const OrderItem = ({
   order_items,
@@ -32,15 +33,18 @@ const OrderItem = ({
 
   // console.log("order_code", status);
   const statusStyles = {
-    "đang xử lý":
-      "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
-    "đã xác nhận":
-      "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
-    "đang giao":
-      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    "hoàn thành":
-      "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
-    "đã hủy": "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+    [ORDER_STATUS.PENDING]: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
+    [ORDER_STATUS.CONFIRMED]: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
+    [ORDER_STATUS.PREPARING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.READY_TO_SHIP]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.SHIPPING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.DELIVERED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.COMPLETED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.RETURN_REQUESTED]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURN_PROCESSING]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURNED_COMPLETED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+    [ORDER_STATUS.RETURN_REJECTED]: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300",
+    [ORDER_STATUS.CANCELLED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
   };
 
   return (
@@ -99,7 +103,7 @@ const OrderItem = ({
         <span>Mã đơn hàng: <strong>{order_code}</strong></span>
         <span className="text-sm">{customer_name}, {shipping_address.substring(0, 30)}...</span>
         <span className={`px-2 py-1 rounded text-base ${statusStyles[status]}`}>
-          {status}
+          {ORDER_STATUS_LABELS[status]}
         </span>
       </h3>
 

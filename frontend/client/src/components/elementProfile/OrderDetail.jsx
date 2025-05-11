@@ -3,9 +3,25 @@ import React from "react";
 import instanceAxios from "../../config/db";
 import { useParams } from "react-router-dom";
 import ScrollToTop from "../../config/ScrollToTop";
+import { ORDER_STATUS_LABELS, ORDER_STATUS } from "../../constants/OrderConstants";
 
 const OrderDetail = () => {
   const { order_code } = useParams();
+
+  const statusStyles = {
+    [ORDER_STATUS.PENDING]: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
+    [ORDER_STATUS.CONFIRMED]: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
+    [ORDER_STATUS.PREPARING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.READY_TO_SHIP]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.SHIPPING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.DELIVERED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.COMPLETED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.RETURN_REQUESTED]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURN_PROCESSING]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURNED_COMPLETED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+    [ORDER_STATUS.RETURN_REJECTED]: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300",
+    [ORDER_STATUS.CANCELLED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+  };
 
   const { data: orderData, isLoading, error } = useQuery({
     queryKey: ["order", order_code],
@@ -96,7 +112,10 @@ const OrderDetail = () => {
       <header className="mb-8 border-b pb-4 flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900">Chi tiết đơn hàng</h1>
         <span className="text-lg">
-          Mã đơn hàng: <strong>{order_code}</strong> | <span className="text-red-500 text-base font-bold">{orderData?.data?.status}</span>
+          Mã đơn hàng: <strong>{order_code}</strong> | 
+          <span className={`ml-2 px-3 py-1 rounded text-base ${statusStyles[orderData?.data?.status]}`}>
+            {ORDER_STATUS_LABELS[orderData?.data?.status]}
+          </span>
         </span>
       </header>
 
