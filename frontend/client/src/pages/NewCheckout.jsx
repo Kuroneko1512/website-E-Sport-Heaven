@@ -41,7 +41,7 @@ const NewCheckout = () => {
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
-  const [order, setOrder] = useState({});
+  const [order, setOrder] = useState({ customer_note: "Giao hàng tận nơi" });
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submit, setSubmit] = useState(false);
   const [shippingFee, setShippingFee] = useState(null);
@@ -272,7 +272,13 @@ const NewCheckout = () => {
             } 
           });
           if (response?.data?.success === true) {
-            setShippingFee(response?.data?.fee?.ship_fee_only);
+            const fee = response?.data?.fee?.ship_fee_only;
+            setShippingFee(fee);
+            // Update order with shipping fee
+            setOrder(prev => ({
+              ...prev,
+              shipping_fee: fee
+            }));
           } else if (response?.data?.success === false) {
             message.error(response.message || "Không thể tính phí vận chuyển!");
           }
@@ -328,6 +334,7 @@ const NewCheckout = () => {
         ...order,
         amount: calculateGrandTotal(),
         payment_method: paymentMethod,
+        shipping_fee: shippingFee || 0
       };
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/order",
@@ -359,6 +366,8 @@ const NewCheckout = () => {
       setSubmit(false);
     }
   };
+
+  console.log("order", order)
 
   return (
     <div className="p-6 bg-white">
