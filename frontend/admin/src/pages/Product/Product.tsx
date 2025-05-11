@@ -148,7 +148,7 @@ const Product = () => {
                     </button>
                     <button
                       className="btn btn-primary btn-sm"
-                      onClick={() => navigate(`/add-product/${product.id}`)}
+                      onClick={() => navigate(`/edit-product/${product.id}`)}
                     >
                       Chỉnh sửa
                     </button>

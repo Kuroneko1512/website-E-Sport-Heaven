@@ -3,18 +3,18 @@ import { deleteCoupon, getCoupons, Coupon as ApiCoupon } from "@app/services/Cou
 import { Link, useNavigate } from "react-router-dom";
 
 interface CouponDisplay {
-  id: number;
+    id : number;
   code: string;
   name: string;
   description: string;
   discount_value: number;
-  discount_type: number;
-  max_uses_per_user: number;
-  user_usage: any;
+  discount_type: string;
+  min_purchase: number;
   is_active: number;
   start_date: string;
   end_date: string;
   max_uses: number;
+  user_usage: any;
   used_count: number;
 }
 
@@ -47,7 +47,7 @@ const Coupon: FC = () => {
         description: item.description || '',
         discount_value: item.discount_value,
         discount_type: item.discount_type,
-        max_uses_per_user: item.max_uses_per_user || 0,
+        min_purchase: item.min_purchase || 0,
         user_usage: item.user_usage || {},
         is_active: 1,
         start_date: item.start_date || '',
@@ -194,10 +194,10 @@ const Coupon: FC = () => {
                   <tr>
                     <th>Mã</th>
                     <th>Tên</th>
-                   
                     <th>Loại</th>
-                    <th>Trạng thái</th>
+
                     <th>Hạn sử dụng</th>
+                    <th>Trạng thái</th>
                     <th>Số lượt sử dụng</th>
                     <th colSpan={3} className="text-center">Thao tác</th>
                   </tr>
@@ -208,7 +208,10 @@ const Coupon: FC = () => {
                       <tr key={coupon.id}>
                         <td>{coupon.code}</td>
                         <td>{coupon.name}</td>
-                        <td>{coupon.discount_type === 0 ? 'Phần trăm' : 'Giá tiền'}</td>
+                        <td>{coupon.discount_type === "percentage" ? 'Phần trăm' : 'Giá tiền'}</td>
+                          <td>
+                          {coupon.end_date}
+                        </td>
                         <td>
                           <span
                             className={`tag ${coupon.is_active === 1 ? "tag-success" : "tag-danger"}`}
@@ -217,11 +220,9 @@ const Coupon: FC = () => {
                           </span>
                         </td>
                         
+                      
                         <td>
-                          {coupon.start_date && new Date(coupon.start_date) >= new Date(new Date().toISOString().split('T')[0]) ? "Còn hạn" : "Hết hạn"}
-                        </td>
-                        <td>
-                        {coupon.max_uses_per_user}
+                        {coupon.max_uses}
                         </td>
                         <td>
                           <button className="btn btn-primary" onClick={() => navigate(`/detail-coupon/${coupon.id}`)}>Chi tiết</button>

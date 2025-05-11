@@ -1,5 +1,4 @@
 export type CouponForm = {
-  
     code: string;
     name: string;
     description: string;
@@ -10,11 +9,21 @@ export type CouponForm = {
     min_purchase: number;
     max_uses: number;
     used_count: number;
-    max_uses_per_user: number;
+ 
     is_active: number;
+    user_usage: number[];
 }
 
 
-export type FormErrors = {
-    [key in keyof Omit<CouponForm, 'id' | 'is_active'>]?: string;
+export interface FormErrors {
+    code?: string;
+    name?: string;
+    description?: string;
+    discount_value?: string;
+    discount_type?: string;
+    start_date?: string;
+    end_date?: string;
+    min_purchase?: string;
+    max_uses?: string;
+    user_usage?: string;
 }

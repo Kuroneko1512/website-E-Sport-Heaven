@@ -2,34 +2,43 @@ import { FC, useEffect, useState } from "react";
 import { createCoupon, Coupon as ApiCoupon } from "@app/services/Coupon/ApiCoupon";
 import { useNavigate } from "react-router-dom";
 import { CouponForm, FormErrors } from "./type";
+import { getUserList } from "@app/services/User/Type";
 
 
 
 const Store: FC = () => {
     const navigate = useNavigate();
     const [coupon, setCoupon] = useState<CouponForm>({
+     
         code: "",
         name: "",
         description: "",
         discount_value: 0,
-        discount_type: 0,
+        discount_type: "percentage",
         start_date:new Date().toISOString().split('T')[0],
         end_date: "",
         min_purchase: 0,
         max_uses: 0,
         used_count: 0,
-        max_uses_per_user: 1,
-        is_active: 1
+        is_active: 1,
+        user_usage: []
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [submitted, setSubmitted] = useState(false);
-   
+    const [userUsage, setUserUsage] = useState<{id: number, name: string}[]>([]);
 
     const discountTypeOptions = [
-        { value: 0, label: 'Phần trăm' },
-        { value: 1, label: 'Giá tiền' }
+        { value: "percentage", label: 'Phần trăm' },
+        { value: "fixed", label: 'Giá tiền' }
     ];
-
+    const fetchUserUsage = async () => {
+        const response = await getUserList();
+        const customerUsers = response.filter((user: any) => user.account_type === "customer");
+        setUserUsage(customerUsers);
+    }
+    useEffect(() => {
+        fetchUserUsage();
+    }, []);
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {  
         const { name, value, type } = e.target;
         
@@ -37,7 +46,7 @@ const Store: FC = () => {
             const target = e.target as HTMLInputElement;
             setCoupon({ ...coupon, [name]: target.checked });
         } else {
-            setCoupon({ ...coupon, [name]: name === "discount_value" || name === "max_uses_per_user" || name === "max_uses" 
+            setCoupon({ ...coupon, [name]: name === "discount_value" || name === "max_uses" || name === "discount_type"
                 ? Number(value) 
                 : value });
         }
@@ -76,7 +85,7 @@ const Store: FC = () => {
                 if (value <= 0) {
                     newErrors.discount_value = 'Giá trị giảm giá phải lớn hơn 0';
                     isValid = false;
-                } else if (coupon.discount_type === 0 && value > 70  ) {
+                } else if (coupon.discount_type === "percentage" && value > 70  ) {
                     newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 70%';
                     isValid = false;
                 } else {
@@ -108,7 +117,7 @@ const Store: FC = () => {
                     newErrors.min_purchase = 'Số tiền tối thiểu phải lớn hơn 0';
                     isValid = false;
                 } else {
-                    if(coupon.discount_type === 0){
+                    if(coupon.discount_type === "percentage"){
                     console.log(value);
                     
                         newErrors.min_purchase = 'Số phần trăm tối thiểu phải lớn hơn 0';
@@ -159,7 +168,7 @@ const Store: FC = () => {
         if (coupon.discount_value <= 0) {
             newErrors.discount_value = 'Giá trị giảm giá phải lớn hơn 0';
             isValid = false;
-        } else if (coupon.discount_type === 0 && coupon.discount_value > 70)  {
+        } else if (coupon.discount_type === "percentage" && coupon.discount_value > 70)  {
             newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 70%';
             isValid = false;
         }
@@ -187,6 +196,7 @@ const Store: FC = () => {
             newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
             isValid = false;
         }
+ 
         setErrors(newErrors);
         return isValid;
     };
@@ -198,7 +208,7 @@ const Store: FC = () => {
         if (!validateForm()) {
             return;
         }
-        
+    
        
         try {
 
@@ -208,45 +218,55 @@ const Store: FC = () => {
                 code: coupon.code,
                 name: coupon.name,
                 description: coupon.description,
-                discount_value: coupon.discount_value,
-                discount_type: coupon.discount_type === 0 ? 'percentage' : 'fixed',
-                min_purchase: coupon.min_purchase,
+                discount_value: Number(coupon.discount_value),
+                discount_type: coupon.discount_type,
+                min_purchase: Number(coupon.min_purchase),
                 start_date: coupon.start_date,
                 end_date: coupon.end_date,
-                max_uses: coupon.max_uses,
-                max_uses_per_user: 0,
-                user_usage: {},
-                is_active: 1
+                max_uses: Number(coupon.max_uses),
+                is_active: 1,
+                user_usage: coupon.user_usage
             };
-            
-           await createCoupon(apiCoupon);
+            console.log(apiCoupon);
+            await createCoupon(apiCoupon);
       
             
             
             alert('Tạo mã giảm giá thành công!');
          
             setCoupon({
-              
+           
                 code: "",
                 name: "",
                 description: "",
                 discount_value: 0,
-                discount_type: 0,
+                discount_type: "percentage",
                 start_date: "",
                 end_date: "",
                 min_purchase: 0,
                 max_uses: 0,
                 used_count: 0,
-                max_uses_per_user: 1,
-                user_usage: {},
-                is_active: 1
+                is_active: 1,
+                user_usage: []
             });
             setSubmitted(false);
             navigate('/coupon');
         } catch (error) {
             console.error("Lỗi khi tạo mã giảm giá:", error);
-            alert('Mã giảm giá đã tồn tại!');
+     
         }
+    };
+
+    const handleUserChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedOptions = Array.from(e.target.selectedOptions, option => Number(option.value));
+        console.log(selectedOptions);
+        
+       
+        setCoupon(prev => ({
+            ...prev,
+            user_usage: selectedOptions
+        }));
+  
     };
 
     return (
@@ -352,7 +372,7 @@ const Store: FC = () => {
                         value={coupon.discount_value} 
                         onChange={handleChange}
                         min="0"
-                        step={coupon.discount_type === 0 ? '0.1' : '1000'}
+               
                          
                     />
                     {errors.discount_value && <div className="invalid-feedback">{errors.discount_value}</div>}
@@ -371,18 +391,24 @@ const Store: FC = () => {
                     />
                     
                 </div>
-               <div className="form-group">
-                <label htmlFor="max_uses_per_user">Số lần sử dụng/User</label>
-                <input 
-                    type="number" 
-                    className="form-control" 
-                    id="max_uses_per_user" 
-                    name="max_uses_per_user"     
-                    value={coupon.max_uses_per_user} 
-                    onChange={handleChange}
-                    min="0"
-                />
+                <div className="form-group">
+                    <label htmlFor="user_usage" className="form-label">Chọn User được sử dụng mã giảm giá</label>
+                    <select 
+                        name="user_usage" 
+                        id="user_usage" 
+                        className={`form-control ${errors.user_usage ? 'is-invalid' : ''}`}
+                        defaultValue="0"
+                        onChange={handleUserChange}
+                    >
+                        <option value="0">Chọn User</option>
+                        {userUsage.map(user => (
+                            <option key={user.id} value={user.id}>{user.name}</option>
+                        ))}
+                    </select>
+                    {errors.user_usage && <div className="invalid-feedback">{errors.user_usage}</div>}
                 </div>
+                
+               
                 <button type="submit" className="btn btn-primary">Thêm</button>
             </form>
       

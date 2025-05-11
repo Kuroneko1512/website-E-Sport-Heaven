@@ -45,6 +45,7 @@ const Store = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isEdit, setIsEdit] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [selectedTab, setSelectedTab] = useState<string>("Attribute");
   
 
   const [product, setProduct] = useState<api4>({
@@ -286,7 +287,7 @@ const Store = () => {
 
   return (
     <div className="container-fluid bg-white p-4">
-      <h3>{isEdit ? "EDIT PRODUCT" : "ADD PRODUCT"}</h3>
+      <h3>{isEdit ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm"}</h3>
       <form onSubmit={handleSubmit}>
         <div className="row align-items-stretch">
           {/* Cột nhập thông tin sản phẩm */}
@@ -323,7 +324,7 @@ const Store = () => {
 
             {/* Chọn sản phẩm */}
             <div className="row align-items-stretch my-3">
-              <div className="col-3 p-3 bg-light border rounded">
+              <div className="col-3 bg-light border p-0 ">
                 <ul>
                   {selectedProduct?.value === "simple"
                     ? ["ValueProduct"].map((item, index) => (
@@ -334,10 +335,14 @@ const Store = () => {
                         </li>
                       ))
                     : ["Attribute", "Variant"].map((item, index) => (
-                        <li key={index} className="my-2">
+                        <li 
+                          key={index} 
+                          className={`my-2 h-10 align-content-center ${selectedTab === item ? "bg-dark" : ""}`}
+                          onClick={() => setSelectedTab(item)}
+                        >
                           <Link
                             to={item}
-                            className={`text-black mx-4 `}
+                            className={`text-black mx-4`}
                             style={
                               item != "Attribute" &&
                               product.selected_attributes.length === 0

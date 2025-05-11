@@ -148,7 +148,7 @@ const App = () => {
               <Route path="Variant" element={<VariantProduct />} />
               <Route index element={<ValueProduct />} />
             </Route>
-            <Route path="add-product/:id" element={<Store />} >
+            <Route path="edit-product/:id" element={<Store />} >
               <Route path="ValueProduct" element={<ValueProduct />} />
               <Route path="Attribute" element={<AttributeProduct />} />
               <Route path="Variant" element={<VariantProduct />} />

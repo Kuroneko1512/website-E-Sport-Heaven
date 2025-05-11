@@ -40,7 +40,7 @@ export const MENU: IMenuItem[] = [
     path: '/Attribute',
   },
   {
-    name: 'User',
+    name: 'Người dùng',
     icon: 'fas fa-user nav-icon', // User -> người dùng
     path: '/User',
   },

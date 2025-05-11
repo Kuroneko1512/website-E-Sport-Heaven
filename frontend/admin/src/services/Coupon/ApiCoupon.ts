@@ -9,8 +9,7 @@ export interface Coupon {
   name: string;
   description: string;
   discount_value: number;
-  discount_type: number;
-  max_uses_per_user: number;
+  discount_type: string;
   user_usage: any;
   is_active: number;
   start_date: string;

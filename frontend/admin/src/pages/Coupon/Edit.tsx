@@ -12,7 +12,7 @@ interface Coupon {
     discount_type: 'percentage' | 'fixed'; 
     min_purchase: number;
     max_uses: number;
-  
+ 
 }
 
 const EditCoupon: FC = () => {
@@ -28,7 +28,7 @@ const EditCoupon: FC = () => {
         discount_type: "percentage",
         min_purchase: 0,
         max_uses: 0,
-      
+   
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -55,7 +55,8 @@ const EditCoupon: FC = () => {
                 description: response.description || "",
                 start_date: formattedStartDate,
                 end_date: formattedEndDate,
-                max_uses: response.max_uses || 0
+                max_uses: response.max_uses || 0,
+                discount_type: response.discount_type as 'percentage' | 'fixed'
             });
         } catch (error) {
             console.error("Error fetching coupon:", error);
@@ -267,7 +268,8 @@ const EditCoupon: FC = () => {
                         name="max_uses" 
                         value={coupon.max_uses} 
                         onChange={handleChange}
-                        min="0" 
+                        min="0"
+                     
                     />
                   
                 </div>
