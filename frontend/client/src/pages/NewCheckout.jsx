@@ -16,6 +16,7 @@ import Cookies from "js-cookie";
 import { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiGhtk from "../config/ghtk";
 import FomatVND from "../utils/FomatVND";
 import instanceAxios from "../config/db";
@@ -138,6 +139,7 @@ const NewCheckout = () => {
 
   const { provinces, districts, wards, loadDistricts, loadWards } = useAddressData();
   const { shippingFee, isCalculatingShipping } = useShippingFee(formData, cartItems);
+  const queryClient = useQueryClient();
 
   // Load cart data on mount
   useEffect(() => {
@@ -286,11 +288,15 @@ const NewCheckout = () => {
     wards,
   ]);
 
-  // Fetch available coupons
-  useEffect(() => {
-    const fetchCoupons = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/v1/coupon");
+  // Query for fetching available coupons
+  const { data: couponsData } = useQuery({
+    queryKey: ["coupons"],
+    queryFn: async () => {
+      const response = await instanceAxios.get("api/v1/coupon");
+      return response.data;
+    },
+    onSuccess: (data) => {
+      if (data && data.data) {
         const subtotal = cartItems.reduce(
           (total, item) =>
             total +
@@ -298,31 +304,27 @@ const NewCheckout = () => {
           0
         );
         
-        if (response.data && response.data.data) {
-          const validCoupons = response.data.data.filter((coupon) =>
-            isCouponValid(coupon, subtotal)
-          );
-          setAvailableCoupons(validCoupons);
+        const validCoupons = data.data.filter((coupon) =>
+          isCouponValid(coupon, subtotal)
+        );
+        setAvailableCoupons(validCoupons);
 
-          if (selectedCoupon) {
-            const isStillValid = validCoupons.some((c) => c.id === selectedCoupon.id);
-            if (!isStillValid) {
-              setSelectedCoupon(null);
-              setDiscountCode("");
-              message.warning("Mã giảm giá đã chọn không còn khả dụng!");
-            }
+        if (selectedCoupon) {
+          const isStillValid = validCoupons.some((c) => c.id === selectedCoupon.id);
+          if (!isStillValid) {
+            setSelectedCoupon(null);
+            setDiscountCode("");
+            message.warning("Mã giảm giá đã chọn không còn khả dụng!");
           }
         }
-      } catch (error) {
-        console.error("Error fetching coupons:", error);
-        message.error("Không thể tải danh sách mã giảm giá. Vui lòng thử lại sau.");
       }
-    };
-
-    fetchCoupons();
-    const interval = setInterval(fetchCoupons, 30000);
-    return () => clearInterval(interval);
-  }, [cartItems, selectedCoupon]);
+    },
+    onError: (error) => {
+      console.error("Error fetching coupons:", error);
+      message.error("Không thể tải danh sách mã giảm giá. Vui lòng thử lại sau.");
+    },
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
 
   // Calculate grand total with useMemo
   const grandTotal = useMemo(() => {
@@ -372,6 +374,58 @@ const NewCheckout = () => {
     calculateShippingFee(value);
   };
 
+  // Mutation for creating order
+  const createOrderMutation = useMutation({
+    mutationFn: async (orderData) => {
+      const response = await instanceAxios.post("api/v1/order", orderData);
+      return response.data;
+    },
+    onError: (error) => {
+      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!";
+      message.error(errorMessage);
+      console.error("Lỗi khi đặt hàng:", error);
+      setSubmit(false);
+    }
+  });
+
+  // Mutation for updating coupon usage
+  const updateCouponMutation = useMutation({
+    mutationFn: async ({ couponId, usedCount }) => {
+      const response = await instanceAxios.put(
+        `api/v1/coupon/${couponId}`,
+        { used_count: usedCount }
+      );
+      return response.data;
+    },
+    onError: (error) => {
+      console.error("Lỗi khi cập nhật mã giảm giá:", error);
+      message.error("Không thể cập nhật mã giảm giá. Vui lòng liên hệ hỗ trợ.");
+    }
+  });
+
+  // Mutation for deleting order
+  const deleteOrderMutation = useMutation({
+    mutationFn: async (orderId) => {
+      const response = await instanceAxios.delete(`api/v1/order/${orderId}`);
+      return response.data;
+    },
+    onError: (error) => {
+      console.error("Lỗi khi xóa đơn hàng:", error);
+      message.error("Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng liên hệ hỗ trợ.");
+    }
+  });
+
+  // Query for validating coupon
+  const validateCouponQuery = useQuery({
+    queryKey: ["coupon", selectedCoupon?.id],
+    queryFn: async () => {
+      if (!selectedCoupon) return null;
+      const response = await instanceAxios.get(`api/v1/coupon/${selectedCoupon.id}`);
+      return response.data;
+    },
+    enabled: !!selectedCoupon,
+  });
+
   // Handle order submission
   const handleSubmit = async () => {
     try {
@@ -398,99 +452,54 @@ const NewCheckout = () => {
         return;
       }
 
-      // Validate coupon before proceeding with payment
-      if (selectedCoupon) {
-        try {
-          const couponResponse = await axios.get(`http://127.0.0.1:8000/api/v1/coupon/${selectedCoupon.id}`);
-          const currentCoupon = couponResponse.data;
-          const subtotal = cartItems.reduce(
-            (total, item) =>
-              total +
-              (item.price - (item.price * item.discount) / 100) * item.quantity,
-            0
-          );
-
-          if (!isCouponValid(currentCoupon, subtotal)) {
-            message.error("Mã giảm giá không còn khả dụng. Vui lòng chọn mã khác hoặc tiếp tục thanh toán không sử dụng mã giảm giá.");
-            setSelectedCoupon(null);
-            setDiscountCode("");
-            return;
-          }
-        } catch (error) {
-          console.error("Error validating coupon:", error);
-          message.error("Không thể xác thực mã giảm giá. Vui lòng thử lại sau.");
-          return;
-        }
-      }
-
       setSubmit(true);
       const orderData = {
         ...order,
         amount: grandTotal,
         payment_method: paymentMethod,
         shipping_fee: shippingFee || 0,
+        coupon_id: selectedCoupon?.id || null,
+        order_coupon_code: selectedCoupon?.code || null,
+        order_coupon_name: selectedCoupon?.name || null,
+        order_discount_amount: selectedCoupon ? (
+          selectedCoupon.discount_type === 'percentage' 
+            ? (grandTotal * Number(selectedCoupon.discount_value) / 100).toFixed(2)
+            : Number(selectedCoupon.discount_value).toFixed(2)
+        ) : "0.00",
+        order_discount_type: selectedCoupon ? (selectedCoupon.discount_type === 'percentage' ? 1 : 2) : null,
+        order_discount_value: selectedCoupon ? Number(selectedCoupon.discount_value) : null
       };
 
-      const orderResponse = await axios.post(
-        "http://127.0.0.1:8000/api/v1/order",
-        orderData
-      );
+      const orderResponse = await createOrderMutation.mutateAsync(orderData);
 
-      if (orderResponse.data.success && selectedCoupon) {
-        try {
-          const couponResponse = await axios.get(
-            `http://127.0.0.1:8000/api/v1/coupon/${selectedCoupon.id}`
-          );
-          const currentCoupon = couponResponse.data;
-          const subtotal = cartItems.reduce(
-            (total, item) =>
-              total +
-              (item.price - (item.price * item.discount) / 100) * item.quantity,
-            0
-          );
+      if (orderResponse.success && selectedCoupon) {
+        const currentCoupon = validateCouponQuery.data;
+        const subtotal = cartItems.reduce(
+          (total, item) =>
+            total +
+            (item.price - (item.price * item.discount) / 100) * item.quantity,
+          0
+        );
 
-          if (!isCouponValid(currentCoupon, subtotal)) {
-            try {
-              await axios.delete(
-                `http://127.0.0.1:8000/api/v1/order/${orderResponse.data.data.id}`
-              );
-            } catch (deleteError) {
-              console.error("Lỗi khi xóa đơn hàng:", deleteError);
-              message.error("Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng liên hệ hỗ trợ.");
-              setSubmit(false);
-              return;
-            }
-            message.error(
-              "Mã giảm giá không còn khả dụng. Vui lòng thử lại với mã khác."
-            );
-            setSelectedCoupon(null);
-            setDiscountCode("");
-            setSubmit(false);
-            return;
-          }
-
-          await axios.put(
-            `http://127.0.0.1:8000/api/v1/coupon/${selectedCoupon.id}`,
-            {
-              used_count: currentCoupon.used_count + 1,
-            }
-          );
-        } catch (error) {
-          await axios.delete(
-            `http://127.0.0.1:8000/api/v1/order/${orderResponse.data.data.id}`
-          );
-          console.error("Lỗi khi cập nhật mã giảm giá:", error);
-          message.error("Không thể cập nhật mã giảm giá. Vui lòng liên hệ hỗ trợ.");
+        if (!isCouponValid(currentCoupon, subtotal)) {
+          await deleteOrderMutation.mutateAsync(orderResponse.data.id);
+          setSelectedCoupon(null);
+          setDiscountCode("");
           setSubmit(false);
           return;
         }
+
+        await updateCouponMutation.mutateAsync({
+          couponId: selectedCoupon.id,
+          usedCount: currentCoupon.used_count + 1
+        });
       }
 
-      if (paymentMethod === "vnpay" && orderResponse.data.vnpUrl) {
-        window.location.href = orderResponse.data.vnpUrl;
+      if (paymentMethod === "vnpay" && orderResponse.vnpUrl) {
+        window.location.href = orderResponse.vnpUrl;
       } else {
         message.success("Đặt hàng thành công!");
-        localStorage.setItem("orderCode", orderResponse.data.data.order_code);
+        localStorage.setItem("orderCode", orderResponse.data.order_code);
         const checkoutItems = JSON.parse(localStorage.getItem("checkoutItems")) || [];
         let storedCartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
         storedCartItems = storedCartItems.filter(
@@ -503,10 +512,6 @@ const NewCheckout = () => {
         navigate("/thankyou");
       }
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!";
-      message.error(errorMessage);
-      console.error("Lỗi khi đặt hàng:", error);
       setSubmit(false);
     }
   };
