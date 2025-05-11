@@ -13,7 +13,7 @@ import {
 } from "antd";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import apiGhtk from "../config/ghtk";
@@ -22,6 +22,86 @@ import instanceAxios from "../config/db";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
+
+// Custom hook cho phí vận chuyển
+const useShippingFee = (formData, cartItems) => {
+  const [shippingFee, setShippingFee] = useState(null);
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
+
+  useEffect(() => {
+    const { province, district, ward } = formData;
+    if (province && district && ward) {
+      const calculateShippingFee = async () => {
+        setIsCalculatingShipping(true);
+        try {
+          const weight = cartItems.reduce(
+            (total, item) => total + (item.weight || 0) * item.quantity,
+            0
+          ) || 10000;
+          const response = await apiGhtk.get(`/services/shipment/fee`, {
+            params: { ...formData, weight },
+          });
+          if (response?.data?.success === true) {
+            setShippingFee(response?.data?.fee?.ship_fee_only);
+          } else if (response?.data?.success === false) {
+            message.error(response.message || "Không thể tính phí vận chuyển!");
+          }
+        } catch (error) {
+          console.error("Lỗi khi tính phí vận chuyển:", error);
+          message.error("Lỗi khi tính phí vận chuyển!");
+        } finally {
+          setIsCalculatingShipping(false);
+        }
+      };
+
+      calculateShippingFee();
+    }
+  }, [formData, cartItems]);
+
+  return { shippingFee, isCalculatingShipping };
+};
+
+// Custom hook cho dữ liệu địa chỉ
+const useAddressData = () => {
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get("http://127.0.0.1:8000/api/v1/address/provinces/")
+      .then((response) => setProvinces(response?.data?.data))
+      .catch((error) => console.error("Lỗi khi tải tỉnh/thành phố:", error));
+  }, []);
+
+  const loadDistricts = (provinceCode) => {
+    axios
+      .get(`http://127.0.0.1:8000/api/v1/address/districts?province_code=${provinceCode}`)
+      .then((response) => setDistricts(response?.data?.data))
+      .catch((error) => console.error("Lỗi khi tải quận/huyện:", error));
+  };
+
+  const loadWards = (districtCode) => {
+    axios
+      .get(`http://127.0.0.1:8000/api/v1/address/communes?district_code=${districtCode}`)
+      .then((response) => setWards(response?.data?.data))
+      .catch((error) => console.error("Lỗi khi tải phường/xã:", error));
+  };
+
+  return { provinces, districts, wards, loadDistricts, loadWards };
+};
+
+// Hàm kiểm tra tính hợp lệ của mã giảm giá
+const isCouponValid = (coupon, subtotal) => {
+  const now = new Date();
+  return (
+    coupon.is_active &&
+    new Date(coupon.start_date) <= now &&
+    new Date(coupon.end_date) >= now &&
+    coupon.used_count < coupon.max_uses &&
+    subtotal >= coupon.min_purchase
+  );
+};
 
 const NewCheckout = () => {
   const isLogin = useSelector((state) => state.auth.isLogin);
@@ -36,9 +116,6 @@ const NewCheckout = () => {
   const [discountCode, setDiscountCode] = useState("");
   const [availableCoupons, setAvailableCoupons] = useState([]);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
   const [specificAddress, setSpecificAddress] = useState("");
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
@@ -46,7 +123,6 @@ const NewCheckout = () => {
   const [order, setOrder] = useState({ customer_note: "Giao hàng tận nơi" });
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submit, setSubmit] = useState(false);
-  const [shippingFee, setShippingFee] = useState(null);
 
   const [formData, setFormData] = useState({
     pick_province: "Hà Nội",
@@ -60,35 +136,11 @@ const NewCheckout = () => {
     deliver_option: "none",
   });
 
-  // Calculate shipping fee when formData changes
+  const { provinces, districts, wards, loadDistricts, loadWards } = useAddressData();
+  const { shippingFee, isCalculatingShipping } = useShippingFee(formData, cartItems);
+
+  // Load cart data on mount
   useEffect(() => {
-    const { province, district, ward } = formData;
-
-    if (province && district && ward) {
-      const calculateShippingFee = async () => {
-        try {
-          const response = await apiGhtk.get(`/services/shipment/fee`, { params: formData });
-          if (response?.data?.success === true) {
-            setShippingFee(response?.data?.fee?.ship_fee_only);
-          } else if (response?.data?.success === false) {
-            message.error(response.message || "Không thể tính phí vận chuyển!");
-          }
-        } catch (error) {
-          message.error("Lỗi khi tính phí vận chuyển!");
-        }
-      };
-
-      calculateShippingFee();
-    }
-  }, [formData]);
-
-  // Load provinces and cart data on mount
-  useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/v1/address/provinces/")
-      .then((response) => setProvinces(response?.data?.data))
-      .catch((error) => console.error("Lỗi khi tải tỉnh/thành phố:", error));
-
     const cartItems = localStorage.getItem("checkoutItems");
     const cartTotal = localStorage.getItem("cartTotal");
 
@@ -96,93 +148,7 @@ const NewCheckout = () => {
     if (cartTotal) setCartTotal(JSON.parse(cartTotal));
   }, []);
 
-  // Load districts when province changes
-  useEffect(() => {
-    if (selectedProvince) {
-      axios
-        .get(`http://127.0.0.1:8000/api/v1/address/districts?province_code=${selectedProvince}`)
-        .then((response) => setDistricts(response?.data?.data))
-        .catch((error) => console.error("Lỗi khi tải quận/huyện:", error));
-    }
-  }, [selectedProvince]);
-
-  // Load wards when district changes
-  useEffect(() => {
-    if (selectedDistrict) {
-      axios
-        .get(`http://127.0.0.1:8000/api/v1/address/communes?district_code=${selectedDistrict}`)
-        .then((response) => setWards(response?.data?.data))
-        .catch((error) => console.error("Lỗi khi tải phường/xã:", error));
-    }
-  }, [selectedDistrict]);
-
-  // Add this function to check if a coupon is valid
-  const isCouponValid = (coupon, subtotal) => {
-    const now = new Date();
-    const startDate = coupon.start_date ? new Date(coupon.start_date) : null;
-    const endDate = coupon.end_date ? new Date(coupon.end_date) : null;
-
-    // Check if coupon is active
-    if (!coupon.is_active) return false;
-
-    // Check if coupon has reached max uses
-    if (coupon.max_uses && coupon.used_count >= coupon.max_uses) return false;
-
-    // Check if order total meets minimum purchase requirement
-    if (coupon.min_purchase && subtotal < coupon.min_purchase) return false;
-
-    // Check if coupon is within valid date range
-    if (startDate && now < startDate) return false;
-    if (endDate && now > endDate) return false;
-
-    return true;
-  };
-
-  // Update the useEffect for fetching coupons
-  useEffect(() => {
-    const fetchCoupons = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/v1/coupon");
-        const subtotal = cartItems.reduce(
-          (total, item) =>
-            total +
-            (item.price - (item.price * item.discount) / 100) * item.quantity,
-          0
-        );
-        
-        // Filter coupons that are valid for current order
-        const validCoupons = response.data.data.filter(coupon => 
-          isCouponValid(coupon, subtotal)
-        );
-        
-        setAvailableCoupons(validCoupons);
-
-        // If currently selected coupon is no longer valid, remove it
-        if (selectedCoupon) {
-          const isStillValid = validCoupons.some(c => c.id === selectedCoupon.id);
-          if (!isStillValid) {
-            setSelectedCoupon(null);
-            setDiscountCode("");
-            message.warning("Mã giảm giá đã chọn không còn khả dụng!");
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching coupons:", error);
-      }
-    };
-
-    fetchCoupons();
-    // Refresh coupons every 30 seconds to keep used_count updated
-    const interval = setInterval(fetchCoupons, 30000);
-    return () => clearInterval(interval);
-  }, [cartItems, selectedCoupon]); // Add selectedCoupon to dependencies
-
-  const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    setOrder((prev) => ({ ...prev, [id]: value }));
-  };
-
-  // On login, fetch addresses from API
+  // Fetch addresses if logged in
   useEffect(() => {
     const userRaw = Cookies.get("user");
     if (!userRaw) return;
@@ -246,13 +212,12 @@ const NewCheckout = () => {
       setSelectedDistrict(districtCode);
       setSelectedWard(wardCode);
 
-      // Update formData for shipping fee calculation
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         province: dataform.province?.name || dataform.province,
         district: dataform.district?.name || dataform.district,
         ward: dataform.commune?.name || dataform.ward,
-        address: dataform.address_line1 || dataform.specificAddress
+        address: dataform.address_line1 || dataform.specificAddress,
       }));
 
       setOrder((prev) => ({
@@ -287,13 +252,12 @@ const NewCheckout = () => {
         ", " +
         (provinces.find((p) => p.code === selectedProvince)?.name || "");
 
-      // Update formData for shipping fee calculation when using new address
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         province: provinces.find((p) => p.code === selectedProvince)?.name || "",
         district: districts.find((d) => d.code === selectedDistrict)?.name || "",
         ward: wards.find((w) => w.code === selectedWard)?.name || "",
-        address: specificAddress
+        address: specificAddress,
       }));
 
       setOrder((prev) => ({
@@ -322,64 +286,90 @@ const NewCheckout = () => {
     wards,
   ]);
 
-  // Update shipping fee calculation when formData changes
+  // Fetch available coupons
   useEffect(() => {
-    const { province, district, ward } = formData;
-    if (province && district && ward) {
-      const calculateShippingFee = async () => {
-        try {
-          const response = await apiGhtk.get(`/services/shipment/fee`, { 
-            params: {
-              ...formData,
-              weight: cartItems.reduce((total, item) => total + (item.weight || 0) * item.quantity, 0) || 10000
-            } 
-          });
-          if (response?.data?.success === true) {
-            const fee = response?.data?.fee?.ship_fee_only;
-            setShippingFee(fee);
-            // Update order with shipping fee
-            setOrder(prev => ({
-              ...prev,
-              shipping_fee: fee
-            }));
-          } else if (response?.data?.success === false) {
-            message.error(response.message || "Không thể tính phí vận chuyển!");
+    const fetchCoupons = async () => {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/v1/coupon");
+        const subtotal = cartItems.reduce(
+          (total, item) =>
+            total +
+            (item.price - (item.price * item.discount) / 100) * item.quantity,
+          0
+        );
+        
+        if (response.data && response.data.data) {
+          const validCoupons = response.data.data.filter((coupon) =>
+            isCouponValid(coupon, subtotal)
+          );
+          setAvailableCoupons(validCoupons);
+
+          if (selectedCoupon) {
+            const isStillValid = validCoupons.some((c) => c.id === selectedCoupon.id);
+            if (!isStillValid) {
+              setSelectedCoupon(null);
+              setDiscountCode("");
+              message.warning("Mã giảm giá đã chọn không còn khả dụng!");
+            }
           }
-        } catch (error) {
-          console.error("Lỗi khi tính phí vận chuyển:", error);
-          message.error("Lỗi khi tính phí vận chuyển!");
         }
-      };
+      } catch (error) {
+        console.error("Error fetching coupons:", error);
+        message.error("Không thể tải danh sách mã giảm giá. Vui lòng thử lại sau.");
+      }
+    };
 
-      calculateShippingFee();
-    }
-  }, [formData, cartItems]);
+    fetchCoupons();
+    const interval = setInterval(fetchCoupons, 30000);
+    return () => clearInterval(interval);
+  }, [cartItems, selectedCoupon]);
 
-  // Handle address selection from modal
-  const handleSelectAddress = (id) => {
-    setSelectedAddress(id);
-    setShowAddressModal(false);
-    setUseNewAddress(false);
-  };
-
-  const calculateGrandTotal = () => {
+  // Calculate grand total with useMemo
+  const grandTotal = useMemo(() => {
     const subtotal = cartItems.reduce(
       (total, item) =>
         total +
         (item.price - (item.price * item.discount) / 100) * item.quantity,
       0
     );
-    
     let discount = 0;
     if (selectedCoupon) {
-      if (selectedCoupon.discount_type === 'percentage') {
+      if (selectedCoupon.discount_type === "percentage") {
         discount = (subtotal * selectedCoupon.discount_value) / 100;
       } else {
         discount = selectedCoupon.discount_value;
       }
     }
-    
     return subtotal + (shippingFee || 0) - discount;
+  }, [cartItems, shippingFee, selectedCoupon]);
+
+  // Handle input changes
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setOrder((prev) => ({ ...prev, [id]: value }));
+  };
+
+  // Handle address selection
+  const handleSelectAddress = (id) => {
+    setSelectedAddress(id);
+    setShowAddressModal(false);
+    setUseNewAddress(false);
+  };
+
+  // Handle address change
+  const handleAddressChange = (value) => {
+    setSelectedAddress(value);
+    setShippingFee(null);
+    setIsCalculatingShipping(true);
+    calculateShippingFee(value);
+  };
+
+  // Handle new address change
+  const handleNewAddressChange = (value) => {
+    setSelectedNewAddress(value);
+    setShippingFee(null);
+    setIsCalculatingShipping(true);
+    calculateShippingFee(value);
   };
 
   // Handle order submission
@@ -397,43 +387,114 @@ const NewCheckout = () => {
         message.error("Vui lòng điền đầy đủ thông tin!");
         return;
       }
+
+      if (!shippingFee) {
+        message.error("Vui lòng chọn địa chỉ giao hàng để tính phí vận chuyển!");
+        return;
+      }
+
+      if (isCalculatingShipping) {
+        message.error("Đang tính phí vận chuyển, vui lòng đợi trong giây lát!");
+        return;
+      }
+
+      // Validate coupon before proceeding with payment
+      if (selectedCoupon) {
+        try {
+          const couponResponse = await axios.get(`http://127.0.0.1:8000/api/v1/coupon/${selectedCoupon.id}`);
+          const currentCoupon = couponResponse.data;
+          const subtotal = cartItems.reduce(
+            (total, item) =>
+              total +
+              (item.price - (item.price * item.discount) / 100) * item.quantity,
+            0
+          );
+
+          if (!isCouponValid(currentCoupon, subtotal)) {
+            message.error("Mã giảm giá không còn khả dụng. Vui lòng chọn mã khác hoặc tiếp tục thanh toán không sử dụng mã giảm giá.");
+            setSelectedCoupon(null);
+            setDiscountCode("");
+            return;
+          }
+        } catch (error) {
+          console.error("Error validating coupon:", error);
+          message.error("Không thể xác thực mã giảm giá. Vui lòng thử lại sau.");
+          return;
+        }
+      }
+
       setSubmit(true);
       const orderData = {
         ...order,
-        amount: calculateGrandTotal(),
+        amount: grandTotal,
         payment_method: paymentMethod,
-        shipping_fee: shippingFee || 0
+        shipping_fee: shippingFee || 0,
       };
 
-      // Create order
-      const response = await axios.post(
+      const orderResponse = await axios.post(
         "http://127.0.0.1:8000/api/v1/order",
         orderData
       );
 
-      // If order is created successfully and a coupon was used, update the coupon's used_count
-      if (response.data.success && selectedCoupon) {
+      if (orderResponse.data.success && selectedCoupon) {
         try {
-          await axios.put(`http://127.0.0.1:8000/api/v1/coupon/${selectedCoupon.id}`, {
-            used_count: selectedCoupon.used_count + 1
-          });
+          const couponResponse = await axios.get(
+            `http://127.0.0.1:8000/api/v1/coupon/${selectedCoupon.id}`
+          );
+          const currentCoupon = couponResponse.data;
+          const subtotal = cartItems.reduce(
+            (total, item) =>
+              total +
+              (item.price - (item.price * item.discount) / 100) * item.quantity,
+            0
+          );
+
+          if (!isCouponValid(currentCoupon, subtotal)) {
+            try {
+              await axios.delete(
+                `http://127.0.0.1:8000/api/v1/order/${orderResponse.data.data.id}`
+              );
+            } catch (deleteError) {
+              console.error("Lỗi khi xóa đơn hàng:", deleteError);
+              message.error("Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng liên hệ hỗ trợ.");
+              setSubmit(false);
+              return;
+            }
+            message.error(
+              "Mã giảm giá không còn khả dụng. Vui lòng thử lại với mã khác."
+            );
+            setSelectedCoupon(null);
+            setDiscountCode("");
+            setSubmit(false);
+            return;
+          }
+
+          await axios.put(
+            `http://127.0.0.1:8000/api/v1/coupon/${selectedCoupon.id}`,
+            {
+              used_count: currentCoupon.used_count + 1,
+            }
+          );
         } catch (error) {
-          console.error("Error updating coupon usage:", error);
+          await axios.delete(
+            `http://127.0.0.1:8000/api/v1/order/${orderResponse.data.data.id}`
+          );
+          console.error("Lỗi khi cập nhật mã giảm giá:", error);
+          message.error("Không thể cập nhật mã giảm giá. Vui lòng liên hệ hỗ trợ.");
+          setSubmit(false);
+          return;
         }
       }
 
-      if (paymentMethod === "vnpay" && response.data.vnpUrl) {
-        window.location.href = response.data.vnpUrl;
+      if (paymentMethod === "vnpay" && orderResponse.data.vnpUrl) {
+        window.location.href = orderResponse.data.vnpUrl;
       } else {
         message.success("Đặt hàng thành công!");
-        localStorage.setItem("orderCode", response.data.data.order_code);
-        const checkoutItems =
-          JSON.parse(localStorage.getItem("checkoutItems")) || [];
-        let storedCartItems =
-          JSON.parse(localStorage.getItem("cartItems")) || [];
+        localStorage.setItem("orderCode", orderResponse.data.data.order_code);
+        const checkoutItems = JSON.parse(localStorage.getItem("checkoutItems")) || [];
+        let storedCartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
         storedCartItems = storedCartItems.filter(
-          (item) =>
-            !checkoutItems.some((checkoutItem) => checkoutItem.id === item.id)
+          (item) => !checkoutItems.some((checkoutItem) => checkoutItem.id === item.id)
         );
         localStorage.setItem("cartItems", JSON.stringify(storedCartItems));
         setCartItems([]);
@@ -442,14 +503,13 @@ const NewCheckout = () => {
         navigate("/thankyou");
       }
     } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!";
+      message.error(errorMessage);
       console.error("Lỗi khi đặt hàng:", error);
-      message.error("Có lỗi xảy ra, vui lòng thử lại!");
-    } finally {
       setSubmit(false);
     }
   };
-
-  console.log("order", order)
 
   return (
     <div className="p-6 bg-white">
@@ -459,7 +519,13 @@ const NewCheckout = () => {
           <div className="mb-4">
             <Text strong>Địa chỉ giao hàng:</Text>{" "}
             {dataform
-              ? `${dataform?.recipient_name || dataform?.fullname} - ${dataform?.phone || dataform?.mobile} - ${dataform?.address_line1 || dataform?.specificAddress}, ${dataform?.commune?.name || dataform?.ward}, ${dataform?.district?.name || dataform?.district}, ${dataform?.province?.name || dataform?.province}`
+              ? `${dataform?.recipient_name || dataform?.fullname} - ${
+                  dataform?.phone || dataform?.mobile
+                } - ${dataform?.address_line1 || dataform?.specificAddress}, ${
+                  dataform?.commune?.name || dataform?.ward
+                }, ${dataform?.district?.name || dataform?.district}, ${
+                  dataform?.province?.name || dataform?.province
+                }`
               : "Chưa có địa chỉ"}
             {isLogin && addresses.length > 0 && (
               <Button type="link" onClick={() => setShowAddressModal(true)}>
@@ -518,20 +584,15 @@ const NewCheckout = () => {
                     placeholder="Chọn Tỉnh/Thành phố"
                     value={selectedProvince}
                     onChange={(value) => {
-                      setFormData({ ...formData, province: provinces.find((p) => p.code === value)?.name });
                       setSelectedProvince(value);
-                      setDistricts([]);
-                      setWards([]);
-                      setSelectedDistrict("");
-                      setSelectedWard("");
-                      form.setFieldsValue({
-                        district: undefined,
-                        ward: undefined,
-                      });
+                      loadDistricts(value);
+                      setFormData((prev) => ({
+                        ...prev,
+                        province: provinces.find((p) => p.code === value)?.name,
+                      }));
                     }}
-                    disabled={!!(dataform?.province?.name || dataform?.province)}
                   >
-                    {provinces?.map((province) => (
+                    {provinces.map((province) => (
                       <Option key={province.code} value={province.code}>
                         {province.name}
                       </Option>
@@ -557,17 +618,16 @@ const NewCheckout = () => {
                     placeholder="Chọn Quận/Huyện"
                     value={selectedDistrict}
                     onChange={(value) => {
-                      setFormData({ ...formData, district: districts.find((d) => d.code === value)?.name });
                       setSelectedDistrict(value);
-                      setWards([]);
-                      setSelectedWard("");
-                      form.setFieldsValue({
-                        ward: undefined,
-                      });
+                      loadWards(value);
+                      setFormData((prev) => ({
+                        ...prev,
+                        district: districts.find((d) => d.code === value)?.name,
+                      }));
                     }}
                     disabled={!selectedProvince}
                   >
-                    {districts?.map((d) => (
+                    {districts.map((d) => (
                       <Option key={d.code} value={d.code}>
                         {d.name}
                       </Option>
@@ -591,12 +651,15 @@ const NewCheckout = () => {
                     placeholder="Chọn Phường/Xã"
                     value={selectedWard}
                     onChange={(value) => {
-                      setFormData({ ...formData, ward: wards.find((w) => w.code === value)?.name });
                       setSelectedWard(value);
+                      setFormData((prev) => ({
+                        ...prev,
+                        ward: wards.find((w) => w.code === value)?.name,
+                      }));
                     }}
                     disabled={!selectedDistrict}
                   >
-                    {wards?.map((w) => (
+                    {wards.map((w) => (
                       <Option key={w.code} value={w.code}>
                         {w.name}
                       </Option>
@@ -610,13 +673,13 @@ const NewCheckout = () => {
                 required
               >
                 <Input
-                  value={order?.specificAddress}
+                  value={specificAddress}
                   onChange={(e) => {
-                    setFormData({ ...formData, address: e.target.value });
                     setSpecificAddress(e.target.value);
+                    setFormData((prev) => ({ ...prev, address: e.target.value }));
                   }}
-                  className="!bg-white !border !border-gray-300 !text-black"
                   disabled={!!(dataform?.address_line1 || dataform?.specificAddress)}
+                  className="!bg-white !border !border-gray-300 !text-black"
                 />
               </Form.Item>
             </Form>
@@ -663,10 +726,10 @@ const NewCheckout = () => {
               <div className="grid grid-cols-1 gap-4 mt-2">
                 {availableCoupons.length > 0 ? (
                   availableCoupons.map((coupon) => (
-                    <Card 
+                    <Card
                       key={coupon.id}
                       className={`cursor-pointer transition-all ${
-                        selectedCoupon?.id === coupon.id ? 'border-blue-500' : ''
+                        selectedCoupon?.id === coupon.id ? "border-blue-500" : ""
                       }`}
                       onClick={() => {
                         if (selectedCoupon?.id === coupon.id) {
@@ -684,13 +747,15 @@ const NewCheckout = () => {
                             {coupon.code.toUpperCase()}
                           </Text>
                           <div className="text-sm mt-1">
-                            {coupon.discount_type === 'percentage' 
+                            {coupon.discount_type === "percentage"
                               ? `Giảm ${coupon.discount_value}%`
                               : `Giảm ${FomatVND(coupon.discount_value)}`}
                           </div>
                         </div>
-                        <Button 
-                          type={selectedCoupon?.id === coupon.id ? "primary" : "default"}
+                        <Button
+                          type={
+                            selectedCoupon?.id === coupon.id ? "primary" : "default"
+                          }
                           onClick={(e) => {
                             e.stopPropagation();
                             if (selectedCoupon?.id === coupon.id) {
@@ -728,11 +793,17 @@ const NewCheckout = () => {
 
             <div className="flex justify-between mb-2">
               <Text>Phí vận chuyển</Text>
-              <Text>{shippingFee ? FomatVND(shippingFee) : "Hãy chọn địa điểm"} </Text>
+              <Text>
+                {isCalculatingShipping
+                  ? "Đang tính..."
+                  : shippingFee
+                  ? FomatVND(shippingFee)
+                  : "Hãy chọn địa điểm"}
+              </Text>
             </div>
             <div className="flex justify-between font-bold">
               <Text strong>Tổng cộng</Text>
-              <Text strong>{FomatVND(calculateGrandTotal())}</Text>
+              <Text strong>{FomatVND(grandTotal)}</Text>
             </div>
 
             <Button
@@ -740,7 +811,7 @@ const NewCheckout = () => {
               block
               className="mt-4"
               onClick={handleSubmit}
-              disabled={submit || (order && order?.order_items?.length === 0)}
+              disabled={submit || cartItems.length === 0}
             >
               Tiếp tục thanh toán
             </Button>
@@ -762,7 +833,9 @@ const NewCheckout = () => {
                   {addr.recipient_name || addr.fullname} - {addr.phone || addr.mobile}
                 </p>
                 <p>
-                  {addr.address_line1 || addr.specificAddress}, {addr.commune?.name || addr.ward}, {addr.district?.name || addr.district}, {addr.province?.name || addr.province}
+                  {addr.address_line1 || addr.specificAddress},{" "}
+                  {addr.commune?.name || addr.ward}, {addr.district?.name || addr.district},{" "}
+                  {addr.province?.name || addr.province}
                 </p>
               </div>
               <div className="flex items-center">
