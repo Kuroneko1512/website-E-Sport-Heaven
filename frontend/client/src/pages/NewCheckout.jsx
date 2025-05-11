@@ -183,6 +183,15 @@ const NewCheckout = () => {
       setSelectedDistrict(districtCode);
       setSelectedWard(wardCode);
 
+      // Update formData for shipping fee calculation
+      setFormData(prev => ({
+        ...prev,
+        province: dataform.province?.name || dataform.province,
+        district: dataform.district?.name || dataform.district,
+        ward: dataform.commune?.name || dataform.ward,
+        address: dataform.address_line1 || dataform.specificAddress
+      }));
+
       setOrder((prev) => ({
         ...prev,
         customer_name: dataform.recipient_name || dataform.fullname,
@@ -214,6 +223,16 @@ const NewCheckout = () => {
         (districts.find((d) => d.code === selectedDistrict)?.name || "") +
         ", " +
         (provinces.find((p) => p.code === selectedProvince)?.name || "");
+
+      // Update formData for shipping fee calculation when using new address
+      setFormData(prev => ({
+        ...prev,
+        province: provinces.find((p) => p.code === selectedProvince)?.name || "",
+        district: districts.find((d) => d.code === selectedDistrict)?.name || "",
+        ward: wards.find((w) => w.code === selectedWard)?.name || "",
+        address: specificAddress
+      }));
+
       setOrder((prev) => ({
         ...prev,
         shipping_address: shippingAddress,
@@ -239,6 +258,33 @@ const NewCheckout = () => {
     districts,
     wards,
   ]);
+
+  // Update shipping fee calculation when formData changes
+  useEffect(() => {
+    const { province, district, ward } = formData;
+    if (province && district && ward) {
+      const calculateShippingFee = async () => {
+        try {
+          const response = await apiGhtk.get(`/services/shipment/fee`, { 
+            params: {
+              ...formData,
+              weight: cartItems.reduce((total, item) => total + (item.weight || 0) * item.quantity, 0) || 10000
+            } 
+          });
+          if (response?.data?.success === true) {
+            setShippingFee(response?.data?.fee?.ship_fee_only);
+          } else if (response?.data?.success === false) {
+            message.error(response.message || "Không thể tính phí vận chuyển!");
+          }
+        } catch (error) {
+          console.error("Lỗi khi tính phí vận chuyển:", error);
+          message.error("Lỗi khi tính phí vận chuyển!");
+        }
+      };
+
+      calculateShippingFee();
+    }
+  }, [formData, cartItems]);
 
   // Handle address selection from modal
   const handleSelectAddress = (id) => {
