@@ -18,6 +18,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import apiGhtk from "../config/ghtk";
 import FomatVND from "../utils/FomatVND";
+import instanceAxios from "../config/db";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -53,41 +54,33 @@ const NewCheckout = () => {
     ward: "",
     address: "",
     weight: 10000,
-    // value: 3000000,
     transport: "road",
     deliver_option: "none",
   });
-  // console.log("order", order);
 
-  console.log("shippingFee", shippingFee);
-
-  // Tự động tính phí vận chuyển khi các trường địa chỉ được chọn đầy đủ
+  // Calculate shipping fee when formData changes
   useEffect(() => {
     const { province, district, ward } = formData;
 
-    // Kiểm tra nếu tất cả các trường cần thiết đã được chọn
     if (province && district && ward) {
       const calculateShippingFee = async () => {
-        // try {
-          const response = await apiGhtk.get(`/services/shipment/fee`, {params:formData});
-          console.log("response", response?.data);
+        try {
+          const response = await apiGhtk.get(`/services/shipment/fee`, { params: formData });
           if (response?.data?.success === true) {
-            setShippingFee(response?.data?.fee?.ship_fee_only); // Lưu phí vận chuyển
-            // message.success("Tính phí vận chuyển thành công!");
-          } 
-          if (response?.data?.success === false) {
+            setShippingFee(response?.data?.fee?.ship_fee_only);
+          } else if (response?.data?.success === false) {
             message.error(response.message || "Không thể tính phí vận chuyển!");
           }
-        // } catch (error) {
-        //   message.error("Lỗi khi tính phí vận chuyển!");
-        // }
-        };
+        } catch (error) {
+          message.error("Lỗi khi tính phí vận chuyển!");
+        }
+      };
 
       calculateShippingFee();
     }
-  }, [formData]); // Theo dõi sự thay đổi của formData
+  }, [formData]);
 
-  // Load dữ liệu provinces, districts, wards một lần khi mount
+  // Load provinces and cart data on mount
   useEffect(() => {
     axios
       .get("http://127.0.0.1:8000/api/v1/address/provinces/")
@@ -101,23 +94,21 @@ const NewCheckout = () => {
     if (cartTotal) setCartTotal(JSON.parse(cartTotal));
   }, []);
 
+  // Load districts when province changes
   useEffect(() => {
     if (selectedProvince) {
       axios
-        .get(
-          `http://127.0.0.1:8000/api/v1/address/districts?province_code=${selectedProvince}`
-        )
+        .get(`http://127.0.0.1:8000/api/v1/address/districts?province_code=${selectedProvince}`)
         .then((response) => setDistricts(response?.data?.data))
         .catch((error) => console.error("Lỗi khi tải quận/huyện:", error));
     }
   }, [selectedProvince]);
 
+  // Load wards when district changes
   useEffect(() => {
     if (selectedDistrict) {
       axios
-        .get(
-          `http://127.0.0.1:8000/api/v1/address/communes?district_code=${selectedDistrict}`
-        )
+        .get(`http://127.0.0.1:8000/api/v1/address/communes?district_code=${selectedDistrict}`)
         .then((response) => setWards(response?.data?.data))
         .catch((error) => console.error("Lỗi khi tải phường/xã:", error));
     }
@@ -128,7 +119,7 @@ const NewCheckout = () => {
     setOrder((prev) => ({ ...prev, [id]: value }));
   };
 
-  // Khi đăng nhập, load địa chỉ từ localStorage
+  // On login, fetch addresses from API
   useEffect(() => {
     const userRaw = Cookies.get("user");
     if (!userRaw) return;
@@ -139,41 +130,54 @@ const NewCheckout = () => {
         ...prev,
         customer_id: user.customerId || null,
       }));
-      const savedAddresses =
-        JSON.parse(localStorage.getItem("addresses")) || [];
-      setAddresses(savedAddresses);
-      if (savedAddresses.length > 0) {
-        const defaultAddr = savedAddresses.find((addr) => addr.defaultAddress);
-        setSelectedAddress(defaultAddr ? defaultAddr.id : savedAddresses[0].id);
-        setUseNewAddress(false);
-      } else {
-        setUseNewAddress(true);
-      }
+
+      instanceAxios
+        .get("http://127.0.0.1:8000/api/v1/customer/shipping-address")
+        .then((response) => {
+          const fetchedAddresses = Array.isArray(response?.data?.data) ? response.data.data : [];
+          setAddresses(fetchedAddresses);
+          if (fetchedAddresses.length > 0) {
+            const defaultAddr = fetchedAddresses.find((addr) => addr.is_default);
+            if (defaultAddr) {
+              setSelectedAddress(defaultAddr.id);
+              setUseNewAddress(false);
+            } else {
+              setSelectedAddress(fetchedAddresses[0].id);
+              setUseNewAddress(false);
+            }
+          } else {
+            setUseNewAddress(true);
+          }
+        })
+        .catch(() => {
+          setUseNewAddress(true);
+          setAddresses([]);
+        });
     } else {
       setUseNewAddress(true);
     }
   }, [isLogin]);
 
-  // Cập nhật form và order khi có địa chỉ đã lưu được chọn
+  // Update form and order when selected address changes
   const dataform = addresses.find((addr) => addr.id === selectedAddress);
   useEffect(() => {
     if (dataform) {
-      // Đang dùng địa chỉ đã lưu => disabled các trường nhập
       form.setFieldsValue({
-        fullname: dataform.fullname,
-        mobile: dataform.mobile,
+        fullname: dataform.recipient_name || dataform.fullname,
+        mobile: dataform.phone || dataform.mobile,
         email: dataform.email,
-        specificAddress: dataform.specificAddress,
-        province: dataform.province,
-        district: dataform.district,
-        ward: dataform.ward,
+        specificAddress: dataform.address_line1 || dataform.specificAddress,
+        province: dataform.province?.name || dataform.province,
+        district: dataform.district?.name || dataform.district,
+        ward: dataform.commune?.name || dataform.ward,
       });
-      // Tìm mã code từ dữ liệu đã load
+
       const provinceCode =
-        provinces.find((p) => p.name === dataform.province)?.code || "";
+        provinces.find((p) => p.name === (dataform.province?.name || dataform.province))?.code || "";
       const districtCode =
-        districts.find((d) => d.name === dataform.district)?.code || "";
-      const wardCode = wards.find((w) => w.name === dataform.ward)?.code || "";
+        districts.find((d) => d.name === (dataform.district?.name || dataform.district))?.code || "";
+      const wardCode =
+        wards.find((w) => w.name === (dataform.commune?.name || dataform.ward))?.code || "";
 
       setSelectedProvince(provinceCode);
       setSelectedDistrict(districtCode);
@@ -181,18 +185,17 @@ const NewCheckout = () => {
 
       setOrder((prev) => ({
         ...prev,
-        // customer_id: user.customerId||null,
-        customer_name: dataform.fullname,
-        customer_phone: dataform.mobile,
+        customer_name: dataform.recipient_name || dataform.fullname,
+        customer_phone: dataform.phone || dataform.mobile,
         customer_email: dataform.email,
         shipping_address:
-          dataform.specificAddress +
+          (dataform.address_line1 || dataform.specificAddress) +
           ", " +
-          dataform.ward +
+          (dataform.commune?.name || dataform.ward) +
           ", " +
-          dataform.district +
+          (dataform.district?.name || dataform.district) +
           ", " +
-          dataform.province,
+          (dataform.province?.name || dataform.province),
         order_items: cartItems.map((item) => ({
           product_id: item.product_id,
           product_variant_id: item.variant_id || null,
@@ -202,9 +205,7 @@ const NewCheckout = () => {
         })),
       }));
     } else {
-      // Nếu không có địa chỉ lưu, cho phép nhập mới
       setUseNewAddress(true);
-      // Nếu có dữ liệu từ form nhập mới, cập nhật order
       const shippingAddress =
         specificAddress +
         ", " +
@@ -239,7 +240,7 @@ const NewCheckout = () => {
     wards,
   ]);
 
-  // Xử lý chọn địa chỉ từ modal
+  // Handle address selection from modal
   const handleSelectAddress = (id) => {
     setSelectedAddress(id);
     setShowAddressModal(false);
@@ -254,21 +255,19 @@ const NewCheckout = () => {
       0
     );
     const discount = discountCode ? 10000 : 0;
-    return subtotal + shippingFee - discount;
+    return subtotal + (shippingFee || 0) - discount;
   };
 
   const handleApplyDiscount = () => {
     message.info("Mã giảm giá chưa được hỗ trợ!");
   };
 
-  // Xử lý submit đơn hàng
+  // Handle order submission
   const handleSubmit = async () => {
     try {
-      // Dùng validateFields của form nếu dùng nhập mới
       if (useNewAddress) {
         await form.validateFields();
       }
-      // Kiểm tra thông tin bắt buộc
       if (
         !order.customer_name ||
         !order.customer_phone ||
@@ -293,7 +292,6 @@ const NewCheckout = () => {
       } else {
         message.success("Đặt hàng thành công!");
         localStorage.setItem("orderCode", response.data.data.order_code);
-        // Xử lý cập nhật lại giỏ hàng
         const checkoutItems =
           JSON.parse(localStorage.getItem("checkoutItems")) || [];
         let storedCartItems =
@@ -324,7 +322,7 @@ const NewCheckout = () => {
           <div className="mb-4">
             <Text strong>Địa chỉ giao hàng:</Text>{" "}
             {dataform
-              ? `${dataform?.fullname} - ${dataform?.mobile} - ${dataform?.specificAddress}, ${dataform?.ward}, ${dataform?.district}, ${dataform?.province}`
+              ? `${dataform?.recipient_name || dataform?.fullname} - ${dataform?.phone || dataform?.mobile} - ${dataform?.address_line1 || dataform?.specificAddress}, ${dataform?.commune?.name || dataform?.ward}, ${dataform?.district?.name || dataform?.district}, ${dataform?.province?.name || dataform?.province}`
               : "Chưa có địa chỉ"}
             {isLogin && addresses.length > 0 && (
               <Button type="link" onClick={() => setShowAddressModal(true)}>
@@ -334,7 +332,7 @@ const NewCheckout = () => {
           </div>
 
           <Card
-            title={isLogin && addresses.length > 0 ? "Địa chi" : "Địa chỉ mới"}
+            title={isLogin && addresses.length > 0 ? "Địa chỉ" : "Địa chỉ mới"}
           >
             <Form layout="vertical" form={form}>
               <Form.Item label="Tên" name={"fullname"} required>
@@ -342,7 +340,7 @@ const NewCheckout = () => {
                   id="customer_name"
                   value={order.customer_name}
                   onChange={handleInputChange}
-                  disabled={dataform?.fullname}
+                  disabled={dataform?.recipient_name || dataform?.fullname}
                   className="!bg-white !border !border-gray-300 !text-black"
                 />
               </Form.Item>
@@ -351,7 +349,7 @@ const NewCheckout = () => {
                   id="customer_phone"
                   value={order.customer_phone}
                   onChange={handleInputChange}
-                  disabled={dataform?.mobile}
+                  disabled={dataform?.phone || dataform?.mobile}
                   className="!bg-white !border !border-gray-300 !text-black"
                 />
               </Form.Item>
@@ -372,9 +370,9 @@ const NewCheckout = () => {
                   { required: true, message: "Vui lòng chọn tỉnh/thành phố" },
                 ]}
               >
-                {dataform?.province ? (
+                {dataform?.province?.name || dataform?.province ? (
                   <Input
-                    value={dataform?.province}
+                    value={dataform?.province?.name || dataform?.province}
                     disabled
                     className="!bg-white !border !border-gray-300 !text-black"
                   />
@@ -389,13 +387,12 @@ const NewCheckout = () => {
                       setWards([]);
                       setSelectedDistrict("");
                       setSelectedWard("");
-                      // Reset giá trị trên form
                       form.setFieldsValue({
-                        district: undefined, // Reset quận/huyện
-                        ward: undefined, // Reset phường/xã
+                        district: undefined,
+                        ward: undefined,
                       });
                     }}
-                    disabled={dataform?.province}
+                    disabled={!!(dataform?.province?.name || dataform?.province)}
                   >
                     {provinces?.map((province) => (
                       <Option key={province.code} value={province.code}>
@@ -412,9 +409,9 @@ const NewCheckout = () => {
                   { required: true, message: "Vui lòng chọn quận/huyện" },
                 ]}
               >
-                {dataform?.district ? (
+                {dataform?.district?.name || dataform?.district ? (
                   <Input
-                    value={dataform?.district}
+                    value={dataform?.district?.name || dataform?.district}
                     disabled
                     className="!bg-white !border !border-gray-300 !text-black"
                   />
@@ -428,7 +425,7 @@ const NewCheckout = () => {
                       setWards([]);
                       setSelectedWard("");
                       form.setFieldsValue({
-                        ward: undefined, // Reset phường/xã
+                        ward: undefined,
                       });
                     }}
                     disabled={!selectedProvince}
@@ -446,9 +443,9 @@ const NewCheckout = () => {
                 name="ward"
                 rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
               >
-                {dataform?.ward ? (
+                {dataform?.commune?.name || dataform?.ward ? (
                   <Input
-                    value={dataform?.ward}
+                    value={dataform?.commune?.name || dataform?.ward}
                     disabled
                     className="!bg-white !border !border-gray-300 !text-black"
                   />
@@ -456,9 +453,9 @@ const NewCheckout = () => {
                   <Select
                     placeholder="Chọn Phường/Xã"
                     value={selectedWard}
-                    onChange={(value)=>{
-                    setFormData({ ...formData, ward: wards.find((w) => w.code === value)?.name });
-                    setSelectedWard;
+                    onChange={(value) => {
+                      setFormData({ ...formData, ward: wards.find((w) => w.code === value)?.name });
+                      setSelectedWard(value);
                     }}
                     disabled={!selectedDistrict}
                   >
@@ -477,13 +474,12 @@ const NewCheckout = () => {
               >
                 <Input
                   value={order?.specificAddress}
-                  onChange={(e) =>
-                  {// setOrder({ ...order, specificAddress: e.target.value })
-                  setFormData({ ...formData, address: e.target.value });
-                  setSpecificAddress(e.target.value)}
-                  }
+                  onChange={(e) => {
+                    setFormData({ ...formData, address: e.target.value });
+                    setSpecificAddress(e.target.value);
+                  }}
                   className="!bg-white !border !border-gray-300 !text-black"
-                  disabled={dataform?.specificAddress}
+                  disabled={!!(dataform?.address_line1 || dataform?.specificAddress)}
                 />
               </Form.Item>
             </Form>
@@ -561,7 +557,6 @@ const NewCheckout = () => {
               className="mt-4"
               onClick={handleSubmit}
               disabled={submit || (order && order?.order_items?.length === 0)}
-              // loading={mutation.isPending}
             >
               Tiếp tục thanh toán
             </Button>
@@ -580,11 +575,10 @@ const NewCheckout = () => {
             <div className="flex justify-between">
               <div>
                 <p>
-                  {addr.fullname} - {addr.mobile}
+                  {addr.recipient_name || addr.fullname} - {addr.phone || addr.mobile}
                 </p>
                 <p>
-                  {addr.specificAddress}, {addr.ward}, {addr.district},{" "}
-                  {addr.province}
+                  {addr.address_line1 || addr.specificAddress}, {addr.commune?.name || addr.ward}, {addr.district?.name || addr.district}, {addr.province?.name || addr.province}
                 </p>
               </div>
               <div className="flex items-center">
@@ -594,9 +588,6 @@ const NewCheckout = () => {
                 >
                   Chọn
                 </Button>
-                {/* <Button danger onClick={() => handleDeleteAddress(addr.id)}>
-                  Xóa
-                </Button> */}
               </div>
             </div>
           </Card>
