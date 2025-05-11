@@ -78,11 +78,31 @@ const OrderDetail = () => {
     }
     return orderData.data.order_items.reduce((acc, item) => {
       const discountedPrice = getDiscountedPrice(item);
-      // Lấy số lượng (số lượng có thể là kiểu string, nên chuyển sang số)
       const quantity = parseInt(item.quantity, 10) || 0;
       return acc + discountedPrice * quantity;
     }, 0);
   };
+
+  // Hàm tính tổng thanh toán cuối cùng
+  const calculateFinalTotal = () => {
+    const subtotal = calculateTotalAmount();
+    const shippingFee = orderData?.data?.shipping_fee || 0;
+    
+    // Tính giảm giá
+    let discountAmount = 0;
+    if (orderData?.data?.order_discount_type === 1) {
+      // Giảm giá theo phần trăm
+      discountAmount = Number(subtotal * (Number(orderData?.data?.order_discount_amount) / 100));
+    } else {
+      // Giảm giá theo giá trị cố định
+      discountAmount = Number(orderData?.data?.order_discount_amount) || 0;
+    }
+
+    // Tổng thanh toán = Tổng tiền hàng + Phí vận chuyển - Giảm giá
+    return subtotal + Number(shippingFee) - discountAmount;
+  };
+
+  console.log("calculateFinalTotal", calculateFinalTotal());
 
   if (isLoading) {
     return (
@@ -105,6 +125,7 @@ const OrderDetail = () => {
 
   // Tính tổng giá tiền theo logic đã cập nhật
   const computedTotalAmount = calculateTotalAmount();
+  const finalTotal = calculateFinalTotal();
 
   return (
     <div className="bg-white text-gray-800 p-6 max-w-4xl mx-auto">
@@ -196,25 +217,26 @@ const OrderDetail = () => {
           <div className="col-span-4">
             Phí vận chuyển:{" "}
           </div>
-          <span className="col-span-2">{formatPrice(orderData?.data?.shipping_fee)}</span>
+          <span className="col-span-2">{formatPrice(orderData?.data?.shipping_fee || 0)}</span>
         </div>
 
         <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
           <div className="col-span-4">
-          Giảm giá:{" "}
+            Giảm giá:{" "}
           </div>
-          <span className="col-span-2">{formatPrice(orderData?.data?.discount_amount)}</span>
+          <span className="col-span-2">
+            {orderData?.data?.order_discount_type === 1 
+              ? `${orderData?.data?.order_discount_amount}%` 
+              : formatPrice(orderData?.data?.order_discount_amount || 0)}
+          </span>
         </div>
 
         <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
           <div className="col-span-4">
-          Tổng thanh toán:{" "}
+            Tổng thanh toán:{" "}
           </div>
           <span className="text-2xl font-bold text-red-500 col-span-2">
-            {formatPrice(
-              computedTotalAmount + orderData?.data?.shipping_fee -
-                orderData?.data?.discount_amount
-            )}
+            {formatPrice(finalTotal)}
           </span>
         </div>
         
