@@ -116,19 +116,66 @@ const NewCheckout = () => {
     }
   }, [selectedDistrict]);
 
-  // Add this after other useEffect hooks
+  // Add this function to check if a coupon is valid
+  const isCouponValid = (coupon, subtotal) => {
+    const now = new Date();
+    const startDate = coupon.start_date ? new Date(coupon.start_date) : null;
+    const endDate = coupon.end_date ? new Date(coupon.end_date) : null;
+
+    // Check if coupon is active
+    if (!coupon.is_active) return false;
+
+    // Check if coupon has reached max uses
+    if (coupon.max_uses && coupon.used_count >= coupon.max_uses) return false;
+
+    // Check if order total meets minimum purchase requirement
+    if (coupon.min_purchase && subtotal < coupon.min_purchase) return false;
+
+    // Check if coupon is within valid date range
+    if (startDate && now < startDate) return false;
+    if (endDate && now > endDate) return false;
+
+    return true;
+  };
+
+  // Update the useEffect for fetching coupons
   useEffect(() => {
-    // Fetch available coupons
     const fetchCoupons = async () => {
       try {
         const response = await axios.get("http://127.0.0.1:8000/api/v1/coupon");
-        setAvailableCoupons(response.data.data);
+        const subtotal = cartItems.reduce(
+          (total, item) =>
+            total +
+            (item.price - (item.price * item.discount) / 100) * item.quantity,
+          0
+        );
+        
+        // Filter coupons that are valid for current order
+        const validCoupons = response.data.data.filter(coupon => 
+          isCouponValid(coupon, subtotal)
+        );
+        
+        setAvailableCoupons(validCoupons);
+
+        // If currently selected coupon is no longer valid, remove it
+        if (selectedCoupon) {
+          const isStillValid = validCoupons.some(c => c.id === selectedCoupon.id);
+          if (!isStillValid) {
+            setSelectedCoupon(null);
+            setDiscountCode("");
+            message.warning("Mã giảm giá đã chọn không còn khả dụng!");
+          }
+        }
       } catch (error) {
         console.error("Error fetching coupons:", error);
       }
     };
+
     fetchCoupons();
-  }, []);
+    // Refresh coupons every 30 seconds to keep used_count updated
+    const interval = setInterval(fetchCoupons, 30000);
+    return () => clearInterval(interval);
+  }, [cartItems, selectedCoupon]); // Add selectedCoupon to dependencies
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -357,10 +404,24 @@ const NewCheckout = () => {
         payment_method: paymentMethod,
         shipping_fee: shippingFee || 0
       };
+
+      // Create order
       const response = await axios.post(
         "http://127.0.0.1:8000/api/v1/order",
         orderData
       );
+
+      // If order is created successfully and a coupon was used, update the coupon's used_count
+      if (response.data.success && selectedCoupon) {
+        try {
+          await axios.put(`http://127.0.0.1:8000/api/v1/coupon/${selectedCoupon.id}`, {
+            used_count: selectedCoupon.used_count + 1
+          });
+        } catch (error) {
+          console.error("Error updating coupon usage:", error);
+        }
+      }
+
       if (paymentMethod === "vnpay" && response.data.vnpUrl) {
         window.location.href = response.data.vnpUrl;
       } else {
@@ -600,58 +661,57 @@ const NewCheckout = () => {
             <div className="mb-4">
               <Text strong>Mã giảm giá</Text>
               <div className="grid grid-cols-1 gap-4 mt-2">
-                {availableCoupons.map((coupon) => (
-                  <Card 
-                    key={coupon.id}
-                    className={`cursor-pointer transition-all ${
-                      selectedCoupon?.id === coupon.id ? 'border-blue-500' : ''
-                    }`}
-                    onClick={() => {
-                      if (selectedCoupon?.id === coupon.id) {
-                        setSelectedCoupon(null);
-                        setDiscountCode("");
-                      } else {
-                        setSelectedCoupon(coupon);
-                        setDiscountCode(coupon.code);
-                      }
-                    }}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <Text strong>{coupon.name}</Text>
-                        <div className="text-sm text-gray-600 mt-1">{coupon.description}</div>
-                        <div className="text-sm mt-1">
-                          {coupon.discount_type === 'percentage' 
-                            ? `Giảm ${coupon.discount_value}%`
-                            : `Giảm ${FomatVND(coupon.discount_value)}`}
-                        </div>
-                        <div className="text-sm text-gray-500 mt-1">
-                          Áp dụng cho đơn hàng từ {FomatVND(coupon.min_purchase)}
-                        </div>
-                        {coupon.start_date && coupon.end_date && (
-                          <div className="text-sm text-gray-500 mt-1">
-                            Thời hạn: {new Date(coupon.start_date).toLocaleDateString()} - {new Date(coupon.end_date).toLocaleDateString()}
+                {availableCoupons.length > 0 ? (
+                  availableCoupons.map((coupon) => (
+                    <Card 
+                      key={coupon.id}
+                      className={`cursor-pointer transition-all ${
+                        selectedCoupon?.id === coupon.id ? 'border-blue-500' : ''
+                      }`}
+                      onClick={() => {
+                        if (selectedCoupon?.id === coupon.id) {
+                          setSelectedCoupon(null);
+                          setDiscountCode("");
+                        } else {
+                          setSelectedCoupon(coupon);
+                          setDiscountCode(coupon.code);
+                        }
+                      }}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <Text strong className="text-lg tracking-wider">
+                            {coupon.code.toUpperCase()}
+                          </Text>
+                          <div className="text-sm mt-1">
+                            {coupon.discount_type === 'percentage' 
+                              ? `Giảm ${coupon.discount_value}%`
+                              : `Giảm ${FomatVND(coupon.discount_value)}`}
                           </div>
-                        )}
+                        </div>
+                        <Button 
+                          type={selectedCoupon?.id === coupon.id ? "primary" : "default"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (selectedCoupon?.id === coupon.id) {
+                              setSelectedCoupon(null);
+                              setDiscountCode("");
+                            } else {
+                              setSelectedCoupon(coupon);
+                              setDiscountCode(coupon.code);
+                            }
+                          }}
+                        >
+                          {selectedCoupon?.id === coupon.id ? "Đã chọn" : "Áp dụng"}
+                        </Button>
                       </div>
-                      <Button 
-                        type={selectedCoupon?.id === coupon.id ? "primary" : "default"}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (selectedCoupon?.id === coupon.id) {
-                            setSelectedCoupon(null);
-                            setDiscountCode("");
-                          } else {
-                            setSelectedCoupon(coupon);
-                            setDiscountCode(coupon.code);
-                          }
-                        }}
-                      >
-                        {selectedCoupon?.id === coupon.id ? "Đã chọn" : "Áp dụng"}
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))
+                ) : (
+                  <div className="text-center text-gray-500 py-4">
+                    Không có mã giảm giá khả dụng cho đơn hàng này
+                  </div>
+                )}
               </div>
             </div>
             <Divider />
