@@ -34,6 +34,8 @@ const NewCheckout = () => {
   const [cartItems, setCartItems] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
   const [discountCode, setDiscountCode] = useState("");
+  const [availableCoupons, setAvailableCoupons] = useState([]);
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
@@ -113,6 +115,20 @@ const NewCheckout = () => {
         .catch((error) => console.error("Lỗi khi tải phường/xã:", error));
     }
   }, [selectedDistrict]);
+
+  // Add this after other useEffect hooks
+  useEffect(() => {
+    // Fetch available coupons
+    const fetchCoupons = async () => {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/v1/coupon");
+        setAvailableCoupons(response.data.data);
+      } catch (error) {
+        console.error("Error fetching coupons:", error);
+      }
+    };
+    fetchCoupons();
+  }, []);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -306,12 +322,17 @@ const NewCheckout = () => {
         (item.price - (item.price * item.discount) / 100) * item.quantity,
       0
     );
-    const discount = discountCode ? 10000 : 0;
+    
+    let discount = 0;
+    if (selectedCoupon) {
+      if (selectedCoupon.discount_type === 'percentage') {
+        discount = (subtotal * selectedCoupon.discount_value) / 100;
+      } else {
+        discount = selectedCoupon.discount_value;
+      }
+    }
+    
     return subtotal + (shippingFee || 0) - discount;
-  };
-
-  const handleApplyDiscount = () => {
-    message.info("Mã giảm giá chưa được hỗ trợ!");
   };
 
   // Handle order submission
@@ -576,15 +597,63 @@ const NewCheckout = () => {
 
             <Divider />
 
-            <Input
-              placeholder="Nhập mã giảm giá"
-              value={discountCode}
-              onChange={(e) => setDiscountCode(e.target.value)}
-              addonAfter={
-                <Button onClick={handleApplyDiscount}>Áp dụng</Button>
-              }
-            />
-
+            <div className="mb-4">
+              <Text strong>Mã giảm giá</Text>
+              <div className="grid grid-cols-1 gap-4 mt-2">
+                {availableCoupons.map((coupon) => (
+                  <Card 
+                    key={coupon.id}
+                    className={`cursor-pointer transition-all ${
+                      selectedCoupon?.id === coupon.id ? 'border-blue-500' : ''
+                    }`}
+                    onClick={() => {
+                      if (selectedCoupon?.id === coupon.id) {
+                        setSelectedCoupon(null);
+                        setDiscountCode("");
+                      } else {
+                        setSelectedCoupon(coupon);
+                        setDiscountCode(coupon.code);
+                      }
+                    }}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <Text strong>{coupon.name}</Text>
+                        <div className="text-sm text-gray-600 mt-1">{coupon.description}</div>
+                        <div className="text-sm mt-1">
+                          {coupon.discount_type === 'percentage' 
+                            ? `Giảm ${coupon.discount_value}%`
+                            : `Giảm ${FomatVND(coupon.discount_value)}`}
+                        </div>
+                        <div className="text-sm text-gray-500 mt-1">
+                          Áp dụng cho đơn hàng từ {FomatVND(coupon.min_purchase)}
+                        </div>
+                        {coupon.start_date && coupon.end_date && (
+                          <div className="text-sm text-gray-500 mt-1">
+                            Thời hạn: {new Date(coupon.start_date).toLocaleDateString()} - {new Date(coupon.end_date).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                      <Button 
+                        type={selectedCoupon?.id === coupon.id ? "primary" : "default"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (selectedCoupon?.id === coupon.id) {
+                            setSelectedCoupon(null);
+                            setDiscountCode("");
+                          } else {
+                            setSelectedCoupon(coupon);
+                            setDiscountCode(coupon.code);
+                          }
+                        }}
+                      >
+                        {selectedCoupon?.id === coupon.id ? "Đã chọn" : "Áp dụng"}
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
             <Divider />
 
             <Radio.Group
