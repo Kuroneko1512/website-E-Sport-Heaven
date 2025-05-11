@@ -289,61 +289,67 @@ const NewCheckout = () => {
   ]);
 
   // Query for fetching available coupons
-  const { data: couponsData } = useQuery({
+  const { data: couponsData, isError, isLoading } = useQuery({
     queryKey: ["coupons"],
     queryFn: async () => {
       const response = await instanceAxios.get("api/v1/coupon");
       return response.data;
     },
-    onSuccess: (data) => {
-      if (data && data.data) {
-        const subtotal = cartItems.reduce(
-          (total, item) =>
-            total +
-            (item.price - (item.price * item.discount) / 100) * item.quantity,
-          0
-        );
-        
-        const validCoupons = data.data.filter((coupon) =>
-          isCouponValid(coupon, subtotal)
-        );
-        setAvailableCoupons(validCoupons);
-
-        if (selectedCoupon) {
-          const isStillValid = validCoupons.some((c) => c.id === selectedCoupon.id);
-          if (!isStillValid) {
-            setSelectedCoupon(null);
-            setDiscountCode("");
-            message.warning("Mã giảm giá đã chọn không còn khả dụng!");
-          }
-        }
-      }
-    },
-    onError: (error) => {
-      console.error("Error fetching coupons:", error);
-      message.error("Không thể tải danh sách mã giảm giá. Vui lòng thử lại sau.");
-    },
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 
-  // Calculate grand total with useMemo
-  const grandTotal = useMemo(() => {
-    const subtotal = cartItems.reduce(
+  // Calculate subtotal without coupon discount
+  const calculateSubtotal = useMemo(() => {
+    return cartItems.reduce(
       (total, item) =>
         total +
         (item.price - (item.price * item.discount) / 100) * item.quantity,
       0
     );
+  }, [cartItems]);
+
+  console.log("calculateSubtotal", calculateSubtotal);
+
+  // Process coupons data when it changes
+  useEffect(() => {
+    if (couponsData?.data) {
+      const validCoupons = couponsData.data.filter((coupon) =>
+        isCouponValid(coupon, calculateSubtotal)
+      );
+      setAvailableCoupons(validCoupons);
+
+      if (selectedCoupon) {
+        const isStillValid = validCoupons.some((c) => c.id === selectedCoupon.id);
+        if (!isStillValid) {
+          setSelectedCoupon(null);
+          setDiscountCode("");
+          message.warning("Mã giảm giá đã chọn không còn khả dụng!");
+        }
+      }
+    }
+  }, [couponsData, calculateSubtotal, selectedCoupon]);
+
+  // Handle error state
+  useEffect(() => {
+    if (isError) {
+      message.error("Không thể tải danh sách mã giảm giá. Vui lòng thử lại sau.");
+    }
+  }, [isError]);
+
+  console.log("couponsData", couponsData);
+
+  // Calculate grand total with useMemo
+  const grandTotal = useMemo(() => {
     let discount = 0;
     if (selectedCoupon) {
       if (selectedCoupon.discount_type === "percentage") {
-        discount = (subtotal * selectedCoupon.discount_value) / 100;
+        discount = (calculateSubtotal * selectedCoupon.discount_value) / 100;
       } else {
         discount = selectedCoupon.discount_value;
       }
     }
-    return subtotal + (shippingFee || 0) - discount;
-  }, [cartItems, shippingFee, selectedCoupon]);
+    return calculateSubtotal + (shippingFee || 0) - discount;
+  }, [calculateSubtotal, shippingFee, selectedCoupon]);
 
   // Handle input changes
   const handleInputChange = (e) => {
