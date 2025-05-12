@@ -184,6 +184,11 @@ const ProductDetail = () => {
     });
   };
 
+  const handleToggleWishlist = async (favParam) => {
+    setFav(favParam);
+    await instanceAxios.post("/api/v1/customer/wishlist", { product_id: id });
+  }
+
   const handleAddToCart = () => {
     if (product?.variants?.length > 0) {
       if (!isAllAttributesSelected) {
@@ -525,7 +530,7 @@ const ProductDetail = () => {
                     )}
 
                     <button
-                      onClick={() => setFav(!fav)}
+                      onClick={() => handleToggleWishlist(!fav)}
                       className="border rounded-lg px-3 py-2"
                     >
                       <i

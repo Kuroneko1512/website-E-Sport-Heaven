@@ -6,7 +6,7 @@ use App\Services\BaseService;
 
 
 class WishlistService extends BaseService {
-    public function __construct(Review $review){
+    public function __construct(Wishlist $review){
         parent::__construct($review);
     }
     
