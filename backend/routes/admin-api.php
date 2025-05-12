@@ -37,9 +37,15 @@ Route::prefix('v1')->group(function () {
             //Category routes
             Route::apiResource('/category', CategoryController::class);
             //Order routes
+            Route::get('/order/{id}/order-user-return', [OrderController::class, 'getOrderUserReturn']);
+            Route::get('/order/order-return', [OrderController::class, 'getOrdersWithReturnRequests']);
+
             Route::apiResource('/order', OrderController::class);
+
             Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
             Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
+
+
             //Customer routes
       
           

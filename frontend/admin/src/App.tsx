@@ -35,9 +35,16 @@ import AttributePage from "@pages/Attribute/Attribute";
 import {  setAuthData, clearAuth } from "./store/reducers/auth";
 import Coupon from "@pages/Coupon/Coupon";
 import AddCoupon from "@pages/Coupon/Store";
+
+import OrderReturn from "./pages/OrderReurn/OrderReturn";
+import DetailReturnOrder from "./pages/OrderReurn/DetailReturnOrder";
+
+
+
 import EditCoupon from "@pages/Coupon/Edit";
 import DetailCoupon from "@pages/Coupon/Detail";
 import { UserList } from "@pages/User/index";
+
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {
@@ -165,8 +172,14 @@ const App = () => {
             <Route path="add-coupon" element={<AddCoupon />} />
             <Route path="edit-coupon/:id" element={<EditCoupon />} />
             <Route path="detail-coupon/:id" element={<DetailCoupon />} />
+
+            <Route path="order-return" element={<OrderReturn />} />
+            <Route path="order-return/:id" element={<DetailReturnOrder />} />
+          
+
             {/*Route user*/}
             <Route path="User" element={<UserList />} />
+
            
           </Route>
         </Route>

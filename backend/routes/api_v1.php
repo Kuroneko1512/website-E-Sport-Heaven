@@ -26,6 +26,7 @@ Route::prefix('v1')->group(callback: function () {
     Route::apiResource('/attributeValue', AttributeValueController::class)->except(['index']);
 
     // Order API Routes
+    Route::post('/order/orders-user-return', [OrderController::class, 'orderUserReturn']);
     Route::apiResource('/order', OrderController::class)->only(['store']);
     Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
     Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);

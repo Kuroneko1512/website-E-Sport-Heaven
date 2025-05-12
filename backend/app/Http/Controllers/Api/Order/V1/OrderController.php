@@ -10,7 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Jobs\Mail\Order\NewOrderJob;
+use App\Models\Order;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use App\Models\OrderUserReturn;
 
 class OrderController extends Controller
 {
@@ -79,7 +82,7 @@ class OrderController extends Controller
         try {
             // Gọi service để lấy thông tin chi tiết đơn hàng
             $order = $this->orderService->getOrderByCode($orderCode);
-            Log::info( $order);
+            Log::info($order);
 
             return response()->json([
                 'message' => 'Order details retrieved successfully',
@@ -271,4 +274,59 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    public function orderUserReturn(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,id|unique:orders_user_return,order_id',
+            'order_item_id' => 'nullable|exists:order_items,id',
+            'reason' => 'required|integer|min:0',
+            'description' => 'nullable|string',
+            'image' => 'nullable|image|max:2048', // hoặc 'image' nếu upload file
+            'refund_bank_account' => 'nullable|string|max:255',
+            'refund_bank_name' => 'nullable|string|max:255',
+            'refund_bank_customer_name' => 'nullable|string|max:255',
+            'refund_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+        DB::beginTransaction();
+        try {
+            $data = $validator->validated();
+
+            $data['status'] = OrderUserReturn::STATUS_PENDING;
+          
+            $orderReturn = OrderUserReturn::create($data);
+            // $userId = auth()->user()->id;
+
+            $a=  $this->orderService->updateStatus($data['order_id'], Order::STATUS_RETURN_REQUESTED, null, 3);
+            Log::info('orderReturn', [
+                'data' => $a,
+            ]);
+            DB::commit();
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('returns', 'public');
+                $orderReturn->update(['image' => $imagePath]);
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Lỗi khi xử lý dữ liệu',
+                'error' => $th->getMessage(),
+                'status' => 500
+            ], 500);
+        }
+        return response()->json([
+            'message' => 'Tạo yêu cầu đổi/trả thành công',
+            'data' => $orderReturn
+        ], 201);
+    }
+
+
+
+    // Lấy thông tin đơn hàng
 }
