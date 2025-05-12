@@ -40,7 +40,7 @@ const TableComponent = ({
   return (
     <div className="card">
       <div className="card-header">
-        <h3 className="card-title">Attribute</h3>
+        <h3 className="card-title">Thuộc tính</h3>
       </div>
       <div className="card-body">
         <table className="table table-bordered">

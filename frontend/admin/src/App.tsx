@@ -23,7 +23,6 @@ import Store from "@pages/Product/Store";
 import { useAppDispatch, useAppSelector } from "./store/store";
 import { Loading } from "./components/Loading";
 
-import AttributeForm from "./pages/Product/AttributeForm";
 import ValueProduct from "./pages/Product/ValueProduct";
 import DetailProductComponent from "./pages/Product/DetailProductComponent";
 import EditComponents from "./pages/Product/EditComponents";
@@ -33,15 +32,25 @@ import AttributeProduct from "./pages/Product/AttributeProduct";
 import VariantProduct from "./pages/Product/VariantProduct";
 import Category from "./pages/Category/Category";
 import AttributePage from "@pages/Attribute/Attribute";
-import { setCurrentUser, setAuthData, clearAuth } from "./store/reducers/auth";
-import  Coupon  from "@pages/Coupon/Coupon";
-import DetailCoupon from "@pages/Coupon/Detail";
-import EditCoupon from "@pages/Coupon/Edit";
+import {  setAuthData, clearAuth } from "./store/reducers/auth";
+import Coupon from "@pages/Coupon/Coupon";
 import AddCoupon from "@pages/Coupon/Store";
+<<<<<<< HEAD
 import Blog from "./pages/Blog/Blog";
 import BlogCategory from "./pages/BlogCategory/BlogCategory";
 import DetailBlog from "./pages/Blog/DetailBlog";
 import DetailBlogCategory from "./pages/BlogCategory/DetailBlogCategory";
+=======
+
+import OrderReturn from "./pages/OrderReurn/OrderReturn";
+import DetailReturnOrder from "./pages/OrderReurn/DetailReturnOrder";
+
+
+
+import EditCoupon from "@pages/Coupon/Edit";
+import DetailCoupon from "@pages/Coupon/Detail";
+import { UserList } from "@pages/User/index";
+>>>>>>> 14f072ebc1cf6d664c8e0ea5b96d1e52cc62a5e6
 
 const { VITE_NODE_ENV } = import.meta.env;
 
@@ -85,13 +94,13 @@ const App = () => {
             user: user
           }));
 
-          console.log("Auth data restored from localStorage");
+        
         } catch (error) {
           console.error("Error parsing user data from localStorage:", error);
           dispatch(clearAuth());
         }
       } else {
-        console.error("No user data in localStorage");
+    
         dispatch(clearAuth());
       }
 
@@ -147,15 +156,13 @@ const App = () => {
             </Route>
             <Route path="Product/detail/:id" element={<DetailProductComponent />} />
             <Route path="Product/edit/:id" element={<EditComponents />} />
-            <Route path="add-product" element={<Store />} >
-              <Route path="AttributeForm" element={<AttributeForm />} />
+              <Route path="add-product" element={<Store />} >
               <Route path="ValueProduct" element={<ValueProduct />} />
               <Route path="Attribute" element={<AttributeProduct />} />
               <Route path="Variant" element={<VariantProduct />} />
               <Route index element={<ValueProduct />} />
             </Route>
-            <Route path="add-product/:id" element={<Store />} >
-              <Route path="AttributeForm" element={<AttributeForm />} />
+            <Route path="edit-product/:id" element={<Store />} >
               <Route path="ValueProduct" element={<ValueProduct />} />
               <Route path="Attribute" element={<AttributeProduct />} />
               <Route path="Variant" element={<VariantProduct />} />
@@ -172,6 +179,7 @@ const App = () => {
             <Route path="add-coupon" element={<AddCoupon />} />
             <Route path="edit-coupon/:id" element={<EditCoupon />} />
             <Route path="detail-coupon/:id" element={<DetailCoupon />} />
+<<<<<<< HEAD
             {/*Route blog*/}
             <Route path="blog" element={<Blog />} />
             <Route path="add-blog" element={<DetailBlog />} />
@@ -183,6 +191,17 @@ const App = () => {
             <Route path="edit-blog-category/:id" element={<DetailBlogCategory />} />
             <Route path="detail-blog-category/:id" element={<DetailBlogCategory />} />
 
+=======
+
+            <Route path="order-return" element={<OrderReturn />} />
+            <Route path="order-return/:id" element={<DetailReturnOrder />} />
+          
+
+            {/*Route user*/}
+            <Route path="User" element={<UserList />} />
+
+           
+>>>>>>> 14f072ebc1cf6d664c8e0ea5b96d1e52cc62a5e6
           </Route>
         </Route>
       </Routes>

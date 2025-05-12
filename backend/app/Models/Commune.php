@@ -19,6 +19,12 @@ class Commune extends Model
         'type'              // Loại (xã/phường)
     ];
 
+    // Get name
+    public function getCommuneName($code)
+    {
+        return Commune::where('code', $code)->first()->name;
+    }
+
     // Quan hệ với bảng districts
     public function district()
     {

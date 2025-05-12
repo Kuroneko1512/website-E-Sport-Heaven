@@ -17,13 +17,13 @@ const CategoryPage = () => {
   });
 
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  // Hàm fetch dữ liệu danh mục
+ 
   const fetchCategories = async (page = 1) => {
     try {
       const response  = await CategoryService.getAll(page, pagination.per_page);
-      setCategories(response.data.data); // Giả sử API trả về `data.data` là danh sách category
-      setPagination(response.data); // Cập nhật phân trang
-      console.log(categories);
+      setCategories(response.data.data); 
+      setPagination(response.data); 
+    
     } catch (error) {
       console.error("Lỗi khi lấy danh mục:", error);
     }

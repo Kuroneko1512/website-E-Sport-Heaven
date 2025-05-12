@@ -10,7 +10,7 @@ use App\Http\Controllers\Api\Admin\V1\AttributeController;
 use App\Http\Controllers\Api\Admin\V1\CategoryController;
 use App\Http\Controllers\Api\Admin\V1\ProductController;
 use App\Http\Controllers\Api\Admin\V1\OrderController;
-
+use App\Http\Controllers\Api\User\UserController;
 Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
         Route::get('/', function () {
@@ -33,17 +33,24 @@ Route::prefix('v1')->group(function () {
 
             //Product routes
             Route::apiResource('/product', ProductController::class);
+          
             //Attributes routes
             Route::apiResource('/attribute', AttributeController::class);
             //Category routes
             Route::apiResource('/category', CategoryController::class);
             //Order routes
+            Route::get('/order/{id}/order-user-return', [OrderController::class, 'getOrderUserReturn']);
+            Route::get('/order/order-return', [OrderController::class, 'getOrdersWithReturnRequests']);
+
             Route::apiResource('/order', OrderController::class);
+
             Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
             Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
-            //Customer routes
 
-            //User routes ( Staff)
+
+            //Customer routes
+      
+          
 
             //Role and Permission routes
 

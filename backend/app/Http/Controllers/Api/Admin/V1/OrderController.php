@@ -132,8 +132,27 @@ class OrderController extends Controller
             ], 500); // 500 Internal Server Error
         }
     }
+    public function getOrdersWithReturnRequests(){
+        
+         try {
+            // Gọi service để lấy thông tin chi tiết thuộc tính
+            $order = $this->orderService->getOrderReturn();
+            Log::info($order);
 
-    public function updateStatus(Request $request, $id)
+            return response()->json([
+                'message' => 'lấy thành công', // Thông báo thành công
+                'data' => $order, // Dữ liệu thuộc tính chi tiết
+                'status' => 200 // Trả về mã trạng thái 200 (OK)
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi xử lý dữ liệu.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+   public function updateStatus(Request $request, $id)
     {
         $request->validate([
             'status' => 'nullable|integer|in:' . implode(',', [
@@ -160,12 +179,37 @@ class OrderController extends Controller
         if (!$result['success']) {
             return response()->json(['message' => $result['message']], 404);
         }
-
+       
+        
         return response()->json([
             'message' => $result['message'],
             'data' => $result['data']
         ]);
     }
+    
+    public function getOrderUserReturn($id)
+    {
+        try {
+            // Gọi service để lấy thông tin chi tiết thuộc tính
+            $order = $this->orderService->getOrderUserReturn($id);
+            Log::info($order);
+
+            return response()->json([
+                'message' => 'lấy thành công', // Thông báo thành công
+                'data' => $order, // Dữ liệu thuộc tính chi tiết
+                'status' => 200 // Trả về mã trạng thái 200 (OK)
+            ], 200);
+        }
+        catch (Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi xử lý dữ liệu.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+   
     // private function payment($data, $ip)
     // {
     //     Log::info('vnpay', [

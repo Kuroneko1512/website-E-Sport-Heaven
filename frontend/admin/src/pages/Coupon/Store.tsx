@@ -1,61 +1,44 @@
-import { FC, useState } from "react";
-import { createCoupon, Coupon as ApiCoupon, getCouponById } from "@app/services/Coupon/ApiCoupon";
+import { FC, useEffect, useState } from "react";
+import { createCoupon, Coupon as ApiCoupon } from "@app/services/Coupon/ApiCoupon";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import { CouponForm, FormErrors } from "./type";
+import { getUserList } from "@app/services/User/Type";
 
-const API_URL = 'http://127.0.0.1:8000/api/v1/coupon';
 
-// Hàm kiểm tra mã coupon đã tồn tại hay chưa
-const checkCouponCodeExists = async (code: string): Promise<boolean> => {
-    try {
-        const response = await axios.get(`${API_URL}/check-code/${code}`);
-        return response.data.exists;
-    } catch (error) {
-        console.error("Lỗi khi kiểm tra mã:", error);
-        return false;
-    }
-};
-
-// Type địa phương cho form
-type CouponForm = {
-  
-    code: string;
-    name: string;
-    description: string;
-    discount_value: number;
-    start_date: string;
-    end_date: string;
-    discount_type: string; 
-    min_purchase: number;
-    max_uses: number;
-    used_count: number;
-
-}
-
-// Type cho errors
-type FormErrors = {
-    [key in keyof Omit<CouponForm, 'id' | 'is_active'>]?: string;
-}
 
 const Store: FC = () => {
     const navigate = useNavigate();
     const [coupon, setCoupon] = useState<CouponForm>({
-       
+     
         code: "",
         name: "",
         description: "",
         discount_value: 0,
+        discount_type: "percentage",
         start_date:new Date().toISOString().split('T')[0],
         end_date: "",
-        discount_type: "percentage",
         min_purchase: 0,
         max_uses: 0,
         used_count: 0,
-        
+        is_active: 1,
+        user_usage: []
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [submitted, setSubmitted] = useState(false);
+    const [userUsage, setUserUsage] = useState<{id: number, name: string}[]>([]);
 
+    const discountTypeOptions = [
+        { value: "percentage", label: 'Phần trăm' },
+        { value: "fixed", label: 'Giá tiền' }
+    ];
+    const fetchUserUsage = async () => {
+        const response = await getUserList();
+        const customerUsers = response.filter((user: any) => user.account_type === "customer");
+        setUserUsage(customerUsers);
+    }
+    useEffect(() => {
+        fetchUserUsage();
+    }, []);
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {  
         const { name, value, type } = e.target;
         
@@ -63,7 +46,9 @@ const Store: FC = () => {
             const target = e.target as HTMLInputElement;
             setCoupon({ ...coupon, [name]: target.checked });
         } else {
-            setCoupon({ ...coupon, [name]: value });
+            setCoupon({ ...coupon, [name]: name === "discount_value" || name === "max_uses" || name === "discount_type"
+                ? Number(value) 
+                : value });
         }
         
         // Xóa lỗi khi người dùng chỉnh sửa trường
@@ -100,7 +85,7 @@ const Store: FC = () => {
                 if (value <= 0) {
                     newErrors.discount_value = 'Giá trị giảm giá phải lớn hơn 0';
                     isValid = false;
-                } else if (coupon.discount_type === 'percentage' && value > 70  ) {
+                } else if (coupon.discount_type === "percentage" && value > 70  ) {
                     newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 70%';
                     isValid = false;
                 } else {
@@ -132,7 +117,7 @@ const Store: FC = () => {
                     newErrors.min_purchase = 'Số tiền tối thiểu phải lớn hơn 0';
                     isValid = false;
                 } else {
-                    if(coupon.discount_type === 'percentage'){
+                    if(coupon.discount_type === "percentage"){
                     console.log(value);
                     
                         newErrors.min_purchase = 'Số phần trăm tối thiểu phải lớn hơn 0';
@@ -183,7 +168,7 @@ const Store: FC = () => {
         if (coupon.discount_value <= 0) {
             newErrors.discount_value = 'Giá trị giảm giá phải lớn hơn 0';
             isValid = false;
-        } else if (coupon.discount_type === 'percentage' && coupon.discount_value > 70)  {
+        } else if (coupon.discount_type === "percentage" && coupon.discount_value > 70)  {
             newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 70%';
             isValid = false;
         }
@@ -211,6 +196,7 @@ const Store: FC = () => {
             newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
             isValid = false;
         }
+ 
         setErrors(newErrors);
         return isValid;
     };
@@ -222,7 +208,7 @@ const Store: FC = () => {
         if (!validateForm()) {
             return;
         }
-        
+    
        
         try {
 
@@ -232,39 +218,55 @@ const Store: FC = () => {
                 code: coupon.code,
                 name: coupon.name,
                 description: coupon.description,
-                discount_value: coupon.discount_value,
-                discount_type: coupon.discount_type as 'percentage' | 'fixed',
-                min_purchase: coupon.min_purchase,
+                discount_value: Number(coupon.discount_value),
+                discount_type: coupon.discount_type,
+                min_purchase: Number(coupon.min_purchase),
                 start_date: coupon.start_date,
                 end_date: coupon.end_date,
-                max_uses: coupon.max_uses,
+                max_uses: Number(coupon.max_uses),
+                is_active: 1,
+                user_usage: coupon.user_usage
             };
-            
-           await createCoupon(apiCoupon);
+            console.log(apiCoupon);
+            await createCoupon(apiCoupon);
       
             
             
             alert('Tạo mã giảm giá thành công!');
          
             setCoupon({
-                id: 0,
+           
                 code: "",
                 name: "",
                 description: "",
                 discount_value: 0,
+                discount_type: "percentage",
                 start_date: "",
                 end_date: "",
-                discount_type: "percentage",
                 min_purchase: 0,
                 max_uses: 0,
                 used_count: 0,
+                is_active: 1,
+                user_usage: []
             });
             setSubmitted(false);
             navigate('/coupon');
         } catch (error) {
             console.error("Lỗi khi tạo mã giảm giá:", error);
-            alert('Mã giảm giá đã tồn tại!');
+     
         }
+    };
+
+    const handleUserChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedOptions = Array.from(e.target.selectedOptions, option => Number(option.value));
+        console.log(selectedOptions);
+        
+       
+        setCoupon(prev => ({
+            ...prev,
+            user_usage: selectedOptions
+        }));
+  
     };
 
     return (
@@ -322,14 +324,14 @@ const Store: FC = () => {
                     <label htmlFor="start_date">Ngày bắt đầu <span className="text-danger">*</span></label>
                     <input 
                         type="date" 
-                        className={`form-control ${errors.start_date ? 'is-invalid' : ''}`}
+                        className="form-control"
                         id="start_date" 
                         name="start_date" 
                         value={coupon.start_date} 
                         onChange={handleChange}
-                         
+                       min={new Date().toISOString().split('T')[0]}
                     />
-                    {errors.start_date && <div className="invalid-feedback">{errors.start_date}</div>}
+                  
                 </div>
                 <div className="form-group">
                     <label htmlFor="end_date">Ngày kết thúc <span className="text-danger">*</span></label>
@@ -340,22 +342,24 @@ const Store: FC = () => {
                         name="end_date" 
                         value={coupon.end_date} 
                         onChange={handleChange}
+                        min={coupon.start_date}
                       
                     />
                     {errors.end_date && <div className="invalid-feedback">{errors.end_date}</div>}
                 </div>
                 <div className="form-group">
-                    <label htmlFor="discount_type">Loại giảm giá <span className="text-danger">*</span></label>
-                    <select 
-                        className="form-control" 
-                        id="discount_type" 
-                        name="discount_type" 
-                        value={coupon.discount_type} 
+                    <label>Loại giảm giá</label>
+                    <select
+                        name="discount_type"
+                        className="form-control"
+                        value={coupon.discount_type}
                         onChange={handleChange}
-                        
                     >
-                        <option value="percentage">Giảm giá theo phần trăm</option>
-                        <option value="fixed">Giảm giá theo số tiền</option>
+                        {discountTypeOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
                     </select>
                 </div>
                 <div className="form-group">
@@ -368,7 +372,7 @@ const Store: FC = () => {
                         value={coupon.discount_value} 
                         onChange={handleChange}
                         min="0"
-                        step={coupon.discount_type === 'percentage' ? '0.1' : '1000'}
+               
                          
                     />
                     {errors.discount_value && <div className="invalid-feedback">{errors.discount_value}</div>}
@@ -385,11 +389,29 @@ const Store: FC = () => {
                         onChange={handleChange}
                    
                     />
-                    <small className="form-text text-muted">Trường này sẽ được cập nhật tự động khi mã giảm giá được sử dụng.</small>
+                    
                 </div>
+                <div className="form-group">
+                    <label htmlFor="user_usage" className="form-label">Chọn User được sử dụng mã giảm giá</label>
+                    <select 
+                        name="user_usage" 
+                        id="user_usage" 
+                        className={`form-control ${errors.user_usage ? 'is-invalid' : ''}`}
+                        defaultValue="0"
+                        onChange={handleUserChange}
+                    >
+                        <option value="0">Chọn User</option>
+                        {userUsage.map(user => (
+                            <option key={user.id} value={user.id}>{user.name}</option>
+                        ))}
+                    </select>
+                    {errors.user_usage && <div className="invalid-feedback">{errors.user_usage}</div>}
+                </div>
+                
                
                 <button type="submit" className="btn btn-primary">Thêm</button>
             </form>
+      
         </div>
     );
 };
