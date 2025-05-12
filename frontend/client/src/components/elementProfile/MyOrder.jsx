@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import instanceAxios from "../../config/db";
 import FomatVND from "../../utils/FomatVND";
 import { FomatTime } from "../../utils/FomatTime";
 import { Link, useNavigate } from "react-router-dom";
-import { Divider, message, Modal, Table, Form } from "antd";
+import { Divider, message, Modal, Table, Form, Pagination } from "antd";
 import ReviewForm from "./ReviewForm";
 import useReview from "../../hooks/useReview";
 import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
@@ -196,8 +196,9 @@ const MyOrder = () => {
   const [form] = Form.useForm();
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Sử dụng hook scroll to top khi currentPage thay đổi
-  useScrollToTop(currentPage);
+  const [pageSize, setPageSize] = useState(5);
+  const [total, setTotal] = useState(0);
+
 
   const selectedProduct =
     selectedOrder?.order_items?.[currentProductIndex] || null;
@@ -260,12 +261,21 @@ const MyOrder = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["orders", currentPage],
+
+    queryKey: ["orders", currentPage, pageSize],
     queryFn: async () => {
-      const res = await instanceAxios.get(`/api/v1/customer/orders?page=${currentPage}`);
+      const res = await instanceAxios.get(`/api/v1/customer/orders?page=${currentPage}&per_page=${pageSize}`);
+
       return res?.data;
     },
   });
+
+  // Cập nhật total khi có dữ liệu mới
+  useEffect(() => {
+    if (apiResponse?.data?.total) {
+      setTotal(apiResponse.data.total);
+    }
+  }, [apiResponse]);
 
   console.log("orderData", apiResponse);
 
@@ -590,6 +600,22 @@ const MyOrder = () => {
                 />
               </div>
             )}
+          </div>
+
+          {/* Thêm phân trang */}
+          <div className="flex justify-center mt-6">
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={total}
+              onChange={(page, pageSize) => {
+                setCurrentPage(page);
+                setPageSize(pageSize);
+              }}
+              showSizeChanger
+              showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} đơn hàng`}
+              className="dark:text-white"
+            />
           </div>
         </div>
       )}

@@ -1,18 +1,20 @@
 import { FC, useEffect, useState } from "react";
-import { deleteCoupon, getCoupons, Coupon as ApiCoupon, Pagination } from "@app/services/Coupon/ApiCoupon";
+import { deleteCoupon, getCoupons, Coupon as ApiCoupon } from "@app/services/Coupon/ApiCoupon";
 import { Link, useNavigate } from "react-router-dom";
 
 interface CouponDisplay {
-  id: number;
+    id : number;
   code: string;
   name: string;
   description: string;
   discount_value: number;
   discount_type: string;
+  min_purchase: number;
   is_active: number;
   start_date: string;
   end_date: string;
   max_uses: number;
+  user_usage: any;
   used_count: number;
 }
 
@@ -33,7 +35,7 @@ const Coupon: FC = () => {
       const response = await getCoupons(page, perPage, search);
       console.log("API response:", response);
       
-      // Lưu thông tin phân trang
+    
       setCurrentPage(response.current_page);
       setLastPage(response.last_page);
       setTotal(response.total);
@@ -45,6 +47,8 @@ const Coupon: FC = () => {
         description: item.description || '',
         discount_value: item.discount_value,
         discount_type: item.discount_type,
+        min_purchase: item.min_purchase || 0,
+        user_usage: item.user_usage || {},
         is_active: 1,
         start_date: item.start_date || '',
         end_date: item.end_date || '',
@@ -183,18 +187,57 @@ const Coupon: FC = () => {
         </div>
 
         <div className="card-body p-0">
-          {loading ? (
-            <div className="text-center p-4">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Đang tải...</span>
-              </div>
-            </div>
-          ) : (
+        
             <>
-              {/* Bọc bảng trong table-responsive */}
-              <div className="table-responsive">
-                <table className="table table-hover text-nowrap mb-0">
-                  <thead>
+
+              <table className="table table-hover text-nowrap">
+                <thead>
+                  <tr>
+                    <th>Mã</th>
+                    <th>Tên</th>
+                    <th>Loại</th>
+
+                    <th>Hạn sử dụng</th>
+                    <th>Trạng thái</th>
+                    <th>Số lượt sử dụng</th>
+                    <th colSpan={3} className="text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {coupons.length > 0 ? (
+                    coupons.map((coupon: CouponDisplay) => (
+                      <tr key={coupon.id}>
+                        <td>{coupon.code}</td>
+                        <td>{coupon.name}</td>
+                        <td>{coupon.discount_type === "percentage" ? 'Phần trăm' : 'Giá tiền'}</td>
+                          <td>
+                          {coupon.end_date}
+                        </td>
+                        <td>
+                          <span
+                            className={`tag ${coupon.is_active === 1 ? "tag-success" : "tag-danger"}`}
+                          >
+                            {coupon.is_active === 1 ? "Hoạt động" : "Ngừng"}
+                          </span>
+                        </td>
+                        
+                      
+                        <td>
+                        {coupon.max_uses}
+                        </td>
+                        <td>
+                          <button className="btn btn-primary" onClick={() => navigate(`/detail-coupon/${coupon.id}`)}>Chi tiết</button>
+                        </td>
+                        <td>
+                          <button className="btn btn-warning" onClick={() => navigate(`/edit-coupon/${coupon.id}`)}>Sửa</button>
+                        </td>
+                        <td>
+                          <button className="btn btn-danger" onClick={() => handleDeleteCoupon(coupon.id)}>Xóa</button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+
                     <tr>
                       <th>Mã</th>
                       <th>Tên</th>
@@ -305,19 +348,7 @@ const Coupon: FC = () => {
 
               {/* Phân trang */}
               <div className="d-flex justify-content-between align-items-center p-3 border-top">
-                <div>
-                  {searchTerm ? (
-                    <span className="text-muted">
-                      <i className="fas fa-search me-1"></i>
-                      Kết quả tìm kiếm cho "<strong>{searchTerm}</strong>": {total} mã giảm giá
-                    </span>
-                  ) : (
-                    <span className="text-muted">
-                      <i className="fas fa-list me-1"></i>
-                      Hiển thị {coupons.length} / {total} mã giảm giá
-                    </span>
-                  )}
-                </div>
+               
                 <div className="pagination">
                   <ul className="pagination mb-0">
                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -356,7 +387,7 @@ const Coupon: FC = () => {
                 </button>
               </div>
             </>
-          )}
+      
         </div>
       </div>
     </section>
