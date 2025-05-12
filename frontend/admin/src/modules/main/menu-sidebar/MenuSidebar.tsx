@@ -40,9 +40,19 @@ export const MENU: IMenuItem[] = [
     path: '/Attribute',
   },
   {
+    name: 'Người dùng',
+    icon: 'fas fa-user nav-icon', // User -> người dùng
+    path: '/User',
+  },
+  {
     name: 'Đơn hàng',
     icon: 'fas fa-shopping-cart nav-icon', // Đơn hàng -> giỏ hàng
     path: '/Order',
+  },
+  {
+    name: 'hoàn hàng',
+    icon: 'fas fa-shopping-cart nav-icon', // Đơn hàng -> giỏ hàng
+    path: '/order-return',
   },
   {
     name: 'Mã giảm giá',

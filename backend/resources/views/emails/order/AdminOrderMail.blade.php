@@ -14,7 +14,9 @@
     <div class="order-info">
         <h2>Thông Tin Đơn Hàng #{{ $order->order_code }}</h2>
         <p><strong>Ngày đặt hàng:</strong> {{ $order->created_at->format('d/m/Y H:i') }}</p>
-        <p><strong>Trạng thái:</strong> {{ $order->status }}</p>
+        <p><strong>Trạng thái:</strong>  <span style="color: {{ $order->status === 6 ? '#28a745' : ($order->status === 0 ? '#ffc107' : '#dc3545') }}">
+                {{ $order->status->getStatusLabelAttribute() }}
+            </span></p>
     </div>
 
     <div class="customer-info">

@@ -6,7 +6,6 @@ import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../components/header/Logo";
 import Error from "../components/popupmodal/Error";
-import Success from "../components/popupmodal/Success";
 import instanceAxios from "../config/db";
 import { login } from "../redux/AuthSide";
 
@@ -40,16 +39,28 @@ const Register = () => {
         })
       );
 
-      setSuccess(true);
+      message.success("Đăng ký thành công!");
+      // setSuccess(true);
       setTimeout(() => {
         nav("/"); // hoặc '/home'
-        setSuccess(false);
+        // setSuccess(false);
       }, 2000);
     },
     onError: (err) => {
-      setError(true);
-      message.error(err.response?.data?.message || "Đăng ký thất bại, vui lòng thử lại sau.");
-    //   setTimeout(() => setError(false), 200);
+      const errors = err.response?.data?.data;
+
+      if (errors) {
+        const messages = Object.values(errors).flat();
+        message.error(messages.join(", "));
+      } else {
+        message.error("Đăng ký thất bại, vui lòng thử lại sau.");
+      }
+      // setError(true);
+      // message.error(
+      //   err.response?.data?.message || "Đăng ký thất bại, vui lòng thử lại sau."
+      // );
+      //   setTimeout(() => setError(false), 200);
+      console.log("err", err.response?.data?.data);
     },
   });
 
@@ -90,7 +101,11 @@ const Register = () => {
         </h2>
         <p className="text-gray-600 mb-8">Đăng ký tại đây</p>
 
-        <Form layout="vertical" onFinish={onFinish} className="space-y-4">
+        <Form
+          layout="vertical"
+          onFinish={onFinish}
+          className="space-y-4"
+        >
           {/* <Form.Item
             label={<span className="text-gray-700">Họ</span>}
             name="firstname"
@@ -105,7 +120,9 @@ const Register = () => {
           <Form.Item
             label={<span className="text-gray-700">Tên người dùng</span>}
             name="name"
-            rules={[{ required: true, message: "Hãy nhập tên người dùng của bạn!" }]}
+            rules={[
+              { required: true, message: "Hãy nhập tên người dùng của bạn!" },
+            ]}
           >
             <Input placeholder="Fox" className="px-4 py-2 border rounded-md" />
           </Form.Item>
@@ -223,7 +240,7 @@ const Register = () => {
         </p>
       </div>
 
-      {success && <Success />}
+      {/* {success && <Success />} */}
     </div>
   );
 };

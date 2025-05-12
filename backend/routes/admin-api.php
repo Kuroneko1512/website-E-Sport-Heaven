@@ -4,7 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\v1\AdminAuthController;
 use App\Http\Controllers\Api\Location\LocationImportController;
 use App\Http\Controllers\Api\Profile\V1\AdminProfileController;
-
+use App\Http\Controllers\Api\Admin\V1\AttributeController;
+use App\Http\Controllers\Api\Admin\V1\CategoryController;
+use App\Http\Controllers\Api\Admin\V1\ProductController;
+use App\Http\Controllers\Api\Admin\V1\OrderController;
+use App\Http\Controllers\Api\User\UserController;
 Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
         Route::get('/', function () {
@@ -14,6 +18,7 @@ Route::prefix('v1')->group(function () {
         // Authentication routes
         Route::post('/login', [AdminAuthController::class, 'login'])->name('login');
         Route::post('/refresh', [AdminAuthController::class, 'refreshToken'])->name('refresh');
+
 
         // Protected routes - yêu cầu đăng nhập
         Route::middleware('auth:admin')->group(function () {
@@ -25,20 +30,29 @@ Route::prefix('v1')->group(function () {
             Route::post('/update-profile', [AdminProfileController::class, 'updateProfile'])->name('update-profile');
 
             //Product routes
-
+            Route::apiResource('/product', ProductController::class);
+          
             //Attributes routes
-
+            Route::apiResource('/attribute', AttributeController::class);
             //Category routes
-
+            Route::apiResource('/category', CategoryController::class);
             //Order routes
+            Route::get('/order/{id}/order-user-return', [OrderController::class, 'getOrderUserReturn']);
+            Route::get('/order/order-return', [OrderController::class, 'getOrdersWithReturnRequests']);
+
+            Route::apiResource('/order', OrderController::class);
+
+            Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
+            Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
+
 
             //Customer routes
-
-            //User routes ( Staff)
+      
+          
 
             //Role and Permission routes
 
-            
+
             // Location Import Routes
             Route::prefix('locations')->group(function () {
                 Route::post('/import', [LocationImportController::class, 'import'])
