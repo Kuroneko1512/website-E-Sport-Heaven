@@ -1,14 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import instanceAxios from "../../config/db";
 import FomatVND from "../../utils/FomatVND";
 import { FomatTime } from "../../utils/FomatTime";
 import { Link, useNavigate } from "react-router-dom";
-import { Divider, message, Modal, Table, Form } from "antd";
+import { Divider, message, Modal, Table, Form, Pagination } from "antd";
 import ReviewForm from "./ReviewForm";
 import useReview from "../../hooks/useReview";
 import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
 import Cookies from "js-cookie";
+import { ORDER_STATUS_LABELS, ORDER_STATUS, PAYMENT_STATUS_LABELS, PAYMENT_STATUS } from "../../constants/OrderConstants";
+import Pagination from "../filterProduct/Pagination";
+import useScrollToTop from "../../hooks/useScrollToTop";
 
 const OrderItem = ({
   order_items,
@@ -32,15 +35,18 @@ const OrderItem = ({
 
   // console.log("order_code", status);
   const statusStyles = {
-    "đang xử lý":
-      "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
-    "đã xác nhận":
-      "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
-    "đang giao":
-      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    "hoàn thành":
-      "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
-    "đã hủy": "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+    [ORDER_STATUS.PENDING]: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
+    [ORDER_STATUS.CONFIRMED]: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
+    [ORDER_STATUS.PREPARING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.READY_TO_SHIP]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.SHIPPING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.DELIVERED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.COMPLETED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.RETURN_REQUESTED]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURN_PROCESSING]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURNED_COMPLETED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+    [ORDER_STATUS.RETURN_REJECTED]: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300",
+    [ORDER_STATUS.CANCELLED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
   };
 
   return (
@@ -99,7 +105,7 @@ const OrderItem = ({
         <span>Mã đơn hàng: <strong>{order_code}</strong></span>
         <span className="text-sm">{customer_name}, {shipping_address.substring(0, 30)}...</span>
         <span className={`px-2 py-1 rounded text-base ${statusStyles[status]}`}>
-          {status}
+          {ORDER_STATUS_LABELS[status]}
         </span>
       </h3>
 
@@ -188,6 +194,11 @@ const MyOrder = () => {
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
   const [reviewedProducts, setReviewedProducts] = useState([]);
   const [form] = Form.useForm();
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [pageSize, setPageSize] = useState(5);
+  const [total, setTotal] = useState(0);
+
 
   const selectedProduct =
     selectedOrder?.order_items?.[currentProductIndex] || null;
@@ -250,17 +261,27 @@ const MyOrder = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["orders"],
+
+    queryKey: ["orders", currentPage, pageSize],
     queryFn: async () => {
-      const res = await instanceAxios.get(`/api/v1/customer/orders`);
+      const res = await instanceAxios.get(`/api/v1/customer/orders?page=${currentPage}&per_page=${pageSize}`);
+
       return res?.data;
     },
   });
+
+  // Cập nhật total khi có dữ liệu mới
+  useEffect(() => {
+    if (apiResponse?.data?.total) {
+      setTotal(apiResponse.data.total);
+    }
+  }, [apiResponse]);
 
   console.log("orderData", apiResponse);
 
   // Truy cập đúng mảng đơn hàng từ cấu trúc phản hồi API
   const orders = apiResponse?.data?.data || [];
+  const totalPages = apiResponse?.data?.last_page || 1;
 
   // 1. Dùng useMemo để group orders theo ngày (string)
   const ordersByDate = useMemo(() => {
@@ -288,116 +309,180 @@ const MyOrder = () => {
   const getActionsForOrder = (order) => {
     const actions = [];
 
-    if (order.status === "đang xử lý") {
-      actions.push("hủy");
+    // Actions for PENDING orders
+    if (order.status === ORDER_STATUS.PENDING) {
+        actions.push("hủy");
     }
 
-    if (order.status === "hoàn thành") {
-      actions.push("đánh giá", "mua lại");
-
-      // Kiểm tra điều kiện hoàn trả theo ngày
-      const completedDate = new Date(order.updated_at || order.completed_at); // hoặc field khác phản ánh ngày hoàn thành
-      const now = new Date();
-      const diffInDays = (now - completedDate) / (1000 * 60 * 60 * 24);
-
-      if (diffInDays <= 7) {
-        actions.push("hoàn trả");
-      }
+    // Actions for DELIVERED orders
+    if (order.status === ORDER_STATUS.DELIVERED) {
+        actions.push("Đã nhận hàng");
     }
 
-    if (order.status === "đã hủy") {
-      actions.push("mua lại");
+    // Actions for COMPLETED orders
+    if (order.status === ORDER_STATUS.COMPLETED) {
+        actions.push("đánh giá", "mua lại");
+
+        // Check if within 7 days for return request
+        const completedDate = new Date(order.updated_at);
+        const now = new Date();
+        const diffInDays = (now - completedDate) / (1000 * 60 * 60 * 24);
+
+        if (diffInDays <= 7) {
+            actions.push("yêu cầu trả hàng");
+        }
+    }
+
+    // Actions for CANCELLED orders
+    if (order.status === ORDER_STATUS.CANCELLED) {
+        actions.push("mua lại");
+    }
+
+    // Actions for RETURN_REQUESTED orders
+    if (order.status === ORDER_STATUS.RETURN_REQUESTED) {
+        actions.push("hủy yêu cầu trả hàng");
+    }
+
+    // Actions for RETURN_PROCESSING orders
+    if (order.status === ORDER_STATUS.RETURN_PROCESSING) {
+        actions.push("xem trạng thái trả hàng");
+    }
+
+    // Actions for RETURNED_COMPLETED orders
+    if (order.status === ORDER_STATUS.RETURNED_COMPLETED) {
+        actions.push("mua lại");
+    }
+
+    // Actions for RETURN_REJECTED orders
+    if (order.status === ORDER_STATUS.RETURN_REJECTED) {
+        actions.push("mua lại");
     }
 
     return actions;
   };
 
   const handleAction = async (action, order) => {
-    switch (action) {
-      case "đánh giá":
-        setSelectedOrder(order);
-        setCurrentProductIndex(0);
-        setReviewedProducts([]);
-        setReviewModalVisible(true);
-        break;
-      case "hủy":
-        // Redirect to cart page
-        nav("/cart");
-        break;
-      case "mua lại":
-        // Check product availability before adding to cart
-        try {
-          const productId =
-            order.order_items[0].product_id ||
-            order.order_items[0].product_variant?.product_id;
-          const res = await instanceAxios.get(
-            `/api/v1/product/${productId}/Detail`
-          );
+    try {
+        switch (action) {
+            case "đánh giá":
+                setSelectedOrder(order);
+                setCurrentProductIndex(0);
+                setReviewedProducts([]);
+                setReviewModalVisible(true);
+                break;
 
-          if (res.data.data.status !== "active") {
-            message.error("Sản phẩm đã ngừng bán");
-            return;
-          }
+            case "hủy":
+                try {
+                    await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
+                        status: ORDER_STATUS.CANCELLED
+                    });
+                    message.success("Đã hủy đơn hàng thành công");
+                    window.location.reload();
+                } catch (error) {
+                    message.error("Không thể hủy đơn hàng");
+                }
+                break;
 
-          // Add all items to cart
-          const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-          const updatedCart = [...cartItems];
+            case "mua lại":
+                try {
+                    const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+                    const updatedCart = [...cartItems];
 
-          order.order_items.forEach((item) => {
-            const existingIndex = updatedCart.findIndex(
-              (cartItem) =>
-                cartItem.product_id === item.product_id &&
-                (!item.variant_id || cartItem.variant_id === item.variant_id)
-            );
+                    order.order_items.forEach((item) => {
+                        const existingIndex = updatedCart.findIndex(
+                            (cartItem) =>
+                                cartItem.product_id === item.product_id &&
+                                (!item.variant_id || cartItem.variant_id === item.variant_id)
+                        );
 
-            if (existingIndex !== -1) {
-              updatedCart[existingIndex].quantity += item.quantity;
-            } else {
-              const generateId = () =>
-                Date.now() + Math.random().toString(36).substr(2, 9);
-              updatedCart.push({
-                id: generateId(),
-                product_id: item.product_id,
-                variant_id: item.product_variant_id,
-                quantity: item.quantity,
-                sku: item.product_variant?.sku || item.product?.sku,
-                image: item.product?.image || item.product_variant?.image,
-                name: item.product?.name,
-                price: Number(item.price), // Ensure price is a number
-                stock: item.product?.stock || item.product_variant?.stock,
-                thuoc_tinh:
-                  item.product_variant?.product_attributes?.reduce(
-                    (acc, attr) => {
-                      acc[attr.attribute.name] = attr.attribute_value.value;
-                      return acc;
-                    },
-                    {}
-                  ) || {},
-                discount: Number(
-                  item.product.discount_percent ||
-                    item.product_variant.discount_percent
-                ), // Use item's discount if available
-              });
-            }
-          });
+                        if (existingIndex !== -1) {
+                            updatedCart[existingIndex].quantity += item.quantity;
+                        } else {
+                            const generateId = () =>
+                                Date.now() + Math.random().toString(36).substr(2, 9);
+                            updatedCart.push({
+                                id: generateId(),
+                                product_id: item.product_id,
+                                variant_id: item.product_variant_id,
+                                quantity: item.quantity,
+                                sku: item.product_variant?.sku || item.product?.sku,
+                                image: item.product?.image || item.product_variant?.image,
+                                name: item.product?.name,
+                                price: Number(item.price),
+                                stock: item.product?.stock || item.product_variant?.stock,
+                                thuoc_tinh:
+                                    item.product_variant?.product_attributes?.reduce(
+                                        (acc, attr) => {
+                                            acc[attr.attribute.name] = attr.attribute_value.value;
+                                            return acc;
+                                        },
+                                        {}
+                                    ) || {},
+                                discount: Number(
+                                    item.product.discount_percent ||
+                                    item.product_variant.discount_percent
+                                ),
+                            });
+                        }
+                    });
 
-          localStorage.setItem("cartItems", JSON.stringify(updatedCart));
-          message.success("Đã thêm sản phẩm vào giỏ hàng");
-          window.dispatchEvent(
-            new CustomEvent("cartUpdated", { detail: updatedCart })
-          );
-          nav("/cart");
-        } catch (error) {
-          console.error("Error checking product:", error);
-          message.error("Không thể kiểm tra sản phẩm");
+                    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+                    message.success("Đã thêm sản phẩm vào giỏ hàng");
+                    window.dispatchEvent(
+                        new CustomEvent("cartUpdated", { detail: updatedCart })
+                    );
+                    nav("/cart");
+                } catch (error) {
+                    message.error("Không thể thêm sản phẩm vào giỏ hàng");
+                }
+                break;
+
+            case "Đã nhận hàng":
+                try {
+                    await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
+                        status: ORDER_STATUS.COMPLETED
+                    });
+                    message.success("Đã xác nhận nhận hàng thành công");
+                    window.location.reload();
+                } catch (error) {
+                    message.error("Không thể xác nhận nhận hàng");
+                }
+                break;
+
+            case "yêu cầu trả hàng":
+                try {
+                    await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
+                        status: ORDER_STATUS.RETURN_REQUESTED
+                    });
+                    message.success("Đã gửi yêu cầu trả hàng");
+                    window.location.reload();
+                } catch (error) {
+                    message.error("Không thể gửi yêu cầu trả hàng");
+                }
+                break;
+
+            case "hủy yêu cầu trả hàng":
+                try {
+                    await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
+                        status: ORDER_STATUS.COMPLETED
+                    });
+                    message.success("Đã hủy yêu cầu trả hàng");
+                    window.location.reload();
+                } catch (error) {
+                    message.error("Không thể hủy yêu cầu trả hàng");
+                }
+                break;
+
+            case "xem trạng thái trả hàng":
+                nav(`/my-profile/orders/${order.order_code}`);
+                break;
+
+            default:
+                console.log(`Hành động chưa xử lý: ${action}`);
         }
-        break;
-      case "hoàn trả":
-        // mở modal hoặc điều hướng đến trang yêu cầu hoàn trả
-        console.log(`Thực hiện yêu cầu hoàn trả cho đơn ${order.order_code}`);
-        break;
-      default:
-        console.log(`Hành động chưa xử lý: ${action}`);
+    } catch (error) {
+        console.error("Error handling action:", error);
+        message.error("Có lỗi xảy ra khi thực hiện hành động");
     }
   };
 
@@ -410,7 +495,6 @@ const MyOrder = () => {
         </>
       ) : (
         <div className="dark:bg-gray-800 min-h-screen p-6">
-          {/* … filter, search bar … */}
           <div className="flex justify-between items-center mb-3">
             <div className="px-2 py-1">Tất cả</div>
             <div className="px-2 py-1">Chờ thanh toán</div>
@@ -474,6 +558,7 @@ const MyOrder = () => {
                                 )
                               )}
                             </span>
+
                           </div>
                           <div className="flex flex-row-reverse bg-white dark:bg-gray-800">
                             <Link
@@ -506,6 +591,31 @@ const MyOrder = () => {
                 </p>
               </div>
             )}
+            {totalPages > 1 && (
+              <div className="flex justify-end mt-4">
+                <Pagination
+                  totalPages={totalPages}
+                  currentPage={currentPage}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Thêm phân trang */}
+          <div className="flex justify-center mt-6">
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={total}
+              onChange={(page, pageSize) => {
+                setCurrentPage(page);
+                setPageSize(pageSize);
+              }}
+              showSizeChanger
+              showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} đơn hàng`}
+              className="dark:text-white"
+            />
           </div>
         </div>
       )}
@@ -514,3 +624,4 @@ const MyOrder = () => {
 };
 
 export default MyOrder;
+

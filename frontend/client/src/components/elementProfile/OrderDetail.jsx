@@ -3,9 +3,25 @@ import React from "react";
 import instanceAxios from "../../config/db";
 import { useParams } from "react-router-dom";
 import ScrollToTop from "../../config/ScrollToTop";
+import { ORDER_STATUS_LABELS, ORDER_STATUS } from "../../constants/OrderConstants";
 
 const OrderDetail = () => {
   const { order_code } = useParams();
+
+  const statusStyles = {
+    [ORDER_STATUS.PENDING]: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
+    [ORDER_STATUS.CONFIRMED]: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
+    [ORDER_STATUS.PREPARING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.READY_TO_SHIP]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.SHIPPING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.DELIVERED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.COMPLETED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.RETURN_REQUESTED]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURN_PROCESSING]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURNED_COMPLETED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+    [ORDER_STATUS.RETURN_REJECTED]: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300",
+    [ORDER_STATUS.CANCELLED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+  };
 
   const { data: orderData, isLoading, error } = useQuery({
     queryKey: ["order", order_code],
@@ -62,11 +78,31 @@ const OrderDetail = () => {
     }
     return orderData.data.order_items.reduce((acc, item) => {
       const discountedPrice = getDiscountedPrice(item);
-      // Lấy số lượng (số lượng có thể là kiểu string, nên chuyển sang số)
       const quantity = parseInt(item.quantity, 10) || 0;
       return acc + discountedPrice * quantity;
     }, 0);
   };
+
+  // Hàm tính tổng thanh toán cuối cùng
+  const calculateFinalTotal = () => {
+    const subtotal = calculateTotalAmount();
+    const shippingFee = orderData?.data?.shipping_fee || 0;
+    
+    // Tính giảm giá
+    let discountAmount = 0;
+    if (orderData?.data?.order_discount_type === 1) {
+      // Giảm giá theo phần trăm
+      discountAmount = Number(subtotal * (Number(orderData?.data?.order_discount_amount) / 100));
+    } else {
+      // Giảm giá theo giá trị cố định
+      discountAmount = Number(orderData?.data?.order_discount_amount) || 0;
+    }
+
+    // Tổng thanh toán = Tổng tiền hàng + Phí vận chuyển - Giảm giá
+    return subtotal + Number(shippingFee) - discountAmount;
+  };
+
+  console.log("calculateFinalTotal", calculateFinalTotal());
 
   if (isLoading) {
     return (
@@ -89,6 +125,7 @@ const OrderDetail = () => {
 
   // Tính tổng giá tiền theo logic đã cập nhật
   const computedTotalAmount = calculateTotalAmount();
+  const finalTotal = calculateFinalTotal();
 
   return (
     <div className="bg-white text-gray-800 p-6 max-w-4xl mx-auto">
@@ -96,7 +133,10 @@ const OrderDetail = () => {
       <header className="mb-8 border-b pb-4 flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900">Chi tiết đơn hàng</h1>
         <span className="text-lg">
-          Mã đơn hàng: <strong>{order_code}</strong> | <span className="text-red-500 text-base font-bold">{orderData?.data?.status}</span>
+          Mã đơn hàng: <strong>{order_code}</strong> | 
+          <span className={`ml-2 px-3 py-1 rounded text-base ${statusStyles[orderData?.data?.status]}`}>
+            {ORDER_STATUS_LABELS[orderData?.data?.status]}
+          </span>
         </span>
       </header>
 
@@ -177,25 +217,26 @@ const OrderDetail = () => {
           <div className="col-span-4">
             Phí vận chuyển:{" "}
           </div>
-          <span className="col-span-2">{formatPrice(orderData?.data?.shipping_fee)}</span>
+          <span className="col-span-2">{formatPrice(orderData?.data?.shipping_fee || 0)}</span>
         </div>
 
         <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
           <div className="col-span-4">
-          Giảm giá:{" "}
+            Giảm giá:{" "}
           </div>
-          <span className="col-span-2">{formatPrice(orderData?.data?.discount_amount)}</span>
+          <span className="col-span-2">
+            {orderData?.data?.order_discount_type === 1 
+              ? `${orderData?.data?.order_discount_amount}%` 
+              : formatPrice(orderData?.data?.order_discount_amount || 0)}
+          </span>
         </div>
 
         <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
           <div className="col-span-4">
-          Tổng thanh toán:{" "}
+            Tổng thanh toán:{" "}
           </div>
           <span className="text-2xl font-bold text-red-500 col-span-2">
-            {formatPrice(
-              computedTotalAmount + orderData?.data?.shipping_fee -
-                orderData?.data?.discount_amount
-            )}
+            {formatPrice(finalTotal)}
           </span>
         </div>
         
