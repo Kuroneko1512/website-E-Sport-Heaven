@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import instanceAxios from "../../config/db";
 import FomatVND from "../../utils/FomatVND";
 import { FomatTime } from "../../utils/FomatTime";
 import { Link, useNavigate } from "react-router-dom";
-import { Divider, message, Modal, Table, Form, Pagination } from "antd";
+import { Divider, message, Modal, Table, Form } from "antd";
 import ReviewForm from "./ReviewForm";
 import useReview from "../../hooks/useReview";
 import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
@@ -76,9 +76,8 @@ const OrderItem = ({
                 <img
                   alt="Product Image"
                   className="h-24 w-24 rounded-md mr-4"
-                  src={`http://127.0.0.1:8000/storage/${
-                    item?.product?.image || item?.product_variant?.image
-                  }`}
+                  src={`http://127.0.0.1:8000/storage/${item?.product?.image || item?.product_variant?.image
+                    }`}
                 />
                 <div>
                   <p className="font-bold text-lg">{item?.product?.name}</p>
@@ -120,9 +119,8 @@ const OrderItem = ({
                 <img
                   alt="Product Image"
                   className="h-16 w-16 rounded-md"
-                  src={`http://127.0.0.1:8000/storage/${
-                    item?.product?.image || item?.product_variant?.image
-                  }`}
+                  src={`http://127.0.0.1:8000/storage/${item?.product?.image || item?.product_variant?.image
+                    }`}
                 />
                 <div>
                   <p className="font-bold text-gray-900 dark:text-gray-200">
@@ -180,7 +178,7 @@ const calculate = (item) => {
     Number(
       item?.product?.discount_percent || item?.product_variant?.discount_percent
     ) || 0;
-  
+
 
   // Calculate discounted price
   const discountedPrice = price - (price * discountPercent) / 100;
@@ -196,9 +194,8 @@ const MyOrder = () => {
   const [form] = Form.useForm();
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [pageSize, setPageSize] = useState(5);
-  const [total, setTotal] = useState(0);
-
+  // Sử dụng hook scroll to top khi currentPage thay đổi
+  useScrollToTop(currentPage);
 
   const selectedProduct =
     selectedOrder?.order_items?.[currentProductIndex] || null;
@@ -261,21 +258,12 @@ const MyOrder = () => {
     isLoading,
     error,
   } = useQuery({
-
-    queryKey: ["orders", currentPage, pageSize],
+    queryKey: ["orders", currentPage],
     queryFn: async () => {
-      const res = await instanceAxios.get(`/api/v1/customer/orders?page=${currentPage}&per_page=${pageSize}`);
-
+      const res = await instanceAxios.get(`/api/v1/customer/orders?page=${currentPage}`);
       return res?.data;
     },
   });
-
-  // Cập nhật total khi có dữ liệu mới
-  useEffect(() => {
-    if (apiResponse?.data?.total) {
-      setTotal(apiResponse.data.total);
-    }
-  }, [apiResponse]);
 
   console.log("orderData", apiResponse);
 
@@ -311,51 +299,51 @@ const MyOrder = () => {
 
     // Actions for PENDING orders
     if (order.status === ORDER_STATUS.PENDING) {
-        actions.push("hủy");
+      actions.push("hủy");
     }
 
     // Actions for DELIVERED orders
     if (order.status === ORDER_STATUS.DELIVERED) {
-        actions.push("Đã nhận hàng");
+      actions.push("Đã nhận hàng");
     }
 
     // Actions for COMPLETED orders
     if (order.status === ORDER_STATUS.COMPLETED) {
-        actions.push("đánh giá", "mua lại");
+      actions.push("đánh giá", "mua lại");
 
-        // Check if within 7 days for return request
-        const completedDate = new Date(order.updated_at);
-        const now = new Date();
-        const diffInDays = (now - completedDate) / (1000 * 60 * 60 * 24);
+      // Check if within 7 days for return request
+      const completedDate = new Date(order.updated_at);
+      const now = new Date();
+      const diffInDays = (now - completedDate) / (1000 * 60 * 60 * 24);
 
-        if (diffInDays <= 7) {
-            actions.push("yêu cầu trả hàng");
-        }
+      if (diffInDays <= 7) {
+        actions.push("yêu cầu trả hàng");
+      }
     }
 
     // Actions for CANCELLED orders
     if (order.status === ORDER_STATUS.CANCELLED) {
-        actions.push("mua lại");
+      actions.push("mua lại");
     }
 
     // Actions for RETURN_REQUESTED orders
     if (order.status === ORDER_STATUS.RETURN_REQUESTED) {
-        actions.push("hủy yêu cầu trả hàng");
+      actions.push("hủy yêu cầu trả hàng");
     }
 
     // Actions for RETURN_PROCESSING orders
     if (order.status === ORDER_STATUS.RETURN_PROCESSING) {
-        actions.push("xem trạng thái trả hàng");
+      actions.push("xem trạng thái trả hàng");
     }
 
     // Actions for RETURNED_COMPLETED orders
     if (order.status === ORDER_STATUS.RETURNED_COMPLETED) {
-        actions.push("mua lại");
+      actions.push("mua lại");
     }
 
     // Actions for RETURN_REJECTED orders
     if (order.status === ORDER_STATUS.RETURN_REJECTED) {
-        actions.push("mua lại");
+      actions.push("mua lại");
     }
 
     return actions;
@@ -363,126 +351,131 @@ const MyOrder = () => {
 
   const handleAction = async (action, order) => {
     try {
-        switch (action) {
-            case "đánh giá":
-                setSelectedOrder(order);
-                setCurrentProductIndex(0);
-                setReviewedProducts([]);
-                setReviewModalVisible(true);
-                break;
+      switch (action) {
+        case "đánh giá":
+          setSelectedOrder(order);
+          setCurrentProductIndex(0);
+          setReviewedProducts([]);
+          setReviewModalVisible(true);
+          break;
 
-            case "hủy":
-                try {
-                    await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-                        status: ORDER_STATUS.CANCELLED
-                    });
-                    message.success("Đã hủy đơn hàng thành công");
-                    window.location.reload();
-                } catch (error) {
-                    message.error("Không thể hủy đơn hàng");
-                }
-                break;
+        case "hủy":
+          try {
+            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
+              status: ORDER_STATUS.CANCELLED
+            });
+            message.success("Đã hủy đơn hàng thành công");
+            window.location.reload();
+          } catch (error) {            
+            console.error("Chi tiết lỗi:", error);
+            message.error("Không thể hủy đơn hàng");
+          }
+          break;
 
-            case "mua lại":
-                try {
-                    const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-                    const updatedCart = [...cartItems];
+        case "mua lại":
+          try {
+            const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+            const updatedCart = [...cartItems];
 
-                    order.order_items.forEach((item) => {
-                        const existingIndex = updatedCart.findIndex(
-                            (cartItem) =>
-                                cartItem.product_id === item.product_id &&
-                                (!item.variant_id || cartItem.variant_id === item.variant_id)
-                        );
+            order.order_items.forEach((item) => {
+              const existingIndex = updatedCart.findIndex(
+                (cartItem) =>
+                  cartItem.product_id === item.product_id &&
+                  (!item.variant_id || cartItem.variant_id === item.variant_id)
+              );
 
-                        if (existingIndex !== -1) {
-                            updatedCart[existingIndex].quantity += item.quantity;
-                        } else {
-                            const generateId = () =>
-                                Date.now() + Math.random().toString(36).substr(2, 9);
-                            updatedCart.push({
-                                id: generateId(),
-                                product_id: item.product_id,
-                                variant_id: item.product_variant_id,
-                                quantity: item.quantity,
-                                sku: item.product_variant?.sku || item.product?.sku,
-                                image: item.product?.image || item.product_variant?.image,
-                                name: item.product?.name,
-                                price: Number(item.price),
-                                stock: item.product?.stock || item.product_variant?.stock,
-                                thuoc_tinh:
-                                    item.product_variant?.product_attributes?.reduce(
-                                        (acc, attr) => {
-                                            acc[attr.attribute.name] = attr.attribute_value.value;
-                                            return acc;
-                                        },
-                                        {}
-                                    ) || {},
-                                discount: Number(
-                                    item.product.discount_percent ||
-                                    item.product_variant.discount_percent
-                                ),
-                            });
-                        }
-                    });
+              if (existingIndex !== -1) {
+                updatedCart[existingIndex].quantity += item.quantity;
+              } else {
+                const generateId = () =>
+                  Date.now() + Math.random().toString(36).substr(2, 9);
+                updatedCart.push({
+                  id: generateId(),
+                  product_id: item.product_id,
+                  variant_id: item.product_variant_id,
+                  quantity: item.quantity,
+                  sku: item.product_variant?.sku || item.product?.sku,
+                  image: item.product?.image || item.product_variant?.image,
+                  name: item.product?.name,
+                  price: Number(item.price),
+                  stock: item.product?.stock || item.product_variant?.stock,
+                  thuoc_tinh:
+                    item.product_variant?.product_attributes?.reduce(
+                      (acc, attr) => {
+                        acc[attr.attribute.name] = attr.attribute_value.value;
+                        return acc;
+                      },
+                      {}
+                    ) || {},
+                  discount: Number(
+                    item.product.discount_percent ||
+                    item.product_variant.discount_percent
+                  ),
+                });
+              }
+            });
 
-                    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
-                    message.success("Đã thêm sản phẩm vào giỏ hàng");
-                    window.dispatchEvent(
-                        new CustomEvent("cartUpdated", { detail: updatedCart })
-                    );
-                    nav("/cart");
-                } catch (error) {
-                    message.error("Không thể thêm sản phẩm vào giỏ hàng");
-                }
-                break;
+            localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+            message.success("Đã thêm sản phẩm vào giỏ hàng");
+            window.dispatchEvent(
+              new CustomEvent("cartUpdated", { detail: updatedCart })
+            );
+            nav("/cart");
+          } catch (error) {
+            console.error("Chi tiết lỗi:", error);
+            message.error("Không thể thêm sản phẩm vào giỏ hàng");
+          }
+          break;
 
-            case "Đã nhận hàng":
-                try {
-                    await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-                        status: ORDER_STATUS.COMPLETED
-                    });
-                    message.success("Đã xác nhận nhận hàng thành công");
-                    window.location.reload();
-                } catch (error) {
-                    message.error("Không thể xác nhận nhận hàng");
-                }
-                break;
+        case "Đã nhận hàng":
+          try {
+            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
+              status: ORDER_STATUS.COMPLETED
+            });
+            message.success("Đã xác nhận nhận hàng thành công");
+            window.location.reload();
+          } catch (error) {
+            console.error("Chi tiết lỗi:", error);
+            message.error("Không thể xác nhận nhận hàng");
+          }
+          break;
 
-            case "yêu cầu trả hàng":
-                try {
-                    await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-                        status: ORDER_STATUS.RETURN_REQUESTED
-                    });
-                    message.success("Đã gửi yêu cầu trả hàng");
-                    window.location.reload();
-                } catch (error) {
-                    message.error("Không thể gửi yêu cầu trả hàng");
-                }
-                break;
+        case "yêu cầu trả hàng":
+          try {
+            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
+              status: ORDER_STATUS.RETURN_REQUESTED
+            });
+            message.success("Đã gửi yêu cầu trả hàng");
+            window.location.reload();
+          } catch (error) {
+            console.error("Chi tiết lỗi:", error);
+            message.error("Không thể gửi yêu cầu trả hàng");
+          }
+          break;
 
-            case "hủy yêu cầu trả hàng":
-                try {
-                    await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-                        status: ORDER_STATUS.COMPLETED
-                    });
-                    message.success("Đã hủy yêu cầu trả hàng");
-                    window.location.reload();
-                } catch (error) {
-                    message.error("Không thể hủy yêu cầu trả hàng");
-                }
-                break;
+        case "hủy yêu cầu trả hàng":
+          try {
+            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
+              status: ORDER_STATUS.COMPLETED
+            });
+            message.success("Đã hủy yêu cầu trả hàng");
+            window.location.reload();
+          } catch (error) {
+            console.error("Chi tiết lỗi:", error);
+            message.error("Không thể hủy yêu cầu trả hàng");
+          }
+          break;
 
-            case "xem trạng thái trả hàng":
-                nav(`/my-profile/orders/${order.order_code}`);
-                break;
+        case "xem trạng thái trả hàng":
+          nav(`/my-profile/orders/${order.order_code}`);
+          break;
 
-            default:
-                console.log(`Hành động chưa xử lý: ${action}`);
-        }
+        default:
+          console.log(`Hành động chưa xử lý: ${action}`);
+      }
     } catch (error) {
-        console.error("Error handling action:", error);
-        message.error("Có lỗi xảy ra khi thực hiện hành động");
+      console.error("Error handling action:", error);
+      message.error("Có lỗi xảy ra khi thực hiện hành động");
     }
   };
 
@@ -600,22 +593,6 @@ const MyOrder = () => {
                 />
               </div>
             )}
-          </div>
-
-          {/* Thêm phân trang */}
-          <div className="flex justify-center mt-6">
-            <Pagination
-              current={currentPage}
-              pageSize={pageSize}
-              total={total}
-              onChange={(page, pageSize) => {
-                setCurrentPage(page);
-                setPageSize(pageSize);
-              }}
-              showSizeChanger
-              showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} đơn hàng`}
-              className="dark:text-white"
-            />
           </div>
         </div>
       )}
