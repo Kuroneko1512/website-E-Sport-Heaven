@@ -43,7 +43,7 @@ const NewCheckout = () => {
   const [order, setOrder] = useState({});
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submit, setSubmit] = useState(false);
-  const [shippingFee, setShippingFee] = useState(null);
+  const [shippingFee, setShippingFee] = useState(0);
 
   const [formData, setFormData] = useState({
     pick_province: "Hà Nội",
@@ -64,25 +64,55 @@ const NewCheckout = () => {
   useEffect(() => {
     const { province, district, ward, address } = formData;
 
-    // Kiểm tra nếu tất cả các trường cần thiết đã được chọn
-    if (province && district && ward && address) {
+    // Nếu chưa đủ thông tin, đặt phí vận chuyển về 0
+    if (!province || !district || !ward || !address) {
+      setShippingFee(0);
+      return;
+    }
+
+    // Thêm debounce để tránh gọi API quá nhanh
+    const timer = setTimeout(() => {
       const calculateShippingFee = async () => {
         try {
+          console.log("Gọi API với formData:", formData);
+
+          // Kiểm tra dữ liệu trước khi gọi API
+          const validAddress =
+              Boolean(formData.province) &&
+              Boolean(formData.district) &&
+              Boolean(formData.ward) &&
+              (typeof formData.address === 'string' ? formData.address.trim() !== '' : Boolean(formData.address));
+
+          if (!validAddress) {
+            console.log("Dữ liệu địa chỉ không hợp lệ, bỏ qua tính phí");
+            setShippingFee(0); // Đặt phí ship về 0 khi không đủ thông tin
+            return;
+          }
+
+          // Chỉ gọi API khi đủ thông tin và dữ liệu hợp lệ
           const response = await getShippingFee(formData);
-          if (response.success) {
-            setShippingFee(response.fee.ship_fee_only); // Lưu phí vận chuyển
-            message.success("Tính phí vận chuyển thành công!");
+          console.log("Kết quả API:", response);
+
+          if (response.success && response.fee && response.fee.ship_fee_only) {
+            setShippingFee(response.fee.ship_fee_only); // Cập nhật phí vận chuyển
+            // message.success("Tính phí vận chuyển thành công!");
           } else {
-            message.error(response.message || "Không thể tính phí vận chuyển!");
+            setShippingFee(0); // Đặt phí ship về 0 khi có lỗi
+            // message.error(response.message || "Không thể tính phí vận chuyển!");
           }
         } catch (error) {
+          console.error("Chi tiết lỗi:", error);
+          setShippingFee(0); // Đặt phí ship về 0 khi có lỗi
           message.error("Lỗi khi tính phí vận chuyển!");
         }
       };
 
       calculateShippingFee();
-    }
-  }, [formData]); // Theo dõi sự thay đổi của formData
+    }, 500); // Chờ 500ms sau khi người dùng nhập xong
+
+    // Dọn dẹp timer khi component unmount hoặc dữ liệu thay đổi
+    return () => clearTimeout(timer);
+  }, [formData]); // Phụ thuộc vào formData
 
   // Load dữ liệu provinces, districts, wards một lần khi mount
   useEffect(() => {
@@ -254,7 +284,7 @@ const NewCheckout = () => {
         (item.price - (item.price * item.discount) / 100) * item.quantity,
       0
     );
-    const shippingFee = 5000;
+
     const discount = discountCode ? 10000 : 0;
     return subtotal + shippingFee - discount;
   };
@@ -547,11 +577,11 @@ const NewCheckout = () => {
 
             <div className="flex justify-between mb-2">
               <Text>Phí vận chuyển</Text>
-              <Text>{shippingFee}</Text>
+              <Text>{FomatVND(shippingFee)}</Text>
             </div>
             <div className="flex justify-between font-bold">
               <Text strong>Tổng cộng</Text>
-              <Text strong>{FomatVND(calculateGrandTotal())}</Text>
+              <Text strong>{FomatVND(calculateGrandTotal(shippingFee))}</Text>
             </div>
 
             <Button

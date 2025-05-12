@@ -18,6 +18,12 @@ class Province extends Model
         'type'              // Loại (tỉnh/thành phố)
     ];
 
+    // Get name
+    public function getProvinceName($code)
+    {
+        return Province::where('code', $code)->first()->name;
+    }
+
     // Quan hệ với bảng districts
     public function districts()
     {
