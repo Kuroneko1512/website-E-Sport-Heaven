@@ -23,7 +23,7 @@ const Review = () => {
   let { data: datareviews } = useQuery({
     queryKey: ["datareviews", id],
     queryFn: async () => {
-      const res = await instanceAxios.get(`/api/v1/review-by-product/${id}`);
+      const res = await instanceAxios.get(`/api/v1/customer/review-by-product/${id}`);
       return res?.data;
     },
   });
