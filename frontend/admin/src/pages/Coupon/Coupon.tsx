@@ -11,6 +11,7 @@ interface CouponDisplay {
   discount_type: string;
   is_active: number;
   start_date: string;
+  end_date: string;
   max_uses: number;
   used_count: number;
 }
@@ -46,6 +47,7 @@ const Coupon: FC = () => {
         discount_type: item.discount_type,
         is_active: 1,
         start_date: item.start_date || '',
+        end_date: item.end_date || '',
         max_uses: item.max_uses || 0,
         used_count: item.used_count || 0,
       }));
@@ -189,71 +191,117 @@ const Coupon: FC = () => {
             </div>
           ) : (
             <>
-              <table className="table table-hover text-nowrap">
-                <thead>
-                  <tr>
-                    <th>Mã</th>
-                    <th>Tên</th>
-                    <th>Giá</th>
-                    <th>Loại</th>
-                    <th>Trạng thái</th>
-                    <th>Mô tả</th>
-                    <th>Hạn sử dụng</th>
-                    <th>Số lượt sử dụng</th>
-                    <th colSpan={3}>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {coupons.length > 0 ? (
-                    coupons.map((coupon: CouponDisplay) => (
-                      <tr key={coupon.id}>
-                        <td>{coupon.code}</td>
-                        <td>{coupon.name}</td>
-                        <td>{coupon.discount_value}</td>
-                        <td>{coupon.discount_type}</td>
-                        <td>
-                          <span
-                            className={`tag ${coupon.is_active === 1 ? "tag-success" : "tag-danger"}`}
-                          >
-                            {coupon.is_active === 1 ? "Hoạt động" : "Ngừng"}
-                          </span>
-                        </td>
-                        <td>{coupon.description}</td>
-                        <td>
-                          {coupon.start_date && new Date(coupon.start_date) >= new Date(new Date().toISOString().split('T')[0]) ? "Còn hạn" : "Hết hạn"}
-                        </td>
-                        <td>
-                          {coupon.max_uses < coupon.used_count ? "Hết lượt sử dụng" : coupon.max_uses - coupon.used_count}
-                        </td>
-                        <td>
-                          <button className="btn btn-primary" onClick={() => navigate(`/detail-coupon/${coupon.id}`)}>Chi tiết</button>
-                        </td>
-                        <td>
-                          <button className="btn btn-warning" onClick={() => navigate(`/edit-coupon/${coupon.id}`)}>Sửa</button>
-                        </td>
-                        <td>
-                          <button className="btn btn-danger" onClick={() => handleDeleteCoupon(coupon.id)}>Xóa</button>
+              {/* Bọc bảng trong table-responsive */}
+              <div className="table-responsive">
+                <table className="table table-hover text-nowrap mb-0">
+                  <thead>
+                    <tr>
+                      <th>Mã</th>
+                      <th>Tên</th>
+                      <th className="d-none d-md-table-cell">Giá</th>
+                      <th className="d-none d-md-table-cell">Loại</th>
+                      <th>Trạng thái</th>
+                      <th className="d-none d-lg-table-cell">Mô tả</th>
+                      <th className="d-none d-md-table-cell">Hạn sử dụng</th>
+                      <th className="d-none d-md-table-cell">Số lượt sử dụng</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {coupons.length > 0 ? (
+                      coupons.map((coupon) => (
+                        <tr key={coupon.id}>
+                          <td>{coupon.code}</td>
+                          <td>{coupon.name}</td>
+                          <td className="d-none d-md-table-cell">{coupon.discount_value}</td>
+                          <td className="d-none d-md-table-cell">
+                            {coupon.discount_type === "fixed" ? "Giá trị" : "Phần trăm"}
+                          </td>
+                          <td>
+                            <span
+                              className={`tag ${coupon.is_active === 1 ? "tag-success" : "tag-danger"}`}
+                            >
+                              {coupon.is_active === 1 ? "Hoạt động" : "Ngừng"}
+                            </span>
+                          </td>
+                          <td className="d-none d-lg-table-cell">{coupon.description}</td>
+                          <td className="d-none d-md-table-cell">
+                            {(() => {
+                            const now = new Date(new Date().toISOString().split('T')[0]);
+                            const startDate = coupon.start_date ? new Date(coupon.start_date.split(' ')[0]) : null;
+                            const endDate = coupon.end_date ? new Date(coupon.end_date.split(' ')[0]) : null;
+                            const formatDate = (date: Date) => {
+                              const day = date.getDate().toString().padStart(2, '0');
+                              const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                              const year = date.getFullYear();
+                              return `${day}/${month}/${year}`;
+                            };
+                            if (startDate && endDate) {
+                              const dateRange = `${formatDate(startDate)} đến ${formatDate(endDate)}`;
+                              if (now < startDate) {
+                                return `Chưa sẵn sàng (${dateRange})`;
+                              } else if (now >= startDate && now <= endDate) {
+                                return `Sẵn sàng (${dateRange})`;
+                              } else {
+                                return `Không hoạt động (${dateRange})`;
+                              }
+                            }
+                            return "";
+                          })()}
+                          </td>
+                          <td className="d-none d-md-table-cell">
+                            {coupon.max_uses < coupon.used_count
+                              ? "Hết lượt sử dụng"
+                              : coupon.max_uses - coupon.used_count}
+                          </td>
+                          <td>
+                            <div className="d-flex flex-wrap gap-1">
+                              <button
+                                className="btn btn-sm btn-primary"
+                                onClick={() => navigate(`/detail-coupon/${coupon.id}`)}
+                              >
+                                Chi tiết
+                              </button>
+                              <button
+                                className="btn btn-sm btn-warning"
+                                onClick={() => navigate(`/edit-coupon/${coupon.id}`)}
+                              >
+                                Sửa
+                              </button>
+                              <button
+                                className="btn btn-sm btn-danger"
+                                onClick={() => handleDeleteCoupon(coupon.id)}
+                              >
+                                Xóa
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={9} className="text-center py-4">
+                          {searchTerm ? (
+                            <>
+                              <p className="text-muted">
+                                Không tìm thấy mã giảm giá nào phù hợp với "{searchTerm}"
+                              </p>
+                              <button
+                                className="btn btn-outline-primary btn-sm"
+                                onClick={handleClearSearch}
+                              >
+                                Xóa tìm kiếm
+                              </button>
+                            </>
+                          ) : (
+                            "Không có dữ liệu"
+                          )}
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={10} className="text-center">
-                        {searchTerm ? (
-                          <div className="p-3">
-                            <p className="text-muted">Không tìm thấy mã giảm giá nào phù hợp với từ khóa "{searchTerm}"</p>
-                            <button className="btn btn-outline-primary btn-sm" onClick={handleClearSearch}>
-                              Xóa tìm kiếm
-                            </button>
-                          </div>
-                        ) : (
-                          "Không có dữ liệu"
-                        )}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
               {/* Phân trang */}
               <div className="d-flex justify-content-between align-items-center p-3 border-top">
