@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Wishlist\WishlistStoreRequest;
-use App\Http\Requests\Wishlist\WishlistUpdateRequest;
 use App\Services\WishlistService;
 use \Illuminate\Support\Facades\Auth;
 use Exception;
@@ -22,14 +21,14 @@ class WishlistController extends Controller
         $this->wishlistService = $wishlistService;
     }
 
-    // Lấy danh sách tất cả Wishlist
+    // Lấy Wishlist
     public function getByProduct($id){
         try {
              // Gọi service để lấy dữ liệu
-            $wishlists = $this->wishlistService->getByProduct($id);
+            $wishlist = $this->wishlistService->getByProduct(auth()->id(), $id);
             return response()->json([
                 'status' => 200,
-                'data' => $wishlists, // Trả về dữ liệu Wishlist
+                'data' => $wishlist, // Trả về dữ liệu Wishlist
             ],200);
         } catch (\Throwable $th) {
              // Trường hợp có lỗi xảy ra khi lấy dữ liệu
@@ -44,7 +43,7 @@ class WishlistController extends Controller
     public function index(){
         try {
              // Gọi service để lấy dữ liệu
-            $wishlists = $this->wishlistService->getWishlists();
+            $wishlists = $this->wishlistService->getWishlists(auth()->id());
             return response()->json([
                 'status' => 200,
                 'data' => $wishlists, // Trả về dữ liệu Wishlist
@@ -63,10 +62,11 @@ class WishlistController extends Controller
         try {
 
              // Validate và lấy dữ liệu từ request
-            $data = $request->validated();
+             $request->merge([
+                'user_id' => auth()->id(),
+            ]);
 
-            // lấy user_id của user đang đăng nhập
-            $data['user_id'] = Auth::id() ?? 1;
+            $data = $request->validated();
 
              // Gọi service để tạo mới Wishlist
             $wishlist = $this->wishlistService->create($data);
@@ -85,7 +85,7 @@ class WishlistController extends Controller
             ], 500);// Trả về mã lỗi 500 (Internal Server Error)
         }
     }
-    public function update(WishlistUpdateRequest $request ,$id)
+    public function update(WishlistStoreRequest $request ,$id)
     {
         try {
             $request->merge([
