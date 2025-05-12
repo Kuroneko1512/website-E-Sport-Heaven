@@ -16,10 +16,16 @@ class Coupon extends Model
         'min_purchase',
         'max_uses',
         'used_count',
+        'max_uses_per_user',
+        'user_usage',
         'is_active',
         'start_date',
         'end_date',
     ];
     
     use HasFactory;
+    public function usages()
+    {
+        return $this->hasMany(CouponUsage::class);
+    }
 }

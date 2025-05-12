@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
 import { useOutletContext } from "react-router-dom";
-import axios from "axios";
+
 import NoImage from "../../../public/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
 import { getAttributesByIds } from "@app/services/Attribute/ApiAttribute";
 
@@ -9,9 +9,10 @@ import { getAttributesByIds } from "@app/services/Attribute/ApiAttribute";
 
 const VariantProduct = () => {
 
-  const { product, setProduct } = useOutletContext<{
+  const { product, setProduct, handleDeleteVariant } = useOutletContext<{
     product: any;
     setProduct: React.Dispatch<React.SetStateAction<any>>;
+    handleDeleteVariant: (id: number) => void;
   }>();
 
   const [attributes, setAttributes] = useState<any[]>([]);
@@ -116,6 +117,13 @@ const VariantProduct = () => {
     alert("Lưu biến thể thành công!");
   };
 
+  const onDeleteVariant = (variantId: number) => {
+    const  confirm = window.confirm("Bạn có chắc chắn muốn xóa biến thể này không?");
+    if(confirm){
+      handleDeleteVariant(variantId);
+    }
+  };
+
   return (
     <div>
       <div className="p-3 border rounded shadow-sm bg-white">
@@ -154,6 +162,7 @@ const VariantProduct = () => {
               <th>Giá</th>
               <th>Số lượng</th>
               <th>Thuộc tính</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -175,6 +184,9 @@ const VariantProduct = () => {
                         return `${attrData?.name}: ${attrValue?.value}`;
                       })
                       .join(", ")} 
+                  </td>
+                  <td>
+                    <button type="button" className="btn btn-danger" onClick={() => onDeleteVariant(variant.id)}>Xóa</button>
                   </td>
                 </tr>
 

@@ -1,6 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CategorySlider = ({categories}) => {
+  const navigate = useNavigate();
+
+  const handleCategoryClick = (categoryId) => {
+    // Navigate to shop page with category filter in query param
+    navigate(`/shop?category=${categoryId}`);
+  };
+
   return (
     <div className="container mx-auto p-4">
       {/* Sử dụng grid: sm: 2 cột, md: 3 cột, lg: 4 cột */}
@@ -9,10 +17,11 @@ const CategorySlider = ({categories}) => {
         {categories?.map((category, index) => (
           <div
             key={index}
-            className="bg-white shadow rounded p-6 flex flex-col items-center justify-center transform transition-transform duration-300 hover:scale-105"
+            onClick={() => handleCategoryClick(category.id)}
+            className="cursor-pointer bg-white shadow rounded p-6 flex flex-col items-center justify-center transform transition-transform duration-300 hover:scale-105"
           >
             {/* Comment phần hình ảnh để tiện thêm khi có hình */}
-            {/*
+            {/* 
             <img
               src={category.imageUrl}
               alt={category.name}

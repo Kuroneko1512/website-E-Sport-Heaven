@@ -1,8 +1,12 @@
+
 // src/api/productApi.ts
 import Product from "@app/pages/Product/Product";
-import axios from "axios";
+// import axios from "axios";
+import { api } from "@app/api/adminApi";
+import { API_ENDPOINTS } from "@app/api/endpoints";
 
-const API_URL = "http://127.0.0.1:8000/api/v1/product";
+
+// const API_URL = "http://127.0.0.1:8000/api/v1/product";
 
 // Interface định nghĩa dữ liệu của một sản phẩm
 export interface AttributeSelection {
@@ -36,11 +40,13 @@ export interface api4 {
   discount_percent?: string;
   product_type: "simple" | "variable";
   status: "active" | "inactive";
-  category_id: string;
+  category_id: number;
+  sku: string;
   stock: number;
   image?: File | null;
   selected_attributes: AttributeSelection[];
   variants: Variant[];
+  delete_variant_id?: number[];
 }
 
 // Tạo sản phẩm mới
@@ -93,7 +99,10 @@ export const createProduct = async (product: api4): Promise<api4> => {
     }
 
     // 🟢 Gửi API
-    const response = await axios.post<api4>(API_URL, formData, {
+    // const response = await axios.post<api4>(API_URL, formData, {
+    //   headers: { "Content-Type": "multipart/form-data" },
+    // });
+    const response = await api.post<api4>(API_ENDPOINTS.PRODUCT.CREATE, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
@@ -155,7 +164,10 @@ export const updateProduct = async (id: number, product: api4): Promise<api4> =>
     }
 
     // 🟢 Gửi API
-    const response = await axios.post<api4>(`${API_URL}/${id}`, formData, {
+    // const response = await axios.post<api4>(`${API_URL}/${id}`, formData, {
+    //   headers: { "Content-Type": "multipart/form-data" },
+    // });
+    const response = await api.post<api4>(`${API_ENDPOINTS.PRODUCT.UPDATE}/${id}`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
@@ -172,7 +184,8 @@ export const updateProduct = async (id: number, product: api4): Promise<api4> =>
 // Lấy danh sách sản phẩm
 export const getProducts = async (page: number = 1, limit: number = 5): Promise<Pagination> => {
   try {
-    const response = await axios.get<Pagination>(`${API_URL}?page=${page}&limit=${limit}`);
+    // const response = await axios.get<Pagination>(`${API_URL}?page=${page}&limit=${limit}`);
+    const response = await api.get<Pagination>(`${API_ENDPOINTS.PRODUCT.GET_ALL}?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -182,7 +195,10 @@ export const getProducts = async (page: number = 1, limit: number = 5): Promise<
 
 export const getProductById = async (id: number): Promise<api4> => {
   try {
-    const response = await axios.get<api4>(`${API_URL}/${id}`);
+
+    // const response = await axios.get<api4>(`${API_URL}/${id}`);
+    const response = await api.get<api4>(`${API_ENDPOINTS.PRODUCT.GET_BY_ID}/${id}`);
+
     return response.data;
   } catch (error) {
     console.error("Error fetching product:", error);
@@ -194,7 +210,8 @@ export const getProductById = async (id: number): Promise<api4> => {
 // Xóa sản phẩm theo ID
 export const deleteProduct = async (id: number): Promise<void> => {
   try {
-    await axios.delete(`${API_URL}/${id}`);
+    // await axios.delete(`${API_URL}/${id}`);
+    await api.delete(`${API_ENDPOINTS.PRODUCT.DELETE}/${id}`);
     console.log(`Đã xóa sản phẩm có ID: ${id}`);
   } catch (error) {
     console.error("Lỗi khi xóa sản phẩm:", error);

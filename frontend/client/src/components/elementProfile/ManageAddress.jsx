@@ -1,89 +1,147 @@
-
-import { Button, Form, Input, Modal, Select, Typography } from "antd";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { Button, Form, Input, Modal, Select, Typography, message } from "antd";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axiosInstance from "../../config/db";
 
 const { Title } = Typography;
 const { Option } = Select;
 
-const ManageAddress = () => {
-  const [addresses, setAddresses] = useState([]);
+export default function ManageAddress() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
   const [form] = Form.useForm();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/v1/address/provinces/')
-      .then(response => setProvinces(response?.data?.data))
-      .catch(error => console.error('Lỗi khi tải tỉnh/thành phố:', error));
+  // 1. Fetch provinces
+  const {
+    data: provinces = [],
+    isLoading: provincesLoading,
+    isError: provincesError,
+  } = useQuery({
+    queryKey: ["provinces"],
+    queryFn: () =>
+      axiosInstance
+        .get("/api/v1/address/provinces/")
+        .then((res) => res.data.data),
+    refetchOnWindowFocus: false,
+  });
 
-    // const cartItems = localStorage.getItem('checkoutItems');
-    // const cartTotal = localStorage.getItem('cartTotal');
+  // 2. Fetch districts when province selected
+  const {
+    data: districts = [],
+    isFetching: districtsLoading,
+  } = useQuery({
+    queryKey: ["districts", selectedProvince],
+    queryFn: () =>
+      axiosInstance
+        .get(
+          `/api/v1/address/districts?province_code=${selectedProvince}`
+        )
+        .then((res) => res.data.data),
+    enabled: Boolean(selectedProvince),
+  });
 
-    // if (cartItems) setCartItems(JSON.parse(cartItems));
-    // if (cartTotal) setCartTotal(JSON.parse(cartTotal));
-  }, []);
+  // 3. Fetch wards when district selected
+  const {
+    data: wards = [],
+    isFetching: wardsLoading,
+  } = useQuery({
+    queryKey: ["wards", selectedDistrict],
+    queryFn: () =>
+      axiosInstance
+        .get(
+          `/api/v1/address/communes?district_code=${selectedDistrict}`
+        )
+        .then((res) => res.data.data),
+    enabled: Boolean(selectedDistrict),
+  });
 
-  console.log("provinces", provinces);
-  console.log("districts", districts);
-  console.log("wards", wards);
+  // 4. Fetch current addresses
+  const {
+    data: addresses = [],
+    isLoading: addressesLoading,
+    isError: addressesError,
+  } = useQuery({
+    queryKey: ["addresses"],
+    queryFn: () =>
+      axiosInstance
+        .get("/api/v1/customer/shipping-address")
+        .then((res) => res.data.data),
+    refetchOnWindowFocus: false,
+  });
 
-  useEffect(() => {
-    if (selectedProvince) {
-      axios.get(`http://127.0.0.1:8000/api/v1/address/districts?province_code=${selectedProvince}`)
-        .then(response => setDistricts(response?.data?.data))
-        .catch(error => console.error('Lỗi khi tải quận/huyện:', error));
-    }
-  }, [selectedProvince]);
+  // 5. Mutations
+  const addAddressMutation = useMutation({
+    mutationFn: (newAddress) =>
+      axiosInstance.post(
+        "/api/v1/customer/shipping-address",
+        newAddress
+      ),
+    onSuccess: () => {
+      message.success("Thêm địa chỉ thành công");
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      form.resetFields();
+      setSelectedProvince("");
+      setSelectedDistrict("");
+      setSelectedWard("");
+      setIsModalOpen(false);
+    },
+    onError: () => message.error("Thêm địa chỉ thất bại"),
+  });
 
-  useEffect(() => {
-    if (selectedDistrict) {
-      axios.get(`http://127.0.0.1:8000/api/v1/address/communes?district_code=${selectedDistrict}`)
-        .then(response => setWards(response?.data?.data))
-        .catch(error => console.error('Lỗi khi tải phường/xã:', error));
-    }
-  }, [selectedDistrict]);
+  const updateAddressMutation = useMutation({
+    mutationFn: ({ id, updatedAddress }) =>
+      axiosInstance.put(
+        `/api/v1/customer/shipping-address/${id}`,
+        updatedAddress
+      ),
+    onSuccess: () => {
+      message.success("Cập nhật địa chỉ thành công");
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      form.resetFields();
+      setSelectedProvince("");
+      setSelectedDistrict("");
+      setSelectedWard("");
+      setIsModalOpen(false);
+    },
+    onError: () => message.error("Cập nhật địa chỉ thất bại"),
+  });
 
-  // console.log(wards);
+  const deleteAddressMutation = useMutation({
+    mutationFn: (id) =>
+      axiosInstance.delete(
+        `/api/v1/customer/shipping-address/${id}`
+      ),
+    onSuccess: () => {
+      message.success("Xóa địa chỉ thành công");
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+    },
+    onError: () => message.error("Xóa địa chỉ thất bại"),
+  });
 
-  useEffect(() => {
-    setAddresses(JSON.parse(localStorage.getItem('addresses')) || []);
-  }, []);  
+  const setDefaultAddressMutation = useMutation({
+    mutationFn: (id) =>
+      axiosInstance.post(
+        `/api/v1/customer/shipping-address/${id}/set-default`
+      ),
+    onSuccess: () => {
+      message.success(
+        "Cài đặt địa chỉ mặc định thành công"
+      );
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+    },
+    onError: () =>
+      message.error("Cài đặt địa chỉ mặc định thất bại"),
+  });
 
-  const saveAddresses = (updated) => {
-    localStorage.setItem("addresses", JSON.stringify(updated));
-    setAddresses(updated);
-  };
-
-  const handleDelete = (id) => {
-    Modal.confirm({
-      title: "Xác nhận xóa điểm giao hàng",
-      content: "Bạn có chắc muốn xóa điểm giao hàng nay?",
-      cancelText: "Hủy",
-      onOk: () => {
-        const updated = addresses.filter((addr) => addr.id !== id);
-        saveAddresses(updated);
-      },
-    })
-  };
-
-  const handleSetDefault = (id) => {
-    const updated = addresses.map((addr) => ({
-      ...addr,
-      defaultAddress: addr.id === id,
-    }));
-    saveAddresses(updated);
-  };
-
+  // 6. Open add modal
   const openAddModal = () => {
     setIsEditMode(false);
+    setEditingAddress(null);
     form.resetFields();
     setSelectedProvince("");
     setSelectedDistrict("");
@@ -91,69 +149,123 @@ const ManageAddress = () => {
     setIsModalOpen(true);
   };
 
+  // 7. Open edit modal with prefetch
   const openEditModal = (address) => {
-    console.log("address", address);
     setIsEditMode(true);
     setEditingAddress(address);
-    form.setFieldsValue(address);
-    setSelectedProvince(
-      provinces.find((p) => p.name === address.province)?.code || ""
-    );
-    setSelectedDistrict(
-      districts.find((d) => d.name === address.district)?.code || ""
-    );
-    setSelectedWard(wards.find((w) => w.name === address.ward)?.code || "");
+
+    // Prefetch districts & wards
+    queryClient.prefetchQuery({
+      queryKey: ["districts", address.province_code],
+      queryFn: () =>
+        axiosInstance
+          .get(
+            `/api/v1/address/districts?province_code=${address.province_code}`
+          )
+          .then((res) => res.data.data),
+    });
+    queryClient.prefetchQuery({
+      queryKey: ["wards", address.district_code],
+      queryFn: () =>
+        axiosInstance
+          .get(
+            `/api/v1/address/communes?district_code=${address.district_code}`
+          )
+          .then((res) => res.data.data),
+    });
+
+    // Set form + selections immediately
+    form.setFieldsValue({
+      ...address,
+      province_code: address.province_code,
+      district_code: address.district_code,
+      commune_code: address.commune_code,
+    });
+    setSelectedProvince(address.province_code);
+    setSelectedDistrict(address.district_code);
+    setSelectedWard(address.commune_code);
+
     setIsModalOpen(true);
+  };
+
+  // 8. Handlers
+  const handleDelete = (id) => {
+    Modal.confirm({
+      title: "Xác nhận xóa điểm giao hàng",
+      content: "Bạn có chắc muốn xóa điểm giao hàng này?",
+      cancelText: "Hủy",
+      onOk: () => deleteAddressMutation.mutate(id),
+    });
+  };
+
+  const handleSetDefault = (id) => {
+    setDefaultAddressMutation.mutate(id);
   };
 
   const handleFinish = (values) => {
     const provinceName = provinces.find(
-      (p) => Number(p.code) === Number(selectedProvince)
+      (p) => String(p.code) === String(selectedProvince)
     )?.name;
     const districtName = districts.find(
-      (d) => Number(d.code) === Number(selectedDistrict)
+      (d) => String(d.code) === String(selectedDistrict)
     )?.name;
-    const wardName = wards.find((w) => Number(w.code) === Number(selectedWard))?.name;
+    const wardName = wards.find(
+      (w) => String(w.code) === String(selectedWard)
+    )?.name;
 
-    if (isEditMode) {
-      const updated = addresses.map((addr) =>
-        addr.id === editingAddress.id
-          ? {
-              ...editingAddress,
-              ...values,
-              province: provinceName,
-              district: districtName,
-              ward: wardName,
-            }
-          : addr
-      );
-      saveAddresses(updated);
+    const payload = {
+      ...values,
+      province: provinceName,
+      district: districtName,
+      ward: wardName,
+    };
+
+    if (isEditMode && editingAddress) {
+      // Check if data changed before updating
+      const isChanged =
+        editingAddress.recipient_name !== payload.recipient_name ||
+        editingAddress.phone !== payload.phone ||
+        editingAddress.province_code !== selectedProvince ||
+        editingAddress.district_code !== selectedDistrict ||
+        editingAddress.commune_code !== selectedWard ||
+        editingAddress.address_line1 !== payload.address_line1;
+
+      if (isChanged) {
+        updateAddressMutation.mutate({
+          id: editingAddress.id,
+          is_default: editingAddress.is_default,
+          updatedAddress: payload,
+        });
+      } else {
+        message.info("Không có thay đổi nào để cập nhật");
+        setIsModalOpen(false);
+      }
     } else {
-      const updated = [
-        ...addresses,
-        {
-          ...values,
-          id: Date.now(),
-          province: provinceName,
-          district: districtName,
-          ward: wardName,
-          defaultAddress: addresses.length === 0,
-        },
-      ];
-      saveAddresses(updated);
+      addAddressMutation.mutate({...payload, is_default: true});
     }
-
-    setIsModalOpen(false);
-    form.resetFields();
-    setSelectedProvince("");
-    setSelectedDistrict("");
-    setSelectedWard("");
   };
 
+  console.log("editingAddress", editingAddress);
+
+  // 9. Loading/Error states
+  if (provincesLoading || addressesLoading) {
+    return <div>Đang tải dữ liệu...</div>;
+  }
+  if (provincesError || addressesError) {
+    return <div>Lỗi khi tải dữ liệu</div>;
+  }
+
+  // 10. Render
   return (
     <div className="p-6 dark:bg-gray-800 px-10 py-6">
-      <Title className="text-black dark:text-white" level={3}>Quản lý địa chỉ</Title>
-      <Button type="primary" onClick={openAddModal} className="mb-4 bg-black dark:bg-gray-800 text-white py-2 px-4 rounded hover:!bg-white hover:!border-gray-800 hover:!text-black dark:hover:bg-gray-700">
+      <Title className="text-black dark:text-white" level={3}>
+        Quản lý địa chỉ
+      </Title>
+      <Button
+        type="primary"
+        onClick={openAddModal}
+        className="mb-4 bg-black dark:bg-gray-800 text-white"
+      >
         + Thêm địa chỉ
       </Button>
 
@@ -166,18 +278,18 @@ const ManageAddress = () => {
             <div className="grid grid-cols-4 gap-4 items-center">
               <div className="col-span-2">
                 <h2 className="font-bold text-lg text-black dark:text-white">
-                  {address.fullname}
+                  {address.recipient_name}
                   <span className="ml-4 font-normal text-gray-500 dark:text-gray-400 text-base">
-                    {address.mobile} - {address.email}
+                    {address.phone} - {address.email}
                   </span>
                 </h2>
                 <p className="mt-2 text-gray-500 dark:text-gray-400 text-base">
-                  {address.specificAddress}, {address.ward}, {address.district},{" "}
-                  {address.province}
+                  {address.address_line1}, {address.commune.name}, {address.district.name},{" "}
+                  {address.province.name}
                 </p>
               </div>
-              <div className="col-span-1">
-                {address.defaultAddress ? (
+              <div className="col-span-1 text-center">
+                {address.is_default ? (
                   <span className="text-black dark:text-white">Mặc định</span>
                 ) : (
                   <Button
@@ -214,37 +326,51 @@ const ManageAddress = () => {
         onCancel={() => setIsModalOpen(false)}
         footer={null}
       >
-        <Form form={form} layout="vertical" onFinish={handleFinish}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFinish}
+        >
           <Form.Item
-            name="fullname"
+            name="recipient_name"
             label="Tên"
             rules={[{ required: true, message: "Hãy nhập tên" }]}
           >
             <Input placeholder="Tên" />
           </Form.Item>
+
           <Form.Item
-            name="mobile"
+            name="phone"
             label="Số điện thoại"
             rules={[
-              { required: true, message: "Hãy nhập số diện thoại" },
+              { required: true, message: "Hãy nhập số điện thoại" },
               {
                 pattern: /^[0-9]{10,11}$/,
                 message: "Số điện thoại không hợp lệ",
               },
             ]}
           >
-            <Input placeholder="Mobile" maxLength={11} />
+            <Input placeholder="Số điện thoại" maxLength={11} />
           </Form.Item>
 
-          <Form.Item name="email" label="Email" rules={[{ required: true, type: "email", message: "Email không hợp lệ" }]}>
-            <Input placeholder="Email" />
-          </Form.Item>
-
-          <Form.Item label="Tỉnh/Thành phố" name="province" rules={[{ required: true, message: "Hãy chọn tỉnh/thành phố" }]}>
+          <Form.Item
+            name="province_code"
+            label="Tỉnh/Thành phố"
+            rules={[{ required: true, message: "Chọn tỉnh/thành phố" }]}
+          >
             <Select
-              placeholder="Chọn Tỉnh/Thành phố"
+              placeholder="Chọn tỉnh/thành phố"
+              loading={provincesLoading}
               value={selectedProvince}
-              onChange={(val) => setSelectedProvince(val)}
+              onChange={(val) => {
+                setSelectedProvince(val);
+                setSelectedDistrict("");
+                setSelectedWard("");
+                form.setFieldsValue({
+                  district_code: undefined,
+                  commune_code: undefined,
+                });
+              }}
             >
               {provinces.map((p) => (
                 <Option key={p.code} value={p.code}>
@@ -254,12 +380,21 @@ const ManageAddress = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item label="Quận/Huyện" name="district" rules={[{ required: true, message: "Hãy chọn quận/huyện" }]}>
+          <Form.Item
+            name="district_code"
+            label="Quận/Huyện"
+            rules={[{ required: true, message: "Chọn quận/huyện" }]}
+          >
             <Select
-              placeholder="Chọn Quận/Huyện"
-              value={selectedDistrict}
-              onChange={(val) => setSelectedDistrict(val)}
+              placeholder="Chọn quận/huyện"
+              loading={districtsLoading}
               disabled={!selectedProvince}
+              value={selectedDistrict}
+              onChange={(val) => {
+                setSelectedDistrict(val);
+                setSelectedWard("");
+                form.setFieldsValue({ commune_code: undefined });
+              }}
             >
               {districts.map((d) => (
                 <Option key={d.code} value={d.code}>
@@ -269,12 +404,17 @@ const ManageAddress = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item label="Phường/Xã" name="ward" rules={[{ required: true, message: "Hãy chọn phường/xã" }]}>
+          <Form.Item
+            name="commune_code"
+            label="Phường/Xã"
+            rules={[{ required: true, message: "Chọn phường/xã" }]}
+          >
             <Select
-              placeholder="Chọn Phường/Xã"
+              placeholder="Chọn phường/xã"
+              loading={wardsLoading}
+              disabled={!selectedDistrict}
               value={selectedWard}
               onChange={(val) => setSelectedWard(val)}
-              disabled={!selectedDistrict}
             >
               {wards.map((w) => (
                 <Option key={w.code} value={w.code}>
@@ -285,9 +425,9 @@ const ManageAddress = () => {
           </Form.Item>
 
           <Form.Item
-            name="specificAddress"
+            name="address_line1"
             label="Địa chỉ cụ thể"
-            rules={[{ required: true, message: "Hãy nhập điểm chỉ cụ thể" }]}
+            rules={[{ required: true, message: "Nhập địa chỉ cụ thể" }]}
           >
             <Input placeholder="Địa chỉ cụ thể" />
           </Form.Item>
@@ -299,9 +439,6 @@ const ManageAddress = () => {
           </Form.Item>
         </Form>
       </Modal>
-
     </div>
   );
-};
-
-export default ManageAddress;
+}

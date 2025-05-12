@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { getShippingFee } from "../config/ghtk";
 import FomatVND from "../utils/FomatVND";
 import {
   Form,
@@ -42,17 +43,86 @@ const NewCheckout = () => {
   const [order, setOrder] = useState({});
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submit, setSubmit] = useState(false);
-  // console.log("User:", user);
+  const [shippingFee, setShippingFee] = useState(0);
+
+  const [formData, setFormData] = useState({
+    pick_province: "Hà Nội",
+    pick_district: "Hoàng Mai",
+    province: "",
+    district: "",
+    ward: "",
+    address: "",
+    weight: 10000,
+    value: 3000000,
+    transport: "road",
+    deliver_option: "xteam",
+  });
 
   // console.log("order", order);
+
+  // Tự động tính phí vận chuyển khi các trường địa chỉ được chọn đầy đủ
+  useEffect(() => {
+    const { province, district, ward, address } = formData;
+
+    // Nếu chưa đủ thông tin, đặt phí vận chuyển về 0
+    if (!province || !district || !ward || !address) {
+      setShippingFee(0);
+      return;
+    }
+
+    // Thêm debounce để tránh gọi API quá nhanh
+    const timer = setTimeout(() => {
+      const calculateShippingFee = async () => {
+        try {
+          console.log("Gọi API với formData:", formData);
+
+          // Kiểm tra dữ liệu trước khi gọi API
+          const validAddress =
+              Boolean(formData.province) &&
+              Boolean(formData.district) &&
+              Boolean(formData.ward) &&
+              (typeof formData.address === 'string' ? formData.address.trim() !== '' : Boolean(formData.address));
+
+          if (!validAddress) {
+            console.log("Dữ liệu địa chỉ không hợp lệ, bỏ qua tính phí");
+            setShippingFee(0); // Đặt phí ship về 0 khi không đủ thông tin
+            return;
+          }
+
+          // Chỉ gọi API khi đủ thông tin và dữ liệu hợp lệ
+          const response = await getShippingFee(formData);
+          console.log("Kết quả API:", response);
+
+          if (response.success && response.fee && response.fee.ship_fee_only) {
+            setShippingFee(response.fee.ship_fee_only); // Cập nhật phí vận chuyển
+            // message.success("Tính phí vận chuyển thành công!");
+          } else {
+            setShippingFee(0); // Đặt phí ship về 0 khi có lỗi
+            // message.error(response.message || "Không thể tính phí vận chuyển!");
+          }
+        } catch (error) {
+          console.error("Chi tiết lỗi:", error);
+          setShippingFee(0); // Đặt phí ship về 0 khi có lỗi
+          message.error("Lỗi khi tính phí vận chuyển!");
+        }
+      };
+
+      calculateShippingFee();
+    }, 500); // Chờ 500ms sau khi người dùng nhập xong
+
+    // Dọn dẹp timer khi component unmount hoặc dữ liệu thay đổi
+    return () => clearTimeout(timer);
+  }, [formData]); // Phụ thuộc vào formData
+
   // Load dữ liệu provinces, districts, wards một lần khi mount
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/v1/address/provinces/')
-      .then(response => setProvinces(response?.data?.data))
-      .catch(error => console.error('Lỗi khi tải tỉnh/thành phố:', error));
+    axios
+      .get("http://127.0.0.1:8000/api/v1/address/provinces/")
+      .then((response) => setProvinces(response?.data?.data))
+      .catch((error) => console.error("Lỗi khi tải tỉnh/thành phố:", error));
 
-    const cartItems = localStorage.getItem('checkoutItems');
-    const cartTotal = localStorage.getItem('cartTotal');
+    const cartItems = localStorage.getItem("checkoutItems");
+    const cartTotal = localStorage.getItem("cartTotal");
 
     if (cartItems) setCartItems(JSON.parse(cartItems));
     if (cartTotal) setCartTotal(JSON.parse(cartTotal));
@@ -64,17 +134,23 @@ const NewCheckout = () => {
 
   useEffect(() => {
     if (selectedProvince) {
-      axios.get(`http://127.0.0.1:8000/api/v1/address/districts?province_code=${selectedProvince}`)
-        .then(response => setDistricts(response?.data?.data))
-        .catch(error => console.error('Lỗi khi tải quận/huyện:', error));
+      axios
+        .get(
+          `http://127.0.0.1:8000/api/v1/address/districts?province_code=${selectedProvince}`
+        )
+        .then((response) => setDistricts(response?.data?.data))
+        .catch((error) => console.error("Lỗi khi tải quận/huyện:", error));
     }
   }, [selectedProvince]);
 
   useEffect(() => {
     if (selectedDistrict) {
-      axios.get(`http://127.0.0.1:8000/api/v1/address/communes?district_code=${selectedDistrict}`)
-        .then(response => setWards(response?.data?.data))
-        .catch(error => console.error('Lỗi khi tải phường/xã:', error));
+      axios
+        .get(
+          `http://127.0.0.1:8000/api/v1/address/communes?district_code=${selectedDistrict}`
+        )
+        .then((response) => setWards(response?.data?.data))
+        .catch((error) => console.error("Lỗi khi tải phường/xã:", error));
     }
   }, [selectedDistrict]);
 
@@ -88,7 +164,7 @@ const NewCheckout = () => {
     const userRaw = Cookies.get("user");
     if (!userRaw) return;
 
-  const user = JSON.parse(userRaw);
+    const user = JSON.parse(userRaw);
     if (isLogin) {
       setOrder((prev) => ({
         ...prev,
@@ -208,7 +284,7 @@ const NewCheckout = () => {
         (item.price - (item.price * item.discount) / 100) * item.quantity,
       0
     );
-    const shippingFee = 5000;
+
     const discount = discountCode ? 10000 : 0;
     return subtotal + shippingFee - discount;
   };
@@ -339,11 +415,17 @@ const NewCheckout = () => {
                     placeholder="Chọn Tỉnh/Thành phố"
                     value={selectedProvince}
                     onChange={(value) => {
+                      setFormData({ ...formData, province: value });
                       setSelectedProvince(value);
                       setDistricts([]);
                       setWards([]);
                       setSelectedDistrict("");
                       setSelectedWard("");
+                      // Reset giá trị trên form
+                      form.setFieldsValue({
+                        district: undefined, // Reset quận/huyện
+                        ward: undefined, // Reset phường/xã
+                      });
                     }}
                     disabled={dataform?.province}
                   >
@@ -373,9 +455,13 @@ const NewCheckout = () => {
                     placeholder="Chọn Quận/Huyện"
                     value={selectedDistrict}
                     onChange={(value) => {
+                      setFormData({ ...formData, district: value });
                       setSelectedDistrict(value);
                       setWards([]);
                       setSelectedWard("");
+                      form.setFieldsValue({
+                        ward: undefined, // Reset phường/xã
+                      });
                     }}
                     disabled={!selectedProvince}
                   >
@@ -402,7 +488,7 @@ const NewCheckout = () => {
                   <Select
                     placeholder="Chọn Phường/Xã"
                     value={selectedWard}
-                    onChange={setSelectedWard}
+                    onChange={(value)=>{setSelectedWard;setFormData({ ...formData, ward: value })}}
                     disabled={!selectedDistrict}
                   >
                     {wards?.map((w) => (
@@ -421,8 +507,9 @@ const NewCheckout = () => {
                 <Input
                   value={order?.specificAddress}
                   onChange={(e) =>
-                    // setOrder({ ...order, specificAddress: e.target.value })
-                    setSpecificAddress(e.target.value)
+                  {// setOrder({ ...order, specificAddress: e.target.value })
+                  setFormData({ ...formData, address: e.target.value });
+                  setSpecificAddress(e.target.value)}
                   }
                   className="!bg-white !border !border-gray-300 !text-black"
                   disabled={dataform?.specificAddress}
@@ -440,16 +527,20 @@ const NewCheckout = () => {
                 <List.Item>
                   <List.Item.Meta
                     title={`${item.name} (x${item.quantity})`}
-                    description={<>
-                      <div>SKU: {item.sku}</div>
-                      {Object.entries(item.thuoc_tinh || {}).map(([key, value]) => (
-                        <div key={key}>
-                          <Text type="secondary" style={{ fontSize: 13 }}>
-                            {key}: {value}
-                          </Text>
-                        </div>
-                      ))}
-                    </>}
+                    description={
+                      <>
+                        <div>SKU: {item.sku}</div>
+                        {Object.entries(item.thuoc_tinh || {}).map(
+                          ([key, value]) => (
+                            <div key={key}>
+                              <Text type="secondary" style={{ fontSize: 13 }}>
+                                {key}: {value}
+                              </Text>
+                            </div>
+                          )
+                        )}
+                      </>
+                    }
                   />
                   <Text>
                     {FomatVND(
@@ -486,11 +577,11 @@ const NewCheckout = () => {
 
             <div className="flex justify-between mb-2">
               <Text>Phí vận chuyển</Text>
-              <Text>{FomatVND(5000)}</Text>
+              <Text>{FomatVND(shippingFee)}</Text>
             </div>
             <div className="flex justify-between font-bold">
               <Text strong>Tổng cộng</Text>
-              <Text strong>{FomatVND(calculateGrandTotal())}</Text>
+              <Text strong>{FomatVND(calculateGrandTotal(shippingFee))}</Text>
             </div>
 
             <Button

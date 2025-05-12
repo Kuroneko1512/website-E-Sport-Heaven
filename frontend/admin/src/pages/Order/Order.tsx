@@ -1,10 +1,12 @@
 import { getOrders, Order, Pagination } from "@app/services/Order/Api";
 import FomatVND from "@app/utils/FomatVND";
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import {  Link } from "react-router-dom";
+import { Pagination as AntPagination } from "antd";
+import { ORDER_STATUS, ORDER_STATUS_LABELS, PAYMENT_STATUS, PAYMENT_STATUS_LABELS } from "@app/constants/OrderConstants";
 
 const Orders = () => {
-    const navigate = useNavigate();
+    
 
     // State lưu thông tin phân trang
     const [pagination, setPagination] = useState<Pagination>({
@@ -26,10 +28,17 @@ const Orders = () => {
         setLoading(true);
         try {
             const response = await getOrders(page, pagination.per_page);
-            console.log("API Response:", response);
-
-            setOrders(response.data); // Gán danh sách orders
-            setPagination(response); // Cập nhật thông tin phân trang
+            setOrders(response.data);
+            setPagination((prev) => ({
+                ...prev,
+                current_page: response.current_page || 1,
+                last_page: response.last_page || 1,
+                prev_page_url: response.prev_page_url,
+                next_page_url: response.next_page_url,
+                total: response.total || 0,
+                per_page: response.per_page || 5,
+                data: response.data,
+            }));
         } catch (error) {
             console.error("Lỗi khi lấy dữ liệu:", error);
         }
@@ -38,7 +47,7 @@ const Orders = () => {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [pagination.current_page, pagination.per_page]);
 
     return (
         <section className="content">
@@ -108,13 +117,13 @@ const Orders = () => {
                                         <td>{new Date(order.created_at).toLocaleDateString("vi-VI")}
                                         </td>
                                         <td>
-                                            <span className={`badge ${order.payment_status === "đã thanh toán" ? "badge-success" : "badge-warning"}`}>
-                                                {order.payment_status}
+                                            <span className={`badge ${order.payment_status === PAYMENT_STATUS.PAID ? "badge-success" : "badge-warning"}`}>
+                                                {PAYMENT_STATUS_LABELS[order.payment_status]}
                                             </span>
                                         </td>
                                         <td className="project-state">
-                                            <span className={`badge ${order.status === "success" ? "badge-success" : "badge-warning"}`}>
-                                                {order.status}
+                                            <span className={`badge ${ order.status === ORDER_STATUS.COMPLETED ? "badge-success" : "badge-warning"}`}>
+                                                {ORDER_STATUS_LABELS[order.status]}
                                             </span>
                                         </td>
                                         <td className="project-actions text-right">
@@ -129,7 +138,18 @@ const Orders = () => {
                         </table>
                     )}
                 </div>
+                <div className="d-flex justify-content-center mt-4 mb-4">
+                    <AntPagination
+                        current={pagination.current_page}
+                        pageSize={pagination.per_page}
+                        total={pagination.total}
+                        onChange={(page: number, pageSize: number) => {
+                            setPagination({ ...pagination, current_page: page, per_page: pageSize });
+                        }}
+                    />
+                </div>
             </div>
+        
         </section>
     );
 };
