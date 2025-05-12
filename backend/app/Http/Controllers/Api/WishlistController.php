@@ -14,7 +14,7 @@ use Illuminate\Database\QueryException;
 
 class WishlistController extends Controller
 {
-     // Khai báo service xử lý logic nghiệp vụ liên quan đến Đánh giá
+     // Khai báo service xử lý logic nghiệp vụ liên quan đến Wishlist
     protected $wishlistService;
     // Constructor để khởi tạo service
     public function __construct(WishlistService $wishlistService)
@@ -22,14 +22,14 @@ class WishlistController extends Controller
         $this->wishlistService = $wishlistService;
     }
 
-    // Lấy danh sách tất cả Đánh giá
+    // Lấy danh sách tất cả Wishlist
     public function getByProduct($id){
         try {
              // Gọi service để lấy dữ liệu
             $wishlists = $this->wishlistService->getByProduct($id);
             return response()->json([
                 'status' => 200,
-                'data' => $wishlists, // Trả về dữ liệu Đánh giá
+                'data' => $wishlists, // Trả về dữ liệu Wishlist
             ],200);
         } catch (\Throwable $th) {
              // Trường hợp có lỗi xảy ra khi lấy dữ liệu
@@ -40,14 +40,14 @@ class WishlistController extends Controller
         }
     }
 
-    // Lấy danh sách tất cả Đánh giá
+    // Lấy danh sách tất cả Wishlist
     public function index(){
         try {
              // Gọi service để lấy dữ liệu
             $wishlists = $this->wishlistService->getWishlists();
             return response()->json([
                 'status' => 200,
-                'data' => $wishlists, // Trả về dữ liệu Đánh giá
+                'data' => $wishlists, // Trả về dữ liệu Wishlist
             ],200);
         } catch (\Throwable $th) {
              // Trường hợp có lỗi xảy ra khi lấy dữ liệu
@@ -68,16 +68,16 @@ class WishlistController extends Controller
             // lấy user_id của user đang đăng nhập
             $data['user_id'] = Auth::id() ?? 1;
 
-             // Gọi service để tạo mới Đánh giá
+             // Gọi service để tạo mới Wishlist
             $wishlist = $this->wishlistService->create($data);
 
             return response()->json([
-                'message' => 'Đánh giá đã được tạo thành công!', // Thông báo thành công
+                'message' => 'Wishlist đã được tạo thành công!', // Thông báo thành công
                 'data' => $wishlist
             ], 201);// Trả về mã thành công 201 (Created)
 
         } catch (Exception $e) {
-             // Trường hợp có lỗi xảy ra khi tạo Đánh giá
+             // Trường hợp có lỗi xảy ra khi tạo Wishlist
             return response()->json([
                 'message' => 'Lỗi khi xử lý dữ liệu.',
                 'error' => $e->getMessage(), // Lỗi cụ thể
@@ -94,17 +94,17 @@ class WishlistController extends Controller
 
               // Validate và lấy dữ liệu từ request
             $data = $request->validated();
-            // Gọi service để cập nhật Đánh giá
+            // Gọi service để cập nhật Wishlist
             $wishlist = $this->wishlistService->update($id,$data);
 
             return response()->json([
-                'message' => 'Đánh giá đã được sửa thành công!', // Thông báo thành công
+                'message' => 'Wishlist đã được sửa thành công!', // Thông báo thành công
                 'data' => $data,
                 'status'=>200
             ], 200);// Trả về mã trạng thái 200 (OK)
 
         } catch (Exception $e) {
-            // Trường hợp có lỗi xảy ra khi cập nhật Đánh giá
+            // Trường hợp có lỗi xảy ra khi cập nhật Wishlist
             return response()->json([
                 'message' => 'Lỗi khi xử lý dữ liệu.',
                 'error' => $e->getMessage(),
@@ -116,16 +116,16 @@ class WishlistController extends Controller
     {
        
         try {
-            // Gọi service để xóa Đánh giá
+            // Gọi service để xóa Wishlist
             $atr = $this->wishlistService->delete($id);
             return response()->json([
-                'message' => 'Đánh giá đã được xóa',
+                'message' => 'Wishlist đã được xóa',
                 'data' => $atr,
                 'status'=>200
             ], 200);// Trả về mã trạng thái 200 (OK)
 
         } catch (Exception $e) {
-               // Trường hợp có lỗi xảy ra khi xóa Đánh giá
+               // Trường hợp có lỗi xảy ra khi xóa Wishlist
             return response()->json([
                 'message' => 'Lỗi khi xử lý dữ liệu.',
                 'error' => $e->getMessage()  // Lỗi cụ thể
@@ -136,11 +136,11 @@ class WishlistController extends Controller
     public function show($id)
     {
         try {
-                 // Gọi service để lấy thông tin chi tiết Đánh giá
+                 // Gọi service để lấy thông tin chi tiết Wishlist
             $atr = $this->wishlistService->show($id);
             return response()->json([
                 'message' => 'lấy thành công', // Thông báo thành công
-                'data' => $atr,// Dữ liệu Đánh giá chi tiết
+                'data' => $atr,// Dữ liệu Wishlist chi tiết
                 'status'=>200 // Trả về mã trạng thái 200 (OK)
             ], 200);
 

@@ -58,6 +58,7 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::apiResource('/review', ReviewController::class);
+            Route::apiResource('/wishlist', ReviewController::class);
         });
 
         //test route
