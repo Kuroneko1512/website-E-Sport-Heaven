@@ -107,7 +107,7 @@ class OrderController extends Controller
             'status' => 'required|string',
         ]);
 
-        $userId = auth()->user()->id;
+        $userId = $request->user()->id;
 
         $result = $this->orderService->updateStatus($id, $request->status, null, $userId);
 
