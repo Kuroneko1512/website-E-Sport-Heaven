@@ -23,3 +23,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::post('/vnpay-payment', [PaymentController::class, 'createPayment']);
 Route::get('/vnpay-return', [PaymentController::class, 'vnpayReturn']);
+
+Route::get('/check-env', function () {
+    return env('PASSPORT_CLIENT_ID'); // Hoặc: return config('services.passport.client_id');
+});

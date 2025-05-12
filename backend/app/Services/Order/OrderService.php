@@ -2,6 +2,7 @@
 
 namespace App\Services\Order;
 
+use App\Models\OrderUserReturn;
 use Exception;
 use App\Models\Order;
 use App\Models\Product;
@@ -327,7 +328,6 @@ class OrderService extends BaseService
     public function updateStatus($id, $status, $adminId = null, $customerId = null, $notes = null, $isSystem = false)
     {
         $order = $this->model->find($id);
-
         if (!$order) {
             Log::error('Order not found');
             return [
@@ -355,7 +355,6 @@ class OrderService extends BaseService
                 'code' => 400
             ];
         }
-
         // Check permission to update status
         // Kiểm tra quyền cập nhật trạng thái
         $permissionCheckResult = $this->checkUpdateStatusPermission($adminId, $customerId, $isSystem, $status);
@@ -386,6 +385,7 @@ class OrderService extends BaseService
         }
 
         $this->addOrderHistory($order->id, OrderHistory::ACTION_STATUS_UPDATED, $historyData);
+
 
         return [
             'success' => true,
@@ -640,6 +640,26 @@ class OrderService extends BaseService
 
         return $order;
     }
+
+    public function getOrderReturn()
+    {
+        return $this->model->with([
+            'orderItems.product',
+            'orderItems.productVariant'
+        ])->whereIn('status', [
+            Order::STATUS_RETURN_REQUESTED,
+            Order::STATUS_RETURN_PROCESSING
+        ])->orderBy('id', 'desc')->get();
+    }
+
+    public function getOrderUserReturn($orderId)
+    {
+        return OrderUserReturn::select('orders_user_return.*', 'orders.status as order_status')
+            ->join('orders', 'orders.id', '=', 'orders_user_return.order_id')
+            ->where('orders_user_return.order_id', $orderId)
+            ->first();
+    }
+
 
     public function generateUniqueOrderCode()
     {

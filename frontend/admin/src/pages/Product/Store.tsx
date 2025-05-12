@@ -2,7 +2,6 @@ import { useState, useEffect, ChangeEvent } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { getCategory, Category } from "@app/services/Category/ApiCategory";
-// import NoImage from "../../../public/img/default-image-icon-vector-missing-picture-page-website-design-mobile-app-no-photo-available_87543-11093.avif";
 import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
 import {
   createProduct,
@@ -21,7 +20,7 @@ interface Variant {
   price: number;
   stock: number;
   image?: File | string | null;
-  attributes: AttributeSelection[];
+  product_attributes: AttributeSelection[];
 }
 
 // Định nghĩa interface cho errors
@@ -29,7 +28,7 @@ interface ValidationErrors {
   name?: string;
   price?: string;
   discount_percent?: string;
-  category_id?: string;
+  category_id?: number;
   stock?: string;
   description?: string;
   image?: string;
@@ -40,12 +39,14 @@ const NoImage =
 
 const Store = () => {
   const navigate = useNavigate();
-  const { id: paramId } = useParams(); // Lấy `id` từ URL
+  const { id: paramId } = useParams(); 
   const [id, setId] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isEdit, setIsEdit] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [selectedTab, setSelectedTab] = useState<string>("Attribute");
+  
 
   const [product, setProduct] = useState<api4>({
     name: "",
@@ -53,17 +54,18 @@ const Store = () => {
     discount_percent: "",
     product_type: "simple",
     status: "active",
-    category_id: "",
+    category_id: 0,
     stock: 1,
+    sku: "",
     image: null as File | null,
     description: "",
     selected_attributes: [],
-    variants: [],
+    variants: [] as Variant[],
   });
 
   const ProductOptions = [
-    { value: "simple", label: "simple" },
-    { value: "variable", label: "variable" },
+    { value: "simple", label: "Đơn giản" },
+    { value: "variable", label: "Biến thể" },
   ];
   const [selectedProduct, setSelectedProduct] = useState<{
     value: string;
@@ -72,7 +74,8 @@ const Store = () => {
 
  
   const validateForm = (): boolean => {
-    const newErrors: ValidationErrors = {};
+    const newErrors: ValidationErrors = {
+    };
     
   
     if (!product.name.trim()) {
@@ -82,10 +85,7 @@ const Store = () => {
     }
     
     
-    if (product.price <= 1) {
-      newErrors.price = "Giá sản phẩm phải lớn hơn hoặc bằng 1";
-    }
-    
+
    
     
    
@@ -94,27 +94,18 @@ const Store = () => {
     }
     
     
-  
-    
-    if (product.product_type === "simple") {
-      if (product.price <= 1) {
-        newErrors.price = "Giá sản phẩm phải lớn hơn  hoặc bằng   1";
-      }
-  
-      if (product.stock <= 1) {
-        newErrors.stock = "Số lượng trong kho phải lớn  hơn hoặc bằng  1";
-      }
-    }
- 
+
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+
+  
   };
 
   const handleOptionChange = (
     newValue: SingleValue<{ value: string; label: string }>
   ) => {
-    if (!newValue) return; // Kiểm tra nếu null thì không làm gì
+    if (!newValue) return; 
     setSelectedProduct(newValue);
     if (newValue.value === "simple") {
       let confirm = window.confirm("Bạn có chắc muốn chuyển không");
@@ -139,12 +130,13 @@ const Store = () => {
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    console.log(product);
+    
     setProduct((prev) => ({
       ...prev,
-      [name]: name === "price" || name === "stock" ? Number(value) : value,
+      [name]: name === "price" || name === "stock" 
+        ? value 
+        : value,
     }));
-    
     
     if (errors[name as keyof ValidationErrors]) {
       setErrors(prev => ({
@@ -160,9 +152,6 @@ const Store = () => {
       ...prev,
       description: content,
     }));
-    
-    
-  
   };
 
 
@@ -195,22 +184,21 @@ const Store = () => {
 
   useEffect(() => {
     if (paramId) {
-      setId(paramId); // Lưu `id` vào state khi `id` có trong URL
+      setId(paramId);
     }
     const fetchProduct = async () => {
-    
       if (id) {
         try {
           const productData = await getProductById(Number(id));
-
-          // Chuyển đổi selected_attributes thành mảng dạng [[2], [3]]
-          const selected_attributes: number[] = [];
-
-          productData.data.selected_attributes.forEach((attr) => {
-            selected_attributes.push(attr.attribute_id);
-            console.log(selected_attributes);
-          });
-
+          console.log(productData.data);
+          
+          // Lấy danh sách các attribute_id duy nhất từ variants
+          const selected_attributes = [...new Set(
+            productData.data.variants.flatMap(variant => 
+              variant.product_attributes.map(attr => attr.attribute_id)
+            )
+          )];
+          
           setProduct({
             ...productData.data,
             selected_attributes: selected_attributes,
@@ -235,36 +223,39 @@ const Store = () => {
           console.error("Lỗi khi lấy thông tin sản phẩm:", error);
         }
       }
+   
     };
 
     fetchProduct();
     fetchData();
   }, [id]);
 
-  const ProductOptionsDefault =
-  product?.product_type === ProductOptions[1].value
-    ? ProductOptions[1]
-    : ProductOptions[0];
  
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // if (!validateForm()) {
-    
-    //   window.scrollTo(0, 0);
-    //   return;
-    // }else{
-    //   console.log("hi",product);
-    // }
-
-    try {
+    e.preventDefault(); 
+    if (!validateForm()) {
+      window.scrollTo(0, 0);
+      console.log(validateForm());
+      return;
+    }
    
+    try {
       if (isEdit && id) {
-     await updateProduct(Number(id), product);
-    
+        // Chuyển đổi giá trị số trước khi gửi lên server
+        const submitData = {
+          ...product,
+          price: product.price ? Number(product.price) : 0,
+          stock: product.stock ? Number(product.stock) : 0,
+        };
+        await updateProduct(Number(id), submitData);
         alert("Cập nhật sản phẩm thành công!");
       } else {
-        await createProduct(product);
+        const submitData = {
+          ...product,
+          price: product.price ? Number(product.price) : 0,
+          stock: product.stock ? Number(product.stock) : 0,
+        };
+        await createProduct(submitData);
         alert("Tạo sản phẩm thành công!");
       }
       navigate("/product");
@@ -273,9 +264,30 @@ const Store = () => {
     }
   };
 
+  const handleDeleteVariant = async (variantId: number) => {
+    console.log(variantId);
+
+    try {
+      // Xóa variant ở database
+      await updateProduct(Number(id), {
+        ...product,
+        delete_variant_id: [variantId]
+      });
+      
+      // Cập nhật state sau khi xóa thành công
+      setProduct(prev => ({
+        ...prev,
+        variants: prev.variants.filter(variant => variant.id !== variantId)
+      }));
+    } catch (error) {
+      console.error("Lỗi khi xóa variant:", error);
+      alert("Có lỗi xảy ra khi xóa variant!");
+    }
+  };
+
   return (
     <div className="container-fluid bg-white p-4">
-      <h3>{isEdit ? "EDIT PRODUCT" : "ADD PRODUCT"}</h3>
+      <h3>{isEdit ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm"}</h3>
       <form onSubmit={handleSubmit}>
         <div className="row align-items-stretch">
           {/* Cột nhập thông tin sản phẩm */}
@@ -312,21 +324,25 @@ const Store = () => {
 
             {/* Chọn sản phẩm */}
             <div className="row align-items-stretch my-3">
-              <div className="col-3 p-3 bg-light border rounded">
+              <div className="col-3 bg-light border p-0 ">
                 <ul>
                   {selectedProduct?.value === "simple"
                     ? ["ValueProduct"].map((item, index) => (
                         <li key={index} className="my-2">
                           <Link to={item} className="text-black mx-4">
-                            {item}
-                          </Link> 
+                            {selectedProduct.label}
+                          </Link>
                         </li>
                       ))
                     : ["Attribute", "Variant"].map((item, index) => (
-                        <li key={index} className="my-2">
+                        <li 
+                          key={index} 
+                          className={`my-2 h-10 align-content-center ${selectedTab === item ? "bg-dark" : ""}`}
+                          onClick={() => setSelectedTab(item)}
+                        >
                           <Link
                             to={item}
-                            className={`text-black mx-4 `}
+                            className={`text-black mx-4`}
                             style={
                               item != "Attribute" &&
                               product.selected_attributes.length === 0
@@ -334,14 +350,14 @@ const Store = () => {
                                 : {}
                             }
                           >
-                            {item}
+                            {item === "Attribute" ? "Thuộc tính" : "Biến thể"}
                           </Link>
                         </li>
                       ))}
                 </ul>
               </div>
               <div className="col-9 p-3 bg-light border">
-                <Outlet context={{ product, setProduct, errors, setErrors }} />
+                <Outlet context={{ product, setProduct, errors, setErrors, handleDeleteVariant }} />
               </div>
             </div>
           </div>
