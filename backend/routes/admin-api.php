@@ -39,6 +39,8 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('/category', CategoryController::class);
             //Order routes
             Route::apiResource('/order', OrderController::class);
+            Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
+            Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
             //Customer routes
 
             //User routes ( Staff)

@@ -1,7 +1,9 @@
 // src/api/orderApi.ts
-import axios from "axios";
+// import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000/api/v1/order";
+// const API_URL = "http://127.0.0.1:8000/api/v1/order";
+import { api } from "@app/api/adminApi";
+import { API_ENDPOINTS } from "@app/api/endpoints";
 
 // Interface định nghĩa dữ liệu của một Order
 export interface Order {
@@ -12,10 +14,10 @@ export interface Order {
   shipping_address: string;
   order_code: string;
   total_amount: number;
-  status: string;
+  status: number;
   customer_id: number;
   created_at: string;
-  payment_status: string;
+  payment_status: number;
 }
 interface OrderResponse {
     message: string;
@@ -48,7 +50,7 @@ export interface Pagination {
 // };
 
 export const getOrderById = async (id: string | number) => {
-  return await axios.get(`${API_URL}/${id}`);
+  return await api.get<OrderResponse>(`${API_ENDPOINTS.ORDER.BASE}/${id}`);
 };
 
 // Hàm cập nhật một đơn hàng dựa vào ID
@@ -75,9 +77,9 @@ export const getOrderById = async (id: string | number) => {
 //   }
 // };
 
-export const updateOrderStatus = async (id: number, status: string): Promise<OrderResponse> => {
+export const updateOrderStatus = async (id: number, status: number): Promise<OrderResponse> => {
     try {
-      const response = await axios.put<OrderResponse>(`${API_URL}/${id}/status`, { status });
+      const response = await api.put<OrderResponse>(`${API_ENDPOINTS.ORDER.BASE}/${id}/status`, { status });
       return response.data;
     } catch (error) {
       console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
@@ -88,7 +90,7 @@ export const updateOrderStatus = async (id: number, status: string): Promise<Ord
 // Hàm gọi API lấy danh sách orders với phân trang
 export const getOrders = async (page: number = 1, limit: number = 5): Promise<Pagination> => {
   try {
-    const response = await axios.get<Pagination>(`${API_URL}?page=${page}&limit=${limit}`);
+    const response = await api.get<Pagination>(`${API_ENDPOINTS.ORDER.BASE}?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -98,7 +100,7 @@ export const getOrders = async (page: number = 1, limit: number = 5): Promise<Pa
 
 export const deleteOrder = async (id: number): Promise<void> => {
   try {
-    await axios.delete(`${API_URL}/${id}`);
+    await api.delete(`${API_ENDPOINTS.ORDER.BASE}/${id}`);
     console.log(`Deleted order with id: ${id}`);
   } catch (error) {
     console.error("Error deleting order:", error);

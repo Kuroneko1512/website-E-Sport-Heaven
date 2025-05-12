@@ -8,6 +8,7 @@ import DealsOfTheMonth from "../components/main/DealsOfThMonth";
 import { useQuery } from "@tanstack/react-query";
 import instanceAxios from "../config/db";
 import SkeletonLoadingHome from "../components/loadingSkeleton/SkeletonLoadingHome";
+import SkeletonBestseller from "../components/loadingSkeleton/SkeletonBestseller";
 
 
 const Home = () => {
@@ -45,7 +46,7 @@ const Home = () => {
 
         {/* Product Bestseller */}
         {productLoading ? (
-          <SkeletonLoadingHome />
+          <SkeletonBestseller/>
         ) : (
           <ProductBestseller productData={productData?.slice(0, 8)} />
         )}
