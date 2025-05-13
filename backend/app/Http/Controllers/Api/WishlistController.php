@@ -25,10 +25,10 @@ class WishlistController extends Controller
     public function getByProduct($id){
         try {
              // Gọi service để lấy dữ liệu
-            $wishlist = $this->wishlistService->getByProduct(auth()->id(), $id);
+            $wishlist = $this->wishlistService->getItemWishlist(auth()->id(), $id);
             return response()->json([
                 'status' => 200,
-                'data' => $wishlist, // Trả về dữ liệu Wishlist
+                'data' => $wishlist != null, // Trả về dữ liệu Wishlist
             ],200);
         } catch (\Throwable $th) {
              // Trường hợp có lỗi xảy ra khi lấy dữ liệu

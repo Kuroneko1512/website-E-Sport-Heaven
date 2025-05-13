@@ -62,6 +62,7 @@ const ProductDetail = () => {
       fetchAttributes.mutate();
     }
     setDisplayImage(product?.image || "");
+    
   }, [product]);
 
   // Cập nhật hình ảnh và giá của biến thể đầu tiên nếu có biến thể
@@ -91,6 +92,14 @@ const ProductDetail = () => {
         Object.keys(selectedAttributes).length === attributes.length
     );
   }, [selectedAttributes, attributes]);
+
+  useEffect(() => {
+    instanceAxios
+        .get(`/api/v1/customer/wishlist-product/${id}`)
+        .then((response) => {
+          setFav(response.data.data);
+        })
+  }, []);
 
   // Cập nhật danh sách hợp lệ ngay sau khi người dùng chọn thuộc tính
   const updateValidOptions = (selectedAttrs) => {
