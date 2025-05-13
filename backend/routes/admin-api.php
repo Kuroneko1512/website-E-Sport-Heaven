@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Admin\V1\CategoryController;
 use App\Http\Controllers\Api\Admin\V1\ProductController;
 use App\Http\Controllers\Api\Admin\V1\OrderController;
 use App\Http\Controllers\Api\User\UserController;
+
 Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
         Route::get('/', function () {
@@ -31,7 +32,7 @@ Route::prefix('v1')->group(function () {
 
             //Product routes
             Route::apiResource('/product', ProductController::class);
-          
+
             //Attributes routes
             Route::apiResource('/attribute', AttributeController::class);
             //Category routes
@@ -47,8 +48,8 @@ Route::prefix('v1')->group(function () {
 
 
             //Customer routes
-      
-          
+
+
 
             //Role and Permission routes
 
