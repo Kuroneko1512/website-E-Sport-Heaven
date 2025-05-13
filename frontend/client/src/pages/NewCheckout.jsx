@@ -17,7 +17,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import apiGhtk from "../config/ghtk";
+import apiGhtk, { getShippingFee } from "../config/ghtk";
 import FomatVND from "../utils/FomatVND";
 import instanceAxios from "../config/db";
 
@@ -35,12 +35,8 @@ const useShippingFee = (formData, cartItems) => {
       const calculateShippingFee = async () => {
         setIsCalculatingShipping(true);
         try {
-          const weight = cartItems.reduce(
-            (total, item) => total + (item.weight || 0) * item.quantity,
-            0
-          ) || 10000;
-          const response = await apiGhtk.get(`/services/shipment/fee`, {
-            params: { ...formData, weight },
+          const response = await apiGhtk.get(`/shipping/fee`, {
+            params: { ...formData },
           });
           if (response?.data?.success === true) {
             setShippingFee(response?.data?.fee?.ship_fee_only);
@@ -126,7 +122,6 @@ const NewCheckout = () => {
   const [submit, setSubmit] = useState(false);
 
 
-
   const [formData, setFormData] = useState({
     pick_province: "Hà Nội",
     pick_district: "Hoàng Mai",
@@ -135,77 +130,26 @@ const NewCheckout = () => {
     ward: "",
     address: "",
     weight: 10000,
+    value: 3000000,
     transport: "road",
-    deliver_option: "none",
+    deliver_option: "xteam",
   });
 
   const { provinces, districts, wards, loadDistricts, loadWards } = useAddressData();
   const { shippingFee, isCalculatingShipping } = useShippingFee(formData, cartItems);
+
+  // Thêm useEffect để đảm bảo tính phí vận chuyển được tính lại khi formData thay đổi và có đủ thông tin mã địa chỉ
+  useEffect(() => {
+    const { province, district, ward, address } = formData;
+    if (province && district && ward && address) {
+      // Không cần làm gì thêm vì useShippingFee đã tự động tính phí khi formData thay đổi
+      // Nhưng có thể reset trạng thái hoặc xử lý thêm nếu cần
+    }
+  }, [formData]);
   const queryClient = useQueryClient();
 
   // Load cart data on mount
   useEffect(() => {
-
-    const { province, district, ward, address } = formData;
-
-    // Nếu chưa đủ thông tin, đặt phí vận chuyển về 0
-    if (!province || !district || !ward || !address) {
-      setShippingFee(0);
-      return;
-    }
-
-    // Thêm debounce để tránh gọi API quá nhanh
-    const timer = setTimeout(() => {
-      const calculateShippingFee = async () => {
-        try {
-          console.log("Gọi API với formData:", formData);
-
-          // Kiểm tra dữ liệu trước khi gọi API
-          const validAddress =
-              Boolean(formData.province) &&
-              Boolean(formData.district) &&
-              Boolean(formData.ward) &&
-              (typeof formData.address === 'string' ? formData.address.trim() !== '' : Boolean(formData.address));
-
-          if (!validAddress) {
-            console.log("Dữ liệu địa chỉ không hợp lệ, bỏ qua tính phí");
-            setShippingFee(0); // Đặt phí ship về 0 khi không đủ thông tin
-            return;
-          }
-
-          // Chỉ gọi API khi đủ thông tin và dữ liệu hợp lệ
-          const response = await getShippingFee(formData);
-          console.log("Kết quả API:", response);
-
-          if (response.success && response.fee && response.fee.ship_fee_only) {
-            setShippingFee(response.fee.ship_fee_only); // Cập nhật phí vận chuyển
-            // message.success("Tính phí vận chuyển thành công!");
-          } else {
-            setShippingFee(0); // Đặt phí ship về 0 khi có lỗi
-            // message.error(response.message || "Không thể tính phí vận chuyển!");
-          }
-        } catch (error) {
-          console.error("Chi tiết lỗi:", error);
-          setShippingFee(0); // Đặt phí ship về 0 khi có lỗi
-          message.error("Lỗi khi tính phí vận chuyển!");
-        }
-      };
-
-      calculateShippingFee();
-    }, 500); // Chờ 500ms sau khi người dùng nhập xong
-
-    // Dọn dẹp timer khi component unmount hoặc dữ liệu thay đổi
-    return () => clearTimeout(timer);
-  }, [formData]); // Phụ thuộc vào formData
-
-  // Load dữ liệu provinces, districts, wards một lần khi mount
-  useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/v1/address/provinces/")
-      .then((response) => setProvinces(response?.data?.data))
-      .catch((error) => console.error("Lỗi khi tải tỉnh/thành phố:", error));
-
-
     const cartItems = localStorage.getItem("checkoutItems");
     const cartTotal = localStorage.getItem("cartTotal");
 
@@ -266,12 +210,35 @@ const NewCheckout = () => {
         ward: dataform.commune?.name || dataform.ward,
       });
 
-      const provinceCode =
-        provinces.find((p) => p.name === (dataform.province?.name || dataform.province))?.code || "";
-      const districtCode =
-        districts.find((d) => d.name === (dataform.district?.name || dataform.district))?.code || "";
-      const wardCode =
-        wards.find((w) => w.name === (dataform.commune?.name || dataform.ward))?.code || "";
+      // Try to get codes directly from API response first
+      let provinceCode = dataform.province?.code;
+      let districtCode = dataform.district?.code;
+      let wardCode = dataform.commune?.code;
+
+      // If codes are not available in API response, try to find them from names
+      if (!provinceCode) {
+        provinceCode = provinces.find((p) => p.name === (dataform.province?.name || dataform.province))?.code;
+      }
+      if (!districtCode) {
+        districtCode = districts.find((d) => d.name === (dataform.district?.name || dataform.district))?.code;
+      }
+      if (!wardCode) {
+        wardCode = wards.find((w) => w.name === (dataform.commune?.name || dataform.ward))?.code;
+      }
+
+      // Validate codes
+      if (!provinceCode) {
+        message.error("Không tìm thấy mã tỉnh/thành phố!");
+        return;
+      }
+      if (!districtCode) {
+        message.error("Không tìm thấy mã quận/huyện!");
+        return;
+      }
+      if (!wardCode) {
+        message.error("Không tìm thấy mã phường/xã!");
+        return;
+      }
 
       setSelectedProvince(provinceCode);
       setSelectedDistrict(districtCode);
@@ -279,9 +246,9 @@ const NewCheckout = () => {
 
       setFormData((prev) => ({
         ...prev,
-        province: dataform.province?.name || dataform.province,
-        district: dataform.district?.name || dataform.district,
-        ward: dataform.commune?.name || dataform.ward,
+        province: provinceCode,
+        district: districtCode,
+        ward: wardCode,
         address: dataform.address_line1 || dataform.specificAddress,
       }));
 
@@ -302,8 +269,8 @@ const NewCheckout = () => {
           product_id: item.product_id,
           product_variant_id: item.variant_id || null,
           quantity: item.quantity,
-          price: item.price,
-          discount: item.discount,
+          price: grandTotal,
+          discount_percent: item.discount,
         })),
       }));
     } else {
@@ -319,9 +286,9 @@ const NewCheckout = () => {
 
       setFormData((prev) => ({
         ...prev,
-        province: provinces.find((p) => p.code === selectedProvince)?.name || "",
-        district: districts.find((d) => d.code === selectedDistrict)?.name || "",
-        ward: wards.find((w) => w.code === selectedWard)?.name || "",
+        province: selectedProvince,
+        district: selectedDistrict,
+        ward: selectedWard,
         address: specificAddress,
       }));
 
@@ -369,14 +336,9 @@ const NewCheckout = () => {
         (item.price - (item.price * item.discount) / 100) * item.quantity,
       0
     );
-
-
-    const discount = discountCode ? 10000 : 0;
-    return subtotal + shippingFee - discount;
-
   }, [cartItems]);
 
-  console.log("calculateSubtotal", calculateSubtotal);
+  // console.log("calculateSubtotal", calculateSubtotal);
 
   // Process coupons data when it changes
   useEffect(() => {
@@ -404,7 +366,7 @@ const NewCheckout = () => {
     }
   }, [isError]);
 
-  console.log("couponsData", couponsData);
+  // console.log("couponsData", couponsData);
 
   // Calculate grand total with useMemo
   const grandTotal = useMemo(() => {
@@ -438,7 +400,6 @@ const NewCheckout = () => {
     setShippingFee(null);
     setIsCalculatingShipping(true);
     calculateShippingFee(value);
-
   };
 
   // Handle new address change
@@ -536,12 +497,13 @@ const NewCheckout = () => {
         coupon_id: selectedCoupon?.id || null,
         order_coupon_code: selectedCoupon?.code || null,
         order_coupon_name: selectedCoupon?.name || null,
-        order_discount_amount: selectedCoupon ? (
-          selectedCoupon.discount_type === 'percentage' 
-            ? (grandTotal * Number(selectedCoupon.discount_value) / 100).toFixed(2)
-            : Number(selectedCoupon.discount_value).toFixed(2)
-        ) : "0.00",
-        order_discount_type: selectedCoupon ? (selectedCoupon.discount_type === 'percentage' ? 1 : 2) : null,
+        //order_discount_amount: selectedCoupon ? (
+        // selectedCoupon.discount_type === 'percentage' 
+        //   ? (grandTotal * Number(selectedCoupon.discount_value) / 100).toFixed(2)
+        //   : Number(selectedCoupon.discount_value).toFixed(2)
+        //) : "0.00",
+        // discount_percent: ,
+        order_discount_type: selectedCoupon ? (selectedCoupon.discount_type === 'percentage' ? 0 : 1) : null,
         order_discount_value: selectedCoupon ? Number(selectedCoupon.discount_value) : null
       };
 
@@ -590,6 +552,9 @@ const NewCheckout = () => {
       setSubmit(false);
     }
   };
+
+  console.log("order", order);
+  console.log("grandTotal", grandTotal);
 
   return (
     <div className="p-6 bg-white">
@@ -666,10 +631,10 @@ const NewCheckout = () => {
                     onChange={(value) => {
                       setSelectedProvince(value);
                       loadDistricts(value);
-                      setFormData((prev) => ({
-                        ...prev,
-                        province: provinces.find((p) => p.code === value)?.name,
-                      }));
+                    setFormData((prev) => ({
+                      ...prev,
+                      province: value,
+                    }));
                     }}
                   >
                     {provinces.map((province) => (
@@ -700,10 +665,10 @@ const NewCheckout = () => {
                     onChange={(value) => {
                       setSelectedDistrict(value);
                       loadWards(value);
-                      setFormData((prev) => ({
-                        ...prev,
-                        district: districts.find((d) => d.code === value)?.name,
-                      }));
+                    setFormData((prev) => ({
+                      ...prev,
+                      district: value,
+                    }));
                     }}
                     disabled={!selectedProvince}
                   >
@@ -734,7 +699,7 @@ const NewCheckout = () => {
                       setSelectedWard(value);
                       setFormData((prev) => ({
                         ...prev,
-                        ward: wards.find((w) => w.code === value)?.name,
+                        ward: value,
                       }));
                     }}
                     disabled={!selectedDistrict}
@@ -873,13 +838,17 @@ const NewCheckout = () => {
 
             <div className="flex justify-between mb-2">
               <Text>Phí vận chuyển</Text>
-
-              <Text>{FomatVND(shippingFee)}</Text>
+              <Text>
+                {isCalculatingShipping
+                  ? "Đang tính..."
+                  : shippingFee
+                  ? FomatVND(shippingFee)
+                  : "Hãy chọn địa điểm"}
+              </Text>
             </div>
             <div className="flex justify-between font-bold">
               <Text strong>Tổng cộng</Text>
-              <Text strong>{FomatVND(calculateGrandTotal(shippingFee))}</Text>
-
+              <Text strong>{FomatVND(grandTotal)}</Text>
             </div>
 
             <Button
