@@ -227,7 +227,7 @@ const RightNavbar = () => {
       </div>
 
       {/* Wishlist */}
-      <HeartOutlined className="text-lg cursor-pointer dark:text-white" />
+      <Link to="/my-profile/wishlists"><HeartOutlined className="text-lg cursor-pointer dark:text-white" /></Link>
 
       {/* Cart */}
       <Popover
