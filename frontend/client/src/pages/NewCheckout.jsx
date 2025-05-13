@@ -270,7 +270,7 @@ const NewCheckout = () => {
           product_variant_id: item.variant_id || null,
           quantity: item.quantity,
           price: item.price,
-          discount_percent: item.discount_percent,
+          discount: item.discount,
         })),
       }));
     } else {
@@ -497,12 +497,6 @@ const NewCheckout = () => {
         coupon_id: selectedCoupon?.id || null,
         order_coupon_code: selectedCoupon?.code || null,
         order_coupon_name: selectedCoupon?.name || null,
-        //order_discount_amount: selectedCoupon ? (
-        // selectedCoupon.discount_type === 'percentage' 
-        //   ? (grandTotal * Number(selectedCoupon.discount_value) / 100).toFixed(2)
-        //   : Number(selectedCoupon.discount_value).toFixed(2)
-        //) : "0.00",
-        // discount_percent: ,
         order_discount_type: selectedCoupon ? (selectedCoupon.discount_type === 'percentage' ? 0 : 1) : null,
         order_discount_value: selectedCoupon ? Number(selectedCoupon.discount_value) : null
       };

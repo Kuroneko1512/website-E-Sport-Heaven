@@ -248,7 +248,10 @@ class OrderService extends BaseService
     private function addOrderItems($order, $orderItems)
     {
         foreach ($orderItems as $item) {
-            $price = $item['price'];
+            if ($item['discount'] == null) {
+                $item['discount'] = 0;
+            }
+            $price = $item['price'] * (1 - ( $item['discount'] / 100) );
             $quantity = $item['quantity'];
             $itemSubtotal = $price * $quantity;
 
