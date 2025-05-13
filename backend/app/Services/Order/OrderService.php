@@ -146,10 +146,11 @@ class OrderService extends BaseService
         // Tính subtotal từ các sản phẩm
         $subtotal = 0;
         foreach ($data['order_items'] as $item) {
-            if ($item['discount_percent'] == null) {
-                $item['discount_percent'] = 0;
+            if ($item['discount'] == null) {
+                $item['discount'] = 0;
             }
-            $quantity =  $price = $item['price'] * (1 - ( $item['discount_percent'] / 100) );
+            $price = $item['price'] * (1 - ( $item['discount'] / 100) );
+            $quantity = $item['quantity'];
             $subtotal += $price * $quantity;
         }
 

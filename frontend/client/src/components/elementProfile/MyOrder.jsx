@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import instanceAxios from "../../config/db";
 import FomatVND from "../../utils/FomatVND";
 import { FomatTime } from "../../utils/FomatTime";
 import { Link, useNavigate } from "react-router-dom";
-import { Divider, message, Modal, Table, Form } from "antd";
+import { message, Modal, Form } from "antd";
 import ReviewForm from "./ReviewForm";
 import useReview from "../../hooks/useReview";
 import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
@@ -336,12 +336,12 @@ const MyOrder = () => {
 
     // Actions for DELIVERED orders
     if (order.status === ORDER_STATUS.DELIVERED) {
-      actions.push("Đã nhận hàng", "Hoàn trả");
+      actions.push("Đã nhận hàng");
     }
 
     // Actions for COMPLETED orders
     if (order.status === ORDER_STATUS.COMPLETED) {
-      actions.push("đánh giá", "mua lại", "Hoàn trả");
+      actions.push("đánh giá", "mua lại");
 
       // Check if within 7 days for return request
       const completedDate = new Date(order.updated_at);
@@ -356,11 +356,6 @@ const MyOrder = () => {
     // Actions for CANCELLED orders
     if (order.status === ORDER_STATUS.CANCELLED) {
       actions.push("mua lại");
-    }
-
-    // Actions for RETURN_REQUESTED orders
-    if (order.status === ORDER_STATUS.RETURN_REQUESTED) {
-      actions.push("hủy yêu cầu trả hàng");
     }
 
     // Actions for RETURN_PROCESSING orders
@@ -408,7 +403,7 @@ const MyOrder = () => {
               `/api/v1/order/${order.id}/status`,
               {
                 status: ORDER_STATUS.CANCELLED,
-                id: user.customerId,
+                customer_id: user.customerId,
               }
             );
 
@@ -510,115 +505,57 @@ const MyOrder = () => {
               `/api/v1/order/${order.id}/status`,
               {
                 status: ORDER_STATUS.COMPLETED,
-                id: user.customerId,
+                customer_id: user.customerId,
               }
             );
 
             if (response.data?.success) {
               message.success("Đã xác nhận nhận hàng thành công");
               setConfirmModalVisible(false);
-              window.location.reload();
+              // window.location.reload();
             } else {
               throw new Error(
                 response.data?.message || "Không thể xác nhận nhận hàng"
               );
             }
           } catch (error) {
-            console.error("Chi tiết lỗi:", error);
-            if (error.response?.status === 404) {
-              message.error("Không tìm thấy đơn hàng");
-            } else if (error.response?.status === 403) {
-              message.error("Bạn không có quyền thực hiện thao tác này");
-            } else {
-              message.error(
-                error.response?.data?.message ||
-                  error.message ||
-                  "Không thể xác nhận nhận hàng"
-              );
-            }
+            // console.error("Chi tiết lỗi:", error);
+            // if (error.response?.status === 404) {
+            //   message.error("Không tìm thấy đơn hàng");
+            // } else if (error.response?.status === 403) {
+            //   message.error("Bạn không có quyền thực hiện thao tác này");
+            // } else {
+            //   message.error(
+            //     error.response?.data?.message ||
+            //       error.message ||
+            //       "Không thể xác nhận nhận hàng"
+            //   );
+            // }
           } finally {
             setLoading(false);
           }
           break;
 
-        case "Hoàn trả":
-          setLoading(true);
-          try {
-            if (!order?.id) {
-              throw new Error("Không tìm thấy ID đơn hàng");
-            }
 
-            const response = await instanceAxios.put(
-              `/api/v1/order/${order.id}/status`,
-              {
-                status: ORDER_STATUS.RETURN_REQUESTED,
-                id: user.customerId,
-              }
-            );
-
-            if (response.data?.success) {
-              message.success("Đã gửi yêu cầu hoàn trả");
-              window.location.reload();
-            } else {
-              throw new Error(
-                response.data?.message || "Không thể gửi yêu cầu hoàn trả"
-              );
-            }
-          } catch (error) {
-            console.error("Chi tiết lỗi:", error);
-            if (error.response?.status === 404) {
-              message.error("Không tìm thấy đơn hàng");
-            } else if (error.response?.status === 403) {
-              message.error("Bạn không có quyền thực hiện thao tác này");
-            } else {
-              message.error(
-                error.response?.data?.message ||
-                  error.message ||
-                  "Không thể gửi yêu cầu hoàn trả"
-              );
-            }
-          } finally {
-            setLoading(false);
-          }
-          break;
-
-        case "yêu cầu trả hàng":
-          setLoading(true);
-          try {
-            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.RETURN_REQUESTED,
-              id: user.customerId,
-            });
-            message.success("Đã gửi yêu cầu trả hàng");
-            window.location.reload();
-          } catch (error) {
-            console.error("Chi tiết lỗi:", error);
-            message.error(
-              error.response?.data?.message || "Không thể gửi yêu cầu trả hàng"
-            );
-          } finally {
-            setLoading(false);
-          }
-          break;
-
-        case "hủy yêu cầu trả hàng":
-          setLoading(true);
-          try {
-            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.COMPLETED,
-              id: user.customerId,
-            });
-            message.success("Đã hủy yêu cầu trả hàng");
-            window.location.reload();
-          } catch (error) {
-            console.error("Chi tiết lỗi:", error);
-            message.error(
-              error.response?.data?.message || "Không thể hủy yêu cầu trả hàng"
-            );
-          } finally {
-            setLoading(false);
-          }
-          break;
+          // Ấn yêu cầu trả hàng, chuyển sang màn hình gửi form yêu cầu trả hàng, khi nào điền xong for và ấn submit thì mới chuyển trạng thái.
+        // case "Yêu cầu trả hàng":
+        //   setLoading(true);
+        //   try {
+        //     await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
+        //       status: ORDER_STATUS.RETURN_REQUESTED,
+        //       customer_id: user.customerId,
+        //     });
+        //     message.success("Đã gửi yêu cầu trả hàng");
+        //     window.location.reload();
+        //   } catch (error) {
+        //     console.error("Chi tiết lỗi:", error);
+        //     message.error(
+        //       error.response?.data?.message || "Không thể gửi yêu cầu trả hàng"
+        //     );
+        //   } finally {
+        //     setLoading(false);
+        //   }
+        //   break;
 
         case "xem trạng thái trả hàng":
           nav(`/my-profile/orders/${order.order_code}`);
