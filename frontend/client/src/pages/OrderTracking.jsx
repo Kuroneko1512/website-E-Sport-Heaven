@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import FomatVND from "../utils/FomatVND";
-import { ORDER_STATUS_LABELS } from "../constants/OrderConstants";
+import { ORDER_STATUS_LABELS, ORDER_STATUS } from "../constants/OrderConstants";
 
 // Image display component (commented for testing)
 
@@ -35,19 +35,12 @@ const fetchOrderData = async (orderCode) => {
 };
 
 const OrderHistory = ({ history }) => {
-  const ACTION_TYPE_LABELS = {
-    1: "Tạo đơn hàng",
-    2: "Cập nhật trạng thái đơn hàng",
-    3: "Cập nhật trạng thái thanh toán",
-    4: "Hủy đơn hàng",
-    5: "Hoàn trả đơn hàng",
-    // Add more action types if needed
-  };
-
   // Sort history by created_at descending
   const sortedHistory = [...history].sort(
     (a, b) => new Date(b.created_at) - new Date(a.created_at)
   );
+
+  console.log("sortedHistory", sortedHistory);
 
   return (
     <div className="bg-gray-50 p-5 rounded-lg">
@@ -55,57 +48,59 @@ const OrderHistory = ({ history }) => {
         Lịch sử đơn hàng
       </h2>
       <div className="space-y-4">
-        {sortedHistory.map((item, index) => (
-          <div key={index} className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-blue-600"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <div className="flex justify-between items-start flex-wrap gap-2">
-                <div>
-                  <p className="font-medium text-gray-800">
-                    {ACTION_TYPE_LABELS[item.action_type] || "Hành động không xác định"}
-                  </p>
-                  {/* <p className="text-sm text-gray-500">
-                    {item.actor_name} ({item.actor_role})
-                  </p> */}
-                  <p className="text-sm text-gray-500">
-                    {new Date(item.created_at).toLocaleString("vi-VN", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-                {item.notes && (
-                  <p className="text-sm text-gray-600 italic max-w-xl">{item.notes}</p>
-                )}
+        {sortedHistory.map((item, index) => {
+          // Determine the status to display
+          let statusLabel = "Hành động không xác định";
+          if (item.metadata?.new_payment_status !== undefined) {
+            statusLabel =
+              item.metadata.new_payment_status === 1
+                ? "Đã thanh toán"
+                : "Chưa thanh toán";
+          } else if (item.status_to !== null) {
+            statusLabel =
+              ORDER_STATUS_LABELS[item.status_to] || "Hành động không xác định";
+          }
+
+          return (
+            <div key={index} className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-blue-600"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                    clipRule="evenodd"
+                  />
+                </svg>
               </div>
-              {/* {item.metadata && (
-                <div className="mt-1 text-xs text-gray-500 max-w-xl">
-                  {Object.entries(item.metadata).map(([key, value]) => (
-                    <div key={key}>
-                      <strong>{key.replace(/_/g, " ")}:</strong> {String(value)}
-                    </div>
-                  ))}
+              <div className="flex-1">
+                <div className="flex justify-between items-start flex-wrap gap-2">
+                  <div>
+                    <p className="font-medium text-gray-800">{statusLabel}</p>
+                    <p className="text-sm text-gray-500">
+                      {new Date(item.created_at).toLocaleString("vi-VN", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                  {item.notes && (
+                    <p className="text-sm text-gray-600 italic max-w-xl">
+                      {item.notes}
+                    </p>
+                  )}
                 </div>
-              )} */}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -132,7 +127,7 @@ const OrderTracking = () => {
     setSearchCode(orderCode);
   };
 
-  console.log("orderData", orderData);
+  console.log("orderData history", orderData?.history);
 
   const calculateTotal = () => {
     if (!orderData?.order_items) return 0;
