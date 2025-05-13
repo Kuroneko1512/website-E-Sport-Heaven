@@ -3,27 +3,46 @@ import React from "react";
 import instanceAxios from "../../config/db";
 import { useParams } from "react-router-dom";
 import ScrollToTop from "../../config/ScrollToTop";
-import { ORDER_STATUS_LABELS, ORDER_STATUS } from "../../constants/OrderConstants";
+import {
+  ORDER_STATUS_LABELS,
+  ORDER_STATUS,
+} from "../../constants/OrderConstants";
 
 const OrderDetail = () => {
   const { order_code } = useParams();
 
   const statusStyles = {
-    [ORDER_STATUS.PENDING]: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
-    [ORDER_STATUS.CONFIRMED]: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
-    [ORDER_STATUS.PREPARING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    [ORDER_STATUS.READY_TO_SHIP]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    [ORDER_STATUS.SHIPPING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    [ORDER_STATUS.DELIVERED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
-    [ORDER_STATUS.COMPLETED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
-    [ORDER_STATUS.RETURN_REQUESTED]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
-    [ORDER_STATUS.RETURN_PROCESSING]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
-    [ORDER_STATUS.RETURNED_COMPLETED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
-    [ORDER_STATUS.RETURN_REJECTED]: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300",
-    [ORDER_STATUS.CANCELLED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+    [ORDER_STATUS.PENDING]:
+      "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
+    [ORDER_STATUS.CONFIRMED]:
+      "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
+    [ORDER_STATUS.PREPARING]:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.READY_TO_SHIP]:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.SHIPPING]:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.DELIVERED]:
+      "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.COMPLETED]:
+      "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.RETURN_REQUESTED]:
+      "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURN_PROCESSING]:
+      "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURNED_COMPLETED]:
+      "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+    [ORDER_STATUS.RETURN_REJECTED]:
+      "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300",
+    [ORDER_STATUS.CANCELLED]:
+      "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
   };
 
-  const { data: orderData, isLoading, error } = useQuery({
+  const {
+    data: orderData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["order", order_code],
     queryFn: async () => {
       const res = await instanceAxios.get(
@@ -64,7 +83,10 @@ const OrderDetail = () => {
     // Ưu tiên dùng discount của sản phẩm nếu có
     if (item.product && item.product.discount_percent != null) {
       discountPercent = parseFloat(item.product.discount_percent);
-    } else if (item.product_variant && item.product_variant.discount_percent != null) {
+    } else if (
+      item.product_variant &&
+      item.product_variant.discount_percent != null
+    ) {
       discountPercent = parseFloat(item.product_variant.discount_percent);
     }
     // Tính giá đã giảm
@@ -87,12 +109,14 @@ const OrderDetail = () => {
   const calculateFinalTotal = () => {
     const subtotal = calculateTotalAmount();
     const shippingFee = orderData?.data?.shipping_fee || 0;
-    
+
     // Tính giảm giá
     let discountAmount = 0;
     if (orderData?.data?.order_discount_type === 1) {
       // Giảm giá theo phần trăm
-      discountAmount = Number(subtotal * (Number(orderData?.data?.order_discount_amount) / 100));
+      discountAmount = Number(
+        subtotal * (Number(orderData?.data?.order_discount_amount) / 100)
+      );
     } else {
       // Giảm giá theo giá trị cố định
       discountAmount = Number(orderData?.data?.order_discount_amount) || 0;
@@ -102,7 +126,7 @@ const OrderDetail = () => {
     return subtotal + Number(shippingFee) - discountAmount;
   };
 
-  console.log("calculateFinalTotal", calculateFinalTotal());
+  // console.log("calculateFinalTotal", calculateFinalTotal());
 
   if (isLoading) {
     return (
@@ -133,15 +157,19 @@ const OrderDetail = () => {
       <header className="mb-8 border-b pb-4 flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900">Chi tiết đơn hàng</h1>
         <span className="text-lg">
-          Mã đơn hàng: <strong>{order_code}</strong> | 
-          <span className={`ml-2 px-3 py-1 rounded text-base ${statusStyles[orderData?.data?.status]}`}>
+          Mã đơn hàng: <strong>{order_code}</strong> |
+          <span
+            className={`ml-2 px-3 py-1 rounded text-base ${
+              statusStyles[orderData?.data?.status]
+            }`}
+          >
             {ORDER_STATUS_LABELS[orderData?.data?.status]}
           </span>
         </span>
       </header>
 
-      <section className="grid grid-cols-1 gap-6 mb-8 border-b">
-        <div className="p-4">
+      <section className="grid grid-cols-5 gap-6 mb-8 border-b">
+        <div className="p-4 grid col-span-2">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             Thông tin khách hàng
           </h2>
@@ -157,6 +185,11 @@ const OrderDetail = () => {
           <p>
             <strong>Địa chỉ:</strong> {orderData?.data?.shipping_address}
           </p>
+        </div>
+        <div className="p-4 grid col-span-3">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Lịch sử đơn hàng
+          </h2>
         </div>
       </section>
 
@@ -191,12 +224,13 @@ const OrderDetail = () => {
                   Số lượng: <strong>{item.quantity}</strong>
                 </p>
                 <p>
-                  Giá:{" "}
-                  <strong>
-                    {formatPrice(getDiscountedPrice(item))}
-                  </strong>
-                  {(item.product?.discount_percent > 0 || item.product_variant?.discount_percent > 0) && (
-                      <span className="line-through text-gray-500 mr-2"> {formatPrice(item.price)}</span>
+                  Giá: <strong>{formatPrice(item.price)}</strong>
+                  {(item.product?.discount_percent > 0 ||
+                    item.product_variant?.discount_percent > 0) && (
+                    <span className="line-through text-gray-500 mr-2">
+                      {" "}
+                      {formatPrice(item.original_price)}
+                    </span>
                   )}
                 </p>
               </div>
@@ -207,47 +241,44 @@ const OrderDetail = () => {
 
       <section className="mb-8 text-right">
         <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
-          <div className="col-span-4">
-            Tổng tiền hàng:{" "}
-          </div>
-          <span className="col-span-2">{formatPrice(computedTotalAmount)}</span>
-        </div>
-
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
-          <div className="col-span-4">
-            Phí vận chuyển:{" "}
-          </div>
-          <span className="col-span-2">{formatPrice(orderData?.data?.shipping_fee || 0)}</span>
-        </div>
-
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
-          <div className="col-span-4">
-            Giảm giá:{" "}
-          </div>
+          <div className="col-span-4">Tổng tiền hàng: </div>
           <span className="col-span-2">
-            {orderData?.data?.order_discount_type === 1 
-              ? `${orderData?.data?.order_discount_amount}%` 
+            {formatPrice(orderData?.data?.subtotal || 0)}
+          </span>
+        </div>
+
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+          <div className="col-span-4">Phí vận chuyển: </div>
+          <span className="col-span-2">
+            {formatPrice(orderData?.data?.shipping_fee || 0)}
+          </span>
+        </div>
+
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+          <div className="col-span-4">Giảm giá: </div>
+          <span className="col-span-2">
+            {orderData?.data?.order_discount_type === 1
+              ? `${orderData?.data?.order_discount_amount}%`
               : formatPrice(orderData?.data?.order_discount_amount || 0)}
           </span>
         </div>
 
         <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
-          <div className="col-span-4">
-            Tổng thanh toán:{" "}
-          </div>
+          <div className="col-span-4">Tổng thanh toán: </div>
           <span className="text-2xl font-bold text-red-500 col-span-2">
-            {formatPrice(finalTotal)}
+            {formatPrice(orderData?.data?.total_amount)}
           </span>
         </div>
-        
+
         <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
-          <div className="col-span-4">
-            Phương thức thanh toán:{" "}
-          </div>
-          <span className="col-span-2">{orderData?.data?.payment_method === "cod" ? "Thanh toán tiền mặt" : "Thanh toán online"}</span>
+          <div className="col-span-4">Phương thức thanh toán: </div>
+          <span className="col-span-2">
+            {orderData?.data?.payment_method === "cod"
+              ? "Thanh toán tiền mặt"
+              : "Thanh toán online"}
+          </span>
         </div>
       </section>
-
     </div>
   );
 };

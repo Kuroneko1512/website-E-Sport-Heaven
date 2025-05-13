@@ -269,7 +269,7 @@ const NewCheckout = () => {
           product_id: item.product_id,
           product_variant_id: item.variant_id || null,
           quantity: item.quantity,
-          price: item.price,
+          price: grandTotal,
           discount_percent: item.discount,
         })),
       }));
@@ -554,6 +554,7 @@ const NewCheckout = () => {
   };
 
   console.log("order", order);
+  console.log("grandTotal", grandTotal);
 
   return (
     <div className="p-6 bg-white">
