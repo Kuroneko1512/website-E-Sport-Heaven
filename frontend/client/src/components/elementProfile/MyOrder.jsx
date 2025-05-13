@@ -9,7 +9,12 @@ import ReviewForm from "./ReviewForm";
 import useReview from "../../hooks/useReview";
 import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
 import Cookies from "js-cookie";
-import { ORDER_STATUS_LABELS, ORDER_STATUS, PAYMENT_STATUS_LABELS, PAYMENT_STATUS } from "../../constants/OrderConstants";
+import {
+  ORDER_STATUS_LABELS,
+  ORDER_STATUS,
+  PAYMENT_STATUS_LABELS,
+  PAYMENT_STATUS,
+} from "../../constants/OrderConstants";
 import Pagination from "../filterProduct/Pagination";
 import useScrollToTop from "../../hooks/useScrollToTop";
 
@@ -35,18 +40,30 @@ const OrderItem = ({
 
   // console.log("order_code", status);
   const statusStyles = {
-    [ORDER_STATUS.PENDING]: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
-    [ORDER_STATUS.CONFIRMED]: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
-    [ORDER_STATUS.PREPARING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    [ORDER_STATUS.READY_TO_SHIP]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    [ORDER_STATUS.SHIPPING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    [ORDER_STATUS.DELIVERED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
-    [ORDER_STATUS.COMPLETED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
-    [ORDER_STATUS.RETURN_REQUESTED]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
-    [ORDER_STATUS.RETURN_PROCESSING]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
-    [ORDER_STATUS.RETURNED_COMPLETED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
-    [ORDER_STATUS.RETURN_REJECTED]: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300",
-    [ORDER_STATUS.CANCELLED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+    [ORDER_STATUS.PENDING]:
+      "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
+    [ORDER_STATUS.CONFIRMED]:
+      "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
+    [ORDER_STATUS.PREPARING]:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.READY_TO_SHIP]:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.SHIPPING]:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.DELIVERED]:
+      "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.COMPLETED]:
+      "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.RETURN_REQUESTED]:
+      "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURN_PROCESSING]:
+      "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURNED_COMPLETED]:
+      "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+    [ORDER_STATUS.RETURN_REJECTED]:
+      "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300",
+    [ORDER_STATUS.CANCELLED]:
+      "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
   };
 
   return (
@@ -76,8 +93,9 @@ const OrderItem = ({
                 <img
                   alt="Product Image"
                   className="h-24 w-24 rounded-md mr-4"
-                  src={`http://127.0.0.1:8000/storage/${item?.product?.image || item?.product_variant?.image
-                    }`}
+                  src={`http://127.0.0.1:8000/storage/${
+                    item?.product?.image || item?.product_variant?.image
+                  }`}
                 />
                 <div>
                   <p className="font-bold text-lg">{item?.product?.name}</p>
@@ -101,8 +119,15 @@ const OrderItem = ({
         </div>
       </Modal>
       <h3 className="bg-white flex justify-between border-b border-gray-200 items-center dark:bg-gray-800 pb-3">
-        <span>Mã đơn hàng: <strong>{order_code}</strong></span>
-        <span className="text-sm">{customer_name}, {shipping_address.substring(0, 30)}...</span>
+        <div className="flex flex-col gap-2">
+          <span>
+            Mã đơn hàng: <strong>{order_code}</strong>
+          </span>
+          <span className="text-sm">{customer_name}</span>
+          <span className="text-sm">
+            {shipping_address.substring(0, 60)}...
+          </span>
+        </div>
         <span className={`px-2 py-1 rounded text-base ${statusStyles[status]}`}>
           {ORDER_STATUS_LABELS[status]}
         </span>
@@ -119,8 +144,9 @@ const OrderItem = ({
                 <img
                   alt="Product Image"
                   className="h-16 w-16 rounded-md"
-                  src={`http://127.0.0.1:8000/storage/${item?.product?.image || item?.product_variant?.image
-                    }`}
+                  src={`http://127.0.0.1:8000/storage/${
+                    item?.product?.image || item?.product_variant?.image
+                  }`}
                 />
                 <div>
                   <p className="font-bold text-gray-900 dark:text-gray-200">
@@ -146,7 +172,8 @@ const OrderItem = ({
               </div>
               <span className="text-right">
                 <p className="font-bold text-lg text-gray-900 dark:text-gray-200">
-                  {FomatVND(calculate(item))}
+                  {/* {FomatVND(calculate(item))} */}
+                  {FomatVND(item?.price)}
                 </p>
               </span>
             </div>
@@ -179,7 +206,6 @@ const calculate = (item) => {
       item?.product?.discount_percent || item?.product_variant?.discount_percent
     ) || 0;
 
-
   // Calculate discounted price
   const discountedPrice = price - (price * discountPercent) / 100;
 
@@ -188,12 +214,16 @@ const calculate = (item) => {
 const MyOrder = () => {
   const nav = useNavigate();
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
   const [reviewedProducts, setReviewedProducts] = useState([]);
   const [form] = Form.useForm();
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const user = JSON.parse(Cookies.get("user"));
 
+  console.log("user", user);
   // Sử dụng hook scroll to top khi currentPage thay đổi
   useScrollToTop(currentPage);
 
@@ -260,7 +290,9 @@ const MyOrder = () => {
   } = useQuery({
     queryKey: ["orders", currentPage],
     queryFn: async () => {
-      const res = await instanceAxios.get(`/api/v1/customer/orders?page=${currentPage}`);
+      const res = await instanceAxios.get(
+        `/api/v1/customer/orders?page=${currentPage}`
+      );
       return res?.data;
     },
   });
@@ -304,12 +336,12 @@ const MyOrder = () => {
 
     // Actions for DELIVERED orders
     if (order.status === ORDER_STATUS.DELIVERED) {
-      actions.push("Đã nhận hàng");
+      actions.push("Đã nhận hàng", "Hoàn trả");
     }
 
     // Actions for COMPLETED orders
     if (order.status === ORDER_STATUS.COMPLETED) {
-      actions.push("đánh giá", "mua lại");
+      actions.push("đánh giá", "mua lại", "Hoàn trả");
 
       // Check if within 7 days for return request
       const completedDate = new Date(order.updated_at);
@@ -350,6 +382,12 @@ const MyOrder = () => {
   };
 
   const handleAction = async (action, order) => {
+    console.log("order", order);
+    if (!order?.id) {
+      message.error("Không tìm thấy thông tin đơn hàng");
+      return;
+    }
+
     try {
       switch (action) {
         case "đánh giá":
@@ -360,21 +398,50 @@ const MyOrder = () => {
           break;
 
         case "hủy":
+          setLoading(true);
           try {
-            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.CANCELLED
-            });
-            message.success("Đã hủy đơn hàng thành công");
-            window.location.reload();
-          } catch (error) {            
+            if (!order?.id) {
+              throw new Error("Không tìm thấy ID đơn hàng");
+            }
+
+            const response = await instanceAxios.put(
+              `/api/v1/order/${order.id}/status`,
+              {
+                status: ORDER_STATUS.CANCELLED,
+                id: user.customerId,
+              }
+            );
+
+            if (response.data?.success) {
+              message.success("Đã hủy đơn hàng thành công");
+              window.location.reload();
+            } else {
+              throw new Error(
+                response.data?.message || "Không thể hủy đơn hàng"
+              );
+            }
+          } catch (error) {
             console.error("Chi tiết lỗi:", error);
-            message.error("Không thể hủy đơn hàng");
+            if (error.response?.status === 404) {
+              message.error("Không tìm thấy đơn hàng");
+            } else if (error.response?.status === 403) {
+              message.error("Bạn không có quyền thực hiện thao tác này");
+            } else {
+              message.error(
+                error.response?.data?.message ||
+                  error.message ||
+                  "Không thể hủy đơn hàng"
+              );
+            }
+          } finally {
+            setLoading(false);
           }
           break;
 
         case "mua lại":
           try {
-            const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+            const cartItems =
+              JSON.parse(localStorage.getItem("cartItems")) || [];
             const updatedCart = [...cartItems];
 
             order.order_items.forEach((item) => {
@@ -409,7 +476,7 @@ const MyOrder = () => {
                     ) || {},
                   discount: Number(
                     item.product.discount_percent ||
-                    item.product_variant.discount_percent
+                      item.product_variant.discount_percent
                   ),
                 });
               }
@@ -428,41 +495,128 @@ const MyOrder = () => {
           break;
 
         case "Đã nhận hàng":
+          setSelectedOrder(order);
+          setConfirmModalVisible(true);
+          break;
+
+        case "confirmReceived":
+          setLoading(true);
           try {
-            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.COMPLETED
-            });
-            message.success("Đã xác nhận nhận hàng thành công");
-            window.location.reload();
+            if (!order?.id) {
+              throw new Error("Không tìm thấy ID đơn hàng");
+            }
+
+            const response = await instanceAxios.put(
+              `/api/v1/order/${order.id}/status`,
+              {
+                status: ORDER_STATUS.COMPLETED,
+                id: user.customerId,
+              }
+            );
+
+            if (response.data?.success) {
+              message.success("Đã xác nhận nhận hàng thành công");
+              setConfirmModalVisible(false);
+              window.location.reload();
+            } else {
+              throw new Error(
+                response.data?.message || "Không thể xác nhận nhận hàng"
+              );
+            }
           } catch (error) {
             console.error("Chi tiết lỗi:", error);
-            message.error("Không thể xác nhận nhận hàng");
+            if (error.response?.status === 404) {
+              message.error("Không tìm thấy đơn hàng");
+            } else if (error.response?.status === 403) {
+              message.error("Bạn không có quyền thực hiện thao tác này");
+            } else {
+              message.error(
+                error.response?.data?.message ||
+                  error.message ||
+                  "Không thể xác nhận nhận hàng"
+              );
+            }
+          } finally {
+            setLoading(false);
+          }
+          break;
+
+        case "Hoàn trả":
+          setLoading(true);
+          try {
+            if (!order?.id) {
+              throw new Error("Không tìm thấy ID đơn hàng");
+            }
+
+            const response = await instanceAxios.put(
+              `/api/v1/order/${order.id}/status`,
+              {
+                status: ORDER_STATUS.RETURN_REQUESTED,
+                id: user.customerId,
+              }
+            );
+
+            if (response.data?.success) {
+              message.success("Đã gửi yêu cầu hoàn trả");
+              window.location.reload();
+            } else {
+              throw new Error(
+                response.data?.message || "Không thể gửi yêu cầu hoàn trả"
+              );
+            }
+          } catch (error) {
+            console.error("Chi tiết lỗi:", error);
+            if (error.response?.status === 404) {
+              message.error("Không tìm thấy đơn hàng");
+            } else if (error.response?.status === 403) {
+              message.error("Bạn không có quyền thực hiện thao tác này");
+            } else {
+              message.error(
+                error.response?.data?.message ||
+                  error.message ||
+                  "Không thể gửi yêu cầu hoàn trả"
+              );
+            }
+          } finally {
+            setLoading(false);
           }
           break;
 
         case "yêu cầu trả hàng":
+          setLoading(true);
           try {
             await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.RETURN_REQUESTED
+              status: ORDER_STATUS.RETURN_REQUESTED,
+              id: user.customerId,
             });
             message.success("Đã gửi yêu cầu trả hàng");
             window.location.reload();
           } catch (error) {
             console.error("Chi tiết lỗi:", error);
-            message.error("Không thể gửi yêu cầu trả hàng");
+            message.error(
+              error.response?.data?.message || "Không thể gửi yêu cầu trả hàng"
+            );
+          } finally {
+            setLoading(false);
           }
           break;
 
         case "hủy yêu cầu trả hàng":
+          setLoading(true);
           try {
             await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.COMPLETED
+              status: ORDER_STATUS.COMPLETED,
+              id: user.customerId,
             });
             message.success("Đã hủy yêu cầu trả hàng");
             window.location.reload();
           } catch (error) {
             console.error("Chi tiết lỗi:", error);
-            message.error("Không thể hủy yêu cầu trả hàng");
+            message.error(
+              error.response?.data?.message || "Không thể hủy yêu cầu trả hàng"
+            );
+          } finally {
+            setLoading(false);
           }
           break;
 
@@ -476,6 +630,7 @@ const MyOrder = () => {
     } catch (error) {
       console.error("Error handling action:", error);
       message.error("Có lỗi xảy ra khi thực hiện hành động");
+      setLoading(false);
     }
   };
 
@@ -543,15 +698,15 @@ const MyOrder = () => {
                           <div className="self-end">
                             <span className="mr-2 font-medium">Tổng tiền:</span>
                             <span className="font-bold">
-                              {FomatVND(
+                              {/* {FomatVND(
                                 (order?.order_items || []).reduce(
                                   (total, item) =>
                                     total + calculateSubtotal(item),
                                   0
                                 )
-                              )}
+                              )} */}
+                              {FomatVND(order?.subtotal)}
                             </span>
-
                           </div>
                           <div className="flex flex-row-reverse bg-white dark:bg-gray-800">
                             <Link
@@ -566,8 +721,9 @@ const MyOrder = () => {
                                 key={idx}
                                 onClick={() => handleAction(action, order)}
                                 className="ml-2 px-4 py-2 rounded-lg border bg-black text-white dark:bg-gray-700 dark:text-gray-300 capitalize"
+                                disabled={loading}
                               >
-                                {action}
+                                {loading ? "Đang xử lý..." : action}
                               </button>
                             ))}
                           </div>
@@ -594,6 +750,45 @@ const MyOrder = () => {
               </div>
             )}
           </div>
+
+          {/* Add Confirmation Modal */}
+          <Modal
+            title="Xác nhận đã nhận hàng"
+            open={confirmModalVisible}
+            onCancel={() => setConfirmModalVisible(false)}
+            footer={[
+              <button
+                key="cancel"
+                className="px-4 py-2 border rounded-lg mr-2"
+                onClick={() => setConfirmModalVisible(false)}
+                disabled={loading}
+              >
+                Hủy
+              </button>,
+              <button
+                key="confirm"
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                onClick={() => handleAction("confirmReceived", selectedOrder)}
+                disabled={loading}
+              >
+                {loading ? "Đang xử lý..." : "Xác nhận"}
+              </button>,
+            ]}
+          >
+            <div className="p-4">
+              <p className="mb-4">Bạn có chắc chắn đã nhận được hàng?</p>
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <p className="text-yellow-800">
+                  <strong>Lưu ý quan trọng:</strong>
+                </p>
+                <p className="text-yellow-700 mt-2">
+                  Bạn có thể yêu cầu hoàn trả hàng trong vòng 7 ngày kể từ ngày
+                  nhận hàng. Sau thời gian này, chúng tôi sẽ không thể xử lý yêu
+                  cầu hoàn trả của bạn.
+                </p>
+              </div>
+            </div>
+          </Modal>
         </div>
       )}
     </>
@@ -601,4 +796,3 @@ const MyOrder = () => {
 };
 
 export default MyOrder;
-

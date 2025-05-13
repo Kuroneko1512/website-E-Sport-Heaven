@@ -103,7 +103,6 @@ export default function Shop() {
           }
         },
         staleTime: 600000
-
       }
     ]
   });
@@ -138,9 +137,7 @@ export default function Shop() {
       });
       return response.data?.data;
     },
-
     staleTime: 600000
-
   });
 
   const { data: attributeFilters } = attributeMutation;
@@ -255,7 +252,6 @@ export default function Shop() {
     }
   }, [filters, currentPage, searchQuery]);
 
-
   console.log("products", products);
 
   // console.log("productsData", productsData);
@@ -276,7 +272,6 @@ export default function Shop() {
       ) : (
         <div>
           <main className="container mx-auto py-8 grid grid-cols-1">
-            <ScrollToTop/>
             <span className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Trang chủ &gt; <Link to={"/shop"}>Cửa hàng</Link>
             </span>
