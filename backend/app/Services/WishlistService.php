@@ -13,7 +13,7 @@ class WishlistService extends BaseService {
     public function getWishlists($userId){
         return Wishlist::where('user_id', $userId)
                 ->join('products', 'products.id', '=', 'wishlists.product_id')
-                ->get(['products.name as name', 'products.price as price']);
+                ->get(['products.id as id', 'products.name as name', 'products.price as price']);
 
     }
 
