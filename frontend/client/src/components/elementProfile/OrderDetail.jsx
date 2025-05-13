@@ -244,7 +244,7 @@ const OrderDetail = () => {
           <div className="col-span-4">
             Phương thức thanh toán:{" "}
           </div>
-          <span className="col-span-2">{orderData?.data?.payment_method}</span>
+          <span className="col-span-2">{orderData?.data?.payment_method === "cod" ? "Thanh toán tiền mặt" : "Thanh toán online"}</span>
         </div>
       </section>
 

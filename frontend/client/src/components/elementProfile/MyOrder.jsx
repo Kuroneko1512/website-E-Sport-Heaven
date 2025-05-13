@@ -101,8 +101,11 @@ const OrderItem = ({
         </div>
       </Modal>
       <h3 className="bg-white flex justify-between border-b border-gray-200 items-center dark:bg-gray-800 pb-3">
+        <div className="flex flex-col gap-2">
         <span>Mã đơn hàng: <strong>{order_code}</strong></span>
-        <span className="text-sm">{customer_name}, {shipping_address.substring(0, 30)}...</span>
+        <span className="text-sm">{customer_name}</span>
+        <span className="text-sm">{shipping_address.substring(0, 60)}...</span>
+        </div>
         <span className={`px-2 py-1 rounded text-base ${statusStyles[status]}`}>
           {ORDER_STATUS_LABELS[status]}
         </span>
@@ -146,7 +149,8 @@ const OrderItem = ({
               </div>
               <span className="text-right">
                 <p className="font-bold text-lg text-gray-900 dark:text-gray-200">
-                  {FomatVND(calculate(item))}
+                  {/* {FomatVND(calculate(item))} */}
+                  {FomatVND(item?.price)}
                 </p>
               </span>
             </div>
@@ -188,11 +192,13 @@ const calculate = (item) => {
 const MyOrder = () => {
   const nav = useNavigate();
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
   const [reviewedProducts, setReviewedProducts] = useState([]);
   const [form] = Form.useForm();
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   // Sử dụng hook scroll to top khi currentPage thay đổi
   useScrollToTop(currentPage);
@@ -304,12 +310,12 @@ const MyOrder = () => {
 
     // Actions for DELIVERED orders
     if (order.status === ORDER_STATUS.DELIVERED) {
-      actions.push("Đã nhận hàng");
+      actions.push("Đã nhận hàng", "Hoàn trả");
     }
 
     // Actions for COMPLETED orders
     if (order.status === ORDER_STATUS.COMPLETED) {
-      actions.push("đánh giá", "mua lại");
+      actions.push("đánh giá", "mua lại", "Hoàn trả");
 
       // Check if within 7 days for return request
       const completedDate = new Date(order.updated_at);
@@ -350,6 +356,12 @@ const MyOrder = () => {
   };
 
   const handleAction = async (action, order) => {
+    console.log("order", order)
+    if (!order?.id) {
+      message.error("Không tìm thấy thông tin đơn hàng");
+      return;
+    }
+
     try {
       switch (action) {
         case "đánh giá":
@@ -360,15 +372,33 @@ const MyOrder = () => {
           break;
 
         case "hủy":
+          setLoading(true);
           try {
-            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.CANCELLED
+            if (!order?.id) {
+              throw new Error("Không tìm thấy ID đơn hàng");
+            }
+
+            const response = await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
+              status: ORDER_STATUS.CANCELLED.toString()
             });
-            message.success("Đã hủy đơn hàng thành công");
-            window.location.reload();
+
+            if (response.data?.success) {
+              message.success("Đã hủy đơn hàng thành công");
+              window.location.reload();
+            } else {
+              throw new Error(response.data?.message || "Không thể hủy đơn hàng");
+            }
           } catch (error) {            
             console.error("Chi tiết lỗi:", error);
-            message.error("Không thể hủy đơn hàng");
+            if (error.response?.status === 404) {
+              message.error("Không tìm thấy đơn hàng");
+            } else if (error.response?.status === 403) {
+              message.error("Bạn không có quyền thực hiện thao tác này");
+            } else {
+              message.error(error.response?.data?.message || error.message || "Không thể hủy đơn hàng");
+            }
+          } finally {
+            setLoading(false);
           }
           break;
 
@@ -428,41 +458,102 @@ const MyOrder = () => {
           break;
 
         case "Đã nhận hàng":
+          setSelectedOrder(order);
+          setConfirmModalVisible(true);
+          break;
+
+        case "confirmReceived":
+          setLoading(true);
           try {
-            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.COMPLETED
+            if (!order?.id) {
+              throw new Error("Không tìm thấy ID đơn hàng");
+            }
+
+            const response = await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
+              status: ORDER_STATUS.COMPLETED.toString()
             });
-            message.success("Đã xác nhận nhận hàng thành công");
-            window.location.reload();
+
+            if (response.data?.success) {
+              message.success("Đã xác nhận nhận hàng thành công");
+              setConfirmModalVisible(false);
+              window.location.reload();
+            } else {
+              throw new Error(response.data?.message || "Không thể xác nhận nhận hàng");
+            }
           } catch (error) {
             console.error("Chi tiết lỗi:", error);
-            message.error("Không thể xác nhận nhận hàng");
+            if (error.response?.status === 404) {
+              message.error("Không tìm thấy đơn hàng");
+            } else if (error.response?.status === 403) {
+              message.error("Bạn không có quyền thực hiện thao tác này");
+            } else {
+              message.error(error.response?.data?.message || error.message || "Không thể xác nhận nhận hàng");
+            }
+          } finally {
+            setLoading(false);
+          }
+          break;
+
+        case "Hoàn trả":
+          setLoading(true);
+          try {
+            if (!order?.id) {
+              throw new Error("Không tìm thấy ID đơn hàng");
+            }
+
+            const response = await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
+              status: ORDER_STATUS.RETURN_REQUESTED.toString()
+            });
+
+            if (response.data?.success) {
+              message.success("Đã gửi yêu cầu hoàn trả");
+              window.location.reload();
+            } else {
+              throw new Error(response.data?.message || "Không thể gửi yêu cầu hoàn trả");
+            }
+          } catch (error) {
+            console.error("Chi tiết lỗi:", error);
+            if (error.response?.status === 404) {
+              message.error("Không tìm thấy đơn hàng");
+            } else if (error.response?.status === 403) {
+              message.error("Bạn không có quyền thực hiện thao tác này");
+            } else {
+              message.error(error.response?.data?.message || error.message || "Không thể gửi yêu cầu hoàn trả");
+            }
+          } finally {
+            setLoading(false);
           }
           break;
 
         case "yêu cầu trả hàng":
+          setLoading(true);
           try {
             await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.RETURN_REQUESTED
+              status: ORDER_STATUS.RETURN_REQUESTED.toString()
             });
             message.success("Đã gửi yêu cầu trả hàng");
             window.location.reload();
           } catch (error) {
             console.error("Chi tiết lỗi:", error);
-            message.error("Không thể gửi yêu cầu trả hàng");
+            message.error(error.response?.data?.message || "Không thể gửi yêu cầu trả hàng");
+          } finally {
+            setLoading(false);
           }
           break;
 
         case "hủy yêu cầu trả hàng":
+          setLoading(true);
           try {
             await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.COMPLETED
+              status: ORDER_STATUS.COMPLETED.toString()
             });
             message.success("Đã hủy yêu cầu trả hàng");
             window.location.reload();
           } catch (error) {
             console.error("Chi tiết lỗi:", error);
-            message.error("Không thể hủy yêu cầu trả hàng");
+            message.error(error.response?.data?.message || "Không thể hủy yêu cầu trả hàng");
+          } finally {
+            setLoading(false);
           }
           break;
 
@@ -476,6 +567,7 @@ const MyOrder = () => {
     } catch (error) {
       console.error("Error handling action:", error);
       message.error("Có lỗi xảy ra khi thực hiện hành động");
+      setLoading(false);
     }
   };
 
@@ -543,13 +635,14 @@ const MyOrder = () => {
                           <div className="self-end">
                             <span className="mr-2 font-medium">Tổng tiền:</span>
                             <span className="font-bold">
-                              {FomatVND(
+                              {/* {FomatVND(
                                 (order?.order_items || []).reduce(
                                   (total, item) =>
                                     total + calculateSubtotal(item),
                                   0
                                 )
-                              )}
+                              )} */}
+                              {FomatVND(order?.subtotal)}
                             </span>
 
                           </div>
@@ -566,8 +659,9 @@ const MyOrder = () => {
                                 key={idx}
                                 onClick={() => handleAction(action, order)}
                                 className="ml-2 px-4 py-2 rounded-lg border bg-black text-white dark:bg-gray-700 dark:text-gray-300 capitalize"
+                                disabled={loading}
                               >
-                                {action}
+                                {loading ? "Đang xử lý..." : action}
                               </button>
                             ))}
                           </div>
@@ -594,6 +688,44 @@ const MyOrder = () => {
               </div>
             )}
           </div>
+
+          {/* Add Confirmation Modal */}
+          <Modal
+            title="Xác nhận đã nhận hàng"
+            open={confirmModalVisible}
+            onCancel={() => setConfirmModalVisible(false)}
+            footer={[
+              <button
+                key="cancel"
+                className="px-4 py-2 border rounded-lg mr-2"
+                onClick={() => setConfirmModalVisible(false)}
+                disabled={loading}
+              >
+                Hủy
+              </button>,
+              <button
+                key="confirm"
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                onClick={() => handleAction("confirmReceived", selectedOrder)}
+                disabled={loading}
+              >
+                {loading ? "Đang xử lý..." : "Xác nhận"}
+              </button>,
+            ]}
+          >
+            <div className="p-4">
+              <p className="mb-4">Bạn có chắc chắn đã nhận được hàng?</p>
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <p className="text-yellow-800">
+                  <strong>Lưu ý quan trọng:</strong>
+                </p>
+                <p className="text-yellow-700 mt-2">
+                  Bạn có thể yêu cầu hoàn trả hàng trong vòng 7 ngày kể từ ngày nhận hàng.
+                  Sau thời gian này, chúng tôi sẽ không thể xử lý yêu cầu hoàn trả của bạn.
+                </p>
+              </div>
+            </div>
+          </Modal>
         </div>
       )}
     </>
