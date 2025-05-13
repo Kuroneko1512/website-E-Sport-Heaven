@@ -67,12 +67,17 @@ class WishlistController extends Controller
             ]);
 
             $data = $request->validated();
+            $wishlist = null;
+            $existedWishlist = $this->wishlistService->getItemWishlist(auth()->id(), $data['product_id']);
 
-             // Gọi service để tạo mới Wishlist
-            $wishlist = $this->wishlistService->create($data);
+            if ($existedWishlist == null) {
+                $wishlist = $this->wishlistService->create($data);
+            } else {
+                $this->wishlistService->delete($existedWishlist['id']);
+            }
 
             return response()->json([
-                'message' => 'Wishlist đã được tạo thành công!', // Thông báo thành công
+                'message' => 'Wishlist đã được cập nhập thành công!', // Thông báo thành công
                 'data' => $wishlist
             ], 201);// Trả về mã thành công 201 (Created)
 
