@@ -10,10 +10,11 @@ class WishlistService extends BaseService {
         parent::__construct($review);
     }
     
-    public function getWishlists($userId, $paginate = 10){
-        $query = $this->model->query();
-        $query->where('user_id', $userId);
-        return $query->paginate($paginate);
+    public function getWishlists($userId){
+        return Wishlist::where('user_id', $userId)
+                ->join('products', 'products.id', '=', 'wishlists.product_id')
+                ->get(['products.name as name', 'products.price as price']);
+
     }
 
     public function getItemWishlist($userId, $productId){

@@ -1,32 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from 'react'
+import instanceAxios from '../../config/db';
 import { Link } from "react-router-dom";
 
-const fakeData = [
-  {
-    id: 1,
-    name: "Printed Cotton T-Shirt",
-    brand: "Roadstar",
-    price: 38,
-    oldPrice: 50,
-    image:
-      "https://storage.googleapis.com/a1aa/image/MSTn7yA3fyZFHAGlWXBk7nhwiz0apOyrlCgC-ufECbM.jpg",
-  },
-  {
-    id: 2,
-    name: "Printed Cotton T-Shirt",
-    brand: "Roadstar",
-    price: 38,
-    oldPrice: 50,
-    image:
-      "https://storage.googleapis.com/a1aa/image/MSTn7yA3fyZFHAGlWXBk7nhwiz0apOyrlCgC-ufECbM.jpg",
-  },
-];
 
 const Whishlist = () => {
+  const [data, setData] = useState([]);
+  
+  useEffect(() => {
+    (async()=>{
+      try{
+        const {data} = await instanceAxios.get("/api/v1/customer/wishlist");
+        setData(data.data);
+      }catch(err){
+        console.log(err);
+      }
+    })()
+  },[])
+
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-        {fakeData.map((item) => (
+        {data?.map((item) => (
           <div
             key={item.id}
             className="group bg-white dark:bg-gray-800 shadow-md dark:shadow-lg dark:shadow-gray-700 h-max rounded-lg overflow-hidden hover:shadow-xl duration-300 transition-transform transform hover:scale-105"
@@ -36,7 +30,7 @@ const Whishlist = () => {
               <img
                 alt={item.name}
                 className="w-full h-full object-cover"
-                src={item.image}
+                src={'https://storage.googleapis.com/a1aa/image/MSTn7yA3fyZFHAGlWXBk7nhwiz0apOyrlCgC-ufECbM.jpg'}
               />
 
               {/* Overlay hover */}
