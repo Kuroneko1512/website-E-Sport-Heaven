@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import FomatVND from "../utils/FomatVND";
+import { ORDER_STATUS_LABELS } from "../constants/OrderConstants";
 
 // Image display component (commented for testing)
 
@@ -150,7 +151,9 @@ const OrderTracking = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Trạng thái:</span>
-                    <span className="font-medium text-blue-600">{orderData.status}</span>
+                    <span className="font-medium text-blue-600">
+                      {ORDER_STATUS_LABELS[orderData.status] || "Không xác định"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Khách hàng:</span>
