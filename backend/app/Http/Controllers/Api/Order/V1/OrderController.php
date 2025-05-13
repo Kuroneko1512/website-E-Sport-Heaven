@@ -105,11 +105,17 @@ class OrderController extends Controller
     {
         $request->validate([
             'status' => 'required|string',
+            'customer_id' => 'nullable|exists:customers,id',
         ]);
 
-        $userId = $request->user()->id;
+        Log::info('updateStatus', [
+            'request' => $request->all(),
+            'id' => $id,
+        ]);
 
-        $result = $this->orderService->updateStatus($id, $request->status, null, $userId);
+        $customerId = $request->customer_id;
+
+        $result = $this->orderService->updateStatus($id, $request->status, null, $customerId);
 
         if (!$result['success']) {
             return response()->json(['message' => $result['message']], 404);
@@ -299,7 +305,7 @@ class OrderController extends Controller
             $data = $validator->validated();
 
             $data['status'] = OrderUserReturn::STATUS_PENDING;
-          
+
             $orderReturn = OrderUserReturn::create($data);
             // $userId = auth()->user()->id;
 
