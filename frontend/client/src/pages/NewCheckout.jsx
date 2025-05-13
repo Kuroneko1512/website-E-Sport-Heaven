@@ -17,7 +17,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import apiGhtk, { getShippingFee } from "../config/ghtk";
+import apiGhtk from "../config/ghtk";
 import FomatVND from "../utils/FomatVND";
 import instanceAxios from "../config/db";
 
@@ -130,7 +130,7 @@ const NewCheckout = () => {
     ward: "",
     address: "",
     weight: 10000,
-    value: 3000000,
+    value: 10000,
     transport: "road",
     deliver_option: "xteam",
   });
@@ -380,6 +380,13 @@ const NewCheckout = () => {
     }
     return calculateSubtotal + (shippingFee || 0) - discount;
   }, [calculateSubtotal, shippingFee, selectedCoupon]);
+
+  useEffect(() => {
+  setFormData(prev => ({
+    ...prev,
+    value: grandTotal
+  }));
+}, [grandTotal]);
 
   // Handle input changes
   const handleInputChange = (e) => {

@@ -15,7 +15,7 @@
         <h2>Thông Tin Đơn Hàng #{{ $order->order_code }}</h2>
         <p><strong>Ngày đặt hàng:</strong> {{ $order->created_at->format('d/m/Y H:i') }}</p>
         <p><strong>Trạng thái:</strong>  <span style="color: {{ $order->status === 6 ? '#28a745' : ($order->status === 0 ? '#ffc107' : '#dc3545') }}">
-                {{ $order->status->getStatusLabelAttribute() }}
+                {{ $order->status_label }}
             </span></p>
     </div>
 
@@ -68,7 +68,8 @@
         </tbody>
     </table>
 
-    <div class="total">
+    <div class="total">     
+        <p><strong>Phí giao hàng:</strong> {{ number_format($order->shipping_fee) }} VNĐ</p>
         <p><strong>Tổng thanh toán:</strong> {{ number_format($order->total_amount) }} VNĐ</p>
     </div>
 
