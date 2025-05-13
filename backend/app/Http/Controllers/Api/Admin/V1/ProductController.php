@@ -90,7 +90,15 @@ class ProductController extends Controller
             ], 500);
         }
     }
-
+    public function getProductByIdEdit(string $id)
+    {
+        $product = $this->productService->getProductById($id);
+        return response()->json([
+            'message' => 'lấy thành công', // Thông báo thành công
+            'data' => $product, // Dữ liệu thuộc tính chi tiết  
+            'status' => 200 // Trả về mã trạng thái 200 (OK)
+        ], 200);
+    }
 
     /**
      * Update the specified resource in storage.

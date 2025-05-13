@@ -10,8 +10,8 @@
         <h2>Thông Tin Đơn Hàng #{{ $order->order_code }}</h2>
         <p><strong>Ngày đặt hàng:</strong> {{ $order->created_at->format('d/m/Y H:i') }}</p>
         <p><strong>Trạng thái:</strong> 
-            <span style="color: {{ $order->status === 'đã hoàn thành' ? '#28a745' : ($order->status === 'đang xử lý' ? '#ffc107' : '#dc3545') }}">
-                {{ $order->status }}
+            <span style="color: {{ $order->status === 6 ? '#28a745' : ($order->status === 0 ? '#ffc107' : '#dc3545') }}">
+                {{ $order->status->getStatusLabelAttribute() }}
             </span>
         </p>
     </div>
