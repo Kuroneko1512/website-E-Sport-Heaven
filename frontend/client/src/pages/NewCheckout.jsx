@@ -269,8 +269,8 @@ const NewCheckout = () => {
           product_id: item.product_id,
           product_variant_id: item.variant_id || null,
           quantity: item.quantity,
-          price: grandTotal,
-          discount_percent: item.discount,
+          price: item.price,
+          discount_percent: item.discount_percent,
         })),
       }));
     } else {
