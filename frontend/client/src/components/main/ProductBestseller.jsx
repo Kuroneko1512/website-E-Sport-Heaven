@@ -26,11 +26,13 @@ const ProductBestseller = ({productData}) => {
               />
 
               {/* Overlay hover */}
+              <Link to={`/shop/product-detail/${item?.id}`}>
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <button className="absolute top-3 right-3 py-1 px-2 bg-white/80 rounded-full hover:bg-white transition-colors duration-200">
+              </div>
+              </Link>
+              <button className="absolute top-3 right-3 py-1 px-2 bg-white/80 rounded-full hover:bg-white transition-colors duration-200 opacity-0 group-hover:opacity-100 ">
                   <i className="far fa-heart text-gray-700"></i>
                 </button>
-              </div>
             </div>
 
             {/* Text section */}

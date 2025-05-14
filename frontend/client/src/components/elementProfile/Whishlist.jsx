@@ -1,32 +1,39 @@
-import React from "react";
+import React, { useEffect, useState } from 'react'
+import instanceAxios from '../../config/db';
 import { Link } from "react-router-dom";
 
-const fakeData = [
-  {
-    id: 1,
-    name: "Printed Cotton T-Shirt",
-    brand: "Roadstar",
-    price: 38,
-    oldPrice: 50,
-    image:
-      "https://storage.googleapis.com/a1aa/image/MSTn7yA3fyZFHAGlWXBk7nhwiz0apOyrlCgC-ufECbM.jpg",
-  },
-  {
-    id: 2,
-    name: "Printed Cotton T-Shirt",
-    brand: "Roadstar",
-    price: 38,
-    oldPrice: 50,
-    image:
-      "https://storage.googleapis.com/a1aa/image/MSTn7yA3fyZFHAGlWXBk7nhwiz0apOyrlCgC-ufECbM.jpg",
-  },
-];
 
 const Whishlist = () => {
+  const [data, setData] = useState([]);
+  
+  useEffect(() => {
+    getWishlists();
+  },[])
+
+  const getWishlists = async () => {
+  try {
+    const { data } = await instanceAxios.get("/api/v1/customer/wishlist");
+    console.log("API Response:", data); // Kiểm tra dữ liệu trả về
+    setData(data.data);
+  } catch (err) {
+    console.error("API Error:", err.response || err.message); // Log lỗi chi tiết
+  }
+};
+
+  const handleToggleWishlist = async (productId) => {
+  try {
+    const response = await instanceAxios.post("/api/v1/customer/wishlist", { product_id: productId });
+    console.log("Toggle Response:", response); // Kiểm tra phản hồi
+    getWishlists();
+  } catch (err) {
+    console.error("Toggle Error:", err.response || err.message); // Log lỗi chi tiết
+  }
+};
+
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-        {fakeData.map((item) => (
+        {data?.map((item) => (
           <div
             key={item.id}
             className="group bg-white dark:bg-gray-800 shadow-md dark:shadow-lg dark:shadow-gray-700 h-max rounded-lg overflow-hidden hover:shadow-xl duration-300 transition-transform transform hover:scale-105"
@@ -36,12 +43,12 @@ const Whishlist = () => {
               <img
                 alt={item.name}
                 className="w-full h-full object-cover"
-                src={item.image}
+                src={'https://storage.googleapis.com/a1aa/image/MSTn7yA3fyZFHAGlWXBk7nhwiz0apOyrlCgC-ufECbM.jpg'}
               />
 
               {/* Overlay hover */}
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <i className="fas fa-trash-alt absolute text-red-500 top-5 right-5 border rounded-full border-[#D9D9D9] dark:border-gray-600 p-3 bg-[#D9D9D9] dark:bg-gray-700 hover:bg-white dark:hover:bg-gray-500"> </i>
+                <i onClick={() => handleToggleWishlist(item.id)} className="fas fa-trash-alt absolute text-red-500 top-5 right-5 border rounded-full border-[#D9D9D9] dark:border-gray-600 p-3 bg-[#D9D9D9] dark:bg-gray-700 hover:bg-white dark:hover:bg-gray-500"> </i>
                 <button className="bg-black dark:bg-gray-900 text-white py-2 px-4 rounded-lg mt-auto w-5/6 hover:bg-gray-800 dark:hover:bg-gray-700">
                   Add to Cart
                 </button>
@@ -49,7 +56,7 @@ const Whishlist = () => {
             </div>
 
             {/* Text section */}
-            <Link to={`/product-detail/${item.id}`}>
+            <Link to={`/shop/product-detail/${item.id}`}>
               <div className="p-4">
                 <h2 className="text-lg font-bold dark:text-white">{item.brand}</h2>
                 <p className="text-gray-600 dark:text-gray-300">{item.name}</p>

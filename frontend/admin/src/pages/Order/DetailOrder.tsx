@@ -81,7 +81,7 @@ const DetailOrder: React.FC = () => {
 
   const failDelivery = async () => {
     if (!order) return;
-    const confirmCancel = window.confirm("Bạn có chắc muốn đánh dấu đơn hàng là thất bại?");
+    const confirmCancel = window.confirm("Bạn có chắc muốn huỷ đơn hàng này?");
     if (!confirmCancel) return;
     try {
       await updateOrderStatus(Number(id), ORDER_STATUS.CANCELLED); // Truyền giá trị số 10
@@ -123,7 +123,7 @@ const DetailOrder: React.FC = () => {
                   </button>
 
                   <button className="btn btn-danger" onClick={failDelivery}>
-                    Giao hàng thất bại
+                    Huỷ đơn hàng
                   </button>
                 </>
               )}

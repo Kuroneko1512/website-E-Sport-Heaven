@@ -43,7 +43,7 @@ class ProductController extends Controller
             ], 500); // Trả về mã lỗi 500 (Internal Server Error)
         }
     }
-
+    
     /**
      * Store a newly created resource in storage.
      */
@@ -96,6 +96,7 @@ class ProductController extends Controller
             ], 500);
         }
     }
+ 
     public function showForDetails(string $id)
     {
         try {

@@ -82,12 +82,11 @@ class ShippingAddressController extends Controller
             $validator = Validator::make($request->all(), [
                 'recipient_name' => 'required|string|max:100',
                 'phone' => 'required|string|max:20',
-                // Loại bỏ email khỏi validation vì sẽ sử dụng email của user
                 'address_line1' => 'required|string',
                 'address_line2' => 'nullable|string',
-                // 'province_code' => 'required|exists:provinces,code',
-                // 'district_code' => 'required|exists:districts,code',
-                // 'commune_code' => 'required|exists:communes,code',
+                'province_code' => 'required|exists:provinces,code',
+                'district_code' => 'required|exists:districts,code',
+                'commune_code' => 'required|exists:communes,code',
                 'postal_code' => 'nullable|string|max:10',
                 'country' => 'nullable|string|max:50',
                 'is_default' => 'boolean',
