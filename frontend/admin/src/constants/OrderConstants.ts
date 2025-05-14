@@ -14,13 +14,6 @@ export const ORDER_STATUS = {
 
 };
 
-
-
-  
-
-   
-
-
 export const ORDER_STATUS_LABELS = {
     [ORDER_STATUS.PENDING]: "Đang xử lý",
     [ORDER_STATUS.CONFIRMED]: "Đã xác nhận",
