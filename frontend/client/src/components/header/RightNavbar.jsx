@@ -128,6 +128,8 @@ const RightNavbar = () => {
 
   // Logout handler
   const handleLogout = useCallback(() => {
+    // Clear user cookie on logout
+    Cookies.remove("user");
     dispatch(logout());
   }, [dispatch]);
 
