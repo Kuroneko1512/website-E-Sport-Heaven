@@ -25,16 +25,16 @@ class ProductStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'             => ['nullable', 'string', 'max:255'],
+            'name'             => ['required', 'string', 'max:255'],
             'price'            => ['nullable', 'numeric', 'between:0,99999999.99'],
             'stock'            => ['nullable', 'numeric', 'between:0,99999999.99'],
             'selected_attributes' => 'required_if:product_type,variable|array',
             // 'sku'              => ['required', 'string', Rule::unique('products', 'sku')],
             'description'      => ['nullable', 'string'],
             'image'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:10240'],
-            'product_type'     => ['nullable', 'in:simple,variable'],
+            'product_type'     => ['required', 'in:simple,variable'],
             'status'           => ['nullable', 'in:active,inactive'],
-            'category_id'      => ['nullable', 'exists:categories,id'],
+            'category_id'      => ['required', 'exists:categories,id'],
             'discount_percent' => ['nullable', 'numeric', 'between:0,100'], // Giảm giá 0 - 100%
             'discount_start'   => ['nullable', 'date', 'before_or_equal:discount_end'],
             'discount_end'     => ['nullable', 'date', 'after_or_equal:discount_start'],

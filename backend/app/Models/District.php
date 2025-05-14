@@ -19,6 +19,12 @@ class District extends Model
         'type'              // Loại (quận/huyện)
     ];
 
+    // get name
+    public function getDistrictName($code)
+    {
+        return District::where('code', $code)->first()->name;
+    }
+
     // Quan hệ với bảng provinces
     public function province()
     {

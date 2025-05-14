@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+
 class Order extends Model
 {
     use HasFactory, SoftDeletes;
@@ -286,5 +287,9 @@ class Order extends Model
     public function returns()
     {
         return $this->hasMany(OrderReturn::class);
+    }
+       public function userReturns()
+    {
+        return $this->hasMany(OrderUserReturn::class);
     }
 }

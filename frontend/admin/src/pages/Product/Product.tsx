@@ -5,6 +5,7 @@ import {
   Pagination,
   api4,
 } from "@app/services/Product/Api";
+import { Pagination as AntPagination } from "antd";
 import { useEffect, useState } from "react";
 import FomatVND from "@app/utils/FomatVND";
 
@@ -32,7 +33,7 @@ const Product = () => {
       if (!confirm) return;
 
       await deleteProduct(id);
-
+    
       // Cập nhật lại dữ liệu sau khi xóa thành công
       setProducts(products.filter((product) => product.id !== id));
 
@@ -51,16 +52,17 @@ const Product = () => {
           pagination.current_page,
           pagination.per_page
         );
+        console.log("API Response:", response);
         setProducts(response.data.data);
         setPagination((prev) => ({
           ...prev,
-          current_page: response.current_page,
-          last_page: response.last_page,
+          current_page: response.current_page || 1,
+          last_page: response.last_page || 1,
           prev_page_url: response.prev_page_url,
           next_page_url: response.next_page_url,
-          total: response.total,
-          per_page: response.per_page,
-          data: response.data,
+          total: response.total || 0,
+          per_page: response.per_page || 5,
+          data: response.data.data,
         }));
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -68,7 +70,8 @@ const Product = () => {
     };
 
     fetchData();
-  }, [pagination.current_page, isDelete]); // 🔥 Thêm isDelete để load lại khi xóa
+  }, [pagination.current_page, pagination.per_page, isDelete]);
+
 
   return (
     <section className="content">
@@ -76,14 +79,14 @@ const Product = () => {
         <div className="container-fluid">
           <div className="row mb-2">
             <div className="col-sm-6">
-              <h1>Danh sách đơn hàng</h1>
+              <h1>Danh sách sản phẩm</h1>
             </div>
             <div className="col-sm-6">
               <ol className="breadcrumb float-sm-right">
                 <li className="breadcrumb-item">
                   <Link to={"/"}>Trang chủ</Link>
                 </li>
-                <li className="breadcrumb-item active">Đơn hàng</li>
+                <li className="breadcrumb-item active">Sản phẩm</li>
               </ol>
             </div>
           </div>
@@ -92,7 +95,7 @@ const Product = () => {
 
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title">Đơn hàng</h3>
+          <h3 className="card-title">Sản phẩm</h3>
           <div className="card-tools">
             <Link to="/add-product" className="btn btn-success me-2">
               + Thêm
@@ -120,9 +123,7 @@ const Product = () => {
                   <td>{product.name}</td>
                   <td>
                     {FomatVND(
-                      product.variants.length > 0
-                        ? product.variants[0].price
-                        : product.price
+                      product.variants.length > 0 ? product.variants[0].price || 0 : product.price || 0
                     )}
                   </td>
                   <td>
@@ -137,7 +138,7 @@ const Product = () => {
                       {product.status === "active" ? "Đang bán" : "Ngừng"}
                     </span>
                   </td>
-                  <td>{product.stock}</td>
+                  <td>{product.variants.length > 0 ? product.variants[0].stock || 0 : product.stock || 0}</td>
                   <td>
                     <button
                       className="btn btn-warning btn-sm me-2"
@@ -147,13 +148,13 @@ const Product = () => {
                     </button>
                     <button
                       className="btn btn-primary btn-sm"
-                      onClick={() => navigate(`/add-product/${product.id}`)}
+                      onClick={() => navigate(`/edit-product/${product.id}`)}
                     >
                       Chỉnh sửa
                     </button>
                     <button
                       className="btn btn-danger btn-sm mx-2"
-                      onClick={() => handleDeleteProduct(product.id)}
+                      onClick={() => product.id && handleDeleteProduct(product.id)}
                     >
                       Xóa
                     </button>
@@ -163,7 +164,22 @@ const Product = () => {
             </tbody>
           </table>
         </div>
+        <div className="d-flex justify-content-center mt-4 mb-4">
+          <AntPagination
+            current={pagination.current_page}
+            pageSize={pagination.per_page}
+            total={pagination.total}
+            onChange={(page: number, pageSize: number) => {
+              setPagination(prev => ({
+                ...prev,
+                current_page: page,
+                per_page: pageSize || prev.per_page
+              }));
+            }}
+          />
+        </div>
       </div>
+
     </section>
   );
 };
