@@ -604,7 +604,7 @@ const MyOrder = () => {
                     {orders.map((order, idx) => (
                       <div
                         key={idx}
-                        className="p-3 border hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700"
+                        className="p-3 border mb-3 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700"
                       >
                         <OrderItem
                           order_items={order.order_items}
