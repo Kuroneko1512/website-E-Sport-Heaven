@@ -153,7 +153,7 @@ const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông
   
     setCheckoutItems(selectedCartItems);// Lưu danh sách sản phẩm để thanh toán
     localStorage.setItem("checkoutItems", JSON.stringify(selectedCartItems));// Lưu vào localStorage
-    nav("/checkout");// Điều hướng đến trang thanh toán
+    nav("/newcheckout");// Điều hướng đến trang thanh toán
   };
 
   const columns = [

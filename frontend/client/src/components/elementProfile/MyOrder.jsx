@@ -497,7 +497,7 @@ const MyOrder = () => {
                   sku: item.product_variant?.sku || item.product?.sku,
                   image: item.product?.image || item.product_variant?.image,
                   name: item.product?.name,
-                  price: Number(item.price),
+                  price: Number(item.original_price),
                   stock: item.product?.stock || item.product_variant?.stock,
                   thuoc_tinh:
                     item.product_variant?.product_attributes?.reduce(
