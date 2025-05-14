@@ -24,7 +24,7 @@ const OrderHistory = ({ history }) => {
       <div className="space-y-4">
         {sortedHistory.map((item, index) => {
           // Determine the status to display
-          let statusLabel = "Hành động không xác định";
+          let statusLabel = null;
           if (item.metadata?.new_payment_status !== undefined) {
             statusLabel =
               item.metadata.new_payment_status === 1
@@ -33,47 +33,47 @@ const OrderHistory = ({ history }) => {
           } else if (item.status_to !== null) {
             statusLabel =
               ORDER_STATUS_LABELS[item.status_to] || "Hành động không xác định";
-          }
 
-          return (
-            <div key={index} className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-blue-600"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start flex-wrap gap-2">
-                  <div>
-                    <p className="font-medium text-gray-800">{statusLabel}</p>
-                    <p className="text-sm text-gray-500">
-                      {new Date(item.created_at).toLocaleString("vi-VN", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                  {/* {item.notes && (
+            return (
+              <div key={index} className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-blue-600"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between items-start flex-wrap gap-2">
+                    <div>
+                      <p className="font-medium text-gray-800">{statusLabel}</p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(item.created_at).toLocaleString("vi-VN", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                    {/* {item.notes && (
                     <p className="text-sm text-gray-600 italic max-w-xl">
                       {item.notes}
                     </p>
                   )} */}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
+            );
+          }
         })}
       </div>
     </div>
@@ -244,20 +244,20 @@ const OrderDetail = () => {
         <div className="p-4 grid col-span-2">
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Thông tin khách hàng
-          </h2>
-          <p>
-            <strong>Họ và tên:</strong> {orderData?.data?.customer_name}
-          </p>
-          <p>
-            <strong>Email:</strong> {orderData?.data?.customer_email}
-          </p>
-          <p>
-            <strong>Điện thoại:</strong> {orderData?.data?.customer_phone}
-          </p>
-          <p>
-            <strong>Địa chỉ:</strong> {orderData?.data?.shipping_address}
-          </p>
+              Thông tin khách hàng
+            </h2>
+            <p>
+              <strong>Họ và tên:</strong> {orderData?.data?.customer_name}
+            </p>
+            <p>
+              <strong>Email:</strong> {orderData?.data?.customer_email}
+            </p>
+            <p>
+              <strong>Điện thoại:</strong> {orderData?.data?.customer_phone}
+            </p>
+            <p>
+              <strong>Địa chỉ:</strong> {orderData?.data?.shipping_address}
+            </p>
           </div>
         </div>
         <div className="p-4 grid col-span-3">
@@ -265,10 +265,10 @@ const OrderDetail = () => {
             Lịch sử đơn hàng
           </h2> */}
           {orderData?.data?.history && orderData?.data?.history.length > 0 && (
-              <div className="mb-8">
-                <OrderHistory history={orderData?.data.history} />
-              </div>
-            )}
+            <div className="mb-8">
+              <OrderHistory history={orderData?.data.history} />
+            </div>
+          )}
         </div>
       </section>
 

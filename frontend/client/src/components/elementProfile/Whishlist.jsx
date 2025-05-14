@@ -11,18 +11,24 @@ const Whishlist = () => {
   },[])
 
   const getWishlists = async () => {
-    try{
-        const {data} = await instanceAxios.get("/api/v1/customer/wishlist");
-        setData(data.data);
-      }catch(err){
-        console.log(err);
-      }
+  try {
+    const { data } = await instanceAxios.get("/api/v1/customer/wishlist");
+    console.log("API Response:", data); // Kiểm tra dữ liệu trả về
+    setData(data.data);
+  } catch (err) {
+    console.error("API Error:", err.response || err.message); // Log lỗi chi tiết
   }
+};
 
   const handleToggleWishlist = async (productId) => {
-    await instanceAxios.post("/api/v1/customer/wishlist", { product_id: productId });
+  try {
+    const response = await instanceAxios.post("/api/v1/customer/wishlist", { product_id: productId });
+    console.log("Toggle Response:", response); // Kiểm tra phản hồi
     getWishlists();
+  } catch (err) {
+    console.error("Toggle Error:", err.response || err.message); // Log lỗi chi tiết
   }
+};
 
   return (
     <div>
