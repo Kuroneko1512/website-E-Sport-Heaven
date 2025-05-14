@@ -24,6 +24,7 @@ class NewOrderJob implements ShouldQueue
     public function __construct($order)
     {
         $this->order = $order;
+//        Log::info('OrderMail - Toàn bộ dữ liệu order:', $this->order->toArray());
         $this->queue = 'order-mail';
     }
 
