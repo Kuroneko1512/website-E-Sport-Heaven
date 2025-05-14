@@ -82,7 +82,7 @@ class OrderController extends Controller
         try {
             // Gọi service để lấy thông tin chi tiết đơn hàng
             $order = $this->orderService->getOrderByCode($orderCode);
-            Log::info($order);
+            // Log::info('Show order : ' . json_encode($order));
 
             return response()->json([
                 'message' => 'Order details retrieved successfully',

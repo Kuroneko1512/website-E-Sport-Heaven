@@ -388,6 +388,8 @@ class OrderService extends BaseService
             $historyData['admin_id'] = $adminId;
         } elseif ($customerId) {
             $historyData['customer_id'] = $customerId;
+        } elseif ($isSystem) {
+            $historyData['actor_type'] = OrderHistory::ACTOR_TYPE_SYSTEM;
         }
 
         $this->addOrderHistory($order->id, OrderHistory::ACTION_STATUS_UPDATED, $historyData);
