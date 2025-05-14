@@ -95,7 +95,7 @@ class OrderService extends BaseService
 
     /**
      * Kiểm tra tồn kho cho các sản phẩm trong đơn hàng
-     * 
+     *
      * @param array $orderItems Danh sách sản phẩm trong đơn hàng
      * @return bool|string True nếu đủ hàng, thông báo lỗi nếu không đủ
      */
@@ -146,7 +146,10 @@ class OrderService extends BaseService
         // Tính subtotal từ các sản phẩm
         $subtotal = 0;
         foreach ($data['order_items'] as $item) {
-            $price = $item['price'];
+            if ($item['discount'] == null) {
+                $item['discount'] = 0;
+            }
+            $price = $item['price'] * (1 - ( $item['discount'] / 100) );
             $quantity = $item['quantity'];
             $subtotal += $price * $quantity;
         }
@@ -245,7 +248,10 @@ class OrderService extends BaseService
     private function addOrderItems($order, $orderItems)
     {
         foreach ($orderItems as $item) {
-            $price = $item['price'];
+            if ($item['discount'] == null) {
+                $item['discount'] = 0;
+            }
+            $price = $item['price'] * (1 - ( $item['discount'] / 100) );
             $quantity = $item['quantity'];
             $itemSubtotal = $price * $quantity;
 

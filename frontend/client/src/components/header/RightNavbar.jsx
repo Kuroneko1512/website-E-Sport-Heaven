@@ -122,12 +122,15 @@ const RightNavbar = () => {
           (item) => item.product_id !== id || (vid && item.variant_id !== vid)
         );
         updateCart(newCart);
+        window.dispatchEvent(new CustomEvent("cartUpdated", { detail: newCart })); // Phát sự kiện để đồng bộ
       },
     });
   };
 
   // Logout handler
   const handleLogout = useCallback(() => {
+    // Clear user cookie on logout
+    Cookies.remove("user");
     dispatch(logout());
   }, [dispatch]);
 
@@ -227,7 +230,7 @@ const RightNavbar = () => {
       </div>
 
       {/* Wishlist */}
-      <HeartOutlined className="text-lg cursor-pointer dark:text-white" />
+      <Link to="/my-profile/wishlists"><HeartOutlined className="text-lg cursor-pointer dark:text-white" /></Link>
 
       {/* Cart */}
       <Popover

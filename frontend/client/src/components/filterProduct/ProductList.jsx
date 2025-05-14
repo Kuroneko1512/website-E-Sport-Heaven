@@ -23,28 +23,27 @@ const ProductList = ({ products }) => {
               />
 
               {/* Overlay hover */}
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <button className="absolute top-3 right-3 py-1 px-2 bg-white/80 rounded-full hover:bg-white transition-colors duration-200">
-                  <i className="far fa-heart text-gray-700"></i>
-                </button>
-              </div>
+              <Link to={`/shop/product-detail/${item?.id}`}>
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+              </Link>
+              <button className="absolute top-3 right-3 py-1 px-2 bg-white/80 rounded-full hover:bg-white transition-colors duration-200 opacity-0 group-hover:opacity-100 ">
+                <i className="far fa-heart text-gray-700"></i>
+              </button>
             </div>
 
             {/* Text section */}
-            <Link 
-              to={`/shop/product-detail/${item.id}`}
-              className="flex-1 p-4"
-            >
+            <Link to={`/shop/product-detail/${item.id}`} className="flex-1 p-4">
               <h2 className="text-sm md:text-xl text-center font-medium text-gray-900 line-clamp-2 mb-2">
                 {item?.name}
               </h2>
-              
+
               <div className="mt-auto">
                 <div className="flex items-center justify-center gap-2 min-h-[1.5rem]">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-base md:text-lg font-bold text-gray-900">
                       {FomatVND(
-                        item.price - (item.price * item.discount_percent) / 100 ||
+                        item.price -
+                          (item.price * item.discount_percent) / 100 ||
                           item.variants[0].price -
                             (item.variants[0].price *
                               item.variants[0].discount_percent) /

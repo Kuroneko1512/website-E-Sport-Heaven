@@ -13,7 +13,6 @@ use App\Http\Controllers\Api\Attribute\V1\AttributeController;
 use App\Http\Controllers\Api\Attribute\V1\AttributeValueController;
 
 use App\Http\Controllers\Api\User\UserController;
-use App\Http\Controllers\Api\Coupons\CouponsController;
 use App\Http\Controllers\Api\Admin\V1\ProductController as ProductControllerAdmin;
 
 Route::prefix('v1')->group(callback: function () {
