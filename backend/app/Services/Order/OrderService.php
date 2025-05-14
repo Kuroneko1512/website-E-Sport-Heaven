@@ -75,7 +75,7 @@ class OrderService extends BaseService
                 $historyData['actor_email'] = $data['customer_email'];
             }
 
-            Log::info($historyData);
+            Log::info('History create',$historyData);
 
             // Gọi phương thức createHistory
             OrderHistory::createHistory(
@@ -813,7 +813,7 @@ class OrderService extends BaseService
      * Lấy danh sách đơn hàng của người dùng hiện tại
      *
      * @param \App\Models\User $user Người dùng hiện tại
-     * @return \Illuminate\Database\Eloquent\Collection |\Illuminate\Pagination\LengthAwarePaginator
+     * @return \Illuminate\Support\Collection |\Illuminate\Pagination\LengthAwarePaginator
      */
     public function getOrdersByUser($user, $searchParams = [], $perPage = 10)
     {
@@ -1005,7 +1005,7 @@ class OrderService extends BaseService
 
     /**
      * Tự động chuyển trạng thái đơn hàng từ DELIVERED sang COMPLETED sau một khoảng thời gian
-     * 
+     *
      * @param int $daysToAutoComplete Số ngày sau khi giao hàng để tự động chuyển sang hoàn thành
      * @return int Số đơn hàng đã được cập nhật
      */
