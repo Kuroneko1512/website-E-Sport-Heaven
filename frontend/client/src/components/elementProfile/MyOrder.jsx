@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import instanceAxios from "../../config/db";
 import FomatVND from "../../utils/FomatVND";
@@ -222,8 +222,9 @@ const MyOrder = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const user = JSON.parse(Cookies.get("user"));
+  const queryClient = useQueryClient();
 
-  console.log("user", user);
+  // console.log("user", user);
   // Sử dụng hook scroll to top khi currentPage thay đổi
   useScrollToTop(currentPage);
 
@@ -326,6 +327,80 @@ const MyOrder = () => {
     );
   }
 
+  // Mutation cho hủy đơn hàng
+  const cancelOrderMutation = useMutation({
+    mutationFn: async ({ orderId }) => {
+      const response = await instanceAxios.put(`/api/v1/order/${orderId}/status`, {
+        status: ORDER_STATUS.CANCELLED,
+        customer_id: user.customerId,
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      console.log("data", data);
+      if (data?.message === "Order status updated successfully") {
+        message.success("Đã hủy đơn hàng thành công");
+        queryClient.invalidateQueries(["orders", currentPage]);
+      } else {
+        throw new Error(data?.message || "Không thể hủy đơn hàng");
+      }
+    },
+    onError: (error) => {
+      message.error(
+        error.response?.data?.message || "Không thể hủy đơn hàng"
+      );
+    },
+  });
+
+  // Mutation cho xác nhận nhận hàng
+  const confirmReceivedMutation = useMutation({
+    mutationFn: async ({ orderId }) => {
+      const response = await instanceAxios.put(`/api/v1/order/${orderId}/status`, {
+        status: ORDER_STATUS.COMPLETED,
+        customer_id: user.customerId,
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      if (data?.message) {
+        message.success("Đã xác nhận nhận hàng thành công");
+        setConfirmModalVisible(false);
+        queryClient.invalidateQueries(["orders", currentPage]);
+      } else {
+        throw new Error(data?.message || "Không thể xác nhận nhận hàng");
+      }
+    },
+    onError: (error) => {
+      message.error(
+        error.response?.data?.message || "Không thể xác nhận nhận hàng"
+      );
+    },
+  });
+
+  // Mutation cho yêu cầu trả hàng
+  const requestReturnMutation = useMutation({
+    mutationFn: async ({ orderId }) => {
+      const response = await instanceAxios.put(`/api/v1/order/${orderId}/status`, {
+        status: ORDER_STATUS.RETURN_REQUESTED,
+        customer_id: user.customerId,
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      if (data?.message) {
+        message.success("Đã gửi yêu cầu trả hàng");
+        queryClient.invalidateQueries(["orders", currentPage]);
+      } else {
+        throw new Error(data?.message || "Không thể gửi yêu cầu trả hàng");
+      }
+    },
+    onError: (error) => {
+      message.error(
+        error.response?.data?.message || "Không thể gửi yêu cầu trả hàng"
+      );
+    },
+  });
+
   const getActionsForOrder = (order) => {
     const actions = [];
 
@@ -377,7 +452,7 @@ const MyOrder = () => {
   };
 
   const handleAction = async (action, order) => {
-    console.log("order", order);
+    // console.log("order", order);
     if (!order?.id) {
       message.error("Không tìm thấy thông tin đơn hàng");
       return;
@@ -393,44 +468,7 @@ const MyOrder = () => {
           break;
 
         case "hủy":
-          setLoading(true);
-          try {
-            if (!order?.id) {
-              throw new Error("Không tìm thấy ID đơn hàng");
-            }
-
-            const response = await instanceAxios.put(
-              `/api/v1/order/${order.id}/status`,
-              {
-                status: ORDER_STATUS.CANCELLED,
-                customer_id: user.customerId,
-              }
-            );
-
-            if (response.data?.success) {
-              message.success("Đã hủy đơn hàng thành công");
-              window.location.reload();
-            } else {
-              throw new Error(
-                response.data?.message || "Không thể hủy đơn hàng"
-              );
-            }
-          } catch (error) {
-            console.error("Chi tiết lỗi:", error);
-            if (error.response?.status === 404) {
-              message.error("Không tìm thấy đơn hàng");
-            } else if (error.response?.status === 403) {
-              message.error("Bạn không có quyền thực hiện thao tác này");
-            } else {
-              message.error(
-                error.response?.data?.message ||
-                  error.message ||
-                  "Không thể hủy đơn hàng"
-              );
-            }
-          } finally {
-            setLoading(false);
-          }
+          cancelOrderMutation.mutate({ orderId: order.id });
           break;
 
         case "mua lại":
@@ -495,67 +533,14 @@ const MyOrder = () => {
           break;
 
         case "confirmReceived":
-          setLoading(true);
-          try {
-            if (!order?.id) {
-              throw new Error("Không tìm thấy ID đơn hàng");
-            }
-
-            const response = await instanceAxios.put(
-              `/api/v1/order/${order.id}/status`,
-              {
-                status: ORDER_STATUS.COMPLETED,
-                customer_id: user.customerId,
-              }
-            );
-
-            if (response.data?.success) {
-              message.success("Đã xác nhận nhận hàng thành công");
-              setConfirmModalVisible(false);
-              // window.location.reload();
-            } else {
-              throw new Error(
-                response.data?.message || "Không thể xác nhận nhận hàng"
-              );
-            }
-          } catch (error) {
-            // console.error("Chi tiết lỗi:", error);
-            // if (error.response?.status === 404) {
-            //   message.error("Không tìm thấy đơn hàng");
-            // } else if (error.response?.status === 403) {
-            //   message.error("Bạn không có quyền thực hiện thao tác này");
-            // } else {
-            //   message.error(
-            //     error.response?.data?.message ||
-            //       error.message ||
-            //       "Không thể xác nhận nhận hàng"
-            //   );
-            // }
-          } finally {
-            setLoading(false);
-          }
+          confirmReceivedMutation.mutate({ orderId: order.id });
           break;
 
 
           // Ấn yêu cầu trả hàng, chuyển sang màn hình gửi form yêu cầu trả hàng, khi nào điền xong for và ấn submit thì mới chuyển trạng thái.
-        // case "Yêu cầu trả hàng":
-        //   setLoading(true);
-        //   try {
-        //     await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-        //       status: ORDER_STATUS.RETURN_REQUESTED,
-        //       customer_id: user.customerId,
-        //     });
-        //     message.success("Đã gửi yêu cầu trả hàng");
-        //     window.location.reload();
-        //   } catch (error) {
-        //     console.error("Chi tiết lỗi:", error);
-        //     message.error(
-        //       error.response?.data?.message || "Không thể gửi yêu cầu trả hàng"
-        //     );
-        //   } finally {
-        //     setLoading(false);
-        //   }
-        //   break;
+        case "Yêu cầu trả hàng":
+          requestReturnMutation.mutate({ orderId: order.id });
+          break;
 
         case "xem trạng thái trả hàng":
           nav(`/my-profile/orders/${order.order_code}`);
@@ -566,8 +551,16 @@ const MyOrder = () => {
       }
     } catch (error) {
       console.error("Error handling action:", error);
-      message.error("Có lỗi xảy ra khi thực hiện hành động");
-      setLoading(false);
+      // Chỉ hiển thị lỗi chung nếu không phải do mutation xử lý
+      if (
+        ![
+          cancelOrderMutation.isError,
+          confirmReceivedMutation.isError,
+          requestReturnMutation.isError,
+        ].includes(true)
+      ) {
+        message.error("Có lỗi xảy ra khi thực hiện hành động");
+      }
     }
   };
 
@@ -658,9 +651,22 @@ const MyOrder = () => {
                                 key={idx}
                                 onClick={() => handleAction(action, order)}
                                 className="ml-2 px-4 py-2 rounded-lg border bg-black text-white dark:bg-gray-700 dark:text-gray-300 capitalize"
-                                disabled={loading}
+                                disabled={
+                                  cancelOrderMutation.isLoading ||
+                                  confirmReceivedMutation.isLoading ||
+                                  requestReturnMutation.isLoading
+                                }
                               >
-                                {loading ? "Đang xử lý..." : action}
+                                {cancelOrderMutation.isLoading &&
+                                action === "hủy"
+                                  ? "Đang xử lý..."
+                                  : confirmReceivedMutation.isLoading &&
+                                    action === "confirmReceived"
+                                  ? "Đang xử lý..."
+                                  : requestReturnMutation.isLoading &&
+                                    action === "yêu cầu trả hàng"
+                                  ? "Đang xử lý..."
+                                  : action}
                               </button>
                             ))}
                           </div>
@@ -698,7 +704,7 @@ const MyOrder = () => {
                 key="cancel"
                 className="px-4 py-2 border rounded-lg mr-2"
                 onClick={() => setConfirmModalVisible(false)}
-                disabled={loading}
+                disabled={confirmReceivedMutation.isLoading}
               >
                 Hủy
               </button>,
@@ -706,9 +712,9 @@ const MyOrder = () => {
                 key="confirm"
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg"
                 onClick={() => handleAction("confirmReceived", selectedOrder)}
-                disabled={loading}
+                disabled={confirmReceivedMutation.isLoading}
               >
-                {loading ? "Đang xử lý..." : "Xác nhận"}
+                {confirmReceivedMutation.isLoading ? "Đang xử lý..." : "Xác nhận"}
               </button>,
             ]}
           >

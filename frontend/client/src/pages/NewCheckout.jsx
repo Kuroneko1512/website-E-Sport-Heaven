@@ -375,7 +375,7 @@ const NewCheckout = () => {
         if (!isStillValid) {
           setSelectedCoupon(null);
           setDiscountCode("");
-          message.warning("Mã giảm giá đã chọn không còn khả dụng!");
+          // message.warning("Mã giảm giá đã chọn không còn khả dụng!");
         }
       }
     }
