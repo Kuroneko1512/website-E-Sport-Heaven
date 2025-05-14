@@ -149,7 +149,7 @@ function App() {
 
           <Route path="blog" element={<Blog />} />
           <Route path="blog/:id" element={<BlogDetail />} />
-          <Route path="transaction-history" element={<OrderTracking />} />
+          <Route path="order-history/:order_code" element={<OrderTracking />} />
           <Route path="contact" element={<Contact />} />
           <Route path="*" element={<Notfound />} />
           <Route path="cart" element={<Cart />} />

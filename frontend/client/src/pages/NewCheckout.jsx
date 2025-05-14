@@ -121,6 +121,28 @@ const NewCheckout = () => {
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submit, setSubmit] = useState(false);
 
+  // Clear user-related data on logout
+  useEffect(() => {
+    if (!isLogin) {
+      setUseNewAddress(false);
+      setShowAddressModal(false);
+      setAddresses([]);
+      setSelectedAddress(null);
+      setDiscountCode("");
+      setAvailableCoupons([]);
+      setSelectedCoupon(null);
+      setSpecificAddress("");
+      setSelectedProvince("");
+      setSelectedDistrict("");
+      setSelectedWard("");
+      setOrder({ customer_note: "Giao hàng tận nơi" });
+      setPaymentMethod("cod");
+      setSubmit(false);
+      // Reset form fields on logout
+      form.resetFields();
+    }
+  }, [isLogin, form]);
+
 
   const [formData, setFormData] = useState({
     pick_province: "Hà Nội",
@@ -353,7 +375,7 @@ const NewCheckout = () => {
         if (!isStillValid) {
           setSelectedCoupon(null);
           setDiscountCode("");
-          message.warning("Mã giảm giá đã chọn không còn khả dụng!");
+          // message.warning("Mã giảm giá đã chọn không còn khả dụng!");
         }
       }
     }
@@ -504,7 +526,7 @@ const NewCheckout = () => {
         coupon_id: selectedCoupon?.id || null,
         order_coupon_code: selectedCoupon?.code || null,
         order_coupon_name: selectedCoupon?.name || null,
-        order_discount_type: selectedCoupon ? (selectedCoupon.discount_type === 'percentage' ? 0 : 1) : null,
+        order_discount_type: selectedCoupon ? (selectedCoupon.discount_type === 'percentage' ? 1 : 0) : null,
         order_discount_value: selectedCoupon ? Number(selectedCoupon.discount_value) : null
       };
 
@@ -555,7 +577,7 @@ const NewCheckout = () => {
   };
 
   console.log("order", order);
-  console.log("grandTotal", grandTotal);
+  // console.log("grandTotal", grandTotal);
 
   return (
     <div className="p-6 bg-white">
