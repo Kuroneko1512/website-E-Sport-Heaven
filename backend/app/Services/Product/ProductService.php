@@ -4,6 +4,8 @@ namespace App\Services\Product;
 
 use App\Models\Attribute;
 use App\Models\AttributeValue;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\BaseService;
 use Illuminate\Support\Facades\DB;
@@ -35,7 +37,7 @@ class ProductService extends BaseService
             $query->whereIn('category_id', $categoryIds);
         }
 
-        // Lọc theo khoảng giá
+
          // Lọc theo giá sau giảm giá
     if (!empty($filters['min_price']) || !empty($filters['max_price'])) {
         $min = $filters['min_price'];
@@ -61,6 +63,7 @@ class ProductService extends BaseService
                   THEN price * (1 - discount_percent/100)
                   ELSE price
                 END BETWEEN ? AND ?', [$min, $max]);
+
             });
         });
     }
@@ -257,6 +260,38 @@ class ProductService extends BaseService
         }
 
         return $product->fresh();
+    }
+    public function getProductRandom($limit = 4)
+    {
+        return $this->model->with([
+            'variants.productAttributes.attributeValue:id,value',
+        ])
+            ->inRandomOrder()
+            ->limit($limit)
+            ->get();
+    }
+    public function getBestSellingOrder($limit = 8)
+    {
+          return OrderItem::select('order_items.product_id', DB::raw('SUM(order_items.quantity) as total_quantity'))
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')  // Kết nối với bảng orders
+            ->join('products', 'order_items.product_id', '=', 'products.id')  // Kết nối với bảng products
+            ->where('orders.status', 6)  // Chỉ lấy đơn hàng có status = 6
+            ->groupBy('order_items.product_id')  // Nhóm theo product_id để tính tổng số lượng
+            ->orderByDesc('total_quantity')  // Sắp xếp giảm dần theo số lượng bán được
+            ->limit($limit)  // Lấy số lượng sản phẩm bán chạy nhất (mặc định là 8)
+            ->with(['product'])  // Eager load thông tin sản phẩm (nếu cần)
+            ->get();
+    
+    }
+    public function getProductNew($paginate = 8)
+    {
+       return $this->model->with([
+            'variants.productAttributes.attributeValue:id,value',
+        ])
+            ->orderBy('created_at', 'DESC')
+            ->latest() // Sắp xếp theo thời gian mới nhất
+            ->paginate($paginate);
+    
     }
     private function handelVariant($isVariable, $product, $data)
     {

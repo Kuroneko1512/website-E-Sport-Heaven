@@ -25,10 +25,12 @@ Route::prefix('v1')->group(callback: function () {
     // Category API Routes
     Route::get('/category/indexNoPagination', [CategoryController::class, 'indexNoPagination']);
     Route::apiResource('/category', CategoryController::class);
+    Route::get('/product/random', [ProductController::class, 'getProductRandom']);
     Route::get('/product/search', [ProductController::class, 'searchProducts']);
 
-    // Product API Routes
+    Route::get('/product/new', [ProductController::class, 'getProductNew']);
     Route::get('/product/fillter', [ProductController::class, 'getProductFillterAll']);
+    Route::get('/product/best-selling', [ProductController::class, 'getBestSellingOrder']);
     Route::apiResource('/product', ProductController::class);
     Route::get('/product/{id}/Detail', [ProductController::class, 'showForDetails']);
 
