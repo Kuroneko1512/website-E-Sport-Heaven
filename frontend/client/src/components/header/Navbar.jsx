@@ -29,7 +29,7 @@ const Navbar = () => {
           <Link to="/contact" className={`${location.pathname.includes("contact")? "border-b-2 border-black" : ""} text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white`}>
             Liên hệ
           </Link>
-          <Link to="/transaction-history" className={`${location.pathname.includes("transaction-history")? "border-b-2 border-black" : ""} text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white`}>
+          <Link to="/order-history/:order_code" className={`${location.pathname.includes("transaction-history")? "border-b-2 border-black" : ""} text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white`}>
             Đơn hàng giao dịch
 
           </Link>

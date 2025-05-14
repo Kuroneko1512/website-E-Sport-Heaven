@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import FomatVND from "../utils/FomatVND";
-import { ORDER_STATUS_LABELS, ORDER_STATUS } from "../constants/OrderConstants";
+import { ORDER_STATUS_LABELS } from "../constants/OrderConstants";
 
 // Image display component (commented for testing)
 
@@ -18,7 +19,6 @@ const ProductImage = ({ src, alt }) => (
     )}
   </div>
 );
-
 
 const fetchOrderData = async (orderCode) => {
   const response = await fetch(
@@ -39,8 +39,6 @@ const OrderHistory = ({ history }) => {
   const sortedHistory = [...history].sort(
     (a, b) => new Date(b.created_at) - new Date(a.created_at)
   );
-
-  console.log("sortedHistory", sortedHistory);
 
   return (
     <div className="bg-gray-50 p-5 rounded-lg">
@@ -107,27 +105,18 @@ const OrderHistory = ({ history }) => {
 };
 
 const OrderTracking = () => {
-  const [orderCode, setOrderCode] = useState("");
-  const [searchCode, setSearchCode] = useState(null);
+  const { order_code } = useParams();
 
   const {
     data: orderData,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["order", searchCode],
-    queryFn: () => fetchOrderData(searchCode),
-    enabled: !!searchCode, // Chỉ gọi API khi có mã đơn hàng
+    queryKey: ["order", order_code],
+    queryFn: () => fetchOrderData(order_code),
+    enabled: !!order_code, // Chỉ gọi API khi có mã đơn hàng
     staleTime: 60000, // Cache dữ liệu trong 1 phút
   });
-  console.log(orderData);
-  // console.log(orderData.product.discount_percent)
-
-  const handleSearch = () => {
-    setSearchCode(orderCode);
-  };
-
-  console.log("orderData history", orderData?.history);
 
   const calculateTotal = () => {
     if (!orderData?.order_items) return 0;
@@ -148,22 +137,6 @@ const OrderTracking = () => {
       <div className="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Theo dõi đơn hàng</h1>
         
-        <div className="mb-6 flex flex-col md:flex-row gap-3">
-          <input
-            type="text"
-            placeholder="Nhập mã đơn hàng..."
-            value={orderCode}
-            onChange={(e) => setOrderCode(e.target.value)}
-            className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-          />
-          <button
-            onClick={handleSearch}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-sm"
-          >
-            Tìm kiếm
-          </button>
-        </div>
-
         {isLoading && (
           <div className="space-y-6 animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/3"></div>
@@ -193,9 +166,9 @@ const OrderTracking = () => {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -293,41 +266,12 @@ const OrderTracking = () => {
               </div>
             </div>
             
-            {/* Add Order History section */}
+            {/* Add Order History section */} 
             {orderData.history && orderData.history.length > 0 && (
               <div className="mb-8">
                 <OrderHistory history={orderData.history} />
               </div>
             )}
-
-            {/* <div className="bg-gray-50 p-5 rounded-lg col-span-full">
-              <h2 className="text-lg font-semibold mb-3 text-gray-700 border-b pb-2">
-                Địa chỉ giao hàng
-              </h2>
-              <div className="flex items-start gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-500 mt-0.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <p className="text-gray-700">{orderData.shipping_address}</p>
-              </div>
-            </div> */}
           </>
         )}
       </div>
