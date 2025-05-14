@@ -526,7 +526,7 @@ const NewCheckout = () => {
         coupon_id: selectedCoupon?.id || null,
         order_coupon_code: selectedCoupon?.code || null,
         order_coupon_name: selectedCoupon?.name || null,
-        order_discount_type: selectedCoupon ? (selectedCoupon.discount_type === 'percentage' ? 0 : 1) : null,
+        order_discount_type: selectedCoupon ? (selectedCoupon.discount_type === 'percentage' ? 1 : 0) : null,
         order_discount_value: selectedCoupon ? Number(selectedCoupon.discount_value) : null
       };
 

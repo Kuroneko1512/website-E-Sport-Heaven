@@ -606,6 +606,7 @@ const MyOrder = () => {
                         key={idx}
                         className="p-3 border mb-3 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700"
                       >
+                        {/* <Link to={`/my-profile/orders/${order.order_code}`}> */}
                         <OrderItem
                           order_items={order.order_items}
                           status={order.status}
@@ -671,6 +672,7 @@ const MyOrder = () => {
                             ))}
                           </div>
                         </div>
+                        {/* </Link> */}
                       </div>
                     ))}
                   </div>
