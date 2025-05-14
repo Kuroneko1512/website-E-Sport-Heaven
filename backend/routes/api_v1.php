@@ -21,24 +21,23 @@ Route::prefix('v1')->group(callback: function () {
     Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
     Route::post('/attribute/filter', [AttributeController::class, 'getAttributeForIds']);
     Route::apiResource('/attributeValue', AttributeValueController::class)->except(['index']);
+    Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
+    Route::post('/attribute/filter', [AttributeController::class, 'getAttributeForIds']);
+    Route::apiResource('/attributeValue', AttributeValueController::class)->except(['index']);
 
     // Category API Routes
     Route::get('/category/indexNoPagination', [CategoryController::class, 'indexNoPagination']);
     Route::apiResource('/category', CategoryController::class);
+
+    // Product API Routes
     Route::get('/product/random', [ProductController::class, 'getProductRandom']);
     Route::get('/product/search', [ProductController::class, 'searchProducts']);
-
     Route::get('/product/new', [ProductController::class, 'getProductNew']);
     Route::get('/product/fillter', [ProductController::class, 'getProductFillterAll']);
     Route::get('/product/best-selling', [ProductController::class, 'getBestSellingOrder']);
     Route::apiResource('/product', ProductController::class);
     Route::get('/product/{id}/Detail', [ProductController::class, 'showForDetails']);
-
     Route::get('/product/{id}/edit', [ProductControllerAdmin::class, 'getProductByIdEdit']);
-    Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
-    Route::post('/attribute/filter', [AttributeController::class, 'getAttributeForIds']);
-    Route::apiResource('/attributeValue', AttributeValueController::class)->except(['index']);
-
 
     // Order API Routes
     Route::post('/order/orders-user-return', [OrderController::class, 'orderUserReturn']);
@@ -49,9 +48,11 @@ Route::prefix('v1')->group(callback: function () {
     // Blog API Routes
     Route::apiResource('/blog-categories', BlogCategoryController::class);
     Route::apiResource('/blogs', BlogController::class);
+
     // User API Routes
     Route::apiResource('/user', UserController::class);
     Route::put('/user/{id}/status', [UserController::class, 'updateStatus']);
+
     // Address API Routes
     Route::prefix('address')->group(function () {
         Route::get('/provinces', [AddressController::class, 'getProvinces']);

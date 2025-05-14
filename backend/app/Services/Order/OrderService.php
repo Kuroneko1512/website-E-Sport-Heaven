@@ -149,7 +149,7 @@ class OrderService extends BaseService
             if ($item['discount'] == null) {
                 $item['discount'] = 0;
             }
-            $price = $item['price'] * (1 - ( $item['discount'] / 100) );
+            $price = $item['price'] * (1 - ($item['discount'] / 100));
             $quantity = $item['quantity'];
             $subtotal += $price * $quantity;
         }
@@ -251,7 +251,7 @@ class OrderService extends BaseService
             if ($item['discount'] == null) {
                 $item['discount'] = 0;
             }
-            $price = $item['price'] * (1 - ( $item['discount'] / 100) );
+            $price = $item['price'] * (1 - ($item['discount'] / 100));
             $quantity = $item['quantity'];
             $itemSubtotal = $price * $quantity;
 
@@ -352,7 +352,7 @@ class OrderService extends BaseService
 
         // Check if status transition is valid
         // Kiểm tra tính hợp lệ của việc chuyển trạng thái
-        if (!$this->isValidStatusTransition($oldStatus, $status, $isAdmin, $isCustomer)) {
+        if (!$this->isValidStatusTransition($oldStatus, $status, $isAdmin, $isCustomer, $isSystem)) {
             return [
                 'success' => false,
                 'message' => 'Cannot transition from status ' .
@@ -866,7 +866,7 @@ class OrderService extends BaseService
      * @param bool $isCustomer Người thực hiện có phải là khách hàng
      * @return bool
      */
-    protected function isValidStatusTransition($oldStatus, $newStatus, $isAdmin = false, $isCustomer = false)
+    protected function isValidStatusTransition($oldStatus, $newStatus, $isAdmin = false, $isCustomer = false, $isSystem = false)
     {
 
         // Định nghĩa các chuyển trạng thái hợp lệ cho Admin
@@ -955,11 +955,33 @@ class OrderService extends BaseService
             ]
         ];
 
+        // Định nghĩa các chuyển trạng thái hợp lệ cho System
+        $systemValidTransitions = [
+            // Từ đã giao hàng (5) hệ thống có thể tự động chuyển sang hoàn thành (6)
+            Order::STATUS_DELIVERED => [
+                Order::STATUS_COMPLETED
+            ],
+            // Có thể thêm các trạng thái khác mà hệ thống được phép chuyển đổi
+            Order::STATUS_SHIPPING => [
+                Order::STATUS_DELIVERED,
+                Order::STATUS_RETURN_TO_SHOP
+            ],
+            Order::STATUS_COMPLETED => [
+                Order::STATUS_RETURN_REQUESTED
+            ],
+            Order::STATUS_RETURN_TO_SHOP => [
+                Order::STATUS_SHIPPING,
+                Order::STATUS_CANCELLED
+            ]
+        ];
+
         // Kiểm tra quyền chuyển trạng thái dựa trên vai trò
         if ($isAdmin) {
             return in_array($newStatus, $adminValidTransitions[$oldStatus] ?? []);
         } elseif ($isCustomer) {
             return in_array($newStatus, $customerValidTransitions[$oldStatus] ?? []);
+        } elseif ($isSystem) {
+            return in_array($newStatus, $systemValidTransitions[$oldStatus] ?? []);
         }
 
         // Mặc định không cho phép chuyển trạng thái nếu không xác định vai trò
@@ -977,5 +999,46 @@ class OrderService extends BaseService
         return OrderHistory::where('order_id', $orderId)
             ->orderBy('created_at', 'desc')
             ->get();
+    }
+
+    /**
+     * Tự động chuyển trạng thái đơn hàng từ DELIVERED sang COMPLETED sau một khoảng thời gian
+     * 
+     * @param int $daysToAutoComplete Số ngày sau khi giao hàng để tự động chuyển sang hoàn thành
+     * @return int Số đơn hàng đã được cập nhật
+     */
+    public function autoCompleteDeliveredOrders($daysToAutoComplete = null)
+    {
+        $daysToAutoComplete = $daysToAutoComplete ?? config('time.order_auto_complete_days', 3);
+        // Tìm các đơn hàng đã giao nhưng chưa hoàn thành và đã qua thời gian quy định
+        $cutoffDate = now()->subDays($daysToAutoComplete);
+
+        $orders = $this->model
+            ->where('status', Order::STATUS_DELIVERED)
+            ->where('updated_at', '<=', $cutoffDate)
+            ->get();
+
+        $count = 0;
+
+        foreach ($orders as $order) {
+            // Cập nhật trạng thái đơn hàng
+            $result = $this->updateStatus(
+                $order->id,
+                Order::STATUS_COMPLETED,
+                null,
+                null,
+                'Đơn hàng được tự động chuyển sang trạng thái hoàn thành sau ' . $daysToAutoComplete . ' ngày giao hàng',
+                true // isSystem = true
+            );
+
+            if ($result['success']) {
+                $count++;
+                Log::info("Đơn hàng #{$order->order_code} đã được tự động chuyển sang trạng thái hoàn thành");
+            } else {
+                Log::error("Không thể tự động cập nhật trạng thái đơn hàng #{$order->order_code}: " . $result['message']);
+            }
+        }
+
+        return $count;
     }
 }
