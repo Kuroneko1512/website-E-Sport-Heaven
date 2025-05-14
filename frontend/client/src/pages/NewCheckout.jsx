@@ -120,7 +120,7 @@ const NewCheckout = () => {
   const [order, setOrder] = useState({ customer_note: "Giao hàng tận nơi" });
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submit, setSubmit] = useState(false);
-  // const [shippingFee, setShippingFee] = useState(0);
+
 
   const [formData, setFormData] = useState({
     pick_province: "Hà Nội",
