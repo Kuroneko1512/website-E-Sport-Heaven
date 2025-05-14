@@ -17,7 +17,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import apiGhtk, { getShippingFee } from "../config/ghtk";
+import apiGhtk from "../config/ghtk";
 import FomatVND from "../utils/FomatVND";
 import instanceAxios from "../config/db";
 
@@ -130,7 +130,7 @@ const NewCheckout = () => {
     ward: "",
     address: "",
     weight: 10000,
-    value: 3000000,
+    value: 10000,
     transport: "road",
     deliver_option: "xteam",
   });
@@ -270,7 +270,7 @@ const NewCheckout = () => {
           product_variant_id: item.variant_id || null,
           quantity: item.quantity,
           price: item.price,
-          discount_percent: item.discount_percent,
+          discount: item.discount,
         })),
       }));
     } else {
@@ -380,6 +380,13 @@ const NewCheckout = () => {
     }
     return calculateSubtotal + (shippingFee || 0) - discount;
   }, [calculateSubtotal, shippingFee, selectedCoupon]);
+
+  useEffect(() => {
+  setFormData(prev => ({
+    ...prev,
+    value: grandTotal
+  }));
+}, [grandTotal]);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -497,12 +504,6 @@ const NewCheckout = () => {
         coupon_id: selectedCoupon?.id || null,
         order_coupon_code: selectedCoupon?.code || null,
         order_coupon_name: selectedCoupon?.name || null,
-        //order_discount_amount: selectedCoupon ? (
-        // selectedCoupon.discount_type === 'percentage' 
-        //   ? (grandTotal * Number(selectedCoupon.discount_value) / 100).toFixed(2)
-        //   : Number(selectedCoupon.discount_value).toFixed(2)
-        //) : "0.00",
-        // discount_percent: ,
         order_discount_type: selectedCoupon ? (selectedCoupon.discount_type === 'percentage' ? 0 : 1) : null,
         order_discount_value: selectedCoupon ? Number(selectedCoupon.discount_value) : null
       };
