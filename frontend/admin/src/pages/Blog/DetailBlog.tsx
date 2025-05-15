@@ -10,6 +10,19 @@ import BlogCategoryService, {
 import BlogService from "@app/services/Blog/BlogService";
 import Loading from "@app/components/loading-container/loading";
 
+interface FormData {
+  title: string;
+  content: string;
+  thumbnail?: string;
+  pushish_date?: string;
+  category_id?: number;
+}
+
+const INITIAL_FORM_DATA: FormData = {
+  title: "",
+  content: "",
+};
+
 const DetailBlog = () => {
   const quillRef: any = useRef();
   const NoImage =
@@ -24,6 +37,9 @@ const DetailBlog = () => {
 
   const [formData, setFormData] = useState<BlogPost>({} as BlogPost);
   const [categories, setCategories] = useState<BlogCategories[]>([]);
+  const [errors, setErrors] = useState<Record<keyof FormData, string>>(
+    {} as Record<keyof FormData, string>
+  );
   const [loading, setLoading] = useState(false);
 
   // Fetch categories on component mount
@@ -68,19 +84,57 @@ const DetailBlog = () => {
         setLoading(false);
       }
     };
-    
+
     fetchBlogData();
   }, [id, action]);
 
+    const validateForm = useCallback((): boolean => {
+    const newErrors: Partial<Record<keyof FormData, string>> = {};
+
+    // Name validation
+    if (!formData.title || formData.title.length === 0) {
+      newErrors.title = "Tiêu đề không được để trống";
+    } else if (formData.title.length > 255) {
+      newErrors.title = "Tiêu đề không được vượt quá 255 ký tự";
+    }
+
+    // Description validation
+    if (!formData.content || formData.content.length === 0) {
+      newErrors.content = "Nội dung không được để trống";
+    }
+
+    // thumbnail validation
+    if (!formData.thumbnail || formData.thumbnail.length === 0) {
+      newErrors.thumbnail = "Ảnh không được để trống";
+    }
+
+    // publish_date validation
+    if (!formData.publish_date || formData.publish_date.length === 0) {
+      newErrors.pushish_date = "Ngày xuất bản không được để trống";
+    }
+
+    // category_id validation
+    if (!formData.category_id) {
+      newErrors.category_id = "Danh mục không được để trống";
+    }
+
+    setErrors(newErrors as Record<keyof FormData, string>);
+    return Object.keys(newErrors).length === 0;
+  }, [formData]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     const requiredFields = {
       title: "Vui lòng nhập tiêu đề",
       content: "Vui lòng nhập nội dung",
       category_id: "Vui lòng chọn danh mục",
     };
-    
+
     for (const [field, message] of Object.entries(requiredFields)) {
       if (!formData[field as keyof BlogPost]?.toString().trim()) {
         toast.error(message);
@@ -108,10 +162,18 @@ const DetailBlog = () => {
         toast.success("Tạo bài viết thành công!");
       }
       navigate("/blog");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Lỗi khi lưu bài viết:", error);
+       const res = error.response?.data?.errors ?? [];
+
+      const errMessage = Object.values(res)
+        .map((item: any) => item.join(", "))
+        .join(", ");
+
       toast.error(
-        `Không thể ${action === "update" ? "cập nhật" : "tạo"} bài viết`
+        `Không thể ${action === "update" ? "cập nhật" : "tạo"} bài viết` +
+          ": " +
+          errMessage
       );
     } finally {
       setLoading(false);
@@ -160,7 +222,7 @@ const DetailBlog = () => {
 
   return (
     <div className="card">
-      { loading && <Loading/>}
+      {loading && <Loading />}
       <div className="card-header">
         <h3 className="card-title">
           {action === "view"
@@ -174,13 +236,14 @@ const DetailBlog = () => {
       <form onSubmit={handleSubmit}>
         <div className="card-body row">
           {/* Left Side */}
-          <div className="col col-lg-8 col-md-12 pb-3">
+          <div className="col col-lg-8 col-sm-12 pb-3 mb-6">
             <div className="form-group">
-              <label htmlFor="title">Tiêu đề</label>
-              {formData.title}
+              <label htmlFor="title">
+                Tiêu đề <span className="text-danger">*</span>
+              </label>
               <input
                 type="text"
-                className="form-control"
+                className={`form-control ${errors.title ? "is-invalid" : ""}`}
                 id="title"
                 placeholder="Nhập tiêu đề bài viết"
                 value={formData?.title || ""}
@@ -189,20 +252,27 @@ const DetailBlog = () => {
                 }
                 readOnly={action === "view"}
               />
+              {errors.title && (
+                <div className="invalid-feedback" style={{ display: "block" }}>
+                  {errors.title}
+                </div>
+              )}
             </div>
 
             <div className="form-group">
-              <label htmlFor="content">Nội dung</label>
+              <label htmlFor="content">
+                Nội dung <span className="text-danger">*</span>
+              </label>
               <ReactQuill
                 theme="snow"
                 ref={quillRef}
                 placeholder="Nhập nội dung bài viết"
-                style={{ height: "500px", marginBottom: "20px" }}
+                style={{ height: "500px" }}
                 value={formData.content || ""}
                 onChange={(content) => {
                   setFormData((prevState) => ({
                     ...prevState,
-                    content: content
+                    content: content,
                   }));
                 }}
                 readOnly={action === "view"}
@@ -250,17 +320,48 @@ const DetailBlog = () => {
               />
             </div>
           </div>
+          {errors.content && (
+              <div
+                className="invalid-feedback"
+                style={{ display: "block", transform: "translateY(30px)" }}
+              >
+                {errors.content}
+              </div>
+            )}
 
           {/* Right Side */}
-          <div className="col col-lg-4 col-md-12">
+          <div className="col col-lg-4 col-sm-12">
             <div className="form-group">
-              <label style={{ display: "block" }}>Ảnh đại diện</label>
-              <label htmlFor="thumbnail" style={{ cursor: "pointer", border: "1px solid #ccc", borderRadius: "8px" }}>
+              <label style={{ display: "block" }}>
+                Ảnh đại diện <span className="text-danger">*</span>
+              </label>
+              <label
+                htmlFor="thumbnail"
+                style={{
+                  cursor: "pointer",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  position: "relative",
+                }}
+              >
                 <img
                   src={formData.thumbnail?.toString() ?? NoImage}
                   alt="Preview"
                   style={{ maxHeight: "200px", borderRadius: "8px" }}
                 />
+                {errors.thumbnail && (
+                  <div
+                    className="invalid-feedback"
+                    style={{
+                      display: "block",
+                      position: "absolute",
+                      fontWeight: "normal",
+                      top: "100%",
+                    }}
+                  >
+                    {errors.thumbnail}
+                  </div>
+                )}
               </label>
 
               {action !== "view" && (
@@ -281,9 +382,11 @@ const DetailBlog = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="category">Danh mục</label>
+              <label htmlFor="category">
+                Danh mục <span className="text-danger">*</span>
+              </label>
               <select
-                className="form-control"
+                className={`form-control ${errors.category_id ? "is-invalid" : ""}`}
                 value={formData.category_id || ""}
                 onChange={(e) =>
                   setFormData({
@@ -300,10 +403,17 @@ const DetailBlog = () => {
                   </option>
                 ))}
               </select>
+              {errors.category_id && (
+                <div className="invalid-feedback" style={{ display: "block" }}>
+                  {errors.category_id}
+                </div>
+              )}
             </div>
 
             <div className="form-group">
-              <label htmlFor="publish_date">Ngày xuất bản</label>
+              <label htmlFor="publish_date">
+                Ngày xuất bản <span className="text-danger">*</span>
+              </label>
               <input
                 type="date"
                 className="form-control"
@@ -313,6 +423,11 @@ const DetailBlog = () => {
                 }
                 readOnly={action === "view"}
               />
+              {errors.pushish_date && (
+                <div className="invalid-feedback" style={{ display: "block" }}>
+                  {errors.pushish_date}
+                </div>
+              )}
             </div>
 
             <div className="form-group ml-3">

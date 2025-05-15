@@ -1,8 +1,9 @@
-import { API_CONFIG } from '@app/api/config';
-import axios from 'axios';
-import { PaginatedResponse } from '../BaseApi';
-import { get } from 'http';
-import { BlogCategories } from './BlogCategoryService';
+import { API_CONFIG } from "@app/api/config";
+import axios from "axios";
+import { PaginatedResponse } from "../BaseApi";
+import { BlogCategories } from "./BlogCategoryService";
+import { api } from "../../api/adminApi";
+import { API_ENDPOINTS } from "@app/api/endpoints";
 
 export interface BlogPost {
   id: number;
@@ -10,7 +11,7 @@ export interface BlogPost {
   content: string;
   category_id: number;
   category: BlogCategories;
-  status: 'published' | 'draft';
+  status: "published" | "draft";
   is_featured: boolean;
   thumbnail?: string;
   created_at: string;
@@ -26,42 +27,44 @@ const BlogService = {
       }
     }
     const queryParams = new URLSearchParams(params).toString();
-    const response = await axios.get(`${API_CONFIG.BASE_URL}/v1/blogs?${queryParams}`);
+    const response = await api.get(`${API_ENDPOINTS.BLOG.LIST}?${queryParams}`);
     return response.data?.data;
   },
 
   create: async (data: any): Promise<BlogPost> => {
-    const response = await axios.post(`${API_CONFIG.BASE_URL}/v1/blogs`, data);
+    const response = await api.post(API_ENDPOINTS.BLOG.CREATE, data);
     return response.data;
   },
 
   update: async (id: number, data: any): Promise<BlogPost> => {
-    const response = await axios.put(`${API_CONFIG.BASE_URL}/v1/blogs/${id}`, data);
+    const response = await api.put(`${API_ENDPOINTS.BLOG.UPDATE(id)}`, data);
     return response.data;
   },
 
   delete: async (id: number): Promise<void> => {
-    await axios.delete(`${API_CONFIG.BASE_URL}/v1/blogs/${id}`);
+    await api.delete(`${API_ENDPOINTS.BLOG.DELETE(id)}`);
   },
 
   getById: async (id: number): Promise<BlogPost> => {
-    const response = await axios.get(`${API_CONFIG.BASE_URL}/v1/blogs/${id}`);
+    const response = await api.get(`${API_ENDPOINTS.BLOG.DETAIL(id)}`);
     return response.data?.data;
   },
+
   getBySlug: async (slug: string): Promise<BlogPost> => {
-    const response = await axios.get(`${API_CONFIG.BASE_URL}/v1/blogs/slug/${slug}`);
+    const response = await api.get(`${API_ENDPOINTS.BLOG.SLUG(slug)}`);
     return response.data?.data;
   },
 
   uploadImage: async (file: File): Promise<string> => {
     const body = new FormData();
-    body.append('image', file);
-    return (await axios.post(`${API_CONFIG.BASE_URL}/v1/blogs/upload-image`, body, {
+    body.append("image", file);
+    const response = await api.post(API_ENDPOINTS.BLOG.UPLOAD_IMAGE, body, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })).data?.url;
-  }
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data?.url;
+  },
 };
 
 export default BlogService;

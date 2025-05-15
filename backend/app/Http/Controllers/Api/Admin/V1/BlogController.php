@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Blog\V1;
+namespace App\Http\Controllers\Api\Admin\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Blog\BlogStoreRequest;

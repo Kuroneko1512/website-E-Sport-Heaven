@@ -134,23 +134,23 @@ class BlogController extends Controller
     //     }
     // }
 
-    // // Lấy thông tin chi tiết bài viết blog
-    // public function show($id): JsonResponse
-    // {
-    //     try {
-    //         $blog = $this->blogService->findBlog($id);
-    //         return response()->json([
-    //             'success' => true,
-    //             'data' => $blog
-    //         ], 200);
-    //     } catch (Exception $e) {
-    //         $statusCode = str_contains($e->getMessage(), 'không tồn tại') ? 404 : 500;
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Lỗi khi lấy thông tin bài viết blog: ' . $e->getMessage(),
-    //         ], $statusCode);
-    //     }
-    // }
+    // Lấy thông tin chi tiết bài viết blog
+    public function show($id): JsonResponse
+    {
+        try {
+            $blog = $this->blogService->findBlog($id);
+            return response()->json([
+                'success' => true,
+                'data' => $blog
+            ], 200);
+        } catch (Exception $e) {
+            $statusCode = str_contains($e->getMessage(), 'không tồn tại') ? 404 : 500;
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi lấy thông tin bài viết blog: ' . $e->getMessage(),
+            ], $statusCode);
+        }
+    }
 
     // // Get blog by slug
     // public function getSlug($slug): JsonResponse

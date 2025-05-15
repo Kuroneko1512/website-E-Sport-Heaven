@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\Blog\V1\BlogCategoryController;
-use App\Http\Controllers\Api\Blog\V1\BlogController;
+use App\Http\Controllers\Api\Admin\V1\BlogCategoryController;
+use App\Http\Controllers\Api\Admin\V1\BlogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\v1\AdminAuthController;
 use App\Http\Controllers\Api\Location\LocationImportController;
@@ -56,23 +56,11 @@ Route::prefix('v1')->group(function () {
             //Role and Permission routes
 
             // Blog routes
-            Route::prefix('blogs')->group(function () {
-                Route::get('/', [BlogController::class, 'index'])->name('blogs.index');
-                Route::post('/', [BlogController::class, 'store'])->name('blogs.store');
-                Route::get('/{id}', [BlogController::class, 'show'])->name('blogs.show');
-                Route::put('/{id}', [BlogController::class, 'update'])->name('blogs.update');
-                Route::delete('/{id}', [BlogController::class, 'destroy'])->name('blogs.destroy');
-                Route::post('/upload-image', [BlogController::class, 'uploadImage'])->name('blogs.upload-image');
-            });
+            Route::apiResource('blogs', BlogController::class);
+            Route::post('blogs/upload-image', [BlogController::class, 'uploadImage'])->name('blogs.upload-image');
 
             // Blog Category routes
-            Route::prefix('blog-categories')->group(function () {
-                Route::get('/', [BlogCategoryController::class, 'index'])->name('blog-categories.index');
-                Route::post('/', [BlogCategoryController::class, 'store'])->name('blog-categories.store');
-                Route::get('/{id}', [BlogCategoryController::class, 'show'])->name('blog-categories.show');
-                Route::put('/{id}', [BlogCategoryController::class, 'update'])->name('blog-categories.update');
-                Route::delete('/{id}', [BlogCategoryController::class, 'destroy'])->name('blog-categories.destroy');
-            });
+            Route::apiResource('blog-categories', BlogCategoryController::class);
 
             // Location Import Routes
             Route::prefix('locations')->group(function () {

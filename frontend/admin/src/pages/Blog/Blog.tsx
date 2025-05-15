@@ -20,7 +20,7 @@ const Blog = () => {
   const fetchPosts = async (page: number = 1) => {
     try {
       setLoading(true);
-      const response = await BlogService.getAll({page, keyword: searchTerm});
+      const response = await BlogService.getAll({ page, keyword: searchTerm });
       setPosts(response.data);
       setPagination(response);
     } catch (error) {
@@ -94,7 +94,7 @@ const Blog = () => {
               </div>
             </div>
           </div>
-      </div>
+        </div>
 
         <div className="card-body table-responsive p-0">
           {loading && (
@@ -102,7 +102,7 @@ const Blog = () => {
               <i className="fas fa-sync fa-spin"></i>
             </div>
           )}
-          
+
           <table className="table table-hover text-nowrap ">
             <thead>
               <tr>
@@ -125,7 +125,13 @@ const Blog = () => {
                       <img
                         src={post.thumbnail}
                         alt={post.title}
-                        style={{ width: '50px', height: '50px', 'border-radius': '5px', 'object-fit': 'cover', 'overflow': 'hidden' }}
+                        style={{
+                          width: '50px',
+                          height: '50px',
+                          borderRadius: '5px',
+                          objectFit: 'cover',
+                          overflow: 'hidden'
+                        }}
                       />
                     </td>
                     <td>{post.title}</td>
@@ -136,8 +142,8 @@ const Blog = () => {
                       </span>
                     </td>
                     <td>
-                      <span className={`badge badge-${post.is_featured? 'success' : 'danger'}`}>
-                        {post.is_featured? 'Có' : 'Không'}
+                      <span className={`badge badge-${post.is_featured ? 'success' : 'danger'}`}>
+                        {post.is_featured ? 'Có' : 'Không'}
                       </span>
                     </td>
                     <td>{new Date(post.created_at).toLocaleDateString()}</td>

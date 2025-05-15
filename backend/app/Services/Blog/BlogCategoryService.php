@@ -94,9 +94,9 @@ class BlogCategoryService extends BaseService
             }
 
             // Check if category has associated blogs
-            if ($category->blogs()->count() > 0) {
-                throw new Exception('Cannot delete category with associated blogs');
-            }
+            // if ($category->blogs()->count() > 0) {
+            //     throw new Exception('Cannot delete category with associated blogs');
+            // }
 
             return $this->delete($id);
         } catch (Exception $e) {

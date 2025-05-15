@@ -41,7 +41,10 @@ class BlogCategoryStoreRequest extends FormRequest
             'name.required' => 'Tên danh mục không được để trống.',
             'name.string' => 'Tên danh mục phải là chuỗi.',
             'name.max' => 'Tên danh mục không được vượt quá 255 ký tự.',
-            'name.unique' => 'Tên danh mục đã tồn tại.'
+            'name.unique' => 'Tên danh mục đã tồn tại.',
+            'slug.string' => 'Slug phải là chuỗi.',
+            'slug.max' => 'Slug không được vượt quá 255 ký tự.',
+            'slug.unique' => 'Slug đã tồn tại.',
         ];
     }
     
