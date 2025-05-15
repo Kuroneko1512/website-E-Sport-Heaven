@@ -215,4 +215,59 @@ class ProductController extends Controller
             'data' => $products,
         ], 200);
     }
+      public function getProductRandom()
+    {
+        try {
+            // Gọi service để lấy dữ liệu
+            $Product = $this->productService->getProductRandom();
+            return response()->json([
+                'status' => 200,
+                'data' => $Product, // Trả về dữ liệu thuộc tính
+            ], 200);
+        } catch (\Throwable $th) {
+            // Trường hợp có lỗi xảy ra khi lấy dữ liệu
+            return response()->json([
+                'errnor' => 'lấy thất bại',
+                'mess' => $th,
+                'status' => 500
+            ], 500); // Trả về mã lỗi 500 (Internal Server Error)
+        }
+    }
+    public function getBestSellingOrder()
+    {
+        try {
+            // Gọi service để lấy dữ liệu
+            $Product = $this->productService->getBestSellingOrder();
+            return response()->json([
+                'status' => 200,
+                'data' => $Product, // Trả về dữ liệu thuộc tính
+            ], 200);
+        } catch (\Throwable $th) {
+            // Trường hợp có lỗi xảy ra khi lấy dữ liệu
+            return response()->json([
+                'errnor' => 'lấy thất bại',
+                'mess' => $th,
+                'status' => 500
+            ], 500); // Trả về mã lỗi 500 (Internal Server Error)
+        }
+    }
+    public function getProductNew()
+    {
+        try {
+            // Gọi service để lấy dữ liệu
+            $Product = $this->productService->getProductNew();
+            return response()->json([
+                'status' => 200,
+                'data' => $Product, // Trả về dữ liệu thuộc tính
+            ], 200);
+        } catch (\Throwable $th) {
+            // Trường hợp có lỗi xảy ra khi lấy dữ liệu
+            return response()->json([
+                'errnor' => 'lấy thất bại',
+                'mess' => $th,
+                'status' => 500
+            ], 500); // Trả về mã lỗi 500 (Internal Server Error)
+        }
+    }
+
 }

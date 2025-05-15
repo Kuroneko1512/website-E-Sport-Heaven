@@ -172,7 +172,7 @@ useEffect(() => {
   
     setCheckoutItems(selectedCartItems);// Lưu danh sách sản phẩm để thanh toán
     localStorage.setItem("checkoutItems", JSON.stringify(selectedCartItems));// Lưu vào localStorage
-    nav("/newcheckout");// Điều hướng đến trang thanh toán
+    nav("/checkout");// Điều hướng đến trang thanh toán
   };
 
   const columns = [

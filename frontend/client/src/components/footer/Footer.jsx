@@ -29,8 +29,8 @@ const Footer = () => {
             {[
               { label: "Tài khoản của tôi", path: "/my-profile" },
               { label: "Đăng nhập", path: "/login" },
-              { label: "Giỏ hàng", path: "/my-cart" },
-              { label: "Sản phẩm yêu thích", path: "/my-wishlist" },
+              { label: "Giỏ hàng", path: "/cart" },
+              { label: "Sản phẩm yêu thích", path: "/my-profile/wishlists" },
               { label: "Thanh toán", path: "/checkout" },
             ].map((item) => (
               <li key={item.path}>
