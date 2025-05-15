@@ -99,6 +99,7 @@ class OrderStoreRequest extends FormRequest
             'order_items.*.price' => 'required|numeric|min:0',
             'order_items.*.original_price' => 'nullable|numeric|min:0',
             'order_items.*.subtotal' => 'nullable|numeric|min:0',
+            'order_items.*.discount' => 'nullable|numeric|min:0',
 
             // Phương thức thanh toán
             'payment_method' => 'required|string|in:vnpay,cod,momo,zalopay,bank_transfer',

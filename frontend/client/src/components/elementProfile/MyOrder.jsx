@@ -1,15 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
-import React, { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import instanceAxios from "../../config/db";
 import FomatVND from "../../utils/FomatVND";
 import { FomatTime } from "../../utils/FomatTime";
 import { Link, useNavigate } from "react-router-dom";
-import { Divider, message, Modal, Table, Form } from "antd";
+import { message, Modal, Form } from "antd";
 import ReviewForm from "./ReviewForm";
 import useReview from "../../hooks/useReview";
 import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
 import Cookies from "js-cookie";
-import { ORDER_STATUS_LABELS, ORDER_STATUS, PAYMENT_STATUS_LABELS, PAYMENT_STATUS } from "../../constants/OrderConstants";
+import {
+  ORDER_STATUS_LABELS,
+  ORDER_STATUS,
+  PAYMENT_STATUS_LABELS,
+  PAYMENT_STATUS,
+} from "../../constants/OrderConstants";
 import Pagination from "../filterProduct/Pagination";
 import useScrollToTop from "../../hooks/useScrollToTop";
 
@@ -35,18 +40,30 @@ const OrderItem = ({
 
   // console.log("order_code", status);
   const statusStyles = {
-    [ORDER_STATUS.PENDING]: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
-    [ORDER_STATUS.CONFIRMED]: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
-    [ORDER_STATUS.PREPARING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    [ORDER_STATUS.READY_TO_SHIP]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    [ORDER_STATUS.SHIPPING]: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    [ORDER_STATUS.DELIVERED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
-    [ORDER_STATUS.COMPLETED]: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
-    [ORDER_STATUS.RETURN_REQUESTED]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
-    [ORDER_STATUS.RETURN_PROCESSING]: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
-    [ORDER_STATUS.RETURNED_COMPLETED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
-    [ORDER_STATUS.RETURN_REJECTED]: "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300",
-    [ORDER_STATUS.CANCELLED]: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+    [ORDER_STATUS.PENDING]:
+      "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
+    [ORDER_STATUS.CONFIRMED]:
+      "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
+    [ORDER_STATUS.PREPARING]:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.READY_TO_SHIP]:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.SHIPPING]:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
+    [ORDER_STATUS.DELIVERED]:
+      "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.COMPLETED]:
+      "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
+    [ORDER_STATUS.RETURN_REQUESTED]:
+      "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURN_PROCESSING]:
+      "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
+    [ORDER_STATUS.RETURNED_COMPLETED]:
+      "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+    [ORDER_STATUS.RETURN_REJECTED]:
+      "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300",
+    [ORDER_STATUS.CANCELLED]:
+      "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
   };
 
   return (
@@ -76,8 +93,9 @@ const OrderItem = ({
                 <img
                   alt="Product Image"
                   className="h-24 w-24 rounded-md mr-4"
-                  src={`http://127.0.0.1:8000/storage/${item?.product?.image || item?.product_variant?.image
-                    }`}
+                  src={`http://127.0.0.1:8000/storage/${
+                    item?.product?.image || item?.product_variant?.image
+                  }`}
                 />
                 <div>
                   <p className="font-bold text-lg">{item?.product?.name}</p>
@@ -101,8 +119,15 @@ const OrderItem = ({
         </div>
       </Modal>
       <h3 className="bg-white flex justify-between border-b border-gray-200 items-center dark:bg-gray-800 pb-3">
-        <span>Mã đơn hàng: <strong>{order_code}</strong></span>
-        <span className="text-sm">{customer_name}, {shipping_address.substring(0, 30)}...</span>
+        <div className="flex flex-col gap-2">
+          <span>
+            Mã đơn hàng: <strong>{order_code}</strong>
+          </span>
+          <span className="text-sm">{customer_name}</span>
+          <span className="text-sm">
+            {shipping_address.substring(0, 60)}...
+          </span>
+        </div>
         <span className={`px-2 py-1 rounded text-base ${statusStyles[status]}`}>
           {ORDER_STATUS_LABELS[status]}
         </span>
@@ -119,8 +144,9 @@ const OrderItem = ({
                 <img
                   alt="Product Image"
                   className="h-16 w-16 rounded-md"
-                  src={`http://127.0.0.1:8000/storage/${item?.product?.image || item?.product_variant?.image
-                    }`}
+                  src={`http://127.0.0.1:8000/storage/${
+                    item?.product?.image || item?.product_variant?.image
+                  }`}
                 />
                 <div>
                   <p className="font-bold text-gray-900 dark:text-gray-200">
@@ -146,7 +172,8 @@ const OrderItem = ({
               </div>
               <span className="text-right">
                 <p className="font-bold text-lg text-gray-900 dark:text-gray-200">
-                  {FomatVND(calculate(item))}
+                  {/* {FomatVND(calculate(item))} */}
+                  {FomatVND(item?.price)}
                 </p>
               </span>
             </div>
@@ -179,7 +206,6 @@ const calculate = (item) => {
       item?.product?.discount_percent || item?.product_variant?.discount_percent
     ) || 0;
 
-
   // Calculate discounted price
   const discountedPrice = price - (price * discountPercent) / 100;
 
@@ -188,12 +214,17 @@ const calculate = (item) => {
 const MyOrder = () => {
   const nav = useNavigate();
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [currentProductIndex, setCurrentProductIndex] = useState(0);
   const [reviewedProducts, setReviewedProducts] = useState([]);
   const [form] = Form.useForm();
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const user = JSON.parse(Cookies.get("user"));
+  const queryClient = useQueryClient();
 
+  // console.log("user", user);
   // Sử dụng hook scroll to top khi currentPage thay đổi
   useScrollToTop(currentPage);
 
@@ -260,7 +291,9 @@ const MyOrder = () => {
   } = useQuery({
     queryKey: ["orders", currentPage],
     queryFn: async () => {
-      const res = await instanceAxios.get(`/api/v1/customer/orders?page=${currentPage}`);
+      const res = await instanceAxios.get(
+        `/api/v1/customer/orders?page=${currentPage}`
+      );
       return res?.data;
     },
   });
@@ -294,6 +327,80 @@ const MyOrder = () => {
     );
   }
 
+  // Mutation cho hủy đơn hàng
+  const cancelOrderMutation = useMutation({
+    mutationFn: async ({ orderId }) => {
+      const response = await instanceAxios.put(`/api/v1/order/${orderId}/status`, {
+        status: ORDER_STATUS.CANCELLED,
+        customer_id: user.customerId,
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      console.log("data", data);
+      if (data?.message === "Order status updated successfully") {
+        message.success("Đã hủy đơn hàng thành công");
+        queryClient.invalidateQueries(["orders", currentPage]);
+      } else {
+        throw new Error(data?.message || "Không thể hủy đơn hàng");
+      }
+    },
+    onError: (error) => {
+      message.error(
+        error.response?.data?.message || "Không thể hủy đơn hàng"
+      );
+    },
+  });
+
+  // Mutation cho xác nhận nhận hàng
+  const confirmReceivedMutation = useMutation({
+    mutationFn: async ({ orderId }) => {
+      const response = await instanceAxios.put(`/api/v1/order/${orderId}/status`, {
+        status: ORDER_STATUS.COMPLETED,
+        customer_id: user.customerId,
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      if (data?.message) {
+        message.success("Đã xác nhận nhận hàng thành công");
+        setConfirmModalVisible(false);
+        queryClient.invalidateQueries(["orders", currentPage]);
+      } else {
+        throw new Error(data?.message || "Không thể xác nhận nhận hàng");
+      }
+    },
+    onError: (error) => {
+      message.error(
+        error.response?.data?.message || "Không thể xác nhận nhận hàng"
+      );
+    },
+  });
+
+  // Mutation cho yêu cầu trả hàng
+  const requestReturnMutation = useMutation({
+    mutationFn: async ({ orderId }) => {
+      const response = await instanceAxios.put(`/api/v1/order/${orderId}/status`, {
+        status: ORDER_STATUS.RETURN_REQUESTED,
+        customer_id: user.customerId,
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      if (data?.message) {
+        message.success("Đã gửi yêu cầu trả hàng");
+        queryClient.invalidateQueries(["orders", currentPage]);
+      } else {
+        throw new Error(data?.message || "Không thể gửi yêu cầu trả hàng");
+      }
+    },
+    onError: (error) => {
+      message.error(
+        error.response?.data?.message || "Không thể gửi yêu cầu trả hàng"
+      );
+    },
+  });
+
   const getActionsForOrder = (order) => {
     const actions = [];
 
@@ -326,11 +433,6 @@ const MyOrder = () => {
       actions.push("mua lại");
     }
 
-    // Actions for RETURN_REQUESTED orders
-    if (order.status === ORDER_STATUS.RETURN_REQUESTED) {
-      actions.push("hủy yêu cầu trả hàng");
-    }
-
     // Actions for RETURN_PROCESSING orders
     if (order.status === ORDER_STATUS.RETURN_PROCESSING) {
       actions.push("xem trạng thái trả hàng");
@@ -350,6 +452,12 @@ const MyOrder = () => {
   };
 
   const handleAction = async (action, order) => {
+    // console.log("order", order);
+    if (!order?.id) {
+      message.error("Không tìm thấy thông tin đơn hàng");
+      return;
+    }
+
     try {
       switch (action) {
         case "đánh giá":
@@ -360,21 +468,13 @@ const MyOrder = () => {
           break;
 
         case "hủy":
-          try {
-            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.CANCELLED
-            });
-            message.success("Đã hủy đơn hàng thành công");
-            window.location.reload();
-          } catch (error) {            
-            console.error("Chi tiết lỗi:", error);
-            message.error("Không thể hủy đơn hàng");
-          }
+          cancelOrderMutation.mutate({ orderId: order.id });
           break;
 
         case "mua lại":
           try {
-            const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+            const cartItems =
+              JSON.parse(localStorage.getItem("cartItems")) || [];
             const updatedCart = [...cartItems];
 
             order.order_items.forEach((item) => {
@@ -397,7 +497,7 @@ const MyOrder = () => {
                   sku: item.product_variant?.sku || item.product?.sku,
                   image: item.product?.image || item.product_variant?.image,
                   name: item.product?.name,
-                  price: Number(item.price),
+                  price: Number(item.original_price),
                   stock: item.product?.stock || item.product_variant?.stock,
                   thuoc_tinh:
                     item.product_variant?.product_attributes?.reduce(
@@ -409,7 +509,7 @@ const MyOrder = () => {
                     ) || {},
                   discount: Number(
                     item.product.discount_percent ||
-                    item.product_variant.discount_percent
+                      item.product_variant.discount_percent
                   ),
                 });
               }
@@ -428,42 +528,18 @@ const MyOrder = () => {
           break;
 
         case "Đã nhận hàng":
-          try {
-            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.COMPLETED
-            });
-            message.success("Đã xác nhận nhận hàng thành công");
-            window.location.reload();
-          } catch (error) {
-            console.error("Chi tiết lỗi:", error);
-            message.error("Không thể xác nhận nhận hàng");
-          }
+          setSelectedOrder(order);
+          setConfirmModalVisible(true);
           break;
 
-        case "yêu cầu trả hàng":
-          try {
-            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.RETURN_REQUESTED
-            });
-            message.success("Đã gửi yêu cầu trả hàng");
-            window.location.reload();
-          } catch (error) {
-            console.error("Chi tiết lỗi:", error);
-            message.error("Không thể gửi yêu cầu trả hàng");
-          }
+        case "confirmReceived":
+          confirmReceivedMutation.mutate({ orderId: order.id });
           break;
 
-        case "hủy yêu cầu trả hàng":
-          try {
-            await instanceAxios.put(`/api/v1/order/${order.id}/status`, {
-              status: ORDER_STATUS.COMPLETED
-            });
-            message.success("Đã hủy yêu cầu trả hàng");
-            window.location.reload();
-          } catch (error) {
-            console.error("Chi tiết lỗi:", error);
-            message.error("Không thể hủy yêu cầu trả hàng");
-          }
+
+          // Ấn yêu cầu trả hàng, chuyển sang màn hình gửi form yêu cầu trả hàng, khi nào điền xong for và ấn submit thì mới chuyển trạng thái.
+        case "Yêu cầu trả hàng":
+          requestReturnMutation.mutate({ orderId: order.id });
           break;
 
         case "xem trạng thái trả hàng":
@@ -475,7 +551,16 @@ const MyOrder = () => {
       }
     } catch (error) {
       console.error("Error handling action:", error);
-      message.error("Có lỗi xảy ra khi thực hiện hành động");
+      // Chỉ hiển thị lỗi chung nếu không phải do mutation xử lý
+      if (
+        ![
+          cancelOrderMutation.isError,
+          confirmReceivedMutation.isError,
+          requestReturnMutation.isError,
+        ].includes(true)
+      ) {
+        message.error("Có lỗi xảy ra khi thực hiện hành động");
+      }
     }
   };
 
@@ -519,8 +604,9 @@ const MyOrder = () => {
                     {orders.map((order, idx) => (
                       <div
                         key={idx}
-                        className="p-3 border hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700"
+                        className="p-3 border mb-3 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700"
                       >
+                        {/* <Link to={`/my-profile/orders/${order.order_code}`}> */}
                         <OrderItem
                           order_items={order.order_items}
                           status={order.status}
@@ -543,15 +629,15 @@ const MyOrder = () => {
                           <div className="self-end">
                             <span className="mr-2 font-medium">Tổng tiền:</span>
                             <span className="font-bold">
-                              {FomatVND(
+                              {/* {FomatVND(
                                 (order?.order_items || []).reduce(
                                   (total, item) =>
                                     total + calculateSubtotal(item),
                                   0
                                 )
-                              )}
+                              )} */}
+                              {FomatVND(order?.subtotal)}
                             </span>
-
                           </div>
                           <div className="flex flex-row-reverse bg-white dark:bg-gray-800">
                             <Link
@@ -566,12 +652,27 @@ const MyOrder = () => {
                                 key={idx}
                                 onClick={() => handleAction(action, order)}
                                 className="ml-2 px-4 py-2 rounded-lg border bg-black text-white dark:bg-gray-700 dark:text-gray-300 capitalize"
+                                disabled={
+                                  cancelOrderMutation.isLoading ||
+                                  confirmReceivedMutation.isLoading ||
+                                  requestReturnMutation.isLoading
+                                }
                               >
-                                {action}
+                                {cancelOrderMutation.isLoading &&
+                                action === "hủy"
+                                  ? "Đang xử lý..."
+                                  : confirmReceivedMutation.isLoading &&
+                                    action === "confirmReceived"
+                                  ? "Đang xử lý..."
+                                  : requestReturnMutation.isLoading &&
+                                    action === "yêu cầu trả hàng"
+                                  ? "Đang xử lý..."
+                                  : action}
                               </button>
                             ))}
                           </div>
                         </div>
+                        {/* </Link> */}
                       </div>
                     ))}
                   </div>
@@ -594,6 +695,45 @@ const MyOrder = () => {
               </div>
             )}
           </div>
+
+          {/* Add Confirmation Modal */}
+          <Modal
+            title="Xác nhận đã nhận hàng"
+            open={confirmModalVisible}
+            onCancel={() => setConfirmModalVisible(false)}
+            footer={[
+              <button
+                key="cancel"
+                className="px-4 py-2 border rounded-lg mr-2"
+                onClick={() => setConfirmModalVisible(false)}
+                disabled={confirmReceivedMutation.isLoading}
+              >
+                Hủy
+              </button>,
+              <button
+                key="confirm"
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                onClick={() => handleAction("confirmReceived", selectedOrder)}
+                disabled={confirmReceivedMutation.isLoading}
+              >
+                {confirmReceivedMutation.isLoading ? "Đang xử lý..." : "Xác nhận"}
+              </button>,
+            ]}
+          >
+            <div className="p-4">
+              <p className="mb-4">Bạn có chắc chắn đã nhận được hàng?</p>
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <p className="text-yellow-800">
+                  <strong>Lưu ý quan trọng:</strong>
+                </p>
+                <p className="text-yellow-700 mt-2">
+                  Bạn có thể yêu cầu hoàn trả hàng trong vòng 7 ngày kể từ ngày
+                  nhận hàng. Sau thời gian này, chúng tôi sẽ không thể xử lý yêu
+                  cầu hoàn trả của bạn.
+                </p>
+              </div>
+            </div>
+          </Modal>
         </div>
       )}
     </>
@@ -601,4 +741,3 @@ const MyOrder = () => {
 };
 
 export default MyOrder;
-

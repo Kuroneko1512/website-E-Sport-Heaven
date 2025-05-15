@@ -104,7 +104,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string',
+            'status' => 'required|integer',
             'customer_id' => 'nullable|exists:customers,id',
         ]);
 
