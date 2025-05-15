@@ -696,8 +696,8 @@ const NewCheckout = () => {
                       setSelectedDistrict("");
                       setSelectedWard("");
                       form.setFieldsValue({
-                        district_code: undefined,
-                        commune_code: undefined,
+                        district: undefined,
+                        ward: undefined,
                       });
                       loadDistricts(val); // Đảm bảo các quận được tải khi một tỉnh được chọn
                     }}
@@ -731,7 +731,7 @@ const NewCheckout = () => {
                     onChange={(val) => {
                       setSelectedDistrict(val);
                       setSelectedWard("");
-                      form.setFieldsValue({ commune_code: undefined });
+                      form.setFieldsValue({ ward: undefined });
                       loadWards(val); // Đảm bảo các phường/xã được tải khi một quận được chọn
                     }}
                   >
