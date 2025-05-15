@@ -296,12 +296,13 @@ const OrderDetail = () => {
                   <p className="text-sm text-gray-600">
                     SKU: {item.product_variant?.sku || item.product.sku}
                   </p>
+                  <p>
+                  Số lượng: <strong>{item.quantity}</strong>
+                </p>
                 </div>
               </div>
               <div className="text-right">
-                <p>
-                  Số lượng: <strong>{item.quantity}</strong>
-                </p>
+                
                 <p>
                   Giá: <strong>{formatPrice(item.price)}</strong>
                   {(item.product?.discount_percent > 0 ||

@@ -539,7 +539,8 @@ const MyOrder = () => {
 
           // Ấn yêu cầu trả hàng, chuyển sang màn hình gửi form yêu cầu trả hàng, khi nào điền xong for và ấn submit thì mới chuyển trạng thái.
         case "Yêu cầu trả hàng":
-          requestReturnMutation.mutate({ orderId: order.id });
+          // requestReturnMutation.mutate({ orderId: order.id });
+          console.log("đang yêu cầu trả hàng");
           break;
 
         case "xem trạng thái trả hàng":
