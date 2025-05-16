@@ -75,7 +75,7 @@ class OrderService extends BaseService
                 $historyData['actor_email'] = $data['customer_email'];
             }
 
-            Log::info('History create',$historyData);
+            Log::info('History create', $historyData);
 
             // Gọi phương thức createHistory
             OrderHistory::createHistory(
@@ -1005,15 +1005,38 @@ class OrderService extends BaseService
 
     /**
      * Tự động chuyển trạng thái đơn hàng từ DELIVERED sang COMPLETED sau một khoảng thời gian
-     *
-     * @param int $daysToAutoComplete Số ngày sau khi giao hàng để tự động chuyển sang hoàn thành
+     * 
+     * @param int|null $time Thời gian sau khi giao hàng để tự động chuyển sang hoàn thành
+     * @param string $unit Đơn vị thời gian (minutes, hours, days)
      * @return int Số đơn hàng đã được cập nhật
      */
-    public function autoCompleteDeliveredOrders($daysToAutoComplete = null)
+    public function autoCompleteDeliveredOrders($time = null, $unit = 'minutes')
     {
-        $daysToAutoComplete = $daysToAutoComplete ?? config('time.order_auto_complete_days', 3);
+        // Xác định thời gian dựa trên đơn vị
+        switch ($unit) {
+            case 'days':
+                $configKey = 'time.order_auto_complete_days';
+                $defaultValue = 3;
+                $timeInMinutes = ($time ?? config($configKey, $defaultValue)) * 24 * 60;
+                $timeDisplay = ($time ?? config($configKey, $defaultValue)) . ' ngày';
+                break;
+            case 'hours':
+                $configKey = 'time.order_auto_complete_hours';
+                $defaultValue = 24;
+                $timeInMinutes = ($time ?? config($configKey, $defaultValue)) * 60;
+                $timeDisplay = ($time ?? config($configKey, $defaultValue)) . ' giờ';
+                break;
+            case 'minutes':
+            default:
+                $configKey = 'time.order_auto_complete_minutes';
+                $defaultValue = 60;
+                $timeInMinutes = $time ?? config($configKey, $defaultValue);
+                $timeDisplay = $timeInMinutes . ' phút';
+                break;
+        }
+
         // Tìm các đơn hàng đã giao nhưng chưa hoàn thành và đã qua thời gian quy định
-        $cutoffDate = now()->subDays($daysToAutoComplete);
+        $cutoffDate = now()->subMinutes($timeInMinutes);
 
         $orders = $this->model
             ->where('status', Order::STATUS_DELIVERED)
@@ -1029,13 +1052,13 @@ class OrderService extends BaseService
                 Order::STATUS_COMPLETED,
                 null,
                 null,
-                'Đơn hàng được tự động chuyển sang trạng thái hoàn thành sau ' . $daysToAutoComplete . ' ngày giao hàng',
+                'Đơn hàng được tự động chuyển sang trạng thái hoàn thành sau ' . $timeDisplay,
                 true // isSystem = true
             );
 
             if ($result['success']) {
                 $count++;
-                Log::info("Đơn hàng #{$order->order_code} đã được tự động chuyển sang trạng thái hoàn thành");
+                Log::info("Đơn hàng #{$order->order_code} đã được tự động chuyển sang trạng thái hoàn thành sau {$timeDisplay}");
             } else {
                 Log::error("Không thể tự động cập nhật trạng thái đơn hàng #{$order->order_code}: " . $result['message']);
             }

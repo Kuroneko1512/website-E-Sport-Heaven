@@ -14,7 +14,10 @@ class AutoCompleteOrders extends Command
      *
      * @var string
      */
-    protected $signature = 'orders:auto-complete {--days= : Số ngày sau khi giao hàng để tự động hoàn thành}';
+    protected $signature = 'orders:auto-complete 
+                            {--days= : ngày sau khi giao hàng để tự động hoàn thành}
+                            {--hours= : giờ sau khi giao hàng để tự động hoàn thành}
+                            {--minutes= : phút sau khi giao hàng để tự động hoàn thành}';
 
     /**
      * The console command description.
@@ -31,16 +34,32 @@ class AutoCompleteOrders extends Command
      */
     public function handle(OrderService $orderService)
     {
-        $days = $this->option('days') ?? config('time.order_auto_complete_days', 3);
-        $days = (int) $days;
-
-        $this->info("Đang tìm các đơn hàng đã giao quá {$days} ngày để tự động hoàn thành...");
+        $minutes = $this->option('minutes');
+        $hours = $this->option('hours');
+        $days = $this->option('days');
 
         try {
-            $count = $orderService->autoCompleteDeliveredOrders($days);
-
-            $this->info("Đã cập nhật {$count} đơn hàng sang trạng thái hoàn thành.");
-            Log::info("Auto-complete orders: {$count} orders updated to completed status");
+            // Ưu tiên theo thứ tự: phút > giờ > ngày
+            if (!is_null($minutes)) {
+                $minutes = (int) $minutes;
+                $this->info("Đang tìm các đơn hàng đã giao quá {$minutes} phút để tự động hoàn thành...");
+                $count = $orderService->autoCompleteDeliveredOrders($minutes, 'minutes');
+                $this->info("Đã cập nhật {$count} đơn hàng sang trạng thái hoàn thành.");
+                Log::info("Auto-complete orders: {$count} orders updated to completed status after {$minutes} minutes");
+            } elseif (!is_null($hours)) {
+                $hours = (int) $hours;
+                $this->info("Đang tìm các đơn hàng đã giao quá {$hours} giờ để tự động hoàn thành...");
+                $count = $orderService->autoCompleteDeliveredOrders($hours, 'hours');
+                $this->info("Đã cập nhật {$count} đơn hàng sang trạng thái hoàn thành.");
+                Log::info("Auto-complete orders: {$count} orders updated to completed status after {$hours} hours");
+            } else {
+                $days = $days ?? config('time.order_auto_complete_days', 3);
+                $days = (int) $days;
+                $this->info("Đang tìm các đơn hàng đã giao quá {$days} ngày để tự động hoàn thành...");
+                $count = $orderService->autoCompleteDeliveredOrders($days, 'days');
+                $this->info("Đã cập nhật {$count} đơn hàng sang trạng thái hoàn thành.");
+                Log::info("Auto-complete orders: {$count} orders updated to completed status after {$days} days");
+            }
 
             return Command::SUCCESS;
         } catch (Exception $e) {
