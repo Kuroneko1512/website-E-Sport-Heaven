@@ -35,7 +35,10 @@ import AttributePage from "@pages/Attribute/Attribute";
 import {  setAuthData, clearAuth } from "./store/reducers/auth";
 import Coupon from "@pages/Coupon/Coupon";
 import AddCoupon from "@pages/Coupon/Store";
-
+import Blog from "./pages/Blog/Blog";
+import BlogCategory from "./pages/BlogCategory/BlogCategory";
+import DetailBlog from "./pages/Blog/DetailBlog";
+import DetailBlogCategory from "./pages/BlogCategory/DetailBlogCategory";
 import OrderReturn from "./pages/OrderReurn/OrderReturn";
 import DetailReturnOrder from "./pages/OrderReurn/DetailReturnOrder";
 
@@ -172,6 +175,17 @@ const App = () => {
             <Route path="add-coupon" element={<AddCoupon />} />
             <Route path="edit-coupon/:id" element={<EditCoupon />} />
             <Route path="detail-coupon/:id" element={<DetailCoupon />} />
+            {/*Route blog*/}
+            <Route path="blog" element={<Blog />} />
+            <Route path="add-blog" element={<DetailBlog />} />
+            <Route path="edit-blog/:id" element={<DetailBlog />} />
+            <Route path="detail-blog/:id" element={<DetailBlog />} />
+            
+            <Route path="blog-category" element={<BlogCategory />} />
+            <Route path="add-blog-category" element={<DetailBlogCategory />} />
+            <Route path="edit-blog-category/:id" element={<DetailBlogCategory />} />
+            <Route path="detail-blog-category/:id" element={<DetailBlogCategory />} />
+
 
             <Route path="order-return" element={<OrderReturn />} />
             <Route path="order-return/:id" element={<DetailReturnOrder />} />
@@ -180,7 +194,6 @@ const App = () => {
             {/*Route user*/}
             <Route path="User" element={<UserList />} />
 
-           
           </Route>
         </Route>
       </Routes>

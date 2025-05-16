@@ -46,9 +46,10 @@ Route::prefix('v1')->group(callback: function () {
     Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
 
     // Blog API Routes
-    Route::apiResource('/blog-categories', BlogCategoryController::class);
-    Route::apiResource('/blogs', BlogController::class);
-
+    Route::apiResource('/blog-categories', BlogCategoryController::class)->except(['store', 'edit', 'update', 'destroy']);
+    Route::apiResource('/blogs', BlogController::class)->except(['store', 'edit', 'update', 'destroy']);
+    Route::get('/blogs/slug/{id}', [BlogController::class, 'getSlug']);
+    // Route::post('/blogs/upload-image', [BlogController::class, 'uploadImage']);
     // User API Routes
     Route::apiResource('/user', UserController::class);
     Route::put('/user/{id}/status', [UserController::class, 'updateStatus']);
@@ -65,4 +66,5 @@ Route::prefix('v1')->group(callback: function () {
 
     // Coupon API Routes
     Route::apiResource('/coupon', CouponsController::class);
-});
+
+}); 
