@@ -7,12 +7,14 @@ import SkeletonBestseller from "../loadingSkeleton/SkeletonBestseller";
 
 const RelatedProducts = () => {
   const { data: productData, isLoading: productLoading } = useQuery({
-    queryKey: ["products"],
+    queryKey: ["productRandom"],
     queryFn: async () => {
-      const res = await instanceAxios.get(`/api/v1/product`);
-      return res?.data?.data?.data;
+      const res = await instanceAxios.get(`/api/v1/product/random`);
+      return res?.data?.data;
     },
   });
+
+  // console.log("productData", productData);
 
   return (
     <>
@@ -25,7 +27,7 @@ const RelatedProducts = () => {
           <div className="px-4 sm:px-6 lg:px-8">
             {/* <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">Sản phẩm mới</h1> */}
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 md:gap-6">
-              {productData?.slice(0, 8).map((item) => (
+              {productData?.map((item) => (
                 <div
                   key={item?.id}
                   className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col"
