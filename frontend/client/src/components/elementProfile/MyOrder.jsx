@@ -223,6 +223,8 @@ const MyOrder = () => {
   const [loading, setLoading] = useState(false);
   const user = JSON.parse(Cookies.get("user"));
   const queryClient = useQueryClient();
+  const [returnRequestModalVisible, setReturnRequestModalVisible] = useState(false);
+  const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
 
   // console.log("user", user);
   // Sử dụng hook scroll to top khi currentPage thay đổi
@@ -536,11 +538,10 @@ const MyOrder = () => {
           confirmReceivedMutation.mutate({ orderId: order.id });
           break;
 
-
-          // Ấn yêu cầu trả hàng, chuyển sang màn hình gửi form yêu cầu trả hàng, khi nào điền xong for và ấn submit thì mới chuyển trạng thái.
-        case "Yêu cầu trả hàng":
-          // requestReturnMutation.mutate({ orderId: order.id });
-          console.log("đang yêu cầu trả hàng");
+        // Ấn yêu cầu trả hàng, chuyển sang màn hình gửi form yêu cầu trả hàng, khi nào điền xong form và ấn submit thì mới chuyển trạng thái.
+        case "yêu cầu trả hàng":
+          setSelectedReturnOrder(order);
+          setReturnRequestModalVisible(true);
           break;
 
         case "xem trạng thái trả hàng":
@@ -731,6 +732,48 @@ const MyOrder = () => {
                   Bạn có thể yêu cầu hoàn trả hàng trong vòng 7 ngày kể từ ngày
                   nhận hàng. Sau thời gian này, chúng tôi sẽ không thể xử lý yêu
                   cầu hoàn trả của bạn.
+                </p>
+              </div>
+            </div>
+          </Modal>
+
+          {/* Modal xác nhận yêu cầu trả hàng */}
+          <Modal
+            title="Xác nhận yêu cầu trả hàng"
+            open={returnRequestModalVisible}
+            onCancel={() => setReturnRequestModalVisible(false)}
+            footer={[
+              <button
+                key="cancel"
+                className="px-4 py-2 border rounded-lg mr-2"
+                onClick={() => setReturnRequestModalVisible(false)}
+              >
+                Hủy
+              </button>,
+              <button
+                key="confirm"
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                onClick={() => {
+                  setReturnRequestModalVisible(false);
+                  if (selectedReturnOrder) {
+                    nav(`/orders/${selectedReturnOrder.order_code}/return-request`);
+                  }
+                }}
+              >
+                Xác nhận
+              </button>,
+            ]}
+          >
+            <div className="p-4">
+              <p className="mb-4">
+                Bạn có chắc chắn muốn gửi yêu cầu trả hàng cho đơn <strong>{selectedReturnOrder?.order_code}</strong>?
+              </p>
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <p className="text-yellow-800">
+                  <strong>Lưu ý:</strong>
+                </p>
+                <p className="text-yellow-700 mt-2">
+                  Sau khi xác nhận, bạn sẽ được chuyển đến form để hoàn tất yêu cầu trả hàng.
                 </p>
               </div>
             </div>
