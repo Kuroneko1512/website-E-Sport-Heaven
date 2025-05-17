@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Jobs\Mail\Order\NewOrderJob;
 use App\Models\Order;
+use App\Models\OrderHistory;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Models\OrderUserReturn;
@@ -35,16 +36,31 @@ class OrderController extends Controller
             Log::info('data', $data);
             //tạo sp
             $Order = $this->orderService->createOrder($data);
-
             // Thanh toán vn pay sẽ xử lý ở PaymentController
             if ($data['payment_method'] === 'vnpay') {
                 $vnpUrl = $this->payment($Order, $request->ip());
+                $expireDate = Carbon::now('Asia/Ho_Chi_Minh')->addMinutes(3);
+               OrderHistory::createHistory(
+                    $Order->id,
+                    OrderHistory::ACTION_ORDER_UPDATED,
+                    [
+                        'status_to' => $Order->status,
+                        'notes' => 'Cập nhật url VNPay',
+                        'metadata' => [
+                            'total_amount' => $Order->total_amount,
+                            'payment_method' => $Order->payment_method ?? 'unknown',
+                            'items_count' => $Order->orderItems->count(),
+                            'vnpay_url' => $vnpUrl,
+                            'expire_date' => $expireDate,
+                        ]
+                    ]
+                );
 
                 DB::commit();
                 return response()->json([
                     'message' => 'URL thanh toán VNPay đã được tạo thành công!',
                     'vnpUrl'  => $vnpUrl, // Trả về URL để chuyển hướng người dùng
-                ], 200); // Trả về 200 OK với URL VNPay
+                ], 200); // Trả về 200 OK với URL VNPay 
             }
 
             // Tải lại đơn hàng với các quan hệ để gửi email
@@ -126,17 +142,19 @@ class OrderController extends Controller
             'data' => $result['data']
         ]);
     }
-    private function payment($data, $ip)
+    private function payment($data, $ip): string
     {
         Log::info('vnpay', [
             'data' => $data,
             'ip' => $ip,
         ]);
+        $expireDate = Carbon::now('Asia/Ho_Chi_Minh')->addMinutes(3);
+
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl =  env('VNP_RETURN_URL');
         $vnp_TmnCode = "NJJ0R8FS"; // Merchant code at VNPAY
         $vnp_HashSecret = "BYKJBHPPZKQMKBIBGGXIYKWYFAYSJXCW"; // Secret key
-
+        $vnp_ExpireDate = $expireDate->format('YmdHis'); // thời gian hết hạn thanh toán 
         $vnp_TxnRef = $data['order_code']; // Transaction reference (unique per order)
         $vnp_OrderInfo = 'Thanh toán đơn hàng test'; // Order information
         $vnp_OrderType = 'other';
@@ -152,6 +170,7 @@ class OrderController extends Controller
             "vnp_Amount" => $vnp_Amount,
             "vnp_Command" => "pay",
             "vnp_CreateDate" => Carbon::now('Asia/Ho_Chi_Minh')->format('YmdHis'),
+            "vnp_ExpireDate" => $vnp_ExpireDate,
             "vnp_CurrCode" => "VND",
             "vnp_IpAddr" => $vnp_IpAddr,
             "vnp_Locale" => $vnp_Locale,
