@@ -17,7 +17,7 @@ interface Coupon {
   name: string;
   description: string;
   discount_value: number;
-  discount_type: string;
+  discount_type: number;
   max_uses: number;
 }
 

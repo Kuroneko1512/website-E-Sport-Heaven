@@ -11,14 +11,13 @@ const DetailCoupon: FC = () => {
         name: "",
         description: "",
         discount_value: 0,
-        discount_type: "percentage",
+        discount_type: 0,
         start_date: "",
         end_date: "",
-        min_purchase: 0,
+        max_purchase: 0,
         max_uses: 0,
-        used_count: 0,
         is_active: 1,
-        user_usage: []
+        
     });
 
     useEffect(() => {
@@ -75,13 +74,13 @@ const DetailCoupon: FC = () => {
                             <div className="form-group">
                                 <label>Loại giảm giá</label>
                                 <p className="form-control-static">
-                                    {coupon.discount_type === "percentage" ? 'Phần trăm' : 'Giá tiền'}
+                                    {coupon.discount_type === 0 ? 'Phần trăm' : 'Giá tiền'}
                                 </p>
                             </div>
                             <div className="form-group">
                                 <label>Giá trị giảm</label>
                                 <p className="form-control-static">
-                                    {coupon.discount_type === "percentage" ? `${coupon.discount_value}%` : `${coupon.discount_value.toLocaleString()}đ`}
+                                    {coupon.discount_type === 0 ? `${coupon.discount_value}%` : `${coupon.discount_value.toLocaleString()}đ`}
                                 </p>
                             </div>
                         </div>
@@ -96,11 +95,11 @@ const DetailCoupon: FC = () => {
                             </div>
                             <div className="form-group">
                                 <label>Số lượt sử dụng</label>
-                                <p className="form-control-static">{coupon.used_count}/{coupon.max_uses}</p>
+                                <p className="form-control-static">{coupon.max_uses}</p>
                             </div>
                             <div className="form-group">
                                 <label>Số tiền tối thiểu</label>
-                                <p className="form-control-static">{coupon.min_purchase.toLocaleString()}đ</p>
+                                <p className="form-control-static">{coupon.max_purchase.toLocaleString()}đ</p>
                             </div>
                             <div className="form-group">
                                 <label>Trạng thái</label>
@@ -110,12 +109,7 @@ const DetailCoupon: FC = () => {
                                     </span>
                                 </p>
                             </div>
-                            <div className="form-group">
-                                <label>Đối tượng sử dụng</label>
-                                <p className="form-control-static">
-                                    {coupon.user_usage === null ? 'Tất cả người dùng' : 'Người dùng được chọn'}
-                                </p>
-                            </div>
+                            
                         </div>
                     </div>
                 </div>
