@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\Blog\V1\BlogController;
 use App\Http\Controllers\Api\Order\V1\OrderController;
 use App\Http\Controllers\Api\Location\AddressController;
@@ -27,10 +26,12 @@ Route::prefix('v1')->group(callback: function () {
     Route::get('/attributeValue/index/{attribute_id}', [AttributeValueController::class, 'index']);
     Route::post('/attribute/filter', [AttributeController::class, 'getAttributeForIds']);
     Route::apiResource('/attributeValue', AttributeValueController::class)->except(['index']);
-    Route::apiResource('/order', OrderController::class);
+
+    // Order API Routes
+    Route::apiResource('/order', OrderController::class)->only(['store']);
     Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
     Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
-    Route::apiResource('/review', ReviewController::class);// chưa sửa hả Ngân
+
     Route::apiResource('/blog-categories', BlogCategoryController::class);
     Route::apiResource('/blogs', BlogController::class);
     // User API Routes
@@ -43,12 +44,12 @@ Route::prefix('v1')->group(callback: function () {
         Route::get('/communes', [AddressController::class, 'getCommunes']);
     });
 
-    Route::get('/review-by-product/{id}',[ReviewController::class,'getByProduct']);
+    
 
 
     Route::apiResource('/coupon', CouponsControllerAdmin::class);
     Route::apiResource('/coupon-usage', CouponUsageControllerAdmin::class);
 
-}); 
+});
 
 

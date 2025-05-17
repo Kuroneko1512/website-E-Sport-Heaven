@@ -1,37 +1,97 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom"; // Import useLocation để xử lý URL
+import { Link, useLocation } from "react-router-dom";
 
 const ThankYou = () => {
-    const [orderCode, setOrderCode] = useState("");
-    const location = useLocation(); // Lấy thông tin URL hiện tại
+  const [orderCode, setOrderCode] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const location = useLocation();
 
-    useEffect(() => {
+  useEffect(() => {
+    const processOrder = () => {
+      try {
         // Truy xuất query param "orderCode" từ URL
         const queryParams = new URLSearchParams(location.search);
-        const orderCodeFromURL = queryParams.get("orderCode"); // Lấy mã đơn hàng từ URL
+        const orderCodeFromURL = queryParams.get("orderCode");
 
         if (orderCodeFromURL) {
-            setOrderCode(orderCodeFromURL);
-            let checkoutItems = JSON.parse(localStorage.getItem('checkoutItems')) || [];
-            let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-            
-            // Lọc các item trong cartItems, giữ lại những item không trùng với checkoutItems
-            cartItems = cartItems.filter(item => !checkoutItems.some(checkoutItem => checkoutItem.id === item.id));
-            
-            // Cập nhật lại localStorage sau khi đã loại bỏ các item trùng
-            localStorage.setItem('cartItems', JSON.stringify(cartItems));
-        } else {
-            // Nếu không tìm thấy trên URL, kiểm tra trong localStorage
-            const storedOrderCode = localStorage.getItem("orderCode");
-            if (storedOrderCode) {
-                setOrderCode(storedOrderCode);
-                localStorage.removeItem("orderCode"); // Xóa sau khi sử dụng
-            }
-        }
-    }, [location.search]);
+          setOrderCode(orderCodeFromURL);
+          let checkoutItems = JSON.parse(localStorage.getItem("checkoutItems")) || [];
+          let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
 
+          // Lọc các item trong cartItems, giữ lại những item không trùng với checkoutItems
+          cartItems = cartItems.filter(
+            (item) => !checkoutItems.some((checkoutItem) => checkoutItem.id === item.id)
+          );
+
+          // Cập nhật lại localStorage sau khi đã loại bỏ các item trùng
+          localStorage.setItem("cartItems", JSON.stringify(cartItems));
+          
+          // Xóa checkoutItems sau khi đã xử lý
+          localStorage.removeItem("checkoutItems");
+          
+          // Dispatch event để cập nhật UI
+          window.dispatchEvent(new CustomEvent("cartUpdated", { detail: cartItems }));
+        } else {
+          // Nếu không tìm thấy trên URL, kiểm tra trong localStorage
+          const storedOrderCode = localStorage.getItem("orderCode");
+          if (storedOrderCode) {
+            setOrderCode(storedOrderCode);
+            localStorage.removeItem("orderCode");
+            
+            // Lấy cartItems hiện tại và dispatch event
+            const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+            window.dispatchEvent(new CustomEvent("cartUpdated", { detail: cartItems }));
+          }
+        }
+      } catch (err) {
+        console.error("Error processing order:", err);
+        setError("Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng liên hệ hỗ trợ.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    processOrder();
+
+    // Cleanup function
+    return () => {
+      localStorage.removeItem("checkoutItems");
+      localStorage.removeItem("orderCode");
+    };
+  }, [location.search]);
+
+  if (isLoading) {
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-100">
+      <div className="flex justify-center items-center h-screen bg-gray-100">
+        <div className="text-center p-10 rounded-lg bg-white shadow-md max-w-md w-11/12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Đang xử lý đơn hàng của bạn...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-100">
+        <div className="text-center p-10 rounded-lg bg-white shadow-md max-w-md w-11/12">
+          <div className="text-red-500 text-4xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Đã có lỗi xảy ra</h1>
+          <p className="text-gray-600 mb-5">{error}</p>
+          <Link
+            to="/"
+            className="inline-block px-4 py-3 text-lg text-white bg-blue-600 no-underline rounded font-bold transition duration-300 hover:bg-blue-700"
+          >
+            Quay về trang chủ
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex justify-center items-center h-screen bg-gray-100">
       {/* Container có hiệu ứng fade in (cần định nghĩa trong tailwind.config.js hoặc sử dụng plugin animate.css) */}
       <div className="text-center p-10 rounded-lg bg-white shadow-md max-w-md w-11/12 animate-fadeIn">
         {/* Hình ảnh có hiệu ứng bounce */}
@@ -69,7 +129,7 @@ const ThankYou = () => {
         </Link>
       </div>
     </div>
-    );
+  );
 };
 
 // Styles hoàn chỉnh cho giao diện

@@ -168,7 +168,7 @@ const OrderTracking = () => {
                   Chi tiết đơn hàng
                 </h2>
                 <div className="space-y-4">
-                  {orderData.order_items.map((item, index) => (
+                  {orderData?.order_items?.map((item, index) => (
                     <div key={index} className="border-b border-gray-200 pb-4 last:border-0">
                       <div className="flex gap-4">
                         {/* Uncomment this section to test image display */}
