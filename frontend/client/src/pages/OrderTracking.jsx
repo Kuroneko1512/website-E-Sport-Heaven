@@ -238,7 +238,7 @@ const OrderTracking = () => {
         </span>
       </header>
 
-      <section className="grid grid-cols-5 gap-6 mb-8 border-b">
+      <section className="grid grid-cols-4 gap-6 mb-8 border-b">
         <div className="p-4 grid col-span-2">
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -258,7 +258,7 @@ const OrderTracking = () => {
             </p>
           </div>
         </div>
-        <div className="p-4 grid col-span-3">
+        <div className="p-4 grid col-span-2">
           {/* <h2 className="text-xl font-semibold text-gray-900 mb-2">
             Lịch sử đơn hàng
           </h2> */}
@@ -302,7 +302,6 @@ const OrderTracking = () => {
               <div className="text-right">
                 
                 <p>
-                  Giá: <strong>{formatPrice(item.price)}</strong>
                   {(item.product?.discount_percent > 0 ||
                     item.product_variant?.discount_percent > 0) && (
                     <span className="line-through text-gray-500 mr-2">
@@ -310,6 +309,7 @@ const OrderTracking = () => {
                       {formatPrice(item.original_price)}
                     </span>
                   )}
+                  <strong>{formatPrice(item.price)}</strong>
                 </p>
               </div>
             </div>
@@ -318,21 +318,21 @@ const OrderTracking = () => {
       </section>
 
       <section className="mb-8 text-right">
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng tiền hàng: </div>
           <span className="col-span-2">
             {formatPrice(orderData?.data?.subtotal || 0)}
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phí vận chuyển: </div>
           <span className="col-span-2">
             {formatPrice(orderData?.data?.shipping_fee || 0)}
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Giảm giá: </div>
           <span className="col-span-2">
             {orderData?.data?.order_discount_type === 1
@@ -341,14 +341,14 @@ const OrderTracking = () => {
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng thanh toán: </div>
           <span className="text-2xl font-bold text-red-500 col-span-2">
             {formatPrice(orderData?.data?.total_amount)}
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phương thức thanh toán: </div>
           <span className="col-span-2">
             {orderData?.data?.payment_method === "cod"

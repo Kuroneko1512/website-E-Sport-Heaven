@@ -506,7 +506,8 @@ const OrderDetail = () => {
                 : confirmReceivedMutation.isLoading &&
                   action === "confirmReceived"
                 ? "Đang xử lý..."
-                : requestReturnMutation.isLoading && action === "yêu cầu trả hàng"
+                : requestReturnMutation.isLoading &&
+                  action === "yêu cầu trả hàng"
                 ? "Đang xử lý..."
                 : action}
             </button>
@@ -576,7 +577,6 @@ const OrderDetail = () => {
               </div>
               <div className="text-right">
                 <p>
-                  Giá: <strong>{formatPrice(item.price)}</strong>
                   {(item.product?.discount_percent > 0 ||
                     item.product_variant?.discount_percent > 0) && (
                     <span className="line-through text-gray-500 mr-2">
@@ -584,6 +584,7 @@ const OrderDetail = () => {
                       {formatPrice(item.original_price)}
                     </span>
                   )}
+                  <strong>{formatPrice(item.price)}</strong>
                 </p>
               </div>
             </div>
@@ -592,21 +593,21 @@ const OrderDetail = () => {
       </section>
 
       <section className="mb-8 text-right">
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng tiền hàng: </div>
           <span className="col-span-2">
             {formatPrice(orderData?.data?.subtotal || 0)}
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phí vận chuyển: </div>
           <span className="col-span-2">
             {formatPrice(orderData?.data?.shipping_fee || 0)}
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Giảm giá: </div>
           <span className="col-span-2">
             {orderData?.data?.order_discount_type === 0
@@ -615,14 +616,14 @@ const OrderDetail = () => {
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng thanh toán: </div>
           <span className="text-2xl font-bold text-red-500 col-span-2">
             {formatPrice(orderData?.data?.total_amount)}
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phương thức thanh toán: </div>
           <span className="col-span-2">
             {orderData?.data?.payment_method === "cod"
