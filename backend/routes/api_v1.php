@@ -11,8 +11,10 @@ use App\Http\Controllers\Api\Category\V1\CategoryController;
 use App\Http\Controllers\Api\Attribute\V1\AttributeController;
 use App\Http\Controllers\Api\Attribute\V1\AttributeValueController;
 use App\Http\Controllers\Api\User\UserController;
-use App\Http\Controllers\Api\Coupons\CouponsController;
+
 use App\Http\Controllers\Api\Admin\V1\ProductController as ProductControllerAdmin;
+use App\Http\Controllers\Api\Admin\V1\CouponUsageController as CouponUsageControllerAdmin       ;
+use App\Http\Controllers\Api\Admin\V1\CouponsController as CouponsControllerAdmin;
 Route::prefix('v1')->group(callback: function () {
     Route::apiResource('/attribute', AttributeController::class);
     Route::get('/category/indexNoPagination', [CategoryController::class, 'indexNoPagination']);
@@ -44,7 +46,8 @@ Route::prefix('v1')->group(callback: function () {
     Route::get('/review-by-product/{id}',[ReviewController::class,'getByProduct']);
 
 
-    Route::apiResource('/coupon', CouponsController::class);
+    Route::apiResource('/coupon', CouponsControllerAdmin::class);
+    Route::apiResource('/coupon-usage', CouponUsageControllerAdmin::class);
 
 }); 
 

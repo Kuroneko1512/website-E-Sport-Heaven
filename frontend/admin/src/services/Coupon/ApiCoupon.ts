@@ -9,16 +9,13 @@ export interface Coupon {
   name: string;
   description: string;
   discount_value: number;
-  discount_type: string;
-  user_usage: any;
+  discount_type: number;
   is_active: number;
   start_date: string;
   end_date: string;
   max_uses: number;
-  used_count: number;
-  min_purchase: number;
-  created_at: string;
-  updated_at: string;
+  max_purchase: number;
+
 }
 
 // Interface định nghĩa dữ liệu trả về từ API, bao gồm thông tin phân trang

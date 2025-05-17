@@ -55,6 +55,12 @@ export const MENU: IMenuItem[] = [
     path: '/Coupon',
   },
   {
+    name: 'Người sử dụng mã giảm giá',
+    icon: 'fas fa-ticket-alt nav-icon',
+    path: '/CouponUsage',
+  },
+  
+  {
     name: i18n.t('menusidebar.label.mainMenu'),
     icon: 'far fa-caret-square-down nav-icon',
     children: [

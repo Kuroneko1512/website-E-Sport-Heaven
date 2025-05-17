@@ -39,7 +39,7 @@ Route::prefix('v1')->group(function () {
             //Order routes
             Route::apiResource('/order', OrderController::class);
             //Customer routes
-      
+           
           
 
             //Role and Permission routes

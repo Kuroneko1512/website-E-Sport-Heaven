@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Coupons;
+namespace App\Http\Controllers\Api\Admin\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
@@ -39,9 +39,9 @@ class CouponsController extends Controller
             'code' => 'required|string|max:255|unique:coupons',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'discount_type' => 'required|in:percentage,fixed',
+            'discount_type' => 'required|integer',
             'discount_value' => 'required|numeric|min:0',
-            'min_purchase' => 'required|numeric|min:0',
+            'max_purchase' => 'required|numeric|min:0',
             'max_uses' => 'nullable|integer|min:0',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after:start_date',
@@ -67,9 +67,9 @@ class CouponsController extends Controller
             'code' => 'required|string|max:255|unique:coupons,code,' . $coupon->id,
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'discount_type' => 'required|in:percentage,fixed',
+            'discount_type' => 'required|integer',
             'discount_value' => 'required|numeric|min:0',
-            'min_purchase' => 'required|numeric|min:0',
+            'max_purchase' => 'required|numeric|min:0',
             'max_uses' => 'nullable|integer|min:0',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after:start_date',

@@ -8,14 +8,13 @@ interface CouponDisplay {
   name: string;
   description: string;
   discount_value: number;
-  discount_type: string;
-  min_purchase: number;
+  discount_type: number;
   is_active: number;
   start_date: string;
   end_date: string;
   max_uses: number;
   user_usage: any;
-  used_count: number;
+  max_purchase: number;
 }
 
 const Coupon: FC = () => {
@@ -47,13 +46,13 @@ const Coupon: FC = () => {
         description: item.description || '',
         discount_value: item.discount_value,
         discount_type: item.discount_type,
-        min_purchase: item.min_purchase || 0,
+        max_purchase: item.max_purchase || 0,
         user_usage: item.user_usage || {},
         is_active: 1,
         start_date: item.start_date || '',
         end_date: item.end_date || '',
         max_uses: item.max_uses || 0,
-        used_count: item.used_count || 0,
+  
       }));
       setCoupons(formattedCoupons);
     } catch (error) {
@@ -208,7 +207,7 @@ const Coupon: FC = () => {
                       <tr key={coupon.id}>
                         <td>{coupon.code}</td>
                         <td>{coupon.name}</td>
-                        <td>{coupon.discount_type === "percentage" ? 'Phần trăm' : 'Giá tiền'}</td>
+                        <td>{coupon.discount_type === 0 ? 'Phần trăm' : 'Giá tiền'}</td>
                           <td>
                           {coupon.end_date}
                         </td>

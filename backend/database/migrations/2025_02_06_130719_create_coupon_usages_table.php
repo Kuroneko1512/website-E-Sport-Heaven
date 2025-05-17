@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('coupon_id')->constrained('coupons');
             $table->foreignId('user_id')->constrained('users');
+            $table ->integer('amount')->default(0);
             $table->timestamps();
         });
     }
@@ -25,5 +26,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('coupon_usages');
+      
+  
     }
 };
