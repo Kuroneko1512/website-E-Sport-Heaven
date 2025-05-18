@@ -1,7 +1,7 @@
 import { useEffect, useState, FC } from 'react';
 import { getCouponUsage, CouponUsage, deleteCouponUsage } from '@app/services/Coupon/CouponUsage/ApiCouponUsage';
 import { Button } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+
 import { useNavigate, Link } from 'react-router-dom';
 
 interface CouponUsageResponse {
@@ -27,8 +27,9 @@ const CouponUsageComponent: FC = () => {
             setLoading(true);
             const response = await getCouponUsage();
             const data = response as unknown as CouponUsageResponse;
-            setCouponUsages(data.data);
+            setCouponUsages(data.data.data.data);
             setTotalPages(data.last_page);
+       
         } catch (error) {
             console.error('Error fetching coupon usages:', error);
         } finally {
@@ -98,9 +99,9 @@ const CouponUsageComponent: FC = () => {
                     <div className="card-tools">
                         <Button
                             type="primary"
-                            icon={<PlusOutlined />}
+                           
                             onClick={() => navigate('/CouponUsage/create')}
-                            className="btn btn-success me-2"
+                            className="btn btn-success me-2 h-10"
                         >
                             + Thêm mới
                         </Button>
