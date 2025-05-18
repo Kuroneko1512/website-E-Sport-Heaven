@@ -16,13 +16,45 @@ const ReturnRequestForm = () => {
 
   const handleImageChange = ({ fileList: newFileList }) => {
     setFileList(newFileList);
-    if (newFileList && newFileList[0] && newFileList[0].originFileObj) {
-      const reader = new FileReader();
-      reader.onload = (e) => setPreviewImage(e.target.result);
-      reader.readAsDataURL(newFileList[0].originFileObj);
-    } else {
-      setPreviewImage(null);
+    // Hiển thị preview cho tất cả ảnh
+    if (newFileList.length === 0) {
+      setPreviewImage([]);
+      return;
     }
+    const previews = [];
+    let loaded = 0;
+    newFileList.forEach((file, idx) => {
+      if (file.originFileObj) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previews[idx] = e.target.result;
+          loaded++;
+          if (loaded === newFileList.length) {
+            setPreviewImage([...previews]);
+          }
+        };
+        reader.readAsDataURL(file.originFileObj);
+      } else {
+        loaded++;
+        previews[idx] = file.url || "";
+        if (loaded === newFileList.length) {
+          setPreviewImage([...previews]);
+        }
+      }
+    });
+  };
+
+  // Xóa ảnh khỏi fileList và previewImage
+  const handleRemove = (file) => {
+    const idx = fileList.indexOf(file);
+    const newFileList = fileList.filter((f) => f.uid !== file.uid);
+    setFileList(newFileList);
+    if (previewImage && Array.isArray(previewImage)) {
+      const newPreview = [...previewImage];
+      newPreview.splice(idx, 1);
+      setPreviewImage(newPreview);
+    }
+    return false; // Ngăn Upload tự động xóa, ta tự xử lý
   };
 
   const { data, isLoading } = useQuery({
@@ -74,13 +106,15 @@ const ReturnRequestForm = () => {
     }
     setLoading(true);
     try {
-      // Nếu có file ảnh, gửi bằng FormData
       let formData;
       if (fileList && fileList.length > 0 && fileList[0].originFileObj) {
         formData = new FormData();
         formData.append("order_id", data?.data?.id || "");
-        (values.order_item_id || []).forEach((id) =>
-          formData.append("order_item_id[]", id)
+        formData.append(
+          "order_item_id",
+          (values.order_item_id && values.order_item_id.length > 0)
+            ? values.order_item_id[0]
+            : ""
         );
         formData.append("reason", String(values.reason) || "");
         formData.append("description", values.description || "");
@@ -88,16 +122,22 @@ const ReturnRequestForm = () => {
         formData.append("refund_bank_name", values.refund_bank_name || "");
         formData.append("refund_amount", values.refund_amount || "");
         formData.append("refund_bank_customer_name", values.refund_bank_customer_name || "");
-        formData.append("image", fileList[0].originFileObj);
-        // Gửi bằng FormData
+        // Gửi tất cả ảnh
+        fileList.forEach((file) => {
+          if (file.originFileObj) {
+            formData.append("image[]", file.originFileObj);
+          }
+        });
         await instanceAxios.post("/api/v1/order/orders-user-return", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
-        // Nếu không upload file, gửi JSON:
         const payload = {
           order_id: data?.data?.id || "",
-          order_item_id: values.order_item_id || [],
+          order_item_id:
+            values.order_item_id && values.order_item_id.length > 0
+              ? values.order_item_id[0]
+              : "",
           reason: String(values.reason) || "",
           description: values.description || "",
           refund_bank_account: values.refund_bank_account || "",
@@ -108,7 +148,7 @@ const ReturnRequestForm = () => {
         await instanceAxios.post("/api/v1/order/orders-user-return", payload);
       }
       message.success("Đã gửi yêu cầu trả hàng thành công");
-      // nav("/my-profile/orders");
+      nav("/my-profile/orders");
     } catch (error) {
       console.log(error.response?.data || error);
       message.error("Gửi yêu cầu thất bại");
@@ -237,21 +277,48 @@ const ReturnRequestForm = () => {
         >
           <Upload
             beforeUpload={() => false}
-            maxCount={1}
+            multiple
+            maxCount={5}
             accept="image/*"
             onChange={handleImageChange}
+            onRemove={handleRemove}
             showUploadList={false}
             fileList={fileList}
           >
             <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
           </Upload>
-          {previewImage && (
-            <div style={{ marginTop: 16 }}>
-              <img
-                src={previewImage}
-                alt="preview"
-                style={{ maxWidth: "100%", maxHeight: 200, borderRadius: 8 }}
-              />
+          {previewImage && Array.isArray(previewImage) && (
+            <div style={{ marginTop: 16, display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {previewImage.map((img, idx) => (
+                <div key={idx} style={{ position: "relative", display: "inline-block" }}>
+                  <img
+                    src={img}
+                    alt={`preview-${idx}`}
+                    style={{ maxWidth: 100, maxHeight: 100, borderRadius: 8, border: "1px solid #eee" }}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: 2,
+                      right: 2,
+                      background: "rgba(0,0,0,0.6)",
+                      color: "#fff",
+                      borderRadius: "50%",
+                      width: 20,
+                      height: 20,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      fontSize: 14,
+                      zIndex: 2,
+                    }}
+                    onClick={() => handleRemove(fileList[idx])}
+                  >
+                    ×
+                  </span>
+                </div>
+              ))}
             </div>
           )}
         </Form.Item>
