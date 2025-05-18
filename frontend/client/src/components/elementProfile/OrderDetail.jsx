@@ -13,10 +13,13 @@ import {
 import ReviewForm from "../elementProfile/ReviewForm";
 import useReviewSubmit from "../../hooks/useReviewSubmit";
 import getActionsForOrder from "../../utils/getActionsForOrder";
+import { filterHistoryByStatusTo } from "../../utils/filterHistoryByStatusTo";
 
 const OrderHistory = ({ history }) => {
-  // Sort history by created_at descending
-  const sortedHistory = [...history].sort(
+  // Lọc trùng status_to, giữ bản ghi mới nhất
+  const filteredHistory = filterHistoryByStatusTo(history);
+  // Sort lại theo created_at giảm dần (đã được filter giữ bản mới nhất)
+  const sortedHistory = [...filteredHistory].sort(
     (a, b) => new Date(b.created_at) - new Date(a.created_at)
   );
 
@@ -85,6 +88,13 @@ const OrderHistory = ({ history }) => {
     </div>
   );
 };
+
+function isVnpayExpired(expireDateStr) {
+  if (!expireDateStr) return true;
+  const expire = new Date(expireDateStr).getTime();
+  const now = Date.now();
+  return now > expire;
+}
 
 const OrderDetail = () => {
   const { order_code } = useParams();
@@ -381,7 +391,7 @@ const OrderDetail = () => {
     const basePrice = parseFloat(item.original_price);
 
     // Tính giá đã giảm
-    return basePrice  * item.quantity;
+    return basePrice * item.quantity;
   };
 
   // Hàm tính tổng thanh toán cuối cùng
@@ -425,6 +435,8 @@ const OrderDetail = () => {
       </div>
     );
   }
+
+  console.log("orderData?.data", orderData?.data?.history);
 
   // Thêm kiểm tra dữ liệu orderData?.data trước khi render action buttons
   return (
@@ -474,6 +486,24 @@ const OrderDetail = () => {
                 : action}
             </button>
           ))}
+        {/* Nút tiếp tục thanh toán ở gần tổng tiền nếu có vnpay_url và expire_date */}
+        {orderData?.data?.history && orderData.data.history.some(h => h.metadata?.vnpay_url && h.metadata?.expire_date) && (() => {
+          const vnpayItem = orderData.data.history.find(h => h.metadata?.vnpay_url && h.metadata?.expire_date);
+          const expired = isVnpayExpired(vnpayItem.metadata.expire_date);
+          return (
+            <button
+              className="ml-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={() => {
+                if (!expired) window.location.href = vnpayItem.metadata.vnpay_url;
+              }}
+              disabled={expired}
+              title={expired ? "Liên kết thanh toán đã hết hạn" : ""}
+              style={expired ? { pointerEvents: "none" } : {}}
+            >
+              Tiếp tục thanh toán
+            </button>
+          );
+        })()}
       </div>
 
       <section className="grid grid-cols-4 gap-6 mb-8 border-b">
@@ -584,11 +614,19 @@ const OrderDetail = () => {
           </span>
         </div>
         <div className="border border-yellow-300 bg-yellow-100 text-left p-4 gap-6">
-              <span className="">
-                {orderData?.data?.payment_status === 1
-                  ? <div className="text-yellow-600"><i className="fas fa-bell" /> Đã thanh toán. Vui kiểm tra lại thông tin đơn hàng.</div>
-                  : (<div className="text-yellow-600"><i className="fas fa-bell" /> Vui lòng thanh toán {formatPrice(orderData?.data?.total_amount)} khi nhận hàng.</div>)}
-              </span>
+          <span className="">
+            {orderData?.data?.payment_status === 1 ? (
+              <div className="text-yellow-600">
+                <i className="fas fa-bell" /> Đã thanh toán. Vui kiểm tra lại
+                thông tin đơn hàng.
+              </div>
+            ) : (
+              <div className="text-yellow-600">
+                <i className="fas fa-bell" /> Vui lòng thanh toán{" "}
+                {formatPrice(orderData?.data?.total_amount)} khi nhận hàng.
+              </div>
+            )}
+          </span>
         </div>
         <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phương thức thanh toán: </div>
@@ -682,8 +720,9 @@ const OrderDetail = () => {
               <strong>Lưu ý quan trọng:</strong>
             </p>
             <p className="text-yellow-700 mt-2">
-              Khi bạn xác nhận đã nhận hàng, bạn sẽ không thể yêu cầu trả hàng cho
-                  đơn hàng này nữa. Nếu bạn gặp vấn đề với sản phẩm, vui lòng liên hệ với chúng tôi.
+              Khi bạn xác nhận đã nhận hàng, bạn sẽ không thể yêu cầu trả hàng
+              cho đơn hàng này nữa. Nếu bạn gặp vấn đề với sản phẩm, vui lòng
+              liên hệ với chúng tôi.
             </p>
           </div>
         </div>

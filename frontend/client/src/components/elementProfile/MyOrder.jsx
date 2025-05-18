@@ -413,13 +413,6 @@ const MyOrder = () => {
                           <div className="self-end">
                             <span className="mr-2 font-medium">Tổng tiền:</span>
                             <span className="font-bold">
-                              {/* {FomatVND(
-                                (order?.order_items || []).reduce(
-                                  (total, item) =>
-                                    total + calculateSubtotal(item),
-                                  0
-                                )
-                              )} */}
                               {FomatVND(order?.subtotal)}
                             </span>
                           </div>
@@ -430,7 +423,7 @@ const MyOrder = () => {
                             >
                               Chi tiết
                             </Link>
-
+                            
                             {getActionsForOrder(order).map((action, idx) => (
                               <button
                                 key={idx}
