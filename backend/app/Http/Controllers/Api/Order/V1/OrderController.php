@@ -41,7 +41,7 @@ class OrderController extends Controller
             if ($data['payment_method'] === 'vnpay') {
                 $vnpUrl = $this->payment($Order, $request->ip());
                 $expireDate = Carbon::now('Asia/Ho_Chi_Minh')->addMinutes(3);
-               OrderHistory::createHistory(
+                OrderHistory::createHistory(
                     $Order->id,
                     OrderHistory::ACTION_ORDER_UPDATED,
                     [
@@ -302,68 +302,67 @@ class OrderController extends Controller
     }
     public function orderUserReturn(Request $request)
     {
-    $validator = Validator::make($request->all(), [
-        'order_id' => 'required|exists:orders,id|unique:orders_user_return,order_id',
-        'order_item_id' => 'nullable|exists:order_items,id',
-        'reason' => 'required|integer|min:0',
-        'description' => 'nullable|string',
-        'images' => 'required|array|max:5|min:1',
-        'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        'refund_bank_account' => 'nullable|string|max:255',
-        'refund_bank_name' => 'nullable|string|max:255',
-        'refund_bank_customer_name' => 'nullable|string|max:255',
-        'refund_amount' => 'nullable|numeric|min:0',
-    ]);
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,id|unique:orders_user_return,order_id',
+            'order_item_id' => 'nullable|exists:order_items,id',
+            'reason' => 'required|integer|min:0',
+            'description' => 'nullable|string',
+            'images' => 'required|array|max:5|min:1',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'refund_bank_account' => 'nullable|string|max:255',
+            'refund_bank_name' => 'nullable|string|max:255',
+            'refund_bank_customer_name' => 'nullable|string|max:255',
+            'refund_amount' => 'nullable|numeric|min:0',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json([
-            'message' => 'Dữ liệu không hợp lệ',
-            'errors' => $validator->errors()
-        ], 422);
-    }
-
-    DB::beginTransaction();
-    try {
-        $data = $validator->validated();
-
-        $data['status'] = OrderUserReturn::STATUS_PENDING;
-
-        $orderReturn = OrderUserReturn::create($data);
-
-        // Cập nhật trạng thái đơn hàng
-        $this->orderService->updateStatus(
-            $data['order_id'],
-            Order::STATUS_RETURN_REQUESTED,
-            null,
-            3
-        );
-
-        // Xử lý lưu nhiều ảnh (nếu có)
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $imagePath = $image->store('returns', 'public');
-                OrdersUserReturnImage::create([
-                    'return_id' => $orderReturn->id,
-                    'image_path' => $imagePath,
-                ]);
-            }
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        DB::commit();
+        DB::beginTransaction();
+        try {
+            $data = $validator->validated();
 
-        return response()->json([
-            'message' => 'Tạo yêu cầu đổi/trả thành công',
-            'data' => $orderReturn->load('images') // trả về kèm ảnh
-        ], 201);
+            $data['status'] = OrderUserReturn::STATUS_PENDING;
 
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        return response()->json([
-            'message' => 'Lỗi khi xử lý dữ liệu',
-            'error' => $th->getMessage(),
-            'status' => 500
-        ], 500);
-    }
+            $orderReturn = OrderUserReturn::create($data);
+
+            // Cập nhật trạng thái đơn hàng
+            $this->orderService->updateStatus(
+                $data['order_id'],
+                Order::STATUS_RETURN_REQUESTED,
+                null,
+                3
+            );
+
+            // Xử lý lưu nhiều ảnh (nếu có)
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $imagePath = $image->store('returns', 'public');
+                    OrdersUserReturnImage::create([
+                        'return_id' => $orderReturn->id,
+                        'image_path' => $imagePath,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Tạo yêu cầu đổi/trả thành công',
+                'data' => $orderReturn->load('images') // trả về kèm ảnh
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Lỗi khi xử lý dữ liệu',
+                'error' => $th->getMessage(),
+                'status' => 500
+            ], 500);
+        }
     }
 
 

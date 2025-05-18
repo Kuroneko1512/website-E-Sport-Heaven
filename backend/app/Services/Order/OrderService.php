@@ -683,7 +683,7 @@ class OrderService extends BaseService
 
     public function getOrderUserReturn($orderId)
     {
-         $return = OrderUserReturn::with([
+        $return = OrderUserReturn::with([
             'images',                                        // ảnh trả hàng
             'order.orderItems.product',                      // sản phẩm
             'order.orderItems.productVariant.productAttributes.attribute',
@@ -852,7 +852,16 @@ class OrderService extends BaseService
             return collect(); // Trả về collection rỗng nếu không phải customer
         }
 
-        return $this->getOrdersByCustomerId($user->customer->id, $searchParams, $perPage);
+        // Lấy dữ liệu phân trang
+        $paginatedOrders = $this->getOrdersByCustomerId($user->customer->id, $searchParams, $perPage);
+
+        // Thêm lịch sử cho mỗi đơn hàng
+        $paginatedOrders->getCollection()->transform(function ($order) {
+            $order->history = $this->getOrderHistory($order->id);
+            return $order;
+        });
+
+        return $paginatedOrders;
     }
 
     /**
