@@ -549,6 +549,24 @@ class OrderService extends BaseService
             // Return stock for cancelled orders
             // Nếu đơn hàng bị hủy, hoàn trả lại stock
             $this->returnStockForOrder($order->order_code);
+            // Nếu đơn hàng đã thanh toán online, cập nhật trạng thái thanh toán
+            if (
+                $order->payment_status == Order::PAYMENT_STATUS_PAID &&
+                $order->payment_method == 'vnpay'
+            ) {
+
+                // Cập nhật trạng thái thanh toán sang "hoàn tiền toàn bộ"
+                $this->updatePaymentStatus(
+                    $order->order_code,
+                    Order::PAYMENT_STATUS_FULLY_REFUNDED,
+                    $order->payment_transaction_id,
+                    $adminId,
+                    'Đơn hàng bị hủy, cần hoàn tiền cho khách hàng'
+                );
+
+                // Ghi log để admin xử lý hoàn tiền thủ công
+                Log::info("Đơn hàng #{$order->order_code} đã bị hủy và cần được hoàn tiền. Số tiền: {$order->total_amount}");
+            }
         }
     }
 
@@ -946,15 +964,15 @@ class OrderService extends BaseService
                 Order::STATUS_RETURN_REQUESTED
             ],
 
-            // Từ hoàn thành (6) khách hàng có thể yêu cầu đổi/trả (trong thời hạn)
-            Order::STATUS_COMPLETED => [
-                Order::STATUS_RETURN_REQUESTED
-            ],
+            // // Từ hoàn thành (6) khách hàng có thể yêu cầu đổi/trả (trong thời hạn)
+            // Order::STATUS_COMPLETED => [
+            //     Order::STATUS_RETURN_REQUESTED
+            // ],
 
-            // Từ đã từ chối đổi trả (14) khách hàng có thể tạo yêu cầu mới (trong thời hạn)
-            Order::STATUS_RETURN_REJECTED => [
-                Order::STATUS_RETURN_REQUESTED
-            ]
+            // // Từ đã từ chối đổi trả (14) khách hàng có thể tạo yêu cầu mới (trong thời hạn)
+            // Order::STATUS_RETURN_REJECTED => [
+            //     Order::STATUS_RETURN_REQUESTED
+            // ]
         ];
 
         // Định nghĩa các chuyển trạng thái hợp lệ cho System
