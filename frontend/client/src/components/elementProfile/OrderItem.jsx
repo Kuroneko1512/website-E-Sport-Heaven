@@ -18,7 +18,8 @@ const OrderItem = ({
   currentProductIndex,
   setCurrentProductIndex,
   reviewedProducts,
-  calculateSubtotal
+  calculateSubtotal,
+  payment_status
 }) => {
   const totalAmount = order_items.reduce((total, item) => total + calculateSubtotal(item), 0);
 
@@ -93,9 +94,17 @@ const OrderItem = ({
           <span className="text-sm">{customer_name}</span>
           <span className="text-sm">{shipping_address.substring(0, 60)}...</span>
         </div>
-        <span className={`px-2 py-1 rounded text-base ${statusStyles[status]}`}>
+        <div>
+          <span className="mr-2 border-r pr-2">
+            {payment_status === 1
+              ? <span className="text-sm text-gray-600 dark:text-gray-400">Đã thanh toán</span>
+              : <span className="text-sm text-red-600 dark:text-red-400">Chưa thanh toán</span>
+            }
+          </span>
+          <span className={`px-2 py-1 rounded text-base ${statusStyles[status]}`}>
           {ORDER_STATUS_LABELS[status]}
         </span>
+        </div>
       </h3>
 
       <div className="bg-white dark:bg-gray-800 flex gap-4 items-start border-b border-gray-200 dark:border-gray-700 pb-3">
@@ -123,8 +132,14 @@ const OrderItem = ({
                 </div>
               </div>
               <span className="text-right">
-                <p className="font-bold text-lg text-gray-900 dark:text-gray-200">
-                  {FomatVND(item?.price)}
+                <p className="text-lg text-gray-900 dark:text-gray-200">
+                   {(item.product?.discount_percent > 0 ||
+                    item.product_variant?.discount_percent > 0) && (
+                    <span className="line-through text-gray-500 mr-2">
+                      {FomatVND(item?.original_price)}
+                    </span>
+                  )}
+                  <strong>{FomatVND(item?.price)}</strong>
                 </p>
               </span>
             </div>

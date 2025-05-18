@@ -375,47 +375,13 @@ const OrderDetail = () => {
     }).format(value);
   };
 
-  // Hàm định dạng ngày giờ
-  const formatDateTime = (iso) => {
-    const date = new Date(iso);
-    return date.toLocaleString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   // Hàm tính giá sản phẩm sau khi giảm giá
   const getDiscountedPrice = (item) => {
     // Chuyển đổi giá từ string sang số
-    const basePrice = parseFloat(item.price);
-    let discountPercent = 0;
+    const basePrice = parseFloat(item.original_price);
 
-    // Ưu tiên dùng discount của sản phẩm nếu có
-    if (item.product && item.product.discount_percent != null) {
-      discountPercent = parseFloat(item.product.discount_percent);
-    } else if (
-      item.product_variant &&
-      item.product_variant.discount_percent != null
-    ) {
-      discountPercent = parseFloat(item.product_variant.discount_percent);
-    }
     // Tính giá đã giảm
-    return basePrice * (1 - discountPercent / 100);
-  };
-
-  // Hàm tính tổng giá tiền của đơn hàng (cộng giá đã giảm của từng mặt hàng nhân với số lượng)
-  const calculateTotalAmount = () => {
-    if (!orderData || !orderData.data || !orderData.data.order_items) {
-      return 0;
-    }
-    return orderData.data.order_items.reduce((acc, item) => {
-      const discountedPrice = getDiscountedPrice(item);
-      const quantity = parseInt(item.quantity, 10) || 0;
-      return acc + discountedPrice * quantity;
-    }, 0);
+    return basePrice  * item.quantity;
   };
 
   // Hàm tính tổng thanh toán cuối cùng
@@ -459,10 +425,6 @@ const OrderDetail = () => {
       </div>
     );
   }
-
-  // Tính tổng giá tiền theo logic đã cập nhật
-  const computedTotalAmount = calculateTotalAmount();
-  const finalTotal = calculateFinalTotal();
 
   // Thêm kiểm tra dữ liệu orderData?.data trước khi render action buttons
   return (
@@ -580,11 +542,10 @@ const OrderDetail = () => {
                   {(item.product?.discount_percent > 0 ||
                     item.product_variant?.discount_percent > 0) && (
                     <span className="line-through text-gray-500 mr-2">
-                      {" "}
-                      {formatPrice(item.original_price)}
+                      {formatPrice(getDiscountedPrice(item))}
                     </span>
                   )}
-                  <strong>{formatPrice(item.price)}</strong>
+                  <strong>{formatPrice(item.subtotal)}</strong>
                 </p>
               </div>
             </div>
@@ -616,13 +577,19 @@ const OrderDetail = () => {
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
+        <div className="border-b pb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng thanh toán: </div>
           <span className="text-2xl font-bold text-red-500 col-span-2">
             {formatPrice(orderData?.data?.total_amount)}
           </span>
         </div>
-
+        <div className="border border-yellow-300 bg-yellow-100 text-left p-4 gap-6">
+              <span className="">
+                {orderData?.data?.payment_status === 1
+                  ? <div className="text-yellow-600"><i className="fas fa-bell" /> Đã thanh toán. Vui kiểm tra lại thông tin đơn hàng.</div>
+                  : (<div className="text-yellow-600"><i className="fas fa-bell" /> Vui lòng thanh toán {formatPrice(orderData?.data?.total_amount)} khi nhận hàng.</div>)}
+              </span>
+        </div>
         <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phương thức thanh toán: </div>
           <span className="col-span-2">

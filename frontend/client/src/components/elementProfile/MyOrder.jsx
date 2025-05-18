@@ -75,7 +75,7 @@ const MyOrder = () => {
     },
   });
 
-  console.log("orderData", apiResponse);
+  // console.log("orderData", apiResponse);
 
   // Truy cập đúng mảng đơn hàng từ cấu trúc phản hồi API
   const orders = apiResponse?.data?.data || [];
@@ -83,19 +83,50 @@ const MyOrder = () => {
 
   // 1. Dùng useMemo để group orders theo ngày (string)
   const ordersByDate = useMemo(() => {
-    // Kiểm tra xem orders có phải là mảng không
-    if (!Array.isArray(orders)) {
-      console.error("orders is not an array:", orders);
-      return {}; // Trả về object rỗng nếu không phải mảng
+  if (!Array.isArray(orders)) {
+    console.error("orders is not an array:", orders);
+    return {};
+  }
+
+  const result = {};
+  const now = new Date();
+  
+  // Tạo các nhóm cố định
+  result["Hôm nay"] = [];
+  result["Hôm qua"] = [];
+  result["Tuần này"] = [];
+  result["Tháng này"] = [];
+  result["Trước đó"] = [];
+  
+  orders.forEach(order => {
+    if (!order?.created_at) return;
+    
+    const orderDate = new Date(order.created_at);
+    const daysDiff = Math.floor((now - orderDate) / (1000 * 60 * 60 * 24));
+    
+    if (daysDiff === 0) {
+      result["Hôm nay"].push(order);
+    } else if (daysDiff === 1) {
+      result["Hôm qua"].push(order);
+    } else if (daysDiff < 7) {
+      result["Tuần này"].push(order);
+    } else if (orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear()) {
+      result["Tháng này"].push(order);
+    } else {
+      result["Trước đó"].push(order);
     }
-    return orders.reduce((groups, order) => {
-      // FomatTime trả về chuỗi như "Hôm nay", "Hôm qua", hoặc "DD/MM/YYYY"
-      const day = FomatTime(order.created_at);
-      if (!groups[day]) groups[day] = [];
-      groups[day].push(order);
-      return groups;
-    }, {});
-  }, [orders]);
+  });
+  
+  // Loại bỏ các nhóm trống
+  Object.keys(result).forEach(key => {
+    if (result[key].length === 0) {
+      delete result[key];
+    }
+  });
+  
+  return result;
+}, [orders]);
+
 
   // Hiển thị lỗi nếu có
   if (error) {
@@ -350,7 +381,7 @@ const MyOrder = () => {
                 >
                   {/* Tiêu đề ngày mua chỉ render 1 lần cho nhóm */}
                   <h3 className="m-3 text-lg font-semibold">
-                    Ngày mua: {dayLabel}
+                    {dayLabel}
                   </h3>
                   <div>
                     {orders.map((order, idx) => (
@@ -362,6 +393,7 @@ const MyOrder = () => {
                         <OrderItem
                           order_items={order.order_items}
                           status={order.status}
+                          payment_status={order.payment_status}
                           shipping_address={order.shipping_address}
                           customer_name={order.customer_name}
                           order_code={order.order_code}
