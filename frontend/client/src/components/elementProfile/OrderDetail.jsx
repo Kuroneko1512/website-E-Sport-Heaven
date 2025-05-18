@@ -682,9 +682,8 @@ const OrderDetail = () => {
               <strong>Lưu ý quan trọng:</strong>
             </p>
             <p className="text-yellow-700 mt-2">
-              Bạn có thể yêu cầu hoàn trả hàng trong vòng 7 ngày kể từ ngày nhận
-              hàng. Sau thời gian này, chúng tôi sẽ không thể xử lý yêu cầu hoàn
-              trả của bạn.
+              Khi bạn xác nhận đã nhận hàng, bạn sẽ không thể yêu cầu trả hàng cho
+                  đơn hàng này nữa. Nếu bạn gặp vấn đề với sản phẩm, vui lòng liên hệ với chúng tôi.
             </p>
           </div>
         </div>

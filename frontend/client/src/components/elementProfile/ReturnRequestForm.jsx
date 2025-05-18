@@ -213,10 +213,13 @@ const ReturnRequestForm = () => {
         <Form.Item label="Mô tả chi tiết" name="description">
           <Input.TextArea rows={2} />
         </Form.Item>
+        <Form.Item label="Tên ngân hàng" name="refund_bank_name">
+          <Input />
+        </Form.Item>
         <Form.Item label="Số tài khoản hoàn tiền" name="refund_bank_account">
           <Input />
         </Form.Item>
-        <Form.Item label="Tên ngân hàng" name="refund_bank_name">
+        <Form.Item label="Tên chủ tài khoản" name="refund_bank_customer_name">
           <Input />
         </Form.Item>
         <Form.Item label="Số tiền hoàn" name="refund_amount">
@@ -225,9 +228,7 @@ const ReturnRequestForm = () => {
             className="!bg-white !border !border-gray-300 !text-black"
           />
         </Form.Item>
-        <Form.Item label="Tên chủ tài khoản" name="refund_bank_customer_name">
-          <Input />
-        </Form.Item>
+        
         <Form.Item
           label="Ảnh minh chứng"
           name="image"
