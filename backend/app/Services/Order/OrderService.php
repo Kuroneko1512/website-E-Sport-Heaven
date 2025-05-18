@@ -1012,26 +1012,22 @@ class OrderService extends BaseService
      */
     public function autoCompleteDeliveredOrders($time = null, $unit = 'minutes')
     {
-        // Xác định thời gian dựa trên đơn vị
+        $configKey = 'time.order_auto_complete_' . $unit;
+        $value = $time ?? config($configKey);
+
         switch ($unit) {
             case 'days':
-                $configKey = 'time.order_auto_complete_days';
-                $defaultValue = 3;
-                $timeInMinutes = ($time ?? config($configKey, $defaultValue)) * 24 * 60;
-                $timeDisplay = ($time ?? config($configKey, $defaultValue)) . ' ngày';
+                $timeInMinutes = $value * 24 * 60;
+                $timeDisplay = $value . ' ngày';
                 break;
             case 'hours':
-                $configKey = 'time.order_auto_complete_hours';
-                $defaultValue = 24;
-                $timeInMinutes = ($time ?? config($configKey, $defaultValue)) * 60;
-                $timeDisplay = ($time ?? config($configKey, $defaultValue)) . ' giờ';
+                $timeInMinutes = $value * 60;
+                $timeDisplay = $value . ' giờ';
                 break;
             case 'minutes':
             default:
-                $configKey = 'time.order_auto_complete_minutes';
-                $defaultValue = 60;
-                $timeInMinutes = $time ?? config($configKey, $defaultValue);
-                $timeDisplay = $timeInMinutes . ' phút';
+                $timeInMinutes = $value;
+                $timeDisplay = $value . ' phút';
                 break;
         }
 
