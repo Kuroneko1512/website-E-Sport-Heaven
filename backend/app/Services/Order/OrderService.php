@@ -298,12 +298,12 @@ class OrderService extends BaseService
         }
     }
 
-    public function getOrderAll()
+    public function getOrderAll($paginate = 10)
     {
         return $this->model->with([
             'orderItems.product',
             'orderItems.productVariant'
-        ])->orderBy('id', 'desc')->get();
+        ])->orderBy('id', 'desc')->paginate($paginate);
     }
 
 
@@ -647,23 +647,35 @@ class OrderService extends BaseService
         return $order;
     }
 
-    public function getOrderReturn()
+    public function getOrderReturn($paginate = 10)
     {
-        return $this->model->with([
-            'orderItems.product',
-            'orderItems.productVariant'
-        ])->whereIn('status', [
-            Order::STATUS_RETURN_REQUESTED,
-            Order::STATUS_RETURN_PROCESSING
-        ])->orderBy('id', 'desc')->get();
+        return OrderUserReturn::whereHas('order', function ($query) {
+            $query->whereIn('status', [
+                Order::STATUS_RETURN_REQUESTED,
+                Order::STATUS_RETURN_PROCESSING,
+                Order::STATUS_RETURN_COMPLETED,
+                Order::STATUS_RETURN_REJECTED
+            ]);
+        })->with('order') // nếu bạn vẫn muốn load thông tin order liên quan
+            ->orderBy('id', 'desc')
+            ->paginate($paginate);
     }
 
     public function getOrderUserReturn($orderId)
     {
-        return OrderUserReturn::select('orders_user_return.*', 'orders.status as order_status')
-            ->join('orders', 'orders.id', '=', 'orders_user_return.order_id')
-            ->where('orders_user_return.order_id', $orderId)
-            ->first();
+         $return = OrderUserReturn::with([
+            'images',                                        // ảnh trả hàng
+            'order.orderItems.product',                      // sản phẩm
+            'order.orderItems.productVariant.productAttributes.attribute',
+            'order.orderItems.productVariant.productAttributes.attributeValue'
+        ])
+            ->where('order_id', $orderId)
+            ->firstOrFail();                                    // hoặc ->first() nếu không muốn ném 404
+
+        // Gắn thêm trường order_status để tương thích API cũ
+        $return->order_status = $return->order->status ?? null;
+
+        return $return;
     }
 
 

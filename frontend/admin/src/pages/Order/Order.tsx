@@ -28,7 +28,7 @@ const Orders = () => {
         setLoading(true);
         try {
             const response = await getOrders(page, pagination.per_page);
-            setOrders(response.data);
+            setOrders(response.data.data);
             setPagination((prev) => ({
                 ...prev,
                 current_page: response.current_page || 1,
@@ -39,6 +39,7 @@ const Orders = () => {
                 per_page: response.per_page || 5,
                 data: response.data,
             }));
+            console.log(response.data.data);
         } catch (error) {
             console.error("Lỗi khi lấy dữ liệu:", error);
         }
