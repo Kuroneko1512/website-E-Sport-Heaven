@@ -75,7 +75,7 @@ class OrderService extends BaseService
                 $historyData['actor_email'] = $data['customer_email'];
             }
 
-            Log::info($historyData);
+            Log::info('History create', $historyData);
 
             // Gọi phương thức createHistory
             OrderHistory::createHistory(
@@ -388,6 +388,8 @@ class OrderService extends BaseService
             $historyData['admin_id'] = $adminId;
         } elseif ($customerId) {
             $historyData['customer_id'] = $customerId;
+        } elseif ($isSystem) {
+            $historyData['actor_type'] = OrderHistory::ACTOR_TYPE_SYSTEM;
         }
 
         $this->addOrderHistory($order->id, OrderHistory::ACTION_STATUS_UPDATED, $historyData);
@@ -547,6 +549,24 @@ class OrderService extends BaseService
             // Return stock for cancelled orders
             // Nếu đơn hàng bị hủy, hoàn trả lại stock
             $this->returnStockForOrder($order->order_code);
+            // Nếu đơn hàng đã thanh toán online, cập nhật trạng thái thanh toán
+            if (
+                $order->payment_status == Order::PAYMENT_STATUS_PAID &&
+                $order->payment_method == 'vnpay'
+            ) {
+
+                // Cập nhật trạng thái thanh toán sang "hoàn tiền toàn bộ"
+                $this->updatePaymentStatus(
+                    $order->order_code,
+                    Order::PAYMENT_STATUS_FULLY_REFUNDED,
+                    $order->payment_transaction_id,
+                    $adminId,
+                    'Đơn hàng bị hủy, cần hoàn tiền cho khách hàng'
+                );
+
+                // Ghi log để admin xử lý hoàn tiền thủ công
+                Log::info("Đơn hàng #{$order->order_code} đã bị hủy và cần được hoàn tiền. Số tiền: {$order->total_amount}");
+            }
         }
     }
 
@@ -823,7 +843,7 @@ class OrderService extends BaseService
      * Lấy danh sách đơn hàng của người dùng hiện tại
      *
      * @param \App\Models\User $user Người dùng hiện tại
-     * @return \Illuminate\Database\Eloquent\Collection |\Illuminate\Pagination\LengthAwarePaginator
+     * @return \Illuminate\Support\Collection |\Illuminate\Pagination\LengthAwarePaginator
      */
     public function getOrdersByUser($user, $searchParams = [], $perPage = 10)
     {
@@ -956,15 +976,15 @@ class OrderService extends BaseService
                 Order::STATUS_RETURN_REQUESTED
             ],
 
-            // Từ hoàn thành (6) khách hàng có thể yêu cầu đổi/trả (trong thời hạn)
-            Order::STATUS_COMPLETED => [
-                Order::STATUS_RETURN_REQUESTED
-            ],
+            // // Từ hoàn thành (6) khách hàng có thể yêu cầu đổi/trả (trong thời hạn)
+            // Order::STATUS_COMPLETED => [
+            //     Order::STATUS_RETURN_REQUESTED
+            // ],
 
-            // Từ đã từ chối đổi trả (14) khách hàng có thể tạo yêu cầu mới (trong thời hạn)
-            Order::STATUS_RETURN_REJECTED => [
-                Order::STATUS_RETURN_REQUESTED
-            ]
+            // // Từ đã từ chối đổi trả (14) khách hàng có thể tạo yêu cầu mới (trong thời hạn)
+            // Order::STATUS_RETURN_REJECTED => [
+            //     Order::STATUS_RETURN_REQUESTED
+            // ]
         ];
 
         // Định nghĩa các chuyển trạng thái hợp lệ cho System
@@ -1016,14 +1036,33 @@ class OrderService extends BaseService
     /**
      * Tự động chuyển trạng thái đơn hàng từ DELIVERED sang COMPLETED sau một khoảng thời gian
      * 
-     * @param int $daysToAutoComplete Số ngày sau khi giao hàng để tự động chuyển sang hoàn thành
+     * @param int|null $time Thời gian sau khi giao hàng để tự động chuyển sang hoàn thành
+     * @param string $unit Đơn vị thời gian (minutes, hours, days)
      * @return int Số đơn hàng đã được cập nhật
      */
-    public function autoCompleteDeliveredOrders($daysToAutoComplete = null)
+    public function autoCompleteDeliveredOrders($time = null, $unit = 'minutes')
     {
-        $daysToAutoComplete = $daysToAutoComplete ?? config('time.order_auto_complete_days', 3);
+        $configKey = 'time.order_auto_complete_' . $unit;
+        $value = $time ?? config($configKey);
+
+        switch ($unit) {
+            case 'days':
+                $timeInMinutes = $value * 24 * 60;
+                $timeDisplay = $value . ' ngày';
+                break;
+            case 'hours':
+                $timeInMinutes = $value * 60;
+                $timeDisplay = $value . ' giờ';
+                break;
+            case 'minutes':
+            default:
+                $timeInMinutes = $value;
+                $timeDisplay = $value . ' phút';
+                break;
+        }
+
         // Tìm các đơn hàng đã giao nhưng chưa hoàn thành và đã qua thời gian quy định
-        $cutoffDate = now()->subDays($daysToAutoComplete);
+        $cutoffDate = now()->subMinutes($timeInMinutes);
 
         $orders = $this->model
             ->where('status', Order::STATUS_DELIVERED)
@@ -1039,13 +1078,13 @@ class OrderService extends BaseService
                 Order::STATUS_COMPLETED,
                 null,
                 null,
-                'Đơn hàng được tự động chuyển sang trạng thái hoàn thành sau ' . $daysToAutoComplete . ' ngày giao hàng',
+                'Đơn hàng được tự động chuyển sang trạng thái hoàn thành sau ' . $timeDisplay,
                 true // isSystem = true
             );
 
             if ($result['success']) {
                 $count++;
-                Log::info("Đơn hàng #{$order->order_code} đã được tự động chuyển sang trạng thái hoàn thành");
+                Log::info("Đơn hàng #{$order->order_code} đã được tự động chuyển sang trạng thái hoàn thành sau {$timeDisplay}");
             } else {
                 Log::error("Không thể tự động cập nhật trạng thái đơn hàng #{$order->order_code}: " . $result['message']);
             }
