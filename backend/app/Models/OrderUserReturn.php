@@ -1,12 +1,14 @@
 <?php
+
 namespace App\Models;
+
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Model;
 
 class OrderUserReturn extends Model
 {
     protected $table = 'orders_user_return';
-  
+
 
     // Các trạng thái của yêu cầu đổi/trả
     const STATUS_PENDING = 0;              // Chờ xử lý
@@ -39,7 +41,7 @@ class OrderUserReturn extends Model
         self::REASON_LATE_DELIVERY => 'Giao hàng trễ',
         self::REASON_OTHER => 'Lý do khác',
     ];
-     protected $fillable = [
+    protected $fillable = [
         'order_id',
         'order_item_id',
         'reason',
@@ -52,7 +54,7 @@ class OrderUserReturn extends Model
         'status',
         'refund_bank_customer_name'
     ];
-     // Phương thức để ánh xạ status
+    // Phương thức để ánh xạ status
     public function getStatusLabelAttribute()
     {
         return self::$statusLabels[$this->status] ?? 'Chưa xác định';
@@ -66,5 +68,9 @@ class OrderUserReturn extends Model
     public function order()
     {
         return $this->belongsTo(Order::class);
+    }
+    public function images()
+    {
+        return $this->hasMany(OrdersUserReturnImage::class, 'return_id');
     }
 }

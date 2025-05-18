@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Jobs\Mail\Order\NewOrderJob;
 use App\Models\Order;
+use App\Models\OrdersUserReturnImage;
 use App\Models\OrderHistory;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -301,54 +302,68 @@ class OrderController extends Controller
     }
     public function orderUserReturn(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'order_id' => 'required|exists:orders,id|unique:orders_user_return,order_id',
-            'order_item_id' => 'nullable|exists:order_items,id',
-            'reason' => 'required|integer|min:0',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048', // hoặc 'image' nếu upload file
-            'refund_bank_account' => 'nullable|string|max:255',
-            'refund_bank_name' => 'nullable|string|max:255',
-            'refund_bank_customer_name' => 'nullable|string|max:255',
-            'refund_amount' => 'nullable|numeric|min:0',
-        ]);
+    $validator = Validator::make($request->all(), [
+        'order_id' => 'required|exists:orders,id|unique:orders_user_return,order_id',
+        'order_item_id' => 'nullable|exists:order_items,id',
+        'reason' => 'required|integer|min:0',
+        'description' => 'nullable|string',
+        'images' => 'required|array|max:5|min:1',
+        'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        'refund_bank_account' => 'nullable|string|max:255',
+        'refund_bank_name' => 'nullable|string|max:255',
+        'refund_bank_customer_name' => 'nullable|string|max:255',
+        'refund_amount' => 'nullable|numeric|min:0',
+    ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Dữ liệu không hợp lệ',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-        DB::beginTransaction();
-        try {
-            $data = $validator->validated();
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Dữ liệu không hợp lệ',
+            'errors' => $validator->errors()
+        ], 422);
+    }
 
-            $data['status'] = OrderUserReturn::STATUS_PENDING;
+    DB::beginTransaction();
+    try {
+        $data = $validator->validated();
 
-            $orderReturn = OrderUserReturn::create($data);
-            // $userId = auth()->user()->id;
+        $data['status'] = OrderUserReturn::STATUS_PENDING;
 
-            $a=  $this->orderService->updateStatus($data['order_id'], Order::STATUS_RETURN_REQUESTED, null, 3);
-            Log::info('orderReturn', [
-                'data' => $a,
-            ]);
-            DB::commit();
-            if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('returns', 'public');
-                $orderReturn->update(['image' => $imagePath]);
+        $orderReturn = OrderUserReturn::create($data);
+
+        // Cập nhật trạng thái đơn hàng
+        $this->orderService->updateStatus(
+            $data['order_id'],
+            Order::STATUS_RETURN_REQUESTED,
+            null,
+            3
+        );
+
+        // Xử lý lưu nhiều ảnh (nếu có)
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePath = $image->store('returns', 'public');
+                OrdersUserReturnImage::create([
+                    'return_id' => $orderReturn->id,
+                    'image_path' => $imagePath,
+                ]);
             }
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'Lỗi khi xử lý dữ liệu',
-                'error' => $th->getMessage(),
-                'status' => 500
-            ], 500);
         }
+
+        DB::commit();
+
         return response()->json([
             'message' => 'Tạo yêu cầu đổi/trả thành công',
-            'data' => $orderReturn
+            'data' => $orderReturn->load('images') // trả về kèm ảnh
         ], 201);
+
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        return response()->json([
+            'message' => 'Lỗi khi xử lý dữ liệu',
+            'error' => $th->getMessage(),
+            'status' => 500
+        ], 500);
+    }
     }
 
 
