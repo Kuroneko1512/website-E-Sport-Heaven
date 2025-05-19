@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Coupon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
+use Carbon\Carbon;
 
 
 class CouponsController extends Controller
@@ -41,7 +41,8 @@ class CouponsController extends Controller
             'description' => 'nullable|string',
             'discount_type' => 'required|integer',
             'discount_value' => 'required|numeric|min:0',
-            'max_purchase' => 'required|numeric|min:0',
+            'min_order_amount' => 'required|numeric|min:0',
+            'max_discount_amount' => 'required|numeric|min:0',
             'max_uses' => 'nullable|integer|min:0',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after:start_date',
@@ -58,6 +59,7 @@ class CouponsController extends Controller
 
     public function show(Coupon $coupon)
     {   
+   
         return response()->json($coupon);
     }
 
@@ -69,7 +71,8 @@ class CouponsController extends Controller
             'description' => 'nullable|string',
             'discount_type' => 'required|integer',
             'discount_value' => 'required|numeric|min:0',
-            'max_purchase' => 'required|numeric|min:0',
+            'min_order_amount' => 'required|numeric|min:0',
+            'max_discount_amount' => 'required|numeric|min:0',
             'max_uses' => 'nullable|integer|min:0',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after:start_date',
@@ -89,6 +92,13 @@ class CouponsController extends Controller
         $coupon->delete();
 
         return response()->json(null, 204);
+    }
+    public function saving(Coupon $coupon)
+    {
+        // Kiểm tra nếu end_date đã qua
+        if ($coupon->end_date && Carbon::parse($coupon->end_date)->isPast()) {
+            $coupon->is_active = 1; // 1 = Ngừng hoạt động
+        }
     }
    
 }

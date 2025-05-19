@@ -9,12 +9,14 @@ export interface Coupon {
   name: string;
   description: string;
   discount_value: number;
+  min_order_amount:number;
+  max_discount_amount:number;
   discount_type: number;
   is_active: number;
   start_date: string;
   end_date: string;
   max_uses: number;
-  max_purchase: number;
+
 
 }
 

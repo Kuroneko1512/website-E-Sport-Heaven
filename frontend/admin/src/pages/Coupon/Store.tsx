@@ -15,9 +15,10 @@ const Store: FC = () => {
         description: "",
         discount_value: 0,
         discount_type: 0,
+        min_order_amount: 0,
+        max_discount_amount: 0,
         start_date:new Date().toISOString().split('T')[0],
         end_date: "",
-        max_purchase: 0,
         max_uses: 0,     
         is_active: 1,
        
@@ -106,23 +107,7 @@ const Store: FC = () => {
                     isValid = false;
                 }
                 break;
-            case 'max_purchase':
-                if (value <= 0) {
-                    newErrors.max_purchase = 'Số tiền tối thiểu phải lớn hơn 0';
-                    isValid = false;
-                } else {
-                    if(coupon.discount_type === 0){
-                    console.log(value);
-                    
-                        newErrors.max_purchase = 'Số phần trăm tối thiểu phải lớn hơn 0';
-                        if(value > 70){
-                            newErrors.max_purchase = 'Số phần trăm tối thiểu không được vượt quá 70%';
-                            isValid = false;
-                        }
-                    }
-                    delete newErrors.max_purchase;
-                }
-                break;
+          
             case 'max_uses':
                 if (value <= 0) {
                     newErrors.max_uses = 'Số lần sử dụng phải lớn hơn 0';
@@ -214,7 +199,8 @@ const Store: FC = () => {
                 description: coupon.description,
                 discount_value: Number(coupon.discount_value),
                 discount_type: Number(coupon.discount_type),
-                max_purchase: Number(coupon.max_purchase),
+                min_order_amount: Number(coupon.min_order_amount),
+                max_discount_amount: Number(coupon.max_discount_amount),
                 start_date: coupon.start_date,
                 end_date: coupon.end_date,
                 max_uses: Number(coupon.max_uses),
@@ -235,9 +221,10 @@ const Store: FC = () => {
                 description: "",
                 discount_value: 0,
                 discount_type: 0,
+                min_order_amount: 0,
+                max_discount_amount: 0,
                 start_date: "",
                 end_date: "",
-                max_purchase: 0,
                 max_uses: 0,
                 is_active: 1,
                 
@@ -292,17 +279,29 @@ const Store: FC = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="max_purchase">Số tiền tối đa</label>
+                    <label htmlFor="min_order_amount">Số tiền đơn hàng tối thiểu</label>
                     <input 
                         type="number" 
                         className="form-control" 
-                        id="max_purchase" 
-                        name="max_purchase" 
-                        value={coupon.max_purchase} 
+                        id="min_order_amount" 
+                        name="min_order_amount" 
+                        value={coupon.min_order_amount} 
                         onChange={handleChange}
                         min="0" 
                     />
                 </div>  
+                <div className="form-group">
+                    <label htmlFor="max_discount_amount">Số tiền giảm tối đa</label>
+                    <input 
+                        type="number" 
+                        className="form-control" 
+                        id="max_discount_amount" 
+                        name="max_discount_amount" 
+                        value={coupon.max_discount_amount} 
+                        onChange={handleChange}
+                        min="0" 
+                    />
+                </div>
                 <div className="form-group">
                     <label htmlFor="start_date">Ngày bắt đầu <span className="text-danger">*</span></label>
                     <input 
