@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import FomatVND from "../utils/FomatVND";
 import { ORDER_STATUS_LABELS ,ORDER_STATUS } from "../constants/OrderConstants";
 import instanceAxios from "../config/db";
+import Echo from "laravel-echo";
+
 import ScrollToTop from "../config/ScrollToTop";
+import io from "socket.io-client";
 
 const OrderHistory = ({ history }) => {
   // Sort history by created_at descending
@@ -108,10 +111,12 @@ const OrderTracking = () => {
       "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
   };
 
+
   const {
     data: orderData,
     isLoading,
     error,
+    refetch
   } = useQuery({
     queryKey: ["order", order_code],
     queryFn: async () => {
@@ -122,6 +127,26 @@ const OrderTracking = () => {
     },
   });
 
+window.io = io;
+
+
+window.echo = new Echo({
+  broadcaster: 'socket.io',
+  host: '127.0.0.1:6001',
+  transports: ['websocket'],
+  forceTLS: false,
+ 
+});
+
+ 
+  window.echo.channel('orders.1')
+  .subscribed(() => console.log('✅ Đã subscribe channel orders.1'))
+  .listen('.order-status-updated', (e) => {
+    console.log('✅ Event nhận được:', e);
+    refetch();
+  });
+
+ 
   console.log("orderData", orderData);
 
   // Hàm định dạng giá tiền
