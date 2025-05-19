@@ -3,15 +3,15 @@ export type CouponForm = {
     name: string;
     description: string;
     discount_value: number;
+    min_order_amount: number;
+    max_discount_amount:number;
     start_date: string;
     end_date: string;
-    discount_type: string; 
-    min_purchase: number;
+    discount_type: number; 
+   
     max_uses: number;
-    used_count: number;
- 
     is_active: number;
-    user_usage: number[];
+  
 }
 
 
@@ -23,7 +23,8 @@ export interface FormErrors {
     discount_type?: string;
     start_date?: string;
     end_date?: string;
-    min_purchase?: string;
+    min_order_amount?: string;
+    max_discount_amount?: string;
     max_uses?: string;
-    user_usage?: string;
+   
 }

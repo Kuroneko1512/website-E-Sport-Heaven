@@ -1,8 +1,8 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { createCoupon, Coupon as ApiCoupon } from "@app/services/Coupon/ApiCoupon";
 import { useNavigate } from "react-router-dom";
 import { CouponForm, FormErrors } from "./type";
-import { getUserList } from "@app/services/User/Type";
+  
 
 
 
@@ -14,31 +14,24 @@ const Store: FC = () => {
         name: "",
         description: "",
         discount_value: 0,
-        discount_type: "percentage",
+        discount_type: 0,
+        min_order_amount: 0,
+        max_discount_amount: 0,
         start_date:new Date().toISOString().split('T')[0],
         end_date: "",
-        min_purchase: 0,
-        max_uses: 0,
-        used_count: 0,
-        is_active: 1,
-        user_usage: []
+        max_uses: 0,     
+        is_active: 0,
+       
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [submitted, setSubmitted] = useState(false);
-    const [userUsage, setUserUsage] = useState<{id: number, name: string}[]>([]);
+   
 
     const discountTypeOptions = [
-        { value: "percentage", label: 'Phần trăm' },
-        { value: "fixed", label: 'Giá tiền' }
+        { value: 0, label: 'Phần trăm' },
+        { value: 1, label: 'Giá tiền' }
     ];
-    const fetchUserUsage = async () => {
-        const response = await getUserList();
-        const customerUsers = response.filter((user: any) => user.account_type === "customer");
-        setUserUsage(customerUsers);
-    }
-    useEffect(() => {
-        fetchUserUsage();
-    }, []);
+   
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {  
         const { name, value, type } = e.target;
         
@@ -46,8 +39,10 @@ const Store: FC = () => {
             const target = e.target as HTMLInputElement;
             setCoupon({ ...coupon, [name]: target.checked });
         } else {
-            setCoupon({ ...coupon, [name]: name === "discount_value" || name === "max_uses" || name === "discount_type"
+            setCoupon({ ...coupon, [name]: name === "discount_value" || name === "max_uses" || name === "max_purchase"
                 ? Number(value) 
+                : name === "discount_type"
+                ? Number(value)
                 : value });
         }
         
@@ -85,8 +80,8 @@ const Store: FC = () => {
                 if (value <= 0) {
                     newErrors.discount_value = 'Giá trị giảm giá phải lớn hơn 0';
                     isValid = false;
-                } else if (coupon.discount_type === "percentage" && value > 70  ) {
-                    newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 70%';
+                } else if (coupon.discount_type === 0 && value > 50  ) {
+                    newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 50%';
                     isValid = false;
                 } else {
                     delete newErrors.discount_value;
@@ -112,23 +107,7 @@ const Store: FC = () => {
                     isValid = false;
                 }
                 break;
-            case 'min_purchase':
-                if (value <= 0) {
-                    newErrors.min_purchase = 'Số tiền tối thiểu phải lớn hơn 0';
-                    isValid = false;
-                } else {
-                    if(coupon.discount_type === "percentage"){
-                    console.log(value);
-                    
-                        newErrors.min_purchase = 'Số phần trăm tối thiểu phải lớn hơn 0';
-                        if(value > 70){
-                            newErrors.min_purchase = 'Số phần trăm tối thiểu không được vượt quá 70%';
-                            isValid = false;
-                        }
-                    }
-                    delete newErrors.min_purchase;
-                }
-                break;
+          
             case 'max_uses':
                 if (value <= 0) {
                     newErrors.max_uses = 'Số lần sử dụng phải lớn hơn 0';
@@ -168,8 +147,8 @@ const Store: FC = () => {
         if (coupon.discount_value <= 0) {
             newErrors.discount_value = 'Giá trị giảm giá phải lớn hơn 0';
             isValid = false;
-        } else if (coupon.discount_type === "percentage" && coupon.discount_value > 70)  {
-            newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 70%';
+        } else if (coupon.discount_type === 0 && coupon.discount_value > 50)  {
+            newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 50%';
             isValid = false;
         }
 
@@ -214,20 +193,21 @@ const Store: FC = () => {
 
             
         
-            const apiCoupon: Omit<ApiCoupon, 'id' | 'created_at' | 'updated_at' | 'used_count'> = {
+            const apiCoupon: Omit<ApiCoupon, 'id' | 'created_at' | 'updated_at' > = {
                 code: coupon.code,
                 name: coupon.name,
                 description: coupon.description,
                 discount_value: Number(coupon.discount_value),
-                discount_type: coupon.discount_type,
-                min_purchase: Number(coupon.min_purchase),
+                discount_type: Number(coupon.discount_type),
+                min_order_amount: Number(coupon.min_order_amount),
+                max_discount_amount: Number(coupon.max_discount_amount),
                 start_date: coupon.start_date,
                 end_date: coupon.end_date,
                 max_uses: Number(coupon.max_uses),
-                is_active: 1,
-                user_usage: coupon.user_usage
+                is_active: 0,
+               
             };
-            console.log(apiCoupon);
+            
             await createCoupon(apiCoupon);
       
             
@@ -240,14 +220,14 @@ const Store: FC = () => {
                 name: "",
                 description: "",
                 discount_value: 0,
-                discount_type: "percentage",
+                discount_type: 0,
+                min_order_amount: 0,
+                max_discount_amount: 0,
                 start_date: "",
                 end_date: "",
-                min_purchase: 0,
                 max_uses: 0,
-                used_count: 0,
-                is_active: 1,
-                user_usage: []
+                is_active: 0,
+                
             });
             setSubmitted(false);
             navigate('/coupon');
@@ -257,17 +237,7 @@ const Store: FC = () => {
         }
     };
 
-    const handleUserChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedOptions = Array.from(e.target.selectedOptions, option => Number(option.value));
-        console.log(selectedOptions);
-        
-       
-        setCoupon(prev => ({
-            ...prev,
-            user_usage: selectedOptions
-        }));
-  
-    };
+
 
     return (
         <div>
@@ -309,17 +279,29 @@ const Store: FC = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="min_purchase">Số tiền tối thiểu</label>
+                    <label htmlFor="min_order_amount">Số tiền đơn hàng tối thiểu</label>
                     <input 
                         type="number" 
                         className="form-control" 
-                        id="min_purchase" 
-                        name="min_purchase" 
-                        value={coupon.min_purchase} 
+                        id="min_order_amount" 
+                        name="min_order_amount" 
+                        value={coupon.min_order_amount} 
                         onChange={handleChange}
                         min="0" 
                     />
                 </div>  
+                <div className="form-group">
+                    <label htmlFor="max_discount_amount">Số tiền giảm tối đa</label>
+                    <input 
+                        type="number" 
+                        className="form-control" 
+                        id="max_discount_amount" 
+                        name="max_discount_amount" 
+                        value={coupon.max_discount_amount} 
+                        onChange={handleChange}
+                        min="0" 
+                    />
+                </div>
                 <div className="form-group">
                     <label htmlFor="start_date">Ngày bắt đầu <span className="text-danger">*</span></label>
                     <input 
@@ -363,7 +345,7 @@ const Store: FC = () => {
                     </select>
                 </div>
                 <div className="form-group">
-                    <label htmlFor="discount_value">Giảm giá <span className="text-danger">*</span></label>
+                    <label htmlFor="discount_value">Giá trị giảm giá <span className="text-danger">*</span></label>
                     <input 
                         type="number" 
                         className={`form-control ${errors.discount_value ? 'is-invalid' : ''}`}
@@ -379,34 +361,20 @@ const Store: FC = () => {
                 </div>
                
                 <div className="form-group">
-                    <label htmlFor="used_count">Số lần sử dụng</label>
+                    <label htmlFor="max_uses">Số lần sử dụng</label>
                     <input 
                         type="number" 
                         className="form-control" 
-                        id="used_count" 
-                        name="used_count" 
-                        value={coupon.used_count} 
+                        id="max_uses" 
+                        name="max_uses" 
+                        value={coupon.max_uses} 
                         onChange={handleChange}
-                   
+                        min="0"
+
                     />
                     
                 </div>
-                <div className="form-group">
-                    <label htmlFor="user_usage" className="form-label">Chọn User được sử dụng mã giảm giá</label>
-                    <select 
-                        name="user_usage" 
-                        id="user_usage" 
-                        className={`form-control ${errors.user_usage ? 'is-invalid' : ''}`}
-                        defaultValue="0"
-                        onChange={handleUserChange}
-                    >
-                        <option value="0">Chọn User</option>
-                        {userUsage.map(user => (
-                            <option key={user.id} value={user.id}>{user.name}</option>
-                        ))}
-                    </select>
-                    {errors.user_usage && <div className="invalid-feedback">{errors.user_usage}</div>}
-                </div>
+              
                 
                
                 <button type="submit" className="btn btn-primary">Thêm</button>

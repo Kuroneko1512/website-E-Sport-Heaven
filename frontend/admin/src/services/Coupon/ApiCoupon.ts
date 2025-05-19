@@ -9,16 +9,13 @@ export interface Coupon {
   name: string;
   description: string;
   discount_value: number;
-  discount_type: string;
-  user_usage: any;
+  min_order_amount:number;
+  max_discount_amount:number;
+  discount_type: number;
   is_active: number;
   start_date: string;
   end_date: string;
   max_uses: number;
-  used_count: number;
-  min_purchase: number;
-  created_at: string;
-  updated_at: string;
 }
 
 // Interface định nghĩa dữ liệu trả về từ API, bao gồm thông tin phân trang
@@ -52,8 +49,9 @@ export const getCoupons = async (page: number = 1, limit: number = 10, search: s
 };
 
 // Tạo mới coupon
-export const createCoupon = async (couponData: Omit<Coupon, 'id' | 'created_at' | 'updated_at' | 'used_count'>) => {    
+export const createCoupon = async (couponData: Omit<Coupon, 'id' | 'created_at' | 'updated_at' | 'is_active'>) => {    
   try {
+ 
     const response = await axios.post(API_URL, couponData);
     return response.data;
   } catch (error) {
@@ -63,7 +61,7 @@ export const createCoupon = async (couponData: Omit<Coupon, 'id' | 'created_at' 
 };
 
 
-export const updateCoupon = async (couponId: number, couponData: Partial<Omit<Coupon, 'id' | 'created_at' | 'updated_at' | 'used_count'>>) => {  
+export const updateCoupon = async (couponId: number, couponData: Partial<Omit<Coupon, 'id' | 'created_at' | 'updated_at' | 'is_active'>>) => {  
   try {
     const response = await axios.put(`${API_URL}/${couponId}`, couponData);
     return response.data;

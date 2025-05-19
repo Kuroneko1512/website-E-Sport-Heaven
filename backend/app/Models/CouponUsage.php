@@ -8,10 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class CouponUsage extends Model
 {
     use HasFactory;
-    protected $fillable = ['coupon_id', 'user_id'];
+    protected $fillable = [
+        'coupon_id',
+        'user_id',
+        'amount'
+    ];
 
     public function coupon()
     {
         return $this->belongsTo(Coupon::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

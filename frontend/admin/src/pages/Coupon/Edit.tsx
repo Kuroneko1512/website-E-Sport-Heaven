@@ -1,5 +1,5 @@
 import { FC, useEffect, useState, useCallback } from "react";
-import { updateCoupon, getCouponById, Coupon as ApiCoupon } from "@app/services/Coupon/ApiCoupon";
+import { updateCoupon, getCouponById } from "@app/services/Coupon/ApiCoupon";
 import { useParams, useNavigate } from "react-router-dom";
 
 interface Coupon {
@@ -9,10 +9,12 @@ interface Coupon {
     discount_value: number;
     start_date: string;
     end_date: string;
-    discount_type: 'percentage' | 'fixed'; 
-    min_purchase: number;
+    discount_type: number; 
     max_uses: number;
+    min_order_amount: number;
+    max_discount_amount: number;
  
+
 }
 
 const EditCoupon: FC = () => {
@@ -25,8 +27,9 @@ const EditCoupon: FC = () => {
         discount_value: 0,
         start_date: "",
         end_date: "",
-        discount_type: "percentage",
-        min_purchase: 0,
+        discount_type: 0,
+        min_order_amount: 0,
+        max_discount_amount: 0,
         max_uses: 0,
    
     });
@@ -35,7 +38,6 @@ const EditCoupon: FC = () => {
     const getCoupon = useCallback(async () => {
         try {
             const response = await getCouponById(Number(id));
-            console.log("API response:", response);
             
             // Đảm bảo start_date và end_date được định dạng đúng cho input type="date"
             const formattedStartDate = response.start_date 
@@ -45,10 +47,7 @@ const EditCoupon: FC = () => {
                 ? new Date(response.end_date).toISOString().split('T')[0] 
                 : "";
                 
-            console.log("Formatted dates:", { 
-                original: { start: response.start_date, end: response.end_date },
-                formatted: { start: formattedStartDate, end: formattedEndDate }
-            });
+           
             
             setCoupon({
                 ...response,
@@ -56,7 +55,9 @@ const EditCoupon: FC = () => {
                 start_date: formattedStartDate,
                 end_date: formattedEndDate,
                 max_uses: response.max_uses || 0,
-                discount_type: response.discount_type as 'percentage' | 'fixed'
+                min_order_amount: response.min_order_amount || 0,
+                max_discount_amount: response.max_discount_amount || 0,
+                discount_type: response.discount_type || 0
             });
         } catch (error) {
             console.error("Error fetching coupon:", error);
@@ -97,8 +98,8 @@ const EditCoupon: FC = () => {
         if (coupon.discount_value <= 0) {
             newErrors.discount_value = 'Giá trị giảm giá phải lớn hơn 0';
             isValid = false;
-        } else if (coupon.discount_type === 'percentage' && coupon.discount_value > 70)  {
-            newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 70%';
+        } else if (coupon.discount_type === 0 && coupon.discount_value > 50)  {
+            newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 50%';
             isValid = false;
         }
 
@@ -123,7 +124,7 @@ const EditCoupon: FC = () => {
     
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
+    
         if (!validateForm()) {
             return;
         }
@@ -138,12 +139,13 @@ const EditCoupon: FC = () => {
                 description: coupon.description,
                 discount_type: coupon.discount_type,
                 discount_value: Number(coupon.discount_value),
-                min_purchase: Number(coupon.min_purchase),
+                min_order_amount: Number(coupon.min_order_amount),
+                max_discount_amount: Number(coupon.max_discount_amount),
                 max_uses: Number(coupon.max_uses),
                 start_date: coupon.start_date,
                 end_date: coupon.end_date
             };
-            
+           
             await updateCoupon(Number(id), couponData);
             navigate("/coupon");
             alert("Cập nhật mã giảm giá thành công!");
@@ -195,13 +197,13 @@ const EditCoupon: FC = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="min_purchase">Số tiền tối thiểu</label>
+                    <label htmlFor="min_order_amount">Số tiền đơn hàng tối thiểu</label>
                     <input 
                         type="number" 
                         className="form-control" 
-                        id="min_purchase" 
-                        name="min_purchase" 
-                        value={coupon.min_purchase} 
+                        id="min_order_amount" 
+                        name="min_order_amount" 
+                        value={coupon.min_order_amount} 
                         onChange={handleChange}
                         min="0" 
                     />
@@ -255,10 +257,23 @@ const EditCoupon: FC = () => {
                         value={coupon.discount_value} 
                         onChange={handleChange}
                         min="0"
-                        step={coupon.discount_type === 'percentage' ? '0.1' : '1000'}
+                       
                     />
                     {errors.discount_value && <div className="invalid-feedback">{errors.discount_value}</div>}
                 </div>
+                <div className="form-group">
+                    <label htmlFor="max_discount_amount">Số tiền giảm tối đa</label>
+                    <input 
+                        type="number" 
+                        className="form-control" 
+                        id="max_discount_amount" 
+                        name="max_discount_amount" 
+                        value={coupon.max_discount_amount} 
+                        onChange={handleChange}
+                        min="0"
+                    />
+                </div>
+        
                 <div className="form-group">
                     <label htmlFor="max_uses">Số lượt sử dụng tối đa</label>
                     <input 
