@@ -10,7 +10,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Jobs\Mail\Order\NewOrderJob;
+use App\Models\Order;
+use App\Models\OrdersUserReturnImage;
+use App\Models\OrderHistory;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use App\Models\OrderUserReturn;
 
 class OrderController extends Controller
 {
@@ -32,16 +37,31 @@ class OrderController extends Controller
             Log::info('data', $data);
             //tạo sp
             $Order = $this->orderService->createOrder($data);
-
             // Thanh toán vn pay sẽ xử lý ở PaymentController
             if ($data['payment_method'] === 'vnpay') {
                 $vnpUrl = $this->payment($Order, $request->ip());
+                
+                OrderHistory::createHistory(
+                    $Order->id,
+                    OrderHistory::ACTION_ORDER_UPDATED,
+                    [
+                        'status_to' => $Order->status,
+                        'notes' => 'Cập nhật url VNPay',
+                        'metadata' => [
+                            'total_amount' => $Order->total_amount,
+                            'payment_method' => $Order->payment_method ?? 'unknown',
+                            'items_count' => $Order->orderItems->count(),
+                            'vnpay_url' => $vnpUrl,
+                            'expire_date' => $Order->payment_expire_at,
+                        ]
+                    ]
+                );
 
                 DB::commit();
                 return response()->json([
                     'message' => 'URL thanh toán VNPay đã được tạo thành công!',
                     'vnpUrl'  => $vnpUrl, // Trả về URL để chuyển hướng người dùng
-                ], 200); // Trả về 200 OK với URL VNPay
+                ], 200); // Trả về 200 OK với URL VNPay 
             }
 
             // Tải lại đơn hàng với các quan hệ để gửi email
@@ -79,7 +99,7 @@ class OrderController extends Controller
         try {
             // Gọi service để lấy thông tin chi tiết đơn hàng
             $order = $this->orderService->getOrderByCode($orderCode);
-            Log::info( $order);
+            // Log::info('Show order : ' . json_encode($order));
 
             return response()->json([
                 'message' => 'Order details retrieved successfully',
@@ -101,12 +121,18 @@ class OrderController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string',
+            'status' => 'required|integer',
+            'customer_id' => 'nullable|exists:customers,id',
         ]);
 
-        $userId = auth()->user()->id;
+        Log::info('updateStatus', [
+            'request' => $request->all(),
+            'id' => $id,
+        ]);
 
-        $result = $this->orderService->updateStatus($id, $request->status, null, $userId);
+        $customerId = $request->customer_id;
+
+        $result = $this->orderService->updateStatus($id, $request->status, null, $customerId);
 
         if (!$result['success']) {
             return response()->json(['message' => $result['message']], 404);
@@ -117,17 +143,20 @@ class OrderController extends Controller
             'data' => $result['data']
         ]);
     }
-    private function payment($data, $ip)
+    private function payment($data, $ip): string
     {
         Log::info('vnpay', [
             'data' => $data,
             'ip' => $ip,
         ]);
+        $expireMinutes = config('time.vnpay_payment_expire_minutes');
+        $expireDate = Carbon::now('Asia/Ho_Chi_Minh')->addMinutes($expireMinutes);
+
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl =  env('VNP_RETURN_URL');
         $vnp_TmnCode = "NJJ0R8FS"; // Merchant code at VNPAY
         $vnp_HashSecret = "BYKJBHPPZKQMKBIBGGXIYKWYFAYSJXCW"; // Secret key
-
+        $vnp_ExpireDate = $expireDate->format('YmdHis'); // thời gian hết hạn thanh toán 
         $vnp_TxnRef = $data['order_code']; // Transaction reference (unique per order)
         $vnp_OrderInfo = 'Thanh toán đơn hàng test'; // Order information
         $vnp_OrderType = 'other';
@@ -143,6 +172,7 @@ class OrderController extends Controller
             "vnp_Amount" => $vnp_Amount,
             "vnp_Command" => "pay",
             "vnp_CreateDate" => Carbon::now('Asia/Ho_Chi_Minh')->format('YmdHis'),
+            "vnp_ExpireDate" => $vnp_ExpireDate,
             "vnp_CurrCode" => "VND",
             "vnp_IpAddr" => $vnp_IpAddr,
             "vnp_Locale" => $vnp_Locale,
@@ -271,4 +301,72 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    public function orderUserReturn(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,id|unique:orders_user_return,order_id',
+            'order_item_id' => 'nullable|exists:order_items,id',
+            'reason' => 'required|integer|min:0',
+            'description' => 'nullable|string',
+            'images' => 'required|array|max:5|min:1',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'refund_bank_account' => 'nullable|string|max:255',
+            'refund_bank_name' => 'nullable|string|max:255',
+            'refund_bank_customer_name' => 'nullable|string|max:255',
+            'refund_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $data = $validator->validated();
+
+            $data['status'] = OrderUserReturn::STATUS_PENDING;
+
+            $orderReturn = OrderUserReturn::create($data);
+
+            // Cập nhật trạng thái đơn hàng
+            $this->orderService->updateStatus(
+                $data['order_id'],
+                Order::STATUS_RETURN_REQUESTED,
+                null,
+                3
+            );
+
+            // Xử lý lưu nhiều ảnh (nếu có)
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $imagePath = $image->store('returns', 'public');
+                    OrdersUserReturnImage::create([
+                        'return_id' => $orderReturn->id,
+                        'image_path' => $imagePath,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Tạo yêu cầu đổi/trả thành công',
+                'data' => $orderReturn->load('images') // trả về kèm ảnh
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Lỗi khi xử lý dữ liệu',
+                'error' => $th->getMessage(),
+                'status' => 500
+            ], 500);
+        }
+    }
+
+
+
+    // Lấy thông tin đơn hàng
 }

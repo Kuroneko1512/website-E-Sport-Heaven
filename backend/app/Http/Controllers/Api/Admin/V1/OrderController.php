@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Admin\V1;
 
+use App\Models\Admin;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Order;
@@ -22,6 +23,7 @@ class OrderController extends Controller
     {
         $this->orderService = $orderService;
     }
+
     public function index()
     {
         try {
@@ -34,7 +36,7 @@ class OrderController extends Controller
         } catch (\Throwable $th) {
             // Trường hợp có lỗi xảy ra khi lấy dữ liệu
             return response()->json([
-                'errnor' => 'lấy thất bại',
+                'error' => 'lấy thất bại',
                 'mess' => $th,
                 'status' => 500
             ], 500); // Trả về mã lỗi 500 (Internal Server Error)
@@ -102,6 +104,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
+
     /**
      * Hiển thị chi tiết đơn hàng theo mã đơn hàng
      *
@@ -113,7 +116,7 @@ class OrderController extends Controller
         try {
             // Gọi service để lấy thông tin chi tiết đơn hàng
             $order = $this->orderService->getOrderByCode($orderCode);
-            Log::info($order);
+            // Log::info('Show order : ' . json_encode($order));
 
             return response()->json([
                 'message' => 'Order details retrieved successfully',
@@ -133,29 +136,50 @@ class OrderController extends Controller
         }
     }
 
+    public function getOrdersWithReturnRequests()
+    {
+        try {
+            // Gọi service để lấy thông tin chi tiết thuộc tính
+            $order = $this->orderService->getOrderReturn();
+            Log::info('Order return request : ' . json_encode($order));
+
+            return response()->json([
+                'message' => 'lấy thành công', // Thông báo thành công
+                'data' => $order, // Dữ liệu thuộc tính chi tiết
+                'status' => 200 // Trả về mã trạng thái 200 (OK)
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi xử lý dữ liệu.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
             'status' => 'nullable|integer|in:' . implode(',', [
-                Order::STATUS_PENDING,
-                Order::STATUS_CONFIRMED,
-                Order::STATUS_PREPARING,
-                Order::STATUS_READY_TO_SHIP,
-                Order::STATUS_SHIPPING,
-                Order::STATUS_DELIVERED,
-                Order::STATUS_COMPLETED,
-                Order::STATUS_RETURN_REQUESTED,
-                Order::STATUS_RETURN_PROCESSING,
-                Order::STATUS_RETURN_COMPLETED,
-                Order::STATUS_RETURN_REJECTED,
-                Order::STATUS_RETURN_TO_SHOP,
-                Order::STATUS_CANCELLED
-            ])
+                    Order::STATUS_PENDING,
+                    Order::STATUS_CONFIRMED,
+                    Order::STATUS_PREPARING,
+                    Order::STATUS_READY_TO_SHIP,
+                    Order::STATUS_SHIPPING,
+                    Order::STATUS_DELIVERED,
+                    Order::STATUS_COMPLETED,
+                    Order::STATUS_RETURN_REQUESTED,
+                    Order::STATUS_RETURN_PROCESSING,
+                    Order::STATUS_RETURN_COMPLETED,
+                    Order::STATUS_RETURN_REJECTED,
+                    Order::STATUS_RETURN_TO_SHOP,
+                    Order::STATUS_CANCELLED
+                ])
         ]);
 
         $userId = auth()->user()->id;
+        $adminId = Admin::where('user_id', $userId)->value('id');
 
-        $result = $this->orderService->updateStatus($id, $request->status, $userId);
+        $result = $this->orderService->updateStatus($id, $request->status, $adminId);
 
         if (!$result['success']) {
             return response()->json(['message' => $result['message']], 404);
@@ -166,6 +190,28 @@ class OrderController extends Controller
             'data' => $result['data']
         ]);
     }
+
+    public function getOrderUserReturn($id)
+    {
+        try {
+            // Gọi service để lấy thông tin chi tiết thuộc tính
+            $order = $this->orderService->getOrderUserReturn($id);
+            Log::info('Order return  : ' . json_encode($order));
+
+            return response()->json([
+                'message' => 'lấy thành công', // Thông báo thành công
+                'data' => $order, // Dữ liệu thuộc tính chi tiết
+                'status' => 200 // Trả về mã trạng thái 200 (OK)
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi xử lý dữ liệu.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
     // private function payment($data, $ip)
     // {
     //     Log::info('vnpay', [

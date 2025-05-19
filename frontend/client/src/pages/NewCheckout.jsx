@@ -35,12 +35,8 @@ const useShippingFee = (formData, cartItems) => {
       const calculateShippingFee = async () => {
         setIsCalculatingShipping(true);
         try {
-          const weight = cartItems.reduce(
-            (total, item) => total + (item.weight || 0) * item.quantity,
-            0
-          ) || 10000;
-          const response = await apiGhtk.get(`/services/shipment/fee`, {
-            params: { ...formData, weight },
+          const response = await apiGhtk.get(`/shipping/fee`, {
+            params: { ...formData },
           });
           if (response?.data?.success === true) {
             setShippingFee(response?.data?.fee?.ship_fee_only);
@@ -67,26 +63,38 @@ const useAddressData = () => {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
-
+  const [provincesLoading, setProvincesLoading] = useState(false); // Thêm trạng thái loading
+  const [districtsLoading, setDistrictsLoading] = useState(false); // Add districtsLoading state
+  const [wardsLoading, setWardsLoading] = useState(false); // Add wardsLoading state
   useEffect(() => {
+    setProvincesLoading(true); // Bắt đầu tải dữ liệu
     axios
       .get("http://127.0.0.1:8000/api/v1/address/provinces/")
       .then((response) => setProvinces(response?.data?.data))
-      .catch((error) => console.error("Lỗi khi tải tỉnh/thành phố:", error));
+      .catch((error) => console.error("Lỗi khi tải tỉnh/thành phố:", error))
+      .finally(() => setProvincesLoading(false)); // Kết thúc tải dữ liệu
   }, []);
 
   const loadDistricts = (provinceCode) => {
+    setDistrictsLoading(true); // Start loading districts
     axios
-      .get(`http://127.0.0.1:8000/api/v1/address/districts?province_code=${provinceCode}`)
+      .get(
+        `http://127.0.0.1:8000/api/v1/address/districts?province_code=${provinceCode}`
+      )
       .then((response) => setDistricts(response?.data?.data))
-      .catch((error) => console.error("Lỗi khi tải quận/huyện:", error));
+      .catch((error) => console.error("Lỗi khi tải quận/huyện:", error))
+      .finally(() => setDistrictsLoading(false)); // End loading districts
   };
 
   const loadWards = (districtCode) => {
+    setWardsLoading(true); // Start loading wards
     axios
-      .get(`http://127.0.0.1:8000/api/v1/address/communes?district_code=${districtCode}`)
+      .get(
+        `http://127.0.0.1:8000/api/v1/address/communes?district_code=${districtCode}`
+      )
       .then((response) => setWards(response?.data?.data))
-      .catch((error) => console.error("Lỗi khi tải phường/xã:", error));
+      .catch((error) => console.error("Lỗi khi tải phường/xã:", error))
+      .finally(() => setWardsLoading(false)); // End loading wards
   };
 
   return { provinces, districts, wards, loadDistricts, loadWards };
@@ -125,6 +133,28 @@ const NewCheckout = () => {
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submit, setSubmit] = useState(false);
 
+  // Clear user-related data on logout
+  useEffect(() => {
+    if (!isLogin) {
+      setUseNewAddress(false);
+      setShowAddressModal(false);
+      setAddresses([]);
+      setSelectedAddress(null);
+      setDiscountCode("");
+      setAvailableCoupons([]);
+      setSelectedCoupon(null);
+      setSpecificAddress("");
+      setSelectedProvince("");
+      setSelectedDistrict("");
+      setSelectedWard("");
+      setOrder({ customer_note: "Giao hàng tận nơi" });
+      setPaymentMethod("cod");
+      setSubmit(false);
+      // Reset form fields on logout
+      form.resetFields();
+    }
+  }, [isLogin, form]);
+
   const [formData, setFormData] = useState({
     pick_province: "Hà Nội",
     pick_district: "Hoàng Mai",
@@ -133,12 +163,34 @@ const NewCheckout = () => {
     ward: "",
     address: "",
     weight: 10000,
+    value: 10000,
     transport: "road",
-    deliver_option: "none",
+    deliver_option: "xteam",
   });
 
-  const { provinces, districts, wards, loadDistricts, loadWards } = useAddressData();
-  const { shippingFee, isCalculatingShipping } = useShippingFee(formData, cartItems);
+  const {
+    provinces,
+    districts,
+    wards,
+    loadDistricts,
+    loadWards,
+    provincesLoading,
+    districtsLoading,
+    wardsLoading,
+  } = useAddressData();
+  const { shippingFee, isCalculatingShipping } = useShippingFee(
+    formData,
+    cartItems
+  );
+
+  // Thêm useEffect để đảm bảo tính phí vận chuyển được tính lại khi formData thay đổi và có đủ thông tin mã địa chỉ
+  useEffect(() => {
+    const { province, district, ward, address } = formData;
+    if (province && district && ward && address) {
+      // Không cần làm gì thêm vì useShippingFee đã tự động tính phí khi formData thay đổi
+      // Nhưng có thể reset trạng thái hoặc xử lý thêm nếu cần
+    }
+  }, [formData]);
   const queryClient = useQueryClient();
 
   // Load cart data on mount
@@ -165,10 +217,14 @@ const NewCheckout = () => {
       instanceAxios
         .get("http://127.0.0.1:8000/api/v1/customer/shipping-address")
         .then((response) => {
-          const fetchedAddresses = Array.isArray(response?.data?.data) ? response.data.data : [];
+          const fetchedAddresses = Array.isArray(response?.data?.data)
+            ? response.data.data
+            : [];
           setAddresses(fetchedAddresses);
           if (fetchedAddresses.length > 0) {
-            const defaultAddr = fetchedAddresses.find((addr) => addr.is_default);
+            const defaultAddr = fetchedAddresses.find(
+              (addr) => addr.is_default
+            );
             if (defaultAddr) {
               setSelectedAddress(defaultAddr.id);
               setUseNewAddress(false);
@@ -203,12 +259,41 @@ const NewCheckout = () => {
         ward: dataform.commune?.name || dataform.ward,
       });
 
-      const provinceCode =
-        provinces.find((p) => p.name === (dataform.province?.name || dataform.province))?.code || "";
-      const districtCode =
-        districts.find((d) => d.name === (dataform.district?.name || dataform.district))?.code || "";
-      const wardCode =
-        wards.find((w) => w.name === (dataform.commune?.name || dataform.ward))?.code || "";
+      // Try to get codes directly from API response first
+      let provinceCode = dataform.province?.code;
+      let districtCode = dataform.district?.code;
+      let wardCode = dataform.commune?.code;
+
+      // If codes are not available in API response, try to find them from names
+      if (!provinceCode) {
+        provinceCode = provinces.find(
+          (p) => p.name === (dataform.province?.name || dataform.province)
+        )?.code;
+      }
+      if (!districtCode) {
+        districtCode = districts.find(
+          (d) => d.name === (dataform.district?.name || dataform.district)
+        )?.code;
+      }
+      if (!wardCode) {
+        wardCode = wards.find(
+          (w) => w.name === (dataform.commune?.name || dataform.ward)
+        )?.code;
+      }
+
+      // Validate codes
+      if (!provinceCode) {
+        message.error("Không tìm thấy mã tỉnh/thành phố!");
+        return;
+      }
+      if (!districtCode) {
+        message.error("Không tìm thấy mã quận/huyện!");
+        return;
+      }
+      if (!wardCode) {
+        message.error("Không tìm thấy mã phường/xã!");
+        return;
+      }
 
       setSelectedProvince(provinceCode);
       setSelectedDistrict(districtCode);
@@ -216,9 +301,9 @@ const NewCheckout = () => {
 
       setFormData((prev) => ({
         ...prev,
-        province: dataform.province?.name || dataform.province,
-        district: dataform.district?.name || dataform.district,
-        ward: dataform.commune?.name || dataform.ward,
+        province: provinceCode,
+        district: districtCode,
+        ward: wardCode,
         address: dataform.address_line1 || dataform.specificAddress,
       }));
 
@@ -256,9 +341,9 @@ const NewCheckout = () => {
 
       setFormData((prev) => ({
         ...prev,
-        province: provinces.find((p) => p.code === selectedProvince)?.name || "",
-        district: districts.find((d) => d.code === selectedDistrict)?.name || "",
-        ward: wards.find((w) => w.code === selectedWard)?.name || "",
+        province: selectedProvince,
+        district: selectedDistrict,
+        ward: selectedWard,
         address: specificAddress,
       }));
 
@@ -289,7 +374,11 @@ const NewCheckout = () => {
   ]);
 
   // Query for fetching available coupons
-  const { data: couponsData, isError, isLoading } = useQuery({
+  const {
+    data: couponsData,
+    isError,
+    isLoading,
+  } = useQuery({
     queryKey: ["coupons"],
     queryFn: async () => {
       const response = await instanceAxios.get("api/v1/coupon");
@@ -308,7 +397,7 @@ const NewCheckout = () => {
     );
   }, [cartItems]);
 
-  console.log("calculateSubtotal", calculateSubtotal);
+  // console.log("calculateSubtotal", calculateSubtotal);
 
   // Process coupons data when it changes
   useEffect(() => {
@@ -319,11 +408,13 @@ const NewCheckout = () => {
       setAvailableCoupons(validCoupons);
 
       if (selectedCoupon) {
-        const isStillValid = validCoupons.some((c) => c.id === selectedCoupon.id);
+        const isStillValid = validCoupons.some(
+          (c) => c.id === selectedCoupon.id
+        );
         if (!isStillValid) {
           setSelectedCoupon(null);
           setDiscountCode("");
-          message.warning("Mã giảm giá đã chọn không còn khả dụng!");
+          // message.warning("Mã giảm giá đã chọn không còn khả dụng!");
         }
       }
     }
@@ -332,11 +423,13 @@ const NewCheckout = () => {
   // Handle error state
   useEffect(() => {
     if (isError) {
-      message.error("Không thể tải danh sách mã giảm giá. Vui lòng thử lại sau.");
+      message.error(
+        "Không thể tải danh sách mã giảm giá. Vui lòng thử lại sau."
+      );
     }
   }, [isError]);
 
-  console.log("couponsData", couponsData);
+  // console.log("couponsData", couponsData);
 
   // Calculate grand total with useMemo
   const grandTotal = useMemo(() => {
@@ -348,8 +441,16 @@ const NewCheckout = () => {
         discount = selectedCoupon.discount_value;
       }
     }
-    return calculateSubtotal + (shippingFee || 0) - discount;
+    const total = calculateSubtotal + (shippingFee || 0) - discount;
+    return Math.floor(total); // Lấy phần nguyên trước dấu thập phân
   }, [calculateSubtotal, shippingFee, selectedCoupon]);
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      value: grandTotal,
+    }));
+  }, [grandTotal]);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -364,22 +465,6 @@ const NewCheckout = () => {
     setUseNewAddress(false);
   };
 
-  // Handle address change
-  const handleAddressChange = (value) => {
-    setSelectedAddress(value);
-    setShippingFee(null);
-    setIsCalculatingShipping(true);
-    calculateShippingFee(value);
-  };
-
-  // Handle new address change
-  const handleNewAddressChange = (value) => {
-    setSelectedNewAddress(value);
-    setShippingFee(null);
-    setIsCalculatingShipping(true);
-    calculateShippingFee(value);
-  };
-
   // Mutation for creating order
   const createOrderMutation = useMutation({
     mutationFn: async (orderData) => {
@@ -387,26 +472,26 @@ const NewCheckout = () => {
       return response.data;
     },
     onError: (error) => {
-      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!";
+      const errorMessage =
+        error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!";
       message.error(errorMessage);
       console.error("Lỗi khi đặt hàng:", error);
       setSubmit(false);
-    }
+    },
   });
 
   // Mutation for updating coupon usage
   const updateCouponMutation = useMutation({
     mutationFn: async ({ couponId, usedCount }) => {
-      const response = await instanceAxios.put(
-        `api/v1/coupon/${couponId}`,
-        { used_count: usedCount }
-      );
+      const response = await instanceAxios.put(`api/v1/coupon/${couponId}`, {
+        used_count: usedCount,
+      });
       return response.data;
     },
     onError: (error) => {
       console.error("Lỗi khi cập nhật mã giảm giá:", error);
       message.error("Không thể cập nhật mã giảm giá. Vui lòng liên hệ hỗ trợ.");
-    }
+    },
   });
 
   // Mutation for deleting order
@@ -417,8 +502,10 @@ const NewCheckout = () => {
     },
     onError: (error) => {
       console.error("Lỗi khi xóa đơn hàng:", error);
-      message.error("Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng liên hệ hỗ trợ.");
-    }
+      message.error(
+        "Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng liên hệ hỗ trợ."
+      );
+    },
   });
 
   // Query for validating coupon
@@ -426,7 +513,9 @@ const NewCheckout = () => {
     queryKey: ["coupon", selectedCoupon?.id],
     queryFn: async () => {
       if (!selectedCoupon) return null;
-      const response = await instanceAxios.get(`api/v1/coupon/${selectedCoupon.id}`);
+      const response = await instanceAxios.get(
+        `api/v1/coupon/${selectedCoupon.id}`
+      );
       return response.data;
     },
     enabled: !!selectedCoupon,
@@ -449,7 +538,9 @@ const NewCheckout = () => {
       }
 
       if (!shippingFee) {
-        message.error("Vui lòng chọn địa chỉ giao hàng để tính phí vận chuyển!");
+        message.error(
+          "Vui lòng chọn địa chỉ giao hàng để tính phí vận chuyển!"
+        );
         return;
       }
 
@@ -467,15 +558,16 @@ const NewCheckout = () => {
         coupon_id: selectedCoupon?.id || null,
         order_coupon_code: selectedCoupon?.code || null,
         order_coupon_name: selectedCoupon?.name || null,
-        order_discount_amount: selectedCoupon ? (
-          selectedCoupon.discount_type === 'percentage' 
-            ? (grandTotal * Number(selectedCoupon.discount_value) / 100).toFixed(2)
-            : Number(selectedCoupon.discount_value).toFixed(2)
-        ) : "0.00",
-        order_discount_type: selectedCoupon ? (selectedCoupon.discount_type === 'percentage' ? 1 : 2) : null,
-        order_discount_value: selectedCoupon ? Number(selectedCoupon.discount_value) : null
+        order_discount_type: selectedCoupon
+          ? selectedCoupon.discount_type === "percentage"
+            ? 0
+            : 1
+          : null,
+        order_discount_value: selectedCoupon
+          ? Number(selectedCoupon.discount_value)
+          : null,
       };
-
+      // console.log("orderData", orderData);
       const orderResponse = await createOrderMutation.mutateAsync(orderData);
 
       if (orderResponse.success && selectedCoupon) {
@@ -497,7 +589,7 @@ const NewCheckout = () => {
 
         await updateCouponMutation.mutateAsync({
           couponId: selectedCoupon.id,
-          usedCount: currentCoupon.used_count + 1
+          usedCount: currentCoupon.used_count + 1,
         });
       }
 
@@ -506,10 +598,13 @@ const NewCheckout = () => {
       } else {
         message.success("Đặt hàng thành công!");
         localStorage.setItem("orderCode", orderResponse.data.order_code);
-        const checkoutItems = JSON.parse(localStorage.getItem("checkoutItems")) || [];
-        let storedCartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+        const checkoutItems =
+          JSON.parse(localStorage.getItem("checkoutItems")) || [];
+        let storedCartItems =
+          JSON.parse(localStorage.getItem("cartItems")) || [];
         storedCartItems = storedCartItems.filter(
-          (item) => !checkoutItems.some((checkoutItem) => checkoutItem.id === item.id)
+          (item) =>
+            !checkoutItems.some((checkoutItem) => checkoutItem.id === item.id)
         );
         localStorage.setItem("cartItems", JSON.stringify(storedCartItems));
         setCartItems([]);
@@ -522,6 +617,9 @@ const NewCheckout = () => {
     }
   };
 
+  console.log("order", order);
+  // console.log("grandTotal", grandTotal);
+  // console.log("dataform", dataform);
   return (
     <div className="p-6 bg-white">
       <Title level={2}>Thanh toán</Title>
@@ -578,11 +676,9 @@ const NewCheckout = () => {
               </Form.Item>
 
               <Form.Item
-                label="Tỉnh/Thành phố"
                 name="province"
-                rules={[
-                  { required: true, message: "Vui lòng chọn tỉnh/thành phố" },
-                ]}
+                label="Tỉnh/Thành phố"
+                rules={[{ required: true, message: "Chọn tỉnh/thành phố" }]}
               >
                 {dataform?.province?.name || dataform?.province ? (
                   <Input
@@ -592,31 +688,33 @@ const NewCheckout = () => {
                   />
                 ) : (
                   <Select
-                    placeholder="Chọn Tỉnh/Thành phố"
+                    placeholder="Chọn tỉnh/thành phố"
+                    loading={provincesLoading}
                     value={selectedProvince}
-                    onChange={(value) => {
-                      setSelectedProvince(value);
-                      loadDistricts(value);
-                      setFormData((prev) => ({
-                        ...prev,
-                        province: provinces.find((p) => p.code === value)?.name,
-                      }));
+                    onChange={(val) => {
+                      setSelectedProvince(val);
+                      setSelectedDistrict("");
+                      setSelectedWard("");
+                      form.setFieldsValue({
+                        district: undefined,
+                        ward: undefined,
+                      });
+                      loadDistricts(val); // Đảm bảo các quận được tải khi một tỉnh được chọn
                     }}
                   >
-                    {provinces.map((province) => (
-                      <Option key={province.code} value={province.code}>
-                        {province.name}
+                    {provinces.map((p) => (
+                      <Option key={p.code} value={p.code}>
+                        {p.name}
                       </Option>
                     ))}
                   </Select>
                 )}
               </Form.Item>
+
               <Form.Item
-                label="Quận/Huyện"
                 name="district"
-                rules={[
-                  { required: true, message: "Vui lòng chọn quận/huyện" },
-                ]}
+                label="Quận/Huyện"
+                rules={[{ required: true, message: "Chọn quận/huyện" }]}
               >
                 {dataform?.district?.name || dataform?.district ? (
                   <Input
@@ -626,17 +724,16 @@ const NewCheckout = () => {
                   />
                 ) : (
                   <Select
-                    placeholder="Chọn Quận/Huyện"
-                    value={selectedDistrict}
-                    onChange={(value) => {
-                      setSelectedDistrict(value);
-                      loadWards(value);
-                      setFormData((prev) => ({
-                        ...prev,
-                        district: districts.find((d) => d.code === value)?.name,
-                      }));
-                    }}
+                    placeholder="Chọn quận/huyện"
+                    loading={districtsLoading}
                     disabled={!selectedProvince}
+                    value={selectedDistrict}
+                    onChange={(val) => {
+                      setSelectedDistrict(val);
+                      setSelectedWard("");
+                      form.setFieldsValue({ ward: undefined });
+                      loadWards(val); // Đảm bảo các phường/xã được tải khi một quận được chọn
+                    }}
                   >
                     {districts.map((d) => (
                       <Option key={d.code} value={d.code}>
@@ -646,10 +743,11 @@ const NewCheckout = () => {
                   </Select>
                 )}
               </Form.Item>
+
               <Form.Item
-                label="Phường/Xã"
                 name="ward"
-                rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
+                label="Phường/Xã"
+                rules={[{ required: true, message: "Chọn phường/xã" }]}
               >
                 {dataform?.commune?.name || dataform?.ward ? (
                   <Input
@@ -659,16 +757,11 @@ const NewCheckout = () => {
                   />
                 ) : (
                   <Select
-                    placeholder="Chọn Phường/Xã"
-                    value={selectedWard}
-                    onChange={(value) => {
-                      setSelectedWard(value);
-                      setFormData((prev) => ({
-                        ...prev,
-                        ward: wards.find((w) => w.code === value)?.name,
-                      }));
-                    }}
+                    placeholder="Chọn phường/xã"
+                    loading={wardsLoading}
                     disabled={!selectedDistrict}
+                    value={selectedWard}
+                    onChange={(val) => setSelectedWard(val)}
                   >
                     {wards.map((w) => (
                       <Option key={w.code} value={w.code}>
@@ -687,9 +780,14 @@ const NewCheckout = () => {
                   value={specificAddress}
                   onChange={(e) => {
                     setSpecificAddress(e.target.value);
-                    setFormData((prev) => ({ ...prev, address: e.target.value }));
+                    setFormData((prev) => ({
+                      ...prev,
+                      address: e.target.value,
+                    }));
                   }}
-                  disabled={!!(dataform?.address_line1 || dataform?.specificAddress)}
+                  disabled={
+                    !!(dataform?.address_line1 || dataform?.specificAddress)
+                  }
                   className="!bg-white !border !border-gray-300 !text-black"
                 />
               </Form.Item>
@@ -740,7 +838,9 @@ const NewCheckout = () => {
                     <Card
                       key={coupon.id}
                       className={`cursor-pointer transition-all ${
-                        selectedCoupon?.id === coupon.id ? "border-blue-500" : ""
+                        selectedCoupon?.id === coupon.id
+                          ? "border-blue-500"
+                          : ""
                       }`}
                       onClick={() => {
                         if (selectedCoupon?.id === coupon.id) {
@@ -765,7 +865,9 @@ const NewCheckout = () => {
                         </div>
                         <Button
                           type={
-                            selectedCoupon?.id === coupon.id ? "primary" : "default"
+                            selectedCoupon?.id === coupon.id
+                              ? "primary"
+                              : "default"
                           }
                           onClick={(e) => {
                             e.stopPropagation();
@@ -778,7 +880,9 @@ const NewCheckout = () => {
                             }
                           }}
                         >
-                          {selectedCoupon?.id === coupon.id ? "Đã chọn" : "Áp dụng"}
+                          {selectedCoupon?.id === coupon.id
+                            ? "Đã chọn"
+                            : "Áp dụng"}
                         </Button>
                       </div>
                     </Card>
@@ -841,11 +945,13 @@ const NewCheckout = () => {
             <div className="flex justify-between">
               <div>
                 <p>
-                  {addr.recipient_name || addr.fullname} - {addr.phone || addr.mobile}
+                  {addr.recipient_name || addr.fullname} -{" "}
+                  {addr.phone || addr.mobile}
                 </p>
                 <p>
                   {addr.address_line1 || addr.specificAddress},{" "}
-                  {addr.commune?.name || addr.ward}, {addr.district?.name || addr.district},{" "}
+                  {addr.commune?.name || addr.ward},{" "}
+                  {addr.district?.name || addr.district},{" "}
                   {addr.province?.name || addr.province}
                 </p>
               </div>

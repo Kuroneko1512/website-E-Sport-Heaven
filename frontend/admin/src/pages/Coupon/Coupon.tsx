@@ -27,15 +27,47 @@ const Coupon: FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [isSearching, setIsSearching] = useState<boolean>(false);
 
-    const fetchCoupons = async (page: number = 1, search: string = searchTerm) => {
-        try {
-            setLoading(true);
-            const response = await getCoupons(page, perPage, search);
-            console.log("API response:", response);
+  const fetchCoupons = async (page: number = 1, search: string = searchTerm) => {
+    try {
+      setLoading(true);
+      const response = await getCoupons(page, perPage, search);
+      console.log("API response:", response);
 
-            setCurrentPage(response.current_page);
-            setLastPage(response.last_page);
-            setTotal(response.total);
+
+      setCurrentPage(response.current_page);
+      setLastPage(response.last_page);
+      setTotal(response.total);
+
+      const formattedCoupons = response.data.map((item: ApiCoupon) => ({
+        id: item.id,
+        code: item.code,
+        name: item.name,
+        description: item.description || '',
+        discount_value: item.discount_value,
+        discount_type: item.discount_type,
+        min_purchase: item.min_purchase || 0,
+        user_usage: item.user_usage || {},
+        is_active: 1,
+        start_date: item.start_date || '',
+        end_date: item.end_date || '',
+        max_uses: item.max_uses || 0,
+        used_count: item.used_count || 0,
+      }));
+      setCoupons(formattedCoupons);
+    } catch (error) {
+      console.error("Error fetching coupons:", error);
+    } finally {
+      setLoading(false);
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSearching(true);
+    setCurrentPage(1);
+    fetchCoupons(1, searchTerm);
+  };
 
             const formattedCoupons = response.data.map((item: ApiCoupon) => ({
                 id: item.id,
@@ -66,9 +98,17 @@ const Coupon: FC = () => {
         fetchCoupons(1, searchTerm);
     };
 
-    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value);
-    };
+  const handleDeleteCoupon = async (id: number) => {
+    const confirm = window.confirm("Bạn có chắc chắn muốn xóa không?");
+    if (confirm) {
+      try {
+        await deleteCoupon(id);
+        fetchCoupons(currentPage);
+      } catch (error) {
+        console.error("Error deleting coupon:", error);
+      }
+    }
+  };
 
     const handleClearSearch = () => {
         setSearchTerm('');
@@ -96,11 +136,23 @@ const Coupon: FC = () => {
         }
     };
 
-    useEffect(() => {
-        if (!isSearching) {
-            fetchCoupons(currentPage, searchTerm);
-        }
-    }, [currentPage]);
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(lastPage, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+
+    return pageNumbers;
+  };
 
     const renderPageNumbers = () => {
         const pageNumbers = [];

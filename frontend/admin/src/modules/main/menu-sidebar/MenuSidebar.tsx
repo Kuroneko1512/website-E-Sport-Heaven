@@ -50,6 +50,11 @@ export const MENU: IMenuItem[] = [
     path: '/Order',
   },
   {
+    name: 'hoàn hàng',
+    icon: 'fas fa-shopping-cart nav-icon', // Đơn hàng -> giỏ hàng
+    path: '/order-return',
+  },
+  {
     name: 'Mã giảm giá',
     icon: 'fas fa-tags nav-icon', // Mã giảm giá -> thẻ/tag là biểu tượng hợp lý
     path: '/Coupon',
@@ -59,7 +64,22 @@ export const MENU: IMenuItem[] = [
     icon: 'fas fa-ticket-alt nav-icon',
     path: '/CouponUsage',
   },
-  
+  {
+    name: "Bài viết",
+    icon: "fas fa-newspaper nav-icon",
+    children: [
+      {
+        name: "Tất cả bài viết",
+        icon: "fas fa-newspaper nav-icon",
+        path: "/blog",
+      },
+      {
+        name: "Danh mục bài viết",
+        icon: "fas fa-th-list nav-icon",
+        path: "/blog-category",
+      },
+    ],
+  },  
   {
     name: i18n.t('menusidebar.label.mainMenu'),
     icon: 'far fa-caret-square-down nav-icon',

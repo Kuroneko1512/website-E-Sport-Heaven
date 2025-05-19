@@ -24,3 +24,13 @@ export const apiService = {
     await apiClient.delete(url);
   },
 };
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  current_page: number;
+  last_page: number;
+  prev_page_url: string | null;
+  next_page_url: string | null;
+  total: number;
+  per_page: number;
+}

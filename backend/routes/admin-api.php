@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\V1\BlogCategoryController;
+use App\Http\Controllers\Api\Admin\V1\BlogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\v1\AdminAuthController;
 use App\Http\Controllers\Api\Location\LocationImportController;
@@ -9,6 +11,7 @@ use App\Http\Controllers\Api\Admin\V1\CategoryController;
 use App\Http\Controllers\Api\Admin\V1\ProductController;
 use App\Http\Controllers\Api\Admin\V1\OrderController;
 use App\Http\Controllers\Api\User\UserController;
+
 Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
         Route::get('/', function () {
@@ -31,21 +34,31 @@ Route::prefix('v1')->group(function () {
 
             //Product routes
             Route::apiResource('/product', ProductController::class);
-          
+
             //Attributes routes
             Route::apiResource('/attribute', AttributeController::class);
             //Category routes
             Route::apiResource('/category', CategoryController::class);
             //Order routes
+            Route::get('/order/{id}/order-user-return', [OrderController::class, 'getOrderUserReturn']);
+            Route::get('/order/order-return', [OrderController::class, 'getOrdersWithReturnRequests']);
+
             Route::apiResource('/order', OrderController::class);
+
             Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
             Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
+
+
             //Customer routes
-           
-          
 
             //Role and Permission routes
 
+            // Blog routes
+            Route::apiResource('blogs', BlogController::class);
+            Route::post('blogs/upload-image', [BlogController::class, 'uploadImage'])->name('blogs.upload-image');
+
+            // Blog Category routes
+            Route::apiResource('blog-categories', BlogCategoryController::class);
 
             // Location Import Routes
             Route::prefix('locations')->group(function () {

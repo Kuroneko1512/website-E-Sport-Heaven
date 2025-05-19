@@ -2,14 +2,14 @@ import React from "react";
 import { Link } from "react-router-dom";
 import FomatVND from "../../utils/FomatVND";
 
-const ProductBestseller = ({productData}) => {
+const ProductBestseller = ({productDataB}) => {
 
-  console.log("productData", productData);
+  console.log("productDataB", productDataB);
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">Sản phẩm mới</h1>
+      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">Sản phẩm bán chạy</h1>
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 md:gap-6">
-        {productData?.map((item) => (
+        {productDataB?.map((item) => (
           <div
             key={item?.id}
             className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col"
@@ -26,11 +26,13 @@ const ProductBestseller = ({productData}) => {
               />
 
               {/* Overlay hover */}
+              <Link to={`/shop/product-detail/${item?.id}`}>
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <button className="absolute top-3 right-3 py-1 px-2 bg-white/80 rounded-full hover:bg-white transition-colors duration-200">
+              </div>
+              </Link>
+              <button className="absolute top-3 right-3 py-1 px-2 bg-white/80 rounded-full hover:bg-white transition-colors duration-200 opacity-0 group-hover:opacity-100 ">
                   <i className="far fa-heart text-gray-700"></i>
                 </button>
-              </div>
             </div>
 
             {/* Text section */}

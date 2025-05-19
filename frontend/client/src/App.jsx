@@ -46,6 +46,7 @@ import OrderDetail from "./components/elementProfile/OrderDetail";
 import ChangePassword from "./components/elementProfile/ChangePassword";
 import EmailAuthentication from "./components/elementProfile/EmailAuthentication";
 import Cart from "./pages/Cart";
+import ReturnRequestForm from "./components/elementProfile/ReturnRequestForm";
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
@@ -123,6 +124,7 @@ function App() {
           <Route path="home" element={<Navigate to={"/"} />} />
           <Route index element={<Home />} />
           <Route path="shop" element={<Shop />} />
+          <Route path="orders/:order_code/return-request" element={<ReturnRequestForm />} />
 
           <Route path="shop/product-detail/:id" element={<ProductDetail />}>
             <Route path="descriptions" element={<Description />} />
@@ -144,17 +146,18 @@ function App() {
               <Route path="saved-cards" element={<PaymentCards />} />
               <Route path="wishlists" element={<Whishlist />} />
               <Route path="emailAuth" element={<EmailAuthentication />} />
+              
             </Route>
           </Route>
 
           <Route path="blog" element={<Blog />} />
           <Route path="blog/:id" element={<BlogDetail />} />
-          <Route path="transaction-history" element={<OrderTracking />} />
+          <Route path="order-history/:order_code" element={<OrderTracking />} />
           <Route path="contact" element={<Contact />} />
           <Route path="*" element={<Notfound />} />
           <Route path="cart" element={<Cart />} />
 
-          <Route path="newcheckout" element={<NewCheckout />} />
+          <Route path="checkout" element={<NewCheckout />} />
           <Route path="review-order" element={<ReviewOrder />} />
           <Route path="thankyou" element={<ThankYou />}></Route>
         </Route>
