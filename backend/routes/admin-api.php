@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\V1\BlogCategoryController;
+use App\Http\Controllers\Api\Admin\V1\BlogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\v1\AdminAuthController;
 use App\Http\Controllers\Api\Location\LocationImportController;
@@ -53,6 +55,12 @@ Route::prefix('v1')->group(function () {
 
             //Role and Permission routes
 
+            // Blog routes
+            Route::apiResource('blogs', BlogController::class);
+            Route::post('blogs/upload-image', [BlogController::class, 'uploadImage'])->name('blogs.upload-image');
+
+            // Blog Category routes
+            Route::apiResource('blog-categories', BlogCategoryController::class);
 
             // Location Import Routes
             Route::prefix('locations')->group(function () {

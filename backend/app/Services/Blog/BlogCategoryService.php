@@ -4,65 +4,116 @@ namespace App\Services\Blog;
 
 use App\Models\BlogCategory;
 use App\Services\BaseService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
+use Exception;
+use Illuminate\Validation\ValidationException;
 
 class BlogCategoryService extends BaseService
 {
-    // Constructor nhận vào đối tượng BlogCategory và gọi constructor của lớp cha (BaseService)
+    protected $rules = [
+        'name' => 'required|string|max:255',
+        'slug' => 'nullable|string|max:255',
+        'description' => 'nullable|string|max:255'
+    ];
+
     public function __construct(BlogCategory $blogCategory)
     {
-        parent::__construct($blogCategory);  // Gọi constructor của lớp cha và truyền đối tượng BlogCategory
+        parent::__construct($blogCategory);
     }
 
-    // Phương thức lấy tất cả các danh mục blog với phân trang (mặc định là 10)
     public function getCategories($paginate = 10)
     {
-        // Gọi phương thức getAll của BaseService để lấy danh sách danh mục blog với phân trang
-        return $this->getAll($paginate);
+        try {
+            return $this->getAll($paginate);
+        } catch (Exception $e) {
+            throw new Exception('Error getting blog categories: ' . $e->getMessage());
+        }
     }
 
-    // Phương thức tạo mới một danh mục blog
     public function createCategory(array $data)
     {
-        // Kiểm tra nếu slug chưa có, tự động tạo slug từ name
-        if (!isset($data['slug']) || empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['name']);
+        try {
+            $validator = Validator::make($data, $this->rules);
+            
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+
+            if (!isset($data['slug']) || empty($data['slug'])) {
+                $data['slug'] = Str::slug($data['name']);
+            }
+
+            return $this->create($data);
+        } catch (ValidationException $e) {
+            throw new Exception('Validation error: ' . implode(', ', $e->validator->errors()->all()));
+        } catch (Exception $e) {
+            throw new Exception('Error creating category: ' . $e->getMessage());
         }
-        // Gọi phương thức create của BaseService để tạo mới danh mục
-        return $this->create($data);
     }
 
-    // Phương thức cập nhật danh mục blog theo ID
     public function updateCategory($id, array $data)
     {
-        $category = $this->model->find($id); // Kiểm tra danh mục có tồn tại không
-        if (!$category) {
-            return false; 
+        try {
+            $category = $this->model->find($id);
+            if (!$category) {
+                throw new Exception('Category not found');
+            }
+
+            // Modify validation rules for update to ignore current slug
+            $rules = $this->rules;
+            if (isset($data['slug'])) {
+                $rules['slug'] = 'nullable|string|max:255|unique:blog_categories,slug,' . $id;
+            }
+
+            $validator = Validator::make($data, $rules);
+            if ($validator->fails()) {
+                throw new ValidationException($validator);
+            }
+
+            if (isset($data['name']) && $data['name'] !== $category->name) {
+                $data['slug'] = Str::slug($data['name']);
+            }
+
+            $category->update($data);
+            return $category->fresh();
+        } catch (ValidationException $e) {
+            throw new Exception('Validation error: ' . implode(', ', $e->validator->errors()->all()));
+        } catch (Exception $e) {
+            throw new Exception('Error updating category: ' . $e->getMessage());
         }
-
-        // Nếu 'name' thay đổi, tạo lại slug
-        if (isset($data['name']) && $data['name'] !== $category->name) {
-            $data['slug'] = Str::slug($data['name']);
-        }
-
-        // Cập nhật dữ liệu
-        $category->update($data);
-
-        // Trả về dữ liệu mới sau cập nhật
-        return $category->fresh();
     }
 
-    // Phương thức xóa danh mục blog theo ID
     public function deleteCategory($id)
     {
-        // Gọi phương thức delete của BaseService để xóa danh mục blog
-        return $this->delete($id);
+        try {
+            $category = $this->model->find($id);
+            if (!$category) {
+                throw new Exception('Category not found');
+            }
+
+            // Check if category has associated blogs
+            // if ($category->blogs()->count() > 0) {
+            //     throw new Exception('Cannot delete category with associated blogs');
+            // }
+
+            return $this->delete($id);
+        } catch (Exception $e) {
+            throw new Exception('Error deleting category: ' . $e->getMessage());
+        }
     }
 
-    // Phương thức tìm một danh mục blog theo ID
     public function findCategory($id)
     {
-        // Gọi phương thức show của BaseService để lấy thông tin chi tiết của danh mục
-        return $this->show($id);
+        try {
+            $category = $this->show($id);
+            if (!$category) {
+                throw new Exception('Category not found');
+            }
+            return $category;
+        } catch (Exception $e) {
+            throw new Exception('Error finding category: ' . $e->getMessage());
+        }
     }
 }

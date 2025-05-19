@@ -19,5 +19,21 @@ export const API_ENDPOINTS = {
     },
     ORDER: {
         BASE: "v1/admin/order",
-    }
+    },
+    BLOG: {
+        LIST: "v1/admin/blogs",
+        CREATE: "v1/admin/blogs",
+        UPDATE: (id: number) => `v1/admin/blogs/${id}`,
+        DELETE: (id: number) => `v1/admin/blogs/${id}`,
+        DETAIL: (id: number) => `v1/admin/blogs/${id}`,
+        SLUG: (slug: string) => `v1/admin/blogs/slug/${slug}`,
+        UPLOAD_IMAGE: "v1/admin/blogs/upload-image",
+    },
+    BLOG_CATEGORY: {
+        LIST: "v1/admin/blog-categories",
+        CREATE: "v1/admin/blog-categories",
+        UPDATE: (id: number) => `v1/admin/blog-categories/${id}`,
+        DELETE: (id: number) => `v1/admin/blog-categories/${id}`,
+        DETAIL: (id: number) => `v1/admin/blog-categories/${id}`,
+    },
 };

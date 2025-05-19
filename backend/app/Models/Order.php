@@ -127,6 +127,7 @@ class Order extends Model
         'payment_method',
         'payment_transaction_id',
         'paid_at',
+        'payment_expire_at',
         'shipping_method',
         'shipping_fee',
         'tracking_number',
@@ -157,18 +158,19 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'total_amount' => 'decimal:2',
-        'subtotal' => 'decimal:2',
-        'tax_amount' => 'decimal:2',
-        'shipping_fee' => 'decimal:2',
-        'order_discount_value' => 'decimal:2',
-        'order_discount_amount' => 'decimal:2',
-        'shipping_discount_value' => 'decimal:2',
-        'shipping_discount_amount' => 'decimal:2',
-        'refunded_amount' => 'decimal:2',
+        'total_amount' => 'decimal:0',
+        'subtotal' => 'decimal:0',
+        'tax_amount' => 'decimal:0',
+        'shipping_fee' => 'decimal:0',
+        'order_discount_value' => 'decimal:0',
+        'order_discount_amount' => 'decimal:0',
+        'shipping_discount_value' => 'decimal:0',
+        'shipping_discount_amount' => 'decimal:0',
+        'refunded_amount' => 'decimal:0',
         'is_store_pickup' => 'boolean',
         'has_return_request' => 'boolean',
         'paid_at' => 'datetime',
+        'payment_expire_at' => 'datetime',
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',
         'cancelled_at' => 'datetime',
@@ -288,7 +290,7 @@ class Order extends Model
     {
         return $this->hasMany(OrderReturn::class);
     }
-       public function userReturns()
+    public function userReturns()
     {
         return $this->hasMany(OrderUserReturn::class);
     }
