@@ -6,55 +6,56 @@ use App\Http\Controllers\Controller;
 use App\Models\Coupon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
-
+use App\Services\Coupon\CouponServices;
 
 class CouponsController extends Controller
 {
+    public $couponService;
+    public function __construct(CouponServices $couponService)
+    {
+        $this->couponService = $couponService;
+    }
     public function index(Request $request)
     {
-        $perPage = $request->input('limit', 10); // Mặc định 10 item mỗi trang
-        $page = $request->input('page', 1); // Mặc định trang 1
-        $search = $request->input('search', ''); // Từ khóa tìm kiếm
-        
-        $query = Coupon::orderBy('id', 'desc');
-        
-        // Thêm tìm kiếm nếu có từ khóa
-        if (!empty($search)) {
-            $query->where(function($q) use ($search) {
-                $q->where('code', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-        
-        $coupons = $query->paginate($perPage);
-
-        return response()->json($coupons);
+        $perPage = $request->input('limit', 10);
+    $page = $request->input('page', 1);
+    $search = $request->input('search', '');
+    
+    $coupons = $this->couponService->getCouponsPaginated($perPage, $page, $search);
+    
+    return response()->json($coupons);
     }
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'code' => 'required|string|max:255|unique:coupons',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'discount_type' => 'required|integer',
-            'discount_value' => 'required|numeric|min:0',
-            'min_order_amount' => 'required|numeric|min:0',
-            'max_discount_amount' => 'required|numeric|min:0',
-            'max_uses' => 'nullable|integer|min:0',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after:start_date',
-        ]);
+        try {
+            // Parse JSON string thành array
+            $data = json_decode($request->getContent(), true);
+            
+            // Validate data
+            $validated = $request->validate([
+                'code' => 'required|string|unique:coupons',
+                'name' => 'required|string',
+                'description' => 'nullable|string',
+                'discount_value' => 'required|numeric',
+                'discount_type' => 'required|integer',
+                'min_order_amount' => 'nullable|numeric',
+                'max_discount_amount' => 'nullable|numeric',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after:start_date',
+                'max_uses' => 'nullable|integer',
+                'is_active' => 'required|boolean'
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            $coupon = $this->couponService->createCoupon($validated);
+            
+            return response()->json($coupon, 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Có lỗi xảy ra khi tạo mã giảm giá',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $coupon = Coupon::create($validator->validated());
-
-        return response()->json($coupon, 201);
     }
 
     public function show(Coupon $coupon)
@@ -65,12 +66,13 @@ class CouponsController extends Controller
 
     public function update(Request $request, Coupon $coupon)
     {
-        $validator = Validator::make($request->all(), [
-            'code' => 'required|string|max:255|unique:coupons,code,' . $coupon->id,
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'discount_type' => 'required|integer',
-            'discount_value' => 'required|numeric|min:0',
+        try {
+            $validator = Validator::make($request->all(), [
+                'code' => 'required|string|max:255|unique:coupons,code,' . $coupon->id,
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'discount_type' => 'required|integer',
+                'discount_value' => 'required|numeric|min:0',
             'min_order_amount' => 'required|numeric|min:0',
             'max_discount_amount' => 'required|numeric|min:0',
             'max_uses' => 'nullable|integer|min:0',
@@ -82,25 +84,24 @@ class CouponsController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $coupon->update($validator->validated());
+        $coupon = $this->couponService->updateCoupon($coupon->id, $validator->validated());
 
         return response()->json($coupon);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Có lỗi xảy ra khi cập nhật mã giảm giá',
+            'error' => $e->getMessage()
+        ], 500);
+    }
     }
 
     public function destroy(Coupon $coupon)
     {
-        $coupon->delete();
+        $coupon = $this->couponService->deleteCoupon($coupon->id);
 
         return response()->json(null, 204);
     }
-    public function saving(Coupon $coupon)
-    {
-        // Kiểm tra nếu end_date đã qua
-        if ($coupon->end_date && Carbon::parse($coupon->end_date)->isPast()) {
-            $coupon->is_active = 1; // 1 = Ngừng hoạt động
-        }
-    }
-   
+  
 }
 
 

@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Http\Controllers\Api\Admin\V1\CouponsController;
+
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Category;
@@ -17,7 +17,7 @@ use App\Services\Category\CategoryService;
 use App\Services\Attribute\AttributeService;
 use App\Services\Product\ProductVariantService;
 use App\Services\Attribute\AttributeValueService;
-use App\Models\Coupon;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -52,6 +52,6 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         Passport::enablePasswordGrant();
-        Coupon::observe(CouponsController::class);
+      
     }
 }

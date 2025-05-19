@@ -11,9 +11,7 @@ use App\Http\Controllers\Api\Blog\V1\BlogCategoryController;
 use App\Http\Controllers\Api\Category\V1\CategoryController;
 use App\Http\Controllers\Api\Attribute\V1\AttributeController;
 use App\Http\Controllers\Api\Attribute\V1\AttributeValueController;
-
 use App\Http\Controllers\Api\User\UserController;
-
 use App\Http\Controllers\Api\Admin\V1\ProductController as ProductControllerAdmin;
 use App\Http\Controllers\Api\Admin\V1\CouponUsageController as CouponUsageControllerAdmin       ;
 use App\Http\Controllers\Api\Admin\V1\CouponsController as CouponsControllerAdmin;

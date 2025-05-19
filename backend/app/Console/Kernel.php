@@ -21,7 +21,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
 
-        $schedule->command('coupons:update-expired')->daily();
+     
 
         // $schedule->command('orders:auto-complete')->dailyAt('01:00');
         $schedule->command('orders:auto-complete')->everyMinute();

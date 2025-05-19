@@ -20,7 +20,7 @@ const Store: FC = () => {
         start_date:new Date().toISOString().split('T')[0],
         end_date: "",
         max_uses: 0,     
-        is_active: 1,
+        is_active: 0,
        
     });
     const [errors, setErrors] = useState<FormErrors>({});
@@ -193,7 +193,7 @@ const Store: FC = () => {
 
             
         
-            const apiCoupon: Omit<ApiCoupon, 'id' | 'created_at' | 'updated_at' | 'used_count'> = {
+            const apiCoupon: Omit<ApiCoupon, 'id' | 'created_at' | 'updated_at' > = {
                 code: coupon.code,
                 name: coupon.name,
                 description: coupon.description,
@@ -204,10 +204,10 @@ const Store: FC = () => {
                 start_date: coupon.start_date,
                 end_date: coupon.end_date,
                 max_uses: Number(coupon.max_uses),
-                is_active: 1,
+                is_active: 0,
                
             };
-            console.log(apiCoupon);
+            
             await createCoupon(apiCoupon);
       
             
@@ -226,7 +226,7 @@ const Store: FC = () => {
                 start_date: "",
                 end_date: "",
                 max_uses: 0,
-                is_active: 1,
+                is_active: 0,
                 
             });
             setSubmitted(false);
@@ -345,7 +345,7 @@ const Store: FC = () => {
                     </select>
                 </div>
                 <div className="form-group">
-                    <label htmlFor="discount_value">Giảm giá <span className="text-danger">*</span></label>
+                    <label htmlFor="discount_value">Giá trị giảm giá <span className="text-danger">*</span></label>
                     <input 
                         type="number" 
                         className={`form-control ${errors.discount_value ? 'is-invalid' : ''}`}
@@ -369,7 +369,8 @@ const Store: FC = () => {
                         name="max_uses" 
                         value={coupon.max_uses} 
                         onChange={handleChange}
-                   
+                        min="0"
+
                     />
                     
                 </div>

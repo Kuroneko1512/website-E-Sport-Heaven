@@ -9,11 +9,12 @@ interface CouponDisplay {
     description: string;
     discount_value: number;
     discount_type: number;
+    min_order_amount : number;
+    max_discount_amount : number;
     is_active: number;
     start_date: string;
     end_date: string;
     max_uses: number;
-    max_purchase: number;
 }
 
 const Coupon: FC = () => {
@@ -27,47 +28,15 @@ const Coupon: FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [isSearching, setIsSearching] = useState<boolean>(false);
 
-  const fetchCoupons = async (page: number = 1, search: string = searchTerm) => {
-    try {
-      setLoading(true);
-      const response = await getCoupons(page, perPage, search);
-      console.log("API response:", response);
+    const fetchCoupons = async (page: number = 1, search: string = searchTerm) => {
+        try {
+            setLoading(true);
+            const response = await getCoupons(page, perPage, search);
+            console.log("API response:", response);
 
-
-      setCurrentPage(response.current_page);
-      setLastPage(response.last_page);
-      setTotal(response.total);
-
-      const formattedCoupons = response.data.map((item: ApiCoupon) => ({
-        id: item.id,
-        code: item.code,
-        name: item.name,
-        description: item.description || '',
-        discount_value: item.discount_value,
-        discount_type: item.discount_type,
-        min_purchase: item.min_purchase || 0,
-        user_usage: item.user_usage || {},
-        is_active: 1,
-        start_date: item.start_date || '',
-        end_date: item.end_date || '',
-        max_uses: item.max_uses || 0,
-        used_count: item.used_count || 0,
-      }));
-      setCoupons(formattedCoupons);
-    } catch (error) {
-      console.error("Error fetching coupons:", error);
-    } finally {
-      setLoading(false);
-      setIsSearching(false);
-    }
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSearching(true);
-    setCurrentPage(1);
-    fetchCoupons(1, searchTerm);
-  };
+            setCurrentPage(response.current_page);
+            setLastPage(response.last_page);
+            setTotal(response.total);
 
             const formattedCoupons = response.data.map((item: ApiCoupon) => ({
                 id: item.id,
@@ -76,8 +45,9 @@ const Coupon: FC = () => {
                 description: item.description || '',
                 discount_value: item.discount_value,
                 discount_type: item.discount_type,
-                max_purchase: item.max_purchase || 0,
-                is_active: 1,
+                min_order_amount: item.min_order_amount || 0,
+                max_discount_amount: item.max_discount_amount || 0,
+                is_active: item.is_active,
                 start_date: item.start_date || '',
                 end_date: item.end_date || '',
                 max_uses: item.max_uses || 0,
@@ -91,30 +61,15 @@ const Coupon: FC = () => {
         }
     };
 
+    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+    };
+
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         setIsSearching(true);
         setCurrentPage(1);
         fetchCoupons(1, searchTerm);
-    };
-
-  const handleDeleteCoupon = async (id: number) => {
-    const confirm = window.confirm("Bạn có chắc chắn muốn xóa không?");
-    if (confirm) {
-      try {
-        await deleteCoupon(id);
-        fetchCoupons(currentPage);
-      } catch (error) {
-        console.error("Error deleting coupon:", error);
-      }
-    }
-  };
-
-    const handleClearSearch = () => {
-        setSearchTerm('');
-        setIsSearching(false);
-        setCurrentPage(1);
-        fetchCoupons(1, '');
     };
 
     const handleDeleteCoupon = async (id: number) => {
@@ -129,30 +84,19 @@ const Coupon: FC = () => {
         }
     };
 
+    const handleClearSearch = () => {
+        setSearchTerm('');
+        setIsSearching(false);
+        setCurrentPage(1);
+        fetchCoupons(1, '');
+    };
+
     const goToPage = (page: number) => {
         if (page >= 1 && page <= lastPage) {
             setCurrentPage(page);
             fetchCoupons(page);
         }
     };
-
-  const renderPageNumbers = () => {
-    const pageNumbers = [];
-    const maxPagesToShow = 5;
-
-    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = Math.min(lastPage, startPage + maxPagesToShow - 1);
-
-    if (endPage - startPage + 1 < maxPagesToShow) {
-      startPage = Math.max(1, endPage - maxPagesToShow + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(i);
-    }
-
-    return pageNumbers;
-  };
 
     const renderPageNumbers = () => {
         const pageNumbers = [];
@@ -196,6 +140,10 @@ const Coupon: FC = () => {
             return `Không hoạt động (${dateRange})`;
         }
     };
+
+    useEffect(() => {
+        fetchCoupons();
+    }, []);
 
     return (
         <section className="content">
@@ -281,8 +229,8 @@ const Coupon: FC = () => {
                                                 <td>{coupon.discount_type === 0 ? 'Phần trăm' : 'Giá tiền'}</td>
                                                 <td>{getDateStatus(coupon.start_date, coupon.end_date)}</td>
                                                 <td>
-                                                    <span className={`tag ${coupon.is_active === 1 ? "tag-success" : "tag-danger"}`}>
-                                                        {coupon.is_active === 1 ? "Hoạt động" : "Ngừng"}
+                                                    <span className={`tag ${coupon.is_active === 0 ? "tag-success" : "tag-danger"}`}>
+                                                        {coupon.is_active === 0 ? "Hoạt động" : "Ngừng"}
                                                     </span>
                                                 </td>
                                                 <td>{coupon.max_uses}</td>
