@@ -40,7 +40,7 @@ class OrderController extends Controller
             // Thanh toán vn pay sẽ xử lý ở PaymentController
             if ($data['payment_method'] === 'vnpay') {
                 $vnpUrl = $this->payment($Order, $request->ip());
-                $expireDate = Carbon::now('Asia/Ho_Chi_Minh')->addMinutes(3);
+                
                 OrderHistory::createHistory(
                     $Order->id,
                     OrderHistory::ACTION_ORDER_UPDATED,
@@ -52,7 +52,7 @@ class OrderController extends Controller
                             'payment_method' => $Order->payment_method ?? 'unknown',
                             'items_count' => $Order->orderItems->count(),
                             'vnpay_url' => $vnpUrl,
-                            'expire_date' => $expireDate,
+                            'expire_date' => $Order->payment_expire_at,
                         ]
                     ]
                 );
@@ -149,7 +149,8 @@ class OrderController extends Controller
             'data' => $data,
             'ip' => $ip,
         ]);
-        $expireDate = Carbon::now('Asia/Ho_Chi_Minh')->addMinutes(3);
+        $expireMinutes = config('time.vnpay_payment_expire_minutes');
+        $expireDate = Carbon::now('Asia/Ho_Chi_Minh')->addMinutes($expireMinutes);
 
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl =  env('VNP_RETURN_URL');
