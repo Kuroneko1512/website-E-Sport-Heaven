@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import FomatVND from "../../utils/FomatVND";
 import { useQuery } from "@tanstack/react-query";
 import instanceAxios from "../../config/db";
 import SkeletonBestseller from "../loadingSkeleton/SkeletonBestseller";
-
+import Cookies from "js-cookie";
+import { message } from "antd";
 const RelatedProducts = () => {
+  
+  // State lưu trạng thái yêu thích cho từng sản phẩm
+  const [favMap, setFavMap] = useState({});
   const { data: productData, isLoading: productLoading } = useQuery({
     queryKey: ["productRandom"],
     queryFn: async () => {
@@ -13,6 +17,39 @@ const RelatedProducts = () => {
       return res?.data?.data;
     },
   });
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (!productData) return;
+      const user = Cookies.get("user") ? JSON.parse(Cookies.get("user")) : null;
+      if (!user) return;
+      try {
+        const productIds = productData.map(item => item.id);
+        const res = await instanceAxios.post('/api/v1/customer/wishlist-products', { product_ids: productIds });
+        setFavMap(res.data.data || {});
+      } catch {
+        setFavMap({});
+      }
+    };
+    fetchWishlist();
+  }, [productData]);
+
+  const handleToggleWishlist = async (productId) => {
+    const userRaw = Cookies.get("user");
+    if (!userRaw) {
+      message.error("Bạn cần đăng nhập để thêm sản phẩm vào yêu thích.");
+      return;
+    }
+    // Đảo trạng thái yêu thích cho sản phẩm này
+    setFavMap((prev) => ({
+      ...prev,
+      [productId]: !prev[productId],
+    }));
+    await instanceAxios.post("/api/v1/customer/wishlist", {
+      product_id: productId,
+    });
+  };
+  
 
   // console.log("productData", productData);
 
@@ -47,8 +84,15 @@ const RelatedProducts = () => {
                     <Link to={`/shop/product-detail/${item?.id}`}>
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
                     </Link>
-                    <button className="absolute top-3 right-3 py-1 px-2 bg-white/80 rounded-full hover:bg-white transition-colors duration-200 opacity-0 group-hover:opacity-100 ">
-                      <i className="far fa-heart text-gray-700"></i>
+                    <button
+                      className="absolute top-3 right-3 py-1 px-2 bg-white/80 rounded-full hover:bg-white transition-colors duration-200 opacity-0 group-hover:opacity-100 "
+                      onClick={() => handleToggleWishlist(item.id)}
+                    >
+                      <i
+                        className={`fa${
+                          favMap[item.id] ? "s" : "r"
+                        } fa-heart text-gray-700`}
+                      ></i>
                     </button>
                   </div>
 

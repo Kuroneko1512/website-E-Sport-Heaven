@@ -9,6 +9,7 @@ import instanceAxios from "../config/db";
 import RelatedProducts from "../components/elementProduct/RelatedProducts";
 import ScrollToTop from "../config/ScrollToTop";
 import FomatVND from "../utils/FomatVND";
+import Cookies from "js-cookie";
 
 const ProductDetail = () => {
   const [isAllAttributesSelected, setIsAllAttributesSelected] = useState(false);
@@ -26,7 +27,7 @@ const ProductDetail = () => {
   const [attributes, setAttributes] = useState([]);
   const [validOptions, setValidOptions] = useState({});
   const [chon, setChon] = useState([]);
-  const [activeTab, setActiveTab] = useState('description');
+  const [activeTab, setActiveTab] = useState("description");
 
   const { data: productDetailData, isLoading } = useQuery({
     queryKey: ["productDetailData", id],
@@ -62,7 +63,6 @@ const ProductDetail = () => {
       fetchAttributes.mutate();
     }
     setDisplayImage(product?.image || "");
-    
   }, [product]);
 
   // Cập nhật hình ảnh và giá của biến thể đầu tiên nếu có biến thể
@@ -95,10 +95,10 @@ const ProductDetail = () => {
 
   useEffect(() => {
     instanceAxios
-        .get(`/api/v1/customer/wishlist-product/${id}`)
-        .then((response) => {
-          setFav(response.data.data);
-        })
+      .get(`/api/v1/customer/wishlist-product/${id}`)
+      .then((response) => {
+        setFav(response.data.data);
+      });
   }, []);
 
   // Cập nhật danh sách hợp lệ ngay sau khi người dùng chọn thuộc tính
@@ -194,9 +194,15 @@ const ProductDetail = () => {
   };
 
   const handleToggleWishlist = async (favParam) => {
+    const userRaw = Cookies.get("user");
+
+    if (!userRaw) {
+      message.error("Bạn cần đăng nhập để thêm sản phẩm vào yêu thích.");
+      return;
+    }
     setFav(favParam);
     await instanceAxios.post("/api/v1/customer/wishlist", { product_id: id });
-  }
+  };
 
   const handleAddToCart = () => {
     if (product?.variants?.length > 0) {
@@ -555,8 +561,12 @@ const ProductDetail = () => {
                 <div className="border-b border-gray-200 mb-4">
                   <ul className="flex space-x-4">
                     <button
-                      onClick={() => setActiveTab('description')}
-                      className={`pb-2 ${activeTab === 'description' ? 'border-b-2 border-black' : ''}`}
+                      onClick={() => setActiveTab("description")}
+                      className={`pb-2 ${
+                        activeTab === "description"
+                          ? "border-b-2 border-black"
+                          : ""
+                      }`}
                     >
                       Mô tả
                     </button>
@@ -567,17 +577,23 @@ const ProductDetail = () => {
                       Thông tin bổ sung
                     </button> */}
                     <button
-                      onClick={() => setActiveTab('reviews')}
-                      className={`pb-2 ${activeTab === 'reviews' ? 'border-b-2 border-black' : ''}`}
+                      onClick={() => setActiveTab("reviews")}
+                      className={`pb-2 ${
+                        activeTab === "reviews" ? "border-b-2 border-black" : ""
+                      }`}
                     >
                       Đánh giá
                     </button>
                   </ul>
                 </div>
-                
-                {activeTab === 'description' && <Description product={product} />}
-                {activeTab === 'information' && <AdditionalInformation product={product} />}
-                {activeTab === 'reviews' && <Review product={product} />}
+
+                {activeTab === "description" && (
+                  <Description product={product} />
+                )}
+                {activeTab === "information" && (
+                  <AdditionalInformation product={product} />
+                )}
+                {activeTab === "reviews" && <Review product={product} />}
               </div>
 
               {/* Sản phẩm gần đây */}
@@ -594,7 +610,5 @@ const ProductDetail = () => {
     </div>
   );
 };
-
-
 
 export default ProductDetail;

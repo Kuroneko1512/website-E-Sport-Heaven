@@ -37,7 +37,7 @@ const Review = () => {
   }
 
   return (
-    <div className="p-4 border-b border-gray-200 h-60">
+    <div className="p-4 border-b border-gray-200 min-h-[15rem]">
       {datareviews?.data?.length !== 0 ? (
         <>
           <h2 className="text-2xl font-bold mb-4">Đánh giá của khách hàng</h2>

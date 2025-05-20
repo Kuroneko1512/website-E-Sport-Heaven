@@ -11,10 +11,10 @@ use App\Http\Controllers\Api\Blog\V1\BlogCategoryController;
 use App\Http\Controllers\Api\Category\V1\CategoryController;
 use App\Http\Controllers\Api\Attribute\V1\AttributeController;
 use App\Http\Controllers\Api\Attribute\V1\AttributeValueController;
-
 use App\Http\Controllers\Api\User\UserController;
 use App\Http\Controllers\Api\Admin\V1\ProductController as ProductControllerAdmin;
-
+use App\Http\Controllers\Api\Admin\V1\CouponUsageController as CouponUsageControllerAdmin       ;
+use App\Http\Controllers\Api\Admin\V1\CouponsController as CouponsControllerAdmin;
 Route::prefix('v1')->group(callback: function () {
     // Attribute API Routes
     Route::apiResource('/attribute', AttributeController::class);
@@ -64,7 +64,7 @@ Route::prefix('v1')->group(callback: function () {
     // Shipping API Routes
     Route::get('/shipping/fee', [GhtkController::class, 'getShippingFee']);
 
-    // Coupon API Routes
-    Route::apiResource('/coupon', CouponsController::class);
-
+    Route::apiResource('/coupon', CouponsControllerAdmin::class);
+    Route::apiResource('/coupon-usage', CouponUsageControllerAdmin::class);
+    Route::get('/coupon/check-code/{code}', [CouponsControllerAdmin::class, 'checkCouponCodeExists']);
 }); 

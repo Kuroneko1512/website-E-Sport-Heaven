@@ -13,23 +13,32 @@ export const FomatTime = (timeString) => {
       return isSameDay(d, yesterday);
     };
   
-    const getWeek = (d) => {
-      const oneJan = new Date(d.getFullYear(), 0, 1);
-      const numberOfDays = Math.floor((d - oneJan) / (24 * 60 * 60 * 1000));
-      return Math.ceil((d.getDay() + 1 + numberOfDays) / 7);
+    // Tính số ngày chênh lệch
+    const daysDiff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    
+    // Format ngày tháng
+    const formatDate = (d) => {
+      return d.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
     };
-  
-    const currentWeek = getWeek(now);
-    const dateWeek = getWeek(date);
-  
-    const sameYear = date.getFullYear() === now.getFullYear();
   
     if (isSameDay(date, now)) return "Hôm nay";
     if (isYesterday(date)) return "Hôm qua";
-    if (dateWeek === currentWeek && sameYear) return "Tuần này";
-    if (dateWeek === currentWeek - 1 && sameYear) return "Tuần trước";
-  
-    const month = date.toLocaleString("vi-VN", { month: "long" }); // "Tháng ba"
-    if (sameYear) return `${month}`;
-    return `${month} năm ${date.getFullYear()}`;
-  };  
+    
+    // Nếu trong vòng 7 ngày, hiển thị "X ngày trước"
+    if (daysDiff < 7) return `${daysDiff} ngày trước`;
+    
+    // Nếu cùng năm, hiển thị ngày và tháng
+    if (date.getFullYear() === now.getFullYear()) {
+      return date.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit'
+      });
+    }
+    
+    // Khác năm, hiển thị đầy đủ ngày tháng năm
+    return formatDate(date);
+};
