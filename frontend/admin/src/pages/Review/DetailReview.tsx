@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { useParams, useNavigate } from "react-router-dom";
-import BlogCategoryService from "@app/services/Blog/BlogCategoryService";
+import ReviewService from "@app/services/ReviewService";
 
-interface BlogCategory {
+interface Review {
   id?: number;
   name: string;
   description: string;
@@ -23,10 +23,10 @@ const INITIAL_ERRORS: Record<keyof FormData, string> = {
   description: "",
 };
 
-const DetailBlogCategory = () => {
+const DetailReview = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<BlogCategory>({} as BlogCategory);
+  const [formData, setFormData] = useState<Review>({} as Review);
   const [errors, setErrors] = useState<Record<keyof FormData, string>>(
     {} as Record<keyof FormData, string>
   );
@@ -46,7 +46,7 @@ const DetailBlogCategory = () => {
     const fetchCategory = async () => {
       if (id && action !== "create") {
         try {
-          const response = await BlogCategoryService.getById(Number(id));
+          const response = await ReviewService.getById(Number(id));
           setFormData({
             name: response.name || "",
             description: response.description || "",
@@ -72,10 +72,10 @@ const DetailBlogCategory = () => {
     try {
       setLoading(true);
       if (action === "update") {
-        await BlogCategoryService.update(Number(id), formData);
+        await ReviewService.update(Number(id), formData);
         toast.success("Cập nhật danh mục thành công!");
       } else if (action === "create") {
-        await BlogCategoryService.create({
+        await ReviewService.create({
           name: formData.name,
           description: formData.description,
           slug: formData.name.toLowerCase().replace(/\s+/g, "-"),
@@ -196,4 +196,4 @@ const DetailBlogCategory = () => {
   );
 };
 
-export default DetailBlogCategory;
+export default DetailReview;

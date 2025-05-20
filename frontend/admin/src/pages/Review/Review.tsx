@@ -1,12 +1,12 @@
 import { PaginatedResponse } from '@app/services/BaseApi';
-import ReviewService, { BlogCategories } from '@app/services/Blog/ReviewService';
+import ReviewService from '@app/services/ReviewService';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const Review = () => {
-  const [categories, setCategories] = useState<BlogCategories[]>([]);
-  const [pagination, setPagination] = useState<PaginatedResponse<BlogCategories>>({
+  const [reviews, setReviews] = useState<ReviewService[]>([]);
+  const [pagination, setPagination] = useState<PaginatedResponse<ReviewService>>({
     current_page: 1,
     last_page: 1,
     prev_page_url: null,
@@ -18,17 +18,17 @@ const Review = () => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const fetchCategories = async (page: number = 1) => {
+  const fetchReviews = async (page: number = 1) => {
     try {
       setLoading(true);
       const response = await ReviewService.getAll(page);
       console.log(response.data);
       
-      setCategories(response.data);
+      setReviews(response.data);
       setPagination(response);
     } catch (error) {
-      console.error('Lỗi khi tải danh mục:', error);
-      toast.error('Không thể tải danh sách danh mục');
+      console.error('Lỗi khi tải Đánh giá:', error);
+      toast.error('Không thể tải danh sách Đánh giá');
     } finally {
       setLoading(false);
     }
@@ -36,33 +36,33 @@ const Review = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      const category = categories.find(cat => cat.id === id);
-      if (!category) {
-        toast.error('Không tìm thấy danh mục!');
+      const review = reviews.find(cat => cat.id === id);
+      if (!review) {
+        toast.error('Không tìm thấy Đánh giá!');
         return;
       }
 
-      if (category.posts_count && category.posts_count > 0) {
-        toast.error('Không thể xóa danh mục đang có bài viết!');
+      if (review.posts_count && review.posts_count > 0) {
+        toast.error('Không thể xóa Đánh giá đang có bài viết!');
         return;
       }
 
-      if (!window.confirm('Bạn có chắc chắn muốn xóa danh mục này?')) return;
+      if (!window.confirm('Bạn có chắc chắn muốn xóa Đánh giá này?')) return;
 
       setLoading(true);
       await ReviewService.delete(id);
-      toast.success('Xóa danh mục thành công!');
-      fetchCategories(pagination.current_page);
+      toast.success('Xóa Đánh giá thành công!');
+      fetchReviews(pagination.current_page);
     } catch (error) {
-      console.error('Lỗi khi xóa danh mục:', error);
-      toast.error('Không thể xóa danh mục');
+      console.error('Lỗi khi xóa Đánh giá:', error);
+      toast.error('Không thể xóa Đánh giá');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCategories();
+    fetchReviews();
   }, []);
 
   return (
@@ -71,14 +71,14 @@ const Review = () => {
         <div className="container-fluid">
           <div className="row mb-2">
             <div className="col-sm-6">
-              <h1>Danh Mục Blog</h1>
+              <h1>List Review</h1>
             </div>
             <div className="col-sm-6">
               <ol className="breadcrumb float-sm-right">
                 <li className="breadcrumb-item">
                   <Link to={'/'}>Trang Chủ</Link>
                 </li>
-                <li className="breadcrumb-item active">Danh Mục Blog</li>
+                <li className="breadcrumb-item active">List Review</li>
               </ol>
             </div>
           </div>
@@ -87,11 +87,8 @@ const Review = () => {
 
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title">Danh Mục Blog</h3>
+          <h3 className="card-title">List Review</h3>
           <div className="card-tools d-flex align-items-center" >
-            <Link to="/add-blog-category" className="btn btn-primary btn-sm mr-2">
-              <i className="fas fa-plus"></i> Tạo Danh Mục
-            </Link>
             {/* <div className="input-group input-group-sm" style={{ width: '150px' }}>
               <input
                 type="text"
@@ -121,31 +118,31 @@ const Review = () => {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Tên</th>
-                <th>Mô tả</th>
-                <th>Số Bài Viết</th>
+                <th>Tiêu đề</th>
+                <th>Bình luận</th>
+                <th>User</th>
                 <th>Thao Tác</th>
               </tr>
             </thead>
             <tbody>
-              {categories.length > 0 ? (
-                categories.map((category) => (
-                  <tr key={category.id}>
-                    <td>{category.id}</td>
-                    <td>{category.name}</td>
-                    <td>{category.description}</td>
-                    <td>{category.posts_count || 0}</td>
+              {reviews.length > 0 ? (
+                reviews.map((review) => (
+                  <tr key={review.id}>
+                    <td>{review.id}</td>
+                    <td>{review.title}</td>
+                    <td>{review.comment}</td>
+                    <td>{review.user_id}</td>
                     <td>
                       <Link
-                        to={`/edit-blog-category/${category.id}`}
+                        to={`/review/${review.id}`}
                         className="btn btn-warning btn-sm mr-2"
                       >
                         <i className="fas fa-edit"></i> Sửa
                       </Link>
-                      {(!category.posts_count || category.posts_count === 0) && (
+                      {(!review.posts_count || review.posts_count === 0) && (
                         <button
                           className="btn btn-danger btn-sm"
-                          onClick={() => handleDelete(category.id)}
+                          onClick={() => handleDelete(review.id)}
                           disabled={loading}
                         >
                           <i className="fas fa-trash"></i> Xóa
@@ -157,7 +154,7 @@ const Review = () => {
               ) : (
                 <tr>
                   <td colSpan={5} className="text-center">
-                    Không tìm thấy danh mục nào
+                    Không tìm thấy Đánh giá nào
                   </td>
                 </tr>
               )}
@@ -170,7 +167,7 @@ const Review = () => {
             <li className={`page-item ${!pagination.prev_page_url ? 'disabled' : ''}`}>
               <button
                 className="page-link"
-                onClick={() => fetchCategories(pagination.current_page - 1)}
+                onClick={() => fetchReviews(pagination.current_page - 1)}
                 disabled={!pagination.prev_page_url || loading}
               >
                 «
@@ -183,7 +180,7 @@ const Review = () => {
               >
                 <button
                   className="page-link"
-                  onClick={() => fetchCategories(i + 1)}
+                  onClick={() => fetchReviews(i + 1)}
                   disabled={loading}
                 >
                   {i + 1}
@@ -193,7 +190,7 @@ const Review = () => {
             <li className={`page-item ${!pagination.next_page_url ? 'disabled' : ''}`}>
               <button
                 className="page-link"
-                onClick={() => fetchCategories(pagination.current_page + 1)}
+                onClick={() => fetchReviews(pagination.current_page + 1)}
                 disabled={!pagination.next_page_url || loading}
               >
                 »
