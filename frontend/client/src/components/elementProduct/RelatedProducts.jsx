@@ -20,23 +20,16 @@ const RelatedProducts = () => {
 
   useEffect(() => {
     const fetchWishlist = async () => {
-      if (!productData?.data) return;
+      if (!productData) return;
       const user = Cookies.get("user") ? JSON.parse(Cookies.get("user")) : null;
       if (!user) return;
-      const favs = {};
-      await Promise.all(
-        productData.data.map(async (item) => {
-          try {
-            const res = await instanceAxios.get(
-              `/api/v1/customer/wishlist-product/${item.id}`
-            );
-            favs[item.id] = res.data.data === true;
-          } catch {
-            favs[item.id] = false;
-          }
-        })
-      );
-      setFavMap(favs);
+      try {
+        const productIds = productData.map(item => item.id);
+        const res = await instanceAxios.post('/api/v1/customer/wishlist-products', { product_ids: productIds });
+        setFavMap(res.data.data || {});
+      } catch {
+        setFavMap({});
+      }
     };
     fetchWishlist();
   }, [productData]);
