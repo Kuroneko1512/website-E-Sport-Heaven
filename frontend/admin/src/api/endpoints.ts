@@ -37,10 +37,10 @@ export const API_ENDPOINTS = {
         DETAIL: (id: number) => `v1/admin/blog-categories/${id}`,
     },
     REVIEW: {
-        LIST: "v1/admin/reviews",
-        CREATE: "v1/admin/reviews",
-        UPDATE: (id: number) => `v1/admin/reviews/${id}`,
-        DELETE: (id: number) => `v1/admin/reviews/${id}`,
-        DETAIL: (id: number) => `v1/admin/reviews/${id}`,
+        LIST: "v1/admin/review",
+        CREATE: "v1/admin/review",
+        UPDATE: (id: number) => `v1/admin/review/${id}`,
+        DELETE: (id: number) => `v1/admin/review/${id}`,
+        DETAIL: (id: number) => `v1/admin/review/${id}`,
     },
 };

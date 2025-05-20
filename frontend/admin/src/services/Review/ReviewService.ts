@@ -10,6 +10,7 @@ export interface Review {
   product_variant_id: number;
   rating: number;
   title: string;
+  product_name: string;
   user_name: string;
   comment: string;
   images: string;

@@ -114,7 +114,7 @@ const ReviewList = () => {
               <tr>
                 <th>ID</th>
                 <th>Tiêu đề</th>
-                <th>Bình luận</th>
+                <th>Sản phẩm</th>
                 <th>User</th>
                 <th>Thao Tác</th>
               </tr>
@@ -125,7 +125,7 @@ const ReviewList = () => {
                   <tr key={review.id}>
                     <td>{review.id}</td>
                     <td>{review.title}</td>
-                    <td>{review.comment}</td>
+                    <td>{review.product_name}</td>
                     <td>{review.user_name}</td>
                     <td>
                       <Link
