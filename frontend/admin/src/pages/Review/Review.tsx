@@ -16,7 +16,6 @@ const ReviewList = () => {
     data: [],
   });
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchReviews = async (page: number = 1) => {
     try {
@@ -27,8 +26,8 @@ const ReviewList = () => {
       setReviews(response.data);
       setPagination(response);
     } catch (error) {
-      console.error('Lỗi khi tải Đánh giá:', error);
-      toast.error('Không thể tải danh sách Đánh giá');
+      console.error('Lỗi khi tải đánh giá:', error);
+      toast.error('Không thể tải danh sách đánh giá');
     } finally {
       setLoading(false);
     }
@@ -36,21 +35,21 @@ const ReviewList = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      const review = reviews.find(cat => cat.id === id);
+      const review = reviews.find(r => r.id === id);
       if (!review) {
-        toast.error('Không tìm thấy Đánh giá!');
+        toast.error('Không tìm thấy đánh giá!');
         return;
       }
 
-      if (!window.confirm('Bạn có chắc chắn muốn xóa Đánh giá này?')) return;
+      if (!window.confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) return;
 
       setLoading(true);
       await ReviewService.delete(id);
-      toast.success('Xóa Đánh giá thành công!');
+      toast.success('Xóa đánh giá thành công!');
       fetchReviews(pagination.current_page);
     } catch (error) {
-      console.error('Lỗi khi xóa Đánh giá:', error);
-      toast.error('Không thể xóa Đánh giá');
+      console.error('Lỗi khi xóa đánh giá:', error);
+      toast.error('Không thể xóa đánh giá');
     } finally {
       setLoading(false);
     }
@@ -84,21 +83,6 @@ const ReviewList = () => {
         <div className="card-header">
           <h3 className="card-title">Danh sách đánh giá</h3>
           <div className="card-tools d-flex align-items-center" >
-            {/* <div className="input-group input-group-sm" style={{ width: '150px' }}>
-              <input
-                type="text"
-                name="table_search"
-                className="form-control float-right"
-                placeholder="Tìm kiếm"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <div className="input-group-append">
-                <button type="submit" className="btn btn-default">
-                  <i className="fas fa-search"></i>
-                </button>
-              </div>
-            </div> */}
           </div>
         </div>
 
@@ -147,7 +131,7 @@ const ReviewList = () => {
               ) : (
                 <tr>
                   <td colSpan={5} className="text-center">
-                    Không tìm thấy Đánh giá nào
+                    Không tìm thấy đánh giá nào
                   </td>
                 </tr>
               )}
