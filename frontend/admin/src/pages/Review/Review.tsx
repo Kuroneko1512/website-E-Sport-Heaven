@@ -4,6 +4,21 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+const StarRating = ({ rating }) => {
+  return (
+    <div className="ml-2 text-yellow-500">
+      {[...Array(5)].map((_, index) => (
+        <i
+          key={index}
+          className={`fas fa-star ${
+            index < rating ? "text-yellow-500" : "text-gray-300"
+          }`}
+        ></i>
+      ))}
+    </div>
+  );
+};
+
 const ReviewList = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [pagination, setPagination] = useState<PaginatedResponse<Review>>({
@@ -110,6 +125,7 @@ const ReviewList = () => {
                     <td>{review.id}</td>
                     <td>{review.title}</td>
                     <td>{review.product_name}</td>
+                    <td><StarRating rating={review.rating} /></td>
                     <td>{review.user_name}</td>
                     <td>
                       <Link

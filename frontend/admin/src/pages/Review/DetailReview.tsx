@@ -3,6 +3,21 @@ import { toast } from "react-toastify";
 import { useParams, useNavigate } from "react-router-dom";
 import ReviewService, { Review } from '@app/services/Review/ReviewService';
 
+const StarRating = (rating:any) => {
+  return (
+    <div className="ml-2 text-yellow-500">
+      {[...Array(5)].map((_, index) => (
+        <i
+          key={index}
+          className={`fas fa-star ${
+            index < rating ? "text-yellow-500" : "text-gray-300"
+          }`}
+        ></i>
+      ))}
+    </div>
+  );
+};
+
 const DetailReview = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
@@ -64,6 +79,30 @@ const DetailReview = () => {
               {review?.comment}
             </p>
           </div>
+
+          <div className="form-group">
+            <label htmlFor="name">
+              Đánh giá
+            </label>
+            <p>
+              <StarRating rating={review?.rating} />
+            </p>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="name">
+              Ảnh đánh giá
+            </label>
+            <p>
+              <img
+                  src={review?.images}
+                  className="w-12 h-12 rounded-full mr-4"
+                  width="50"
+                  height="50"
+                />
+            </p>
+          </div>
+          
         </div>
         <div className="card-footer">
           <button
