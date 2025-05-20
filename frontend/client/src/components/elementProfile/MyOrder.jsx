@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Form, message, Modal } from "antd";
 import Cookies from "js-cookie";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import instanceAxios from "../../config/db";
 import { ORDER_STATUS } from "../../constants/OrderConstants";
@@ -31,7 +31,7 @@ const calculateSubtotal = (item) => {
   return discountedPrice * quantity;
 };
 
-const MyOrder = () => {
+const MyOrder = ({ searchParam = "", setSearchParam }) => {
   const nav = useNavigate();
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
@@ -41,6 +41,9 @@ const MyOrder = () => {
   const [form] = Form.useForm();
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  // Thêm state cho input và search thực tế
+  const [inputValue, setInputValue] = useState(searchParam);
+  const [searchTerm, setSearchTerm] = useState(searchParam);
   const user = JSON.parse(Cookies.get("user"));
   const queryClient = useQueryClient();
   const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
@@ -66,11 +69,18 @@ const MyOrder = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["orders", currentPage],
+    queryKey: ["orders", currentPage, searchTerm],
     queryFn: async () => {
-      const res = await instanceAxios.get(
-        `/api/v1/customer/orders?page=${currentPage}`
-      );
+      let url = `/api/v1/customer/orders?page=${currentPage}`;
+      if (searchTerm.trim()) {
+        const isOrderCode = /^\d+$/.test(searchTerm.trim());
+        if (isOrderCode) {
+          url += `&order_code=${encodeURIComponent(searchTerm.trim())}`;
+        } else {
+          url += `&product_name=${encodeURIComponent(searchTerm.trim())}`;
+        }
+      }
+      const res = await instanceAxios.get(url);
       return res?.data;
     },
   });
@@ -345,6 +355,13 @@ const MyOrder = () => {
     }
   };
 
+  // Khi searchParam trên URL thay đổi (ví dụ: back/forward), đồng bộ lại state
+  // (Chỉ chạy khi searchParam thay đổi)
+  useEffect(() => {
+    setInputValue(searchParam);
+    setSearchTerm(searchParam);
+  }, [searchParam]);
+
   console.log("orders", orders);
 
   return (
@@ -368,8 +385,17 @@ const MyOrder = () => {
           <div className="flex justify-between items-center mb-6">
             <input
               className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg p-2 w-1/2"
-              placeholder="Tìm kiếm theo tên sản phẩm"
+              placeholder="Tìm kiếm theo mã đơn hoặc tên sản phẩm"
               type="text"
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Enter") {
+                  setCurrentPage(1);
+                  setSearchTerm(inputValue); // Chỉ cập nhật searchTerm khi nhấn Enter
+                  if (setSearchParam) setSearchParam(inputValue); // Cập nhật URL
+                }
+              }}
             />
           </div>
           <div className="space-y-8">
