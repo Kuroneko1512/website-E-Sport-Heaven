@@ -1,8 +1,49 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import FomatVND from "../../utils/FomatVND";
+import Cookies from "js-cookie";
+import { message } from "antd";
+import instanceAxios from "../../config/db";
 
 const ProductList = ({ products }) => {
+  // State lưu trạng thái yêu thích cho từng sản phẩm
+  const [favMap, setFavMap] = useState({});
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (!products?.data) return;
+      const user = Cookies.get("user") ? JSON.parse(Cookies.get("user")) : null;
+      if (!user) return;
+      const favs = {};
+      await Promise.all(
+        products.data.map(async (item) => {
+          try {
+            const res = await instanceAxios.get(`/api/v1/customer/wishlist-product/${item.id}`);
+            favs[item.id] = res.data.data === true;
+          } catch {
+            favs[item.id] = false;
+          }
+        })
+      );
+      setFavMap(favs);
+    };
+    fetchWishlist();
+  }, [products]);
+
+  const handleToggleWishlist = async (productId) => {
+    const userRaw = Cookies.get("user");
+    if (!userRaw) {
+      message.error("Bạn cần đăng nhập để thêm sản phẩm vào yêu thích.");
+      return;
+    }
+    // Đảo trạng thái yêu thích cho sản phẩm này
+    setFavMap((prev) => ({
+      ...prev,
+      [productId]: !prev[productId]
+    }));
+    await instanceAxios.post("/api/v1/customer/wishlist", { product_id: productId });
+  };
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6">
@@ -26,8 +67,11 @@ const ProductList = ({ products }) => {
               <Link to={`/shop/product-detail/${item?.id}`}>
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
               </Link>
-              <button className="absolute top-3 right-3 py-1 px-2 bg-white/80 rounded-full hover:bg-white transition-colors duration-200 opacity-0 group-hover:opacity-100 ">
-                <i className="far fa-heart text-gray-700"></i>
+              <button
+                className="absolute top-3 right-3 py-1 px-2 bg-white/80 rounded-full hover:bg-white transition-colors duration-200 opacity-0 group-hover:opacity-100 "
+                onClick={() => handleToggleWishlist(item.id)}
+              >
+                <i className={`fa${favMap[item.id] ? "s" : "r"} fa-heart text-gray-700`}></i>
               </button>
             </div>
 
@@ -42,12 +86,8 @@ const ProductList = ({ products }) => {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-base md:text-lg font-bold text-gray-900">
                       {FomatVND(
-                        item.price -
-                          (item.price * item.discount_percent) / 100 ||
-                          item.variants[0].price -
-                            (item.variants[0].price *
-                              item.variants[0].discount_percent) /
-                              100
+                        item.price - (item.price * item.discount_percent) / 100 ||
+                        item.variants[0].price - (item.variants[0].price * item.variants[0].discount_percent) / 100
                       )}
                     </span>
                     {item.discount_percent > 0 && (
