@@ -270,18 +270,24 @@ class ProductService extends BaseService
             ->limit($limit)
             ->get();
     }
-    public function getBestSellingOrder($limit = 8)
+     public function getBestSellingOrder($limit = 8)
     {
-          return OrderItem::select('order_items.product_id', DB::raw('SUM(order_items.quantity) as total_quantity'))
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')  // Kết nối với bảng orders
-            ->join('products', 'order_items.product_id', '=', 'products.id')  // Kết nối với bảng products
-            ->where('orders.status', 6)  // Chỉ lấy đơn hàng có status = 6
-            ->groupBy('order_items.product_id')  // Nhóm theo product_id để tính tổng số lượng
-            ->orderByDesc('total_quantity')  // Sắp xếp giảm dần theo số lượng bán được
-            ->limit($limit)  // Lấy số lượng sản phẩm bán chạy nhất (mặc định là 8)
-            ->with(['product'])  // Eager load thông tin sản phẩm (nếu cần)
+        $topProductIds = OrderItem::join('orders',  'order_items.order_id',  '=', 'orders.id')
+        ->where('orders.status', 6)                          // đơn hàng đã hoàn tất
+        ->groupBy('order_items.product_id')
+        ->select('order_items.product_id', DB::raw('SUM(order_items.quantity) AS total_quantity'))
+        ->orderByDesc('total_quantity')
+        ->limit($limit)
+        ->pluck('order_items.product_id');    
+        
+        $products = Product::with([
+            // Giống đoạn bạn đang dùng:
+            'variants.productAttributes.attributeValue:id,value'
+        ])
+            ->whereIn('id', $topProductIds)                         // Chỉ các SP bán chạy
+            ->orderByRaw('FIELD(id,' . $topProductIds->implode(',') . ')') // Giữ đúng thứ tự “bán chạy nhất”  
             ->get();
-    
+        return $products;
     }
     public function getProductNew($paginate = 8)
     {
