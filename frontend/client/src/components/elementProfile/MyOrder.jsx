@@ -423,7 +423,28 @@ const MyOrder = () => {
                             >
                               Chi tiết
                             </Link>
-                            
+                            {/* Nút tiếp tục thanh toán */}
+                            {order?.history && (() => {
+                              const vnpayItem = order?.history?.find(h => h.metadata?.vnpay_url && h.metadata?.expire_date);
+                              if (!vnpayItem) return null;
+                              const isVnpayExpired = (expireDateStr) => {
+                                if (!expireDateStr) return true;
+                                const expire = new Date(expireDateStr).getTime();
+                                const now = Date.now();
+                                return now > expire;
+                              };
+                              const expired = isVnpayExpired(vnpayItem?.metadata?.expire_date);
+                              const isPaid = order?.history?.some(h => h.metadata?.new_payment_status === 1);
+                              if (expired || isPaid) return null;
+                              return (
+                                <button
+                                  className="ml-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow"
+                                  onClick={() => window.location.href = vnpayItem.metadata.vnpay_url}
+                                >
+                                  Tiếp tục thanh toán
+                                </button>
+                              );
+                            })()}
                             {getActionsForOrder(order).map((action, idx) => (
                               <button
                                 key={idx}
