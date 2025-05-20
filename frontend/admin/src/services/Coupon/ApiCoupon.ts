@@ -96,6 +96,8 @@ export const getCouponById = async (couponId: number): Promise<Coupon> => {
 export const checkCouponCodeExists = async (code: string): Promise<boolean> => {
   try {
     const response = await axios.get(`${API_URL}/check-code/${code}`);
+    console.log(response.data);
+
     return response.data.exists;
   } catch (error) {
     console.error("Lỗi khi kiểm tra mã:", error);

@@ -66,5 +66,5 @@ Route::prefix('v1')->group(callback: function () {
 
     Route::apiResource('/coupon', CouponsControllerAdmin::class);
     Route::apiResource('/coupon-usage', CouponUsageControllerAdmin::class);
-
+    Route::get('/coupon/check-code/{code}', [CouponsControllerAdmin::class, 'checkCouponCodeExists']);
 }); 

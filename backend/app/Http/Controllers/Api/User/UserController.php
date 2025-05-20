@@ -10,7 +10,9 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::where('email', '!=', 'superadmin@example.com')->get();
+        $users = User::where('email', '!=', 'superadmin@example.com')
+        ->where('account_type', 'customer')
+        ->get();
       
         return response()->json(data: $users, status: 200);
     }

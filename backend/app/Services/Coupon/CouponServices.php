@@ -45,4 +45,8 @@ class CouponServices
         
         return $query->paginate($perPage);
     }
+    public function checkCouponCodeExists($code)
+    {
+        return Coupon::where('code', $code)->exists();
+    }
 }
