@@ -1,12 +1,12 @@
 import { PaginatedResponse } from '@app/services/BaseApi';
-import ReviewService from '@app/services/ReviewService';
+import ReviewService, { Review } from '@app/services/Review/ReviewService';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-const Review = () => {
-  const [reviews, setReviews] = useState<ReviewService[]>([]);
-  const [pagination, setPagination] = useState<PaginatedResponse<ReviewService>>({
+const ReviewList = () => {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [pagination, setPagination] = useState<PaginatedResponse<Review>>({
     current_page: 1,
     last_page: 1,
     prev_page_url: null,
@@ -42,11 +42,6 @@ const Review = () => {
         return;
       }
 
-      if (review.posts_count && review.posts_count > 0) {
-        toast.error('Không thể xóa Đánh giá đang có bài viết!');
-        return;
-      }
-
       if (!window.confirm('Bạn có chắc chắn muốn xóa Đánh giá này?')) return;
 
       setLoading(true);
@@ -71,14 +66,14 @@ const Review = () => {
         <div className="container-fluid">
           <div className="row mb-2">
             <div className="col-sm-6">
-              <h1>List Review</h1>
+              <h1>Danh sách đánh giá</h1>
             </div>
             <div className="col-sm-6">
               <ol className="breadcrumb float-sm-right">
                 <li className="breadcrumb-item">
                   <Link to={'/'}>Trang Chủ</Link>
                 </li>
-                <li className="breadcrumb-item active">List Review</li>
+                <li className="breadcrumb-item active">Danh sách đánh giá</li>
               </ol>
             </div>
           </div>
@@ -87,7 +82,7 @@ const Review = () => {
 
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title">List Review</h3>
+          <h3 className="card-title">Danh sách đánh giá</h3>
           <div className="card-tools d-flex align-items-center" >
             {/* <div className="input-group input-group-sm" style={{ width: '150px' }}>
               <input
@@ -131,7 +126,7 @@ const Review = () => {
                     <td>{review.id}</td>
                     <td>{review.title}</td>
                     <td>{review.comment}</td>
-                    <td>{review.user_id}</td>
+                    <td>{review.user_name}</td>
                     <td>
                       <Link
                         to={`/review/${review.id}`}
@@ -139,7 +134,6 @@ const Review = () => {
                       >
                         <i className="fas fa-edit"></i> Sửa
                       </Link>
-                      {(!review.posts_count || review.posts_count === 0) && (
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => handleDelete(review.id)}
@@ -147,7 +141,6 @@ const Review = () => {
                         >
                           <i className="fas fa-trash"></i> Xóa
                         </button>
-                      )}
                     </td>
                   </tr>
                 ))
@@ -203,4 +196,4 @@ const Review = () => {
   );
 };
 
-export default Review;
+export default ReviewList;

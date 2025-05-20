@@ -1,13 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { useParams, useNavigate } from "react-router-dom";
-import ReviewService from "@app/services/ReviewService";
-
-interface Review {
-  id?: number;
-  name: string;
-  description: string;
-}
+import ReviewService, { Review } from '@app/services/Review/ReviewService';
 
 interface FormData {
   name: string;
