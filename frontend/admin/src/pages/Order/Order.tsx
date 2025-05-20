@@ -23,12 +23,34 @@ const Orders = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(false);
 
+    const goToPage = (page: number) => {
+        if (page >= 1 && page <= pagination.last_page) {
+            setPagination({ ...pagination, current_page: page });
+        }
+    };
+
+    const renderPageNumbers = () => {
+        const pageNumbers = [];
+        const maxPages = 5;
+        let startPage = Math.max(1, pagination.current_page - Math.floor(maxPages / 2));
+        let endPage = Math.min(pagination.last_page, startPage + maxPages - 1);
+
+        if (endPage - startPage + 1 < maxPages) {
+            startPage = Math.max(1, endPage - maxPages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+        return pageNumbers;
+    };
+
     // Hàm lấy dữ liệu đơn hàng từ API
     const fetchData = async (page = 1) => {
         setLoading(true);
         try {
-            const response = await getOrders(page, pagination.per_page);
-            setOrders(response.data.data);
+            const response = await getOrders(page, pagination.per_page, 'customer');
+            setOrders(response.data);
             setPagination((prev) => ({
                 ...prev,
                 current_page: response.current_page || 1,
@@ -39,7 +61,6 @@ const Orders = () => {
                 per_page: response.per_page || 5,
                 data: response.data,
             }));
-            console.log(response.data.data);
         } catch (error) {
             console.error("Lỗi khi lấy dữ liệu:", error);
         }
@@ -139,16 +160,44 @@ const Orders = () => {
                         </table>
                     )}
                 </div>
-                <div className="d-flex justify-content-center mt-4 mb-4">
-                    <AntPagination
-                        current={pagination.current_page}
-                        pageSize={pagination.per_page}
-                        total={pagination.total}
-                        onChange={(page: number, pageSize: number) => {
-                            setPagination({ ...pagination, current_page: page, per_page: pageSize });
-                        }}
-                    />
-                </div>
+                <div className="d-flex justify-content-between align-items-center p-3 border-top">
+                                <div className="pagination">
+                                    <ul className="pagination mb-0">
+                                        <li className={`page-item ${pagination.current_page === 1 ? 'disabled' : ''}`}>
+                                            <button className="page-link" onClick={() => goToPage(1)} aria-label="Trang đầu">
+                                                <i className="fas fa-angle-double-left"></i>
+                                            </button>
+                                        </li>
+                                        <li className={`page-item ${pagination.current_page === 1 ? 'disabled' : ''}`}>
+                                            <button className="page-link" onClick={() => goToPage(pagination.current_page - 1)} aria-label="Trang trước">
+                                                <i className="fas fa-angle-left"></i>
+                                            </button>
+                                        </li>
+
+                                        {renderPageNumbers().map(number => (
+                                            <li key={number} className={`page-item ${pagination.current_page === number ? 'active' : ''}`}>
+                                                <button className="page-link" onClick={() => goToPage(number)}>
+                                                    {number}
+                                                </button>
+                                            </li>
+                                        ))}
+
+                                        <li className={`page-item ${pagination.current_page === pagination.last_page ? 'disabled' : ''}`}>
+                                            <button className="page-link" onClick={() => goToPage(pagination.current_page + 1)} aria-label="Trang sau">
+                                                <i className="fas fa-angle-right"></i>
+                                            </button>
+                                        </li>
+                                        <li className={`page-item ${pagination.current_page === pagination.last_page ? 'disabled' : ''}`}>
+                                            <button className="page-link" onClick={() => goToPage(pagination.last_page)} aria-label="Trang cuối">
+                                                <i className="fas fa-angle-double-right"></i>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <button className="btn btn-outline-primary" onClick={() => fetchData(pagination.current_page)}>
+                                    <i className="fas fa-sync-alt me-1"></i> Làm mới
+                                </button>
+                            </div>
             </div>
         
         </section>

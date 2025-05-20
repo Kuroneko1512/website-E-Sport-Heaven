@@ -101,6 +101,11 @@ class CouponsController extends Controller
 
         return response()->json(null, 204);
     }
+    public function checkCouponCodeExists($code)
+    {
+        $exists = $this->couponService->checkCouponCodeExists($code);
+        return response()->json(['exists' => $exists]);
+    }
   
 }
 
