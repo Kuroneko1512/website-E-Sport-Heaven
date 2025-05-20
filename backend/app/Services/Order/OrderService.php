@@ -2,8 +2,8 @@
 
 namespace App\Services\Order;
 
-use App\Models\OrderUserReturn;
 use Exception;
+use Carbon\Carbon;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\OrderItem;
@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use App\Models\OrderHistory;
 use App\Services\BaseService;
 use App\Models\ProductVariant;
+use App\Models\OrderUserReturn;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -75,7 +76,7 @@ class OrderService extends BaseService
                 $historyData['actor_email'] = $data['customer_email'];
             }
 
-            Log::info($historyData);
+            Log::info('History create', $historyData);
 
             // Gọi phương thức createHistory
             OrderHistory::createHistory(
@@ -239,6 +240,12 @@ class OrderService extends BaseService
             'shipping_discount_value' => $data['shipping_discount_value'] ?? null,
         ];
 
+        // Thiết lập thời gian hết hạn thanh toán cho VNPay
+        if (isset($data['payment_method']) && $data['payment_method'] === 'vnpay') {
+            $expireMinutes = config('time.vnpay_payment_expire_minutes');
+            $orderData['payment_expire_at'] = Carbon::now('Asia/Ho_Chi_Minh')->addMinutes($expireMinutes);
+        }
+
         return $orderData;
     }
 
@@ -298,12 +305,12 @@ class OrderService extends BaseService
         }
     }
 
-    public function getOrderAll()
+    public function getOrderAll($paginate = 10)
     {
         return $this->model->with([
             'orderItems.product',
             'orderItems.productVariant'
-        ])->orderBy('id', 'desc')->get();
+        ])->orderBy('id', 'desc')->paginate($paginate);
     }
 
 
@@ -388,6 +395,8 @@ class OrderService extends BaseService
             $historyData['admin_id'] = $adminId;
         } elseif ($customerId) {
             $historyData['customer_id'] = $customerId;
+        } elseif ($isSystem) {
+            $historyData['actor_type'] = OrderHistory::ACTOR_TYPE_SYSTEM;
         }
 
         $this->addOrderHistory($order->id, OrderHistory::ACTION_STATUS_UPDATED, $historyData);
@@ -547,6 +556,24 @@ class OrderService extends BaseService
             // Return stock for cancelled orders
             // Nếu đơn hàng bị hủy, hoàn trả lại stock
             $this->returnStockForOrder($order->order_code);
+            // Nếu đơn hàng đã thanh toán online, cập nhật trạng thái thanh toán
+            if (
+                $order->payment_status == Order::PAYMENT_STATUS_PAID &&
+                $order->payment_method == 'vnpay'
+            ) {
+
+                // Cập nhật trạng thái thanh toán sang "hoàn tiền toàn bộ"
+                $this->updatePaymentStatus(
+                    $order->order_code,
+                    Order::PAYMENT_STATUS_FULLY_REFUNDED,
+                    $order->payment_transaction_id,
+                    $adminId,
+                    'Đơn hàng bị hủy, cần hoàn tiền cho khách hàng'
+                );
+
+                // Ghi log để admin xử lý hoàn tiền thủ công
+                Log::info("Đơn hàng #{$order->order_code} đã bị hủy và cần được hoàn tiền. Số tiền: {$order->total_amount}");
+            }
         }
     }
 
@@ -632,6 +659,9 @@ class OrderService extends BaseService
 
     /**
      * Lấy đơn hàng theo mã order_code
+     * 
+     * @param string $orderCode Mã đơn hàng
+     * @return Order|null
      */
     public function getOrderByCode($orderCode)
     {
@@ -647,23 +677,35 @@ class OrderService extends BaseService
         return $order;
     }
 
-    public function getOrderReturn()
+    public function getOrderReturn($paginate = 10)
     {
-        return $this->model->with([
-            'orderItems.product',
-            'orderItems.productVariant'
-        ])->whereIn('status', [
-            Order::STATUS_RETURN_REQUESTED,
-            Order::STATUS_RETURN_PROCESSING
-        ])->orderBy('id', 'desc')->get();
+        return OrderUserReturn::whereHas('order', function ($query) {
+            $query->whereIn('status', [
+                Order::STATUS_RETURN_REQUESTED,
+                Order::STATUS_RETURN_PROCESSING,
+                Order::STATUS_RETURN_COMPLETED,
+                Order::STATUS_RETURN_REJECTED
+            ]);
+        })->with('order') // nếu bạn vẫn muốn load thông tin order liên quan
+            ->orderBy('id', 'desc')
+            ->paginate($paginate);
     }
 
     public function getOrderUserReturn($orderId)
     {
-        return OrderUserReturn::select('orders_user_return.*', 'orders.status as order_status')
-            ->join('orders', 'orders.id', '=', 'orders_user_return.order_id')
-            ->where('orders_user_return.order_id', $orderId)
-            ->first();
+        $return = OrderUserReturn::with([
+            'images',                                        // ảnh trả hàng
+            'order.orderItems.product',                      // sản phẩm
+            'order.orderItems.productVariant.productAttributes.attribute',
+            'order.orderItems.productVariant.productAttributes.attributeValue'
+        ])
+            ->where('order_id', $orderId)
+            ->firstOrFail();                                    // hoặc ->first() nếu không muốn ném 404
+
+        // Gắn thêm trường order_status để tương thích API cũ
+        $return->order_status = $return->order->status ?? null;
+
+        return $return;
     }
 
 
@@ -811,7 +853,7 @@ class OrderService extends BaseService
      * Lấy danh sách đơn hàng của người dùng hiện tại
      *
      * @param \App\Models\User $user Người dùng hiện tại
-     * @return \Illuminate\Database\Eloquent\Collection |\Illuminate\Pagination\LengthAwarePaginator
+     * @return \Illuminate\Support\Collection |\Illuminate\Pagination\LengthAwarePaginator
      */
     public function getOrdersByUser($user, $searchParams = [], $perPage = 10)
     {
@@ -820,7 +862,16 @@ class OrderService extends BaseService
             return collect(); // Trả về collection rỗng nếu không phải customer
         }
 
-        return $this->getOrdersByCustomerId($user->customer->id, $searchParams, $perPage);
+        // Lấy dữ liệu phân trang
+        $paginatedOrders = $this->getOrdersByCustomerId($user->customer->id, $searchParams, $perPage);
+
+        // Thêm lịch sử cho mỗi đơn hàng
+        $paginatedOrders->getCollection()->transform(function ($order) {
+            $order->history = $this->getOrderHistory($order->id);
+            return $order;
+        });
+
+        return $paginatedOrders;
     }
 
     /**
@@ -944,15 +995,15 @@ class OrderService extends BaseService
                 Order::STATUS_RETURN_REQUESTED
             ],
 
-            // Từ hoàn thành (6) khách hàng có thể yêu cầu đổi/trả (trong thời hạn)
-            Order::STATUS_COMPLETED => [
-                Order::STATUS_RETURN_REQUESTED
-            ],
+            // // Từ hoàn thành (6) khách hàng có thể yêu cầu đổi/trả (trong thời hạn)
+            // Order::STATUS_COMPLETED => [
+            //     Order::STATUS_RETURN_REQUESTED
+            // ],
 
-            // Từ đã từ chối đổi trả (14) khách hàng có thể tạo yêu cầu mới (trong thời hạn)
-            Order::STATUS_RETURN_REJECTED => [
-                Order::STATUS_RETURN_REQUESTED
-            ]
+            // // Từ đã từ chối đổi trả (14) khách hàng có thể tạo yêu cầu mới (trong thời hạn)
+            // Order::STATUS_RETURN_REJECTED => [
+            //     Order::STATUS_RETURN_REQUESTED
+            // ]
         ];
 
         // Định nghĩa các chuyển trạng thái hợp lệ cho System
@@ -1004,14 +1055,33 @@ class OrderService extends BaseService
     /**
      * Tự động chuyển trạng thái đơn hàng từ DELIVERED sang COMPLETED sau một khoảng thời gian
      * 
-     * @param int $daysToAutoComplete Số ngày sau khi giao hàng để tự động chuyển sang hoàn thành
+     * @param int|null $time Thời gian sau khi giao hàng để tự động chuyển sang hoàn thành
+     * @param string $unit Đơn vị thời gian (minutes, hours, days)
      * @return int Số đơn hàng đã được cập nhật
      */
-    public function autoCompleteDeliveredOrders($daysToAutoComplete = null)
+    public function autoCompleteDeliveredOrders($time = null, $unit = 'minutes')
     {
-        $daysToAutoComplete = $daysToAutoComplete ?? config('time.order_auto_complete_days', 3);
+        $configKey = 'time.order_auto_complete_' . $unit;
+        $value = $time ?? config($configKey);
+
+        switch ($unit) {
+            case 'days':
+                $timeInMinutes = $value * 24 * 60;
+                $timeDisplay = $value . ' ngày';
+                break;
+            case 'hours':
+                $timeInMinutes = $value * 60;
+                $timeDisplay = $value . ' giờ';
+                break;
+            case 'minutes':
+            default:
+                $timeInMinutes = $value;
+                $timeDisplay = $value . ' phút';
+                break;
+        }
+
         // Tìm các đơn hàng đã giao nhưng chưa hoàn thành và đã qua thời gian quy định
-        $cutoffDate = now()->subDays($daysToAutoComplete);
+        $cutoffDate = now()->subMinutes($timeInMinutes);
 
         $orders = $this->model
             ->where('status', Order::STATUS_DELIVERED)
@@ -1027,18 +1097,102 @@ class OrderService extends BaseService
                 Order::STATUS_COMPLETED,
                 null,
                 null,
-                'Đơn hàng được tự động chuyển sang trạng thái hoàn thành sau ' . $daysToAutoComplete . ' ngày giao hàng',
+                'Đơn hàng được tự động chuyển sang trạng thái hoàn thành sau ' . $timeDisplay,
                 true // isSystem = true
             );
 
             if ($result['success']) {
                 $count++;
-                Log::info("Đơn hàng #{$order->order_code} đã được tự động chuyển sang trạng thái hoàn thành");
+                Log::info("Đơn hàng #{$order->order_code} đã được tự động chuyển sang trạng thái hoàn thành sau {$timeDisplay}");
             } else {
                 Log::error("Không thể tự động cập nhật trạng thái đơn hàng #{$order->order_code}: " . $result['message']);
             }
         }
 
         return $count;
+    }
+
+    /**
+     * Hủy các đơn hàng đã hết hạn thanh toán
+     * 
+     * @return array Thông tin về số lượng đơn hàng đã hủy
+     */
+    public function cancelExpiredOrders()
+    {
+        try {
+            DB::beginTransaction();
+
+            // Tìm các đơn hàng đã quá hạn thanh toán
+            // 1. Phương thức thanh toán là VNPay
+            // 2. Trạng thái thanh toán là chưa thanh toán
+            // 3. Thời gian hết hạn thanh toán đã qua
+            $expiredOrders = Order::where('payment_method', 'vnpay')
+                ->where('payment_status', Order::PAYMENT_STATUS_UNPAID)
+                ->where('payment_expire_at', '<', Carbon::now())
+                ->where('status', Order::STATUS_PENDING)
+                ->get();
+
+            $count = $expiredOrders->count();
+            $cancelledOrders = [];
+
+            foreach ($expiredOrders as $order) {
+                // Lưu thông tin đơn hàng vào log trước khi cập nhật trạng thái
+                Log::info('Cancelling expired order', [
+                    'order_id' => $order->id,
+                    'order_code' => $order->order_code,
+                    'customer_name' => $order->customer_name,
+                    'payment_expire_at' => $order->payment_expire_at,
+                    'total_amount' => $order->total_amount
+                ]);
+
+                // Cập nhật trạng thái đơn hàng thành đã hủy và trạng thái thanh toán thành hết hạn
+                $order->status = Order::STATUS_CANCELLED;
+                $order->payment_status = Order::PAYMENT_STATUS_EXPIRED;
+                $order->cancel_reason = 'Hết hạn thanh toán';
+                // $order->cancelled_at = Carbon::now();
+                $order->save();
+
+                // Tạo lịch sử đơn hàng
+                OrderHistory::createHistory(
+                    $order->id,
+                    OrderHistory::ACTION_ORDER_CANCELLED,
+                    [
+                        'status_from' => Order::STATUS_PENDING,
+                        'status_to' => Order::STATUS_CANCELLED,
+                        'notes' => 'Đơn hàng bị hủy do hết hạn thanh toán',
+                        'metadata' => [
+                            'payment_expire_at' => $order->payment_expire_at,
+                            'cancelled_at' => Carbon::now(),
+                        ]
+                    ]
+                );
+
+                $cancelledOrders[] = [
+                    'order_code' => $order->order_code,
+                    'customer_name' => $order->customer_name,
+                    'payment_expire_at' => $order->payment_expire_at,
+                ];
+            }
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'count' => $count,
+                'cancelled_orders' => $cancelledOrders
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Error while cancelling expired orders: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'count' => 0,
+                'cancelled_orders' => []
+            ];
+        }
     }
 }

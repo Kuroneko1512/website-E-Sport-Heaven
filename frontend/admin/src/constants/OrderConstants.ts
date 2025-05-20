@@ -30,13 +30,21 @@ export const ORDER_STATUS_LABELS = {
 };
 
 export const PAYMENT_STATUS = {
-    UNPAID: 0,          // Chưa thanh toán
-    PAID: 1             // Đã thanh toán
+    UNPAID: 0,                  // Chưa thanh toán
+    PAID: 1,                    // Đã thanh toán
+    PARTIALLY_REFUNDED:2,       // Đã hoàn trả một phần
+    FULLY_REFUNDED:3,           // Đã hoàn trả toàn bộ
+    FAILED:4,                   // Thanh toán Thất bại
+    EXPIRED:5,                   // Hết hạn thanh toán
 };
 
 export const PAYMENT_STATUS_LABELS = {
     [PAYMENT_STATUS.UNPAID]: "Chưa thanh toán",
-    [PAYMENT_STATUS.PAID]: "Đã thanh toán"
+    [PAYMENT_STATUS.PAID]: "Đã thanh toán",
+    [PAYMENT_STATUS.PARTIALLY_REFUNDED]: "Đã hoàn trả một phần tiền",
+    [PAYMENT_STATUS.FULLY_REFUNDED]: "Đã hoàn trả toàn bộ tiền",
+    [PAYMENT_STATUS.FAILED]: "Thanh toán Thất bại",
+    [PAYMENT_STATUS.EXPIRED]: "Hết hạn thanh toán",
 };
 
 export const ORDER_REASON = {

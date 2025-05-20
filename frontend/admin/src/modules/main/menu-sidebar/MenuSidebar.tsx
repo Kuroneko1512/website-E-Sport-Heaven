@@ -60,6 +60,11 @@ export const MENU: IMenuItem[] = [
     path: '/Coupon',
   },
   {
+    name: 'Người sử dụng mã giảm giá',
+    icon: 'fas fa-ticket-alt nav-icon',
+    path: '/CouponUsage',
+  },
+  {
     name: "Bài viết",
     icon: "fas fa-newspaper nav-icon",
     children: [

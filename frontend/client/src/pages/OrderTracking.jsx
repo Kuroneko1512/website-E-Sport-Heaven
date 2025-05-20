@@ -5,10 +5,13 @@ import FomatVND from "../utils/FomatVND";
 import { ORDER_STATUS_LABELS, ORDER_STATUS } from "../constants/OrderConstants";
 import instanceAxios from "../config/db";
 import ScrollToTop from "../config/ScrollToTop";
+import { filterHistoryByStatusTo } from "../utils/filterHistoryByStatusTo";
 
 const OrderHistory = ({ history }) => {
-  // Sort history by created_at descending
-  const sortedHistory = [...history].sort(
+  // Lọc trùng status_to, giữ bản ghi mới nhất
+  const filteredHistory = filterHistoryByStatusTo(history);
+  // Sort lại theo created_at giảm dần (đã được filter giữ bản mới nhất)
+  const sortedHistory = [...filteredHistory].sort(
     (a, b) => new Date(b.created_at) - new Date(a.created_at)
   );
 

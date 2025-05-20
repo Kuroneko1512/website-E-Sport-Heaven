@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('coupon_usages', function (Blueprint $table) {
+        Schema::create('orders_user_return_images', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('coupon_id')->constrained('coupons');
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('return_id')->constrained('orders_user_return')->onDelete('cascade');
+            $table->string('image_path'); // Đường dẫn hoặc tên file ảnh
             $table->timestamps();
         });
     }
@@ -24,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('coupon_usages');
-      
-  
+        Schema::dropIfExists('orders_user_return_images');
     }
 };
