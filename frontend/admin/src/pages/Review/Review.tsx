@@ -48,7 +48,7 @@ const ReviewList = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: any) => {
     try {
       const review = reviews.find(r => r.id === id);
       if (!review) {

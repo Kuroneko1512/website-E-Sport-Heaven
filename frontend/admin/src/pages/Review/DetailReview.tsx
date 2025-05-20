@@ -18,12 +18,33 @@ const StarRating = (rating:any) => {
   );
 };
 
+  const handleDelete = async (id: any) => {
+    try {
+      const review = reviews.find(r => r.id === id);
+      if (!review) {
+        toast.error('Không tìm thấy đánh giá!');
+        return;
+      }
+
+      if (!window.confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) return;
+
+      setLoading(true);
+      await ReviewService.delete(id);
+      toast.success('Xóa đánh giá thành công!');
+      fetchReviews(pagination.current_page);
+    } catch (error) {
+      console.error('Lỗi khi xóa đánh giá:', error);
+      toast.error('Không thể xóa đánh giá');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
 const DetailReview = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
    const [review, setReview] = useState<Review | null>(null);
-
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchReview = async () => {
@@ -99,6 +120,7 @@ const DetailReview = () => {
                   className="w-12 h-12 rounded-full mr-4"
                   width="50"
                   height="50"
+                  alt={review?.title}
                 />
             </p>
           </div>
@@ -109,9 +131,16 @@ const DetailReview = () => {
             type="button"
             className="btn btn-default ml-2"
             onClick={() => navigate(-1)}
-            disabled={loading}
           >
             Quay lại
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-default ml-2"
+            onClick={() => handleDelete(review?.id)}
+          >
+            Xóa
           </button>
         </div>
     </div>
