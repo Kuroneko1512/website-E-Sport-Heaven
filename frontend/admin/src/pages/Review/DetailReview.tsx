@@ -18,33 +18,12 @@ const StarRating = (rating:any) => {
   );
 };
 
-  const handleDelete = async (id: any) => {
-    try {
-      const review = reviews.find(r => r.id === id);
-      if (!review) {
-        toast.error('Không tìm thấy đánh giá!');
-        return;
-      }
-
-      if (!window.confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) return;
-
-      setLoading(true);
-      await ReviewService.delete(id);
-      toast.success('Xóa đánh giá thành công!');
-      fetchReviews(pagination.current_page);
-    } catch (error) {
-      console.error('Lỗi khi xóa đánh giá:', error);
-      toast.error('Không thể xóa đánh giá');
-    } finally {
-      setLoading(false);
-    }
-  };
-
 
 const DetailReview = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
-   const [review, setReview] = useState<Review | null>(null);
+  const [review, setReview] = useState<Review | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchReview = async () => {
@@ -59,6 +38,24 @@ const DetailReview = () => {
 
     fetchReview();
   }, []);
+
+  
+  const handleDelete = async (id: any) => {
+    try {
+
+      if (!window.confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) return;
+
+      setLoading(true);
+      await ReviewService.delete(id);
+      toast.success('Xóa đánh giá thành công!');
+      navigate(-1);
+    } catch (error) {
+      console.error('Lỗi khi xóa đánh giá:', error);
+      toast.error('Không thể xóa đánh giá');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="card">
