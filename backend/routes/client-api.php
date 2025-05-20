@@ -63,6 +63,7 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('/wishlist', WishlistController::class);
 
             Route::get('/wishlist-product/{id}',[WishlistController::class,'getByProduct']);
+            Route::post('/wishlist-products', [WishlistController::class, 'getByProducts']);
         });
 
         //test route

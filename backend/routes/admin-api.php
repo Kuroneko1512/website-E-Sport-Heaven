@@ -51,8 +51,6 @@ Route::prefix('v1')->group(function () {
 
             //Customer routes
 
-
-
             //Role and Permission routes
 
             // Blog routes

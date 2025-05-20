@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useSearchParams } from "react-router-dom";
 import { CSSTransition, SwitchTransition } from "react-transition-group";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import "./App.css";
@@ -46,10 +46,12 @@ import OrderDetail from "./components/elementProfile/OrderDetail";
 import ChangePassword from "./components/elementProfile/ChangePassword";
 import EmailAuthentication from "./components/elementProfile/EmailAuthentication";
 import Cart from "./pages/Cart";
+import ReturnRequestForm from "./components/elementProfile/ReturnRequestForm";
 
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
   const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // const user = JSON.parse(Cookies.get("user"));
 
@@ -123,6 +125,7 @@ function App() {
           <Route path="home" element={<Navigate to={"/"} />} />
           <Route index element={<Home />} />
           <Route path="shop" element={<Shop />} />
+          <Route path="orders/:order_code/return-request" element={<ReturnRequestForm />} />
 
           <Route path="shop/product-detail/:id" element={<ProductDetail />}>
             <Route path="descriptions" element={<Description />} />
@@ -137,13 +140,28 @@ function App() {
               <Route path="info" element={<InfoProfile />} />
               <Route path="password" element={<ChangePassword />} />
               <Route path="settings" element={<Setting />} />
-              <Route path="orders" element={<MyOrder />} />
+              <Route
+                path="orders"
+                element={
+                  <MyOrder
+                    searchParam={searchParams.get("search") || ""}
+                    setSearchParam={value => {
+                      if (value) {
+                        setSearchParams({ search: value });
+                      } else {
+                        setSearchParams({});
+                      }
+                    }}
+                  />
+                }
+              />
               <Route path="orders/:order_code" element={<OrderDetail />} />
               <Route path="notifications" element={<Notification />} />
               <Route path="manage-address" element={<ManageAddress />} />
               <Route path="saved-cards" element={<PaymentCards />} />
               <Route path="wishlists" element={<Whishlist />} />
               <Route path="emailAuth" element={<EmailAuthentication />} />
+              
             </Route>
           </Route>
 

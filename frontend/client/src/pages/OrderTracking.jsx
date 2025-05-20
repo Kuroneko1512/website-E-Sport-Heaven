@@ -2,16 +2,20 @@ import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import FomatVND from "../utils/FomatVND";
-import { ORDER_STATUS_LABELS ,ORDER_STATUS } from "../constants/OrderConstants";
+import { ORDER_STATUS_LABELS, ORDER_STATUS } from "../constants/OrderConstants";
 import instanceAxios from "../config/db";
 import Echo from "laravel-echo";
 
 import ScrollToTop from "../config/ScrollToTop";
 import io from "socket.io-client";
+import { filterHistoryByStatusTo } from "../utils/filterHistoryByStatusTo";
+
 
 const OrderHistory = ({ history }) => {
-  // Sort history by created_at descending
-  const sortedHistory = [...history].sort(
+  // Lọc trùng status_to, giữ bản ghi mới nhất
+  const filteredHistory = filterHistoryByStatusTo(history);
+  // Sort lại theo created_at giảm dần (đã được filter giữ bản mới nhất)
+  const sortedHistory = [...filteredHistory].sort(
     (a, b) => new Date(b.created_at) - new Date(a.created_at)
   );
 
@@ -157,68 +161,13 @@ window.echo = new Echo({
     }).format(value);
   };
 
-  // Hàm định dạng ngày giờ
-  const formatDateTime = (iso) => {
-    const date = new Date(iso);
-    return date.toLocaleString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   // Hàm tính giá sản phẩm sau khi giảm giá
   const getDiscountedPrice = (item) => {
     // Chuyển đổi giá từ string sang số
-    const basePrice = parseFloat(item.price);
-    let discountPercent = 0;
+    const basePrice = parseFloat(item.original_price);
 
-    // Ưu tiên dùng discount của sản phẩm nếu có
-    if (item.product && item.product.discount_percent != null) {
-      discountPercent = parseFloat(item.product.discount_percent);
-    } else if (
-      item.product_variant &&
-      item.product_variant.discount_percent != null
-    ) {
-      discountPercent = parseFloat(item.product_variant.discount_percent);
-    }
     // Tính giá đã giảm
-    return basePrice * (1 - discountPercent / 100);
-  };
-
-  // Hàm tính tổng giá tiền của đơn hàng (cộng giá đã giảm của từng mặt hàng nhân với số lượng)
-  const calculateTotalAmount = () => {
-    if (!orderData || !orderData.data || !orderData.data.order_items) {
-      return 0;
-    }
-    return orderData.data.order_items.reduce((acc, item) => {
-      const discountedPrice = getDiscountedPrice(item);
-      const quantity = parseInt(item.quantity, 10) || 0;
-      return acc + discountedPrice * quantity;
-    }, 0);
-  };
-
-  // Hàm tính tổng thanh toán cuối cùng
-  const calculateFinalTotal = () => {
-    const subtotal = calculateTotalAmount();
-    const shippingFee = orderData?.data?.shipping_fee || 0;
-
-    // Tính giảm giá
-    let discountAmount = 0;
-    if (orderData?.data?.order_discount_type === 1) {
-      // Giảm giá theo phần trăm
-      discountAmount = Number(
-        subtotal * (Number(orderData?.data?.order_discount_amount) / 100)
-      );
-    } else {
-      // Giảm giá theo giá trị cố định
-      discountAmount = Number(orderData?.data?.order_discount_amount) || 0;
-    }
-
-    // Tổng thanh toán = Tổng tiền hàng + Phí vận chuyển - Giảm giá
-    return subtotal + Number(shippingFee) - discountAmount;
+    return basePrice * item.quantity;
   };
 
   // console.log("calculateFinalTotal", calculateFinalTotal());
@@ -242,10 +191,6 @@ window.echo = new Echo({
     );
   }
 
-  // Tính tổng giá tiền theo logic đã cập nhật
-  const computedTotalAmount = calculateTotalAmount();
-  const finalTotal = calculateFinalTotal();
-
   return (
     <div className="bg-white text-gray-800 p-6 max-w-4xl mx-auto mt-10">
       <ScrollToTop />
@@ -263,7 +208,7 @@ window.echo = new Echo({
         </span>
       </header>
 
-      <section className="grid grid-cols-5 gap-6 mb-8 border-b">
+      <section className="grid grid-cols-4 gap-6 mb-8 border-b">
         <div className="p-4 grid col-span-2">
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -283,7 +228,7 @@ window.echo = new Echo({
             </p>
           </div>
         </div>
-        <div className="p-4 grid col-span-3">
+        <div className="p-4 grid col-span-2">
           {/* <h2 className="text-xl font-semibold text-gray-900 mb-2">
             Lịch sử đơn hàng
           </h2> */}
@@ -320,21 +265,19 @@ window.echo = new Echo({
                     SKU: {item.product_variant?.sku || item.product.sku}
                   </p>
                   <p>
-                  Số lượng: <strong>{item.quantity}</strong>
-                </p>
+                    Số lượng: <strong>{item.quantity}</strong>
+                  </p>
                 </div>
               </div>
               <div className="text-right">
-                
                 <p>
-                  Giá: <strong>{formatPrice(item.price)}</strong>
                   {(item.product?.discount_percent > 0 ||
                     item.product_variant?.discount_percent > 0) && (
                     <span className="line-through text-gray-500 mr-2">
-                      {" "}
-                      {formatPrice(item.original_price)}
+                      {formatPrice(getDiscountedPrice(item))}
                     </span>
                   )}
+                  <strong>{formatPrice(item.subtotal)}</strong>
                 </p>
               </div>
             </div>
@@ -343,21 +286,21 @@ window.echo = new Echo({
       </section>
 
       <section className="mb-8 text-right">
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng tiền hàng: </div>
           <span className="col-span-2">
             {formatPrice(orderData?.data?.subtotal || 0)}
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phí vận chuyển: </div>
           <span className="col-span-2">
             {formatPrice(orderData?.data?.shipping_fee || 0)}
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Giảm giá: </div>
           <span className="col-span-2">
             {orderData?.data?.order_discount_type === 1
@@ -366,14 +309,28 @@ window.echo = new Echo({
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng thanh toán: </div>
           <span className="text-2xl font-bold text-red-500 col-span-2">
             {formatPrice(orderData?.data?.total_amount)}
           </span>
         </div>
-
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border border-yellow-300 bg-yellow-100 text-left p-4 gap-6">
+          <span className="">
+            {orderData?.data?.payment_status === 1 ? (
+              <div className="text-yellow-600">
+                <i className="fas fa-bell" /> Đã thanh toán. Vui kiểm tra lại
+                thông tin đơn hàng.
+              </div>
+            ) : (
+              <div className="text-yellow-600">
+                <i className="fas fa-bell" /> Vui lòng thanh toán{" "}
+                {formatPrice(orderData?.data?.total_amount)} khi nhận hàng.
+              </div>
+            )}
+          </span>
+        </div>
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phương thức thanh toán: </div>
           <span className="col-span-2">
             {orderData?.data?.payment_method === "cod"

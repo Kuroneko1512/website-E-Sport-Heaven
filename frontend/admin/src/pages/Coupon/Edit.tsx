@@ -1,283 +1,440 @@
 import { FC, useEffect, useState, useCallback } from "react";
-import { updateCoupon, getCouponById, Coupon as ApiCoupon } from "@app/services/Coupon/ApiCoupon";
+import { updateCoupon, getCouponById, checkCouponCodeExists } from "@app/services/Coupon/ApiCoupon";
 import { useParams, useNavigate } from "react-router-dom";
 
 interface Coupon {
-    code: string;
-    name: string;
-    description: string;
-    discount_value: number;
-    start_date: string;
-    end_date: string;
-    discount_type: 'percentage' | 'fixed'; 
-    min_purchase: number;
-    max_uses: number;
- 
+  code: string;
+  name: string;
+  description: string;
+  discount_value: number;
+  start_date: string;
+  end_date: string;
+  discount_type: number;
+  max_uses: number;
+  min_order_amount: number;
+  max_discount_amount: number;
 }
 
 const EditCoupon: FC = () => {
-    const navigate = useNavigate();
-    const id = useParams().id;
-    const [coupon, setCoupon] = useState<Coupon>({
-        code: "",
-        name: "",
-        description: "",
-        discount_value: 0,
-        start_date: "",
-        end_date: "",
-        discount_type: "percentage",
-        min_purchase: 0,
-        max_uses: 0,
-   
-    });
-    const [errors, setErrors] = useState<Record<string, string>>({});
+  const navigate = useNavigate();
+  const id = useParams().id;
+  const [coupon, setCoupon] = useState<Coupon>({
+    code: "",
+    name: "",
+    description: "",
+    discount_value: 0,
+    start_date: "",
+    end_date: "",
+    discount_type: 0,
+    min_order_amount: 0,
+    max_discount_amount: 0,
+    max_uses: 0,
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const discountTypeOptions = [
+    { value: 0, label: "Phần trăm" },
+    { value: 1, label: "Giá tiền" },
+  ];
+  const getCoupon = useCallback(async () => {
+    try {
+      const response = await getCouponById(Number(id));
 
-    const getCoupon = useCallback(async () => {
-        try {
-            const response = await getCouponById(Number(id));
-            console.log("API response:", response);
-            
-            // Đảm bảo start_date và end_date được định dạng đúng cho input type="date"
-            const formattedStartDate = response.start_date 
-                ? new Date(response.start_date).toISOString().split('T')[0] 
-                : "";
-            const formattedEndDate = response.end_date 
-                ? new Date(response.end_date).toISOString().split('T')[0] 
-                : "";
-                
-            console.log("Formatted dates:", { 
-                original: { start: response.start_date, end: response.end_date },
-                formatted: { start: formattedStartDate, end: formattedEndDate }
-            });
-            
-            setCoupon({
-                ...response,
-                description: response.description || "",
-                start_date: formattedStartDate,
-                end_date: formattedEndDate,
-                max_uses: response.max_uses || 0,
-                discount_type: response.discount_type as 'percentage' | 'fixed'
-            });
-        } catch (error) {
-            console.error("Error fetching coupon:", error);
-        }
-    }, [id]);
-    
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {  
-        const { name, value, type } = e.target;
-        
-        // Xử lý đặc biệt cho trường ngày tháng
-        if (type === 'date') {
-            console.log(`Date field ${name} changed to:`, value);
-        }
-        
-        setCoupon({ ...coupon, [name]: value });
-    };
+      // Đảm bảo start_date và end_date được định dạng đúng cho input type="date"
+      const formattedStartDate = response.start_date
+        ? response.start_date.split(" ")[0]
+        : "";
+      const formattedEndDate = response.end_date
+        ? response.end_date.split(" ")[0]
+        : "";
 
-    const validateForm = (): boolean => {
-        let isValid = true;
-        let newErrors: Record<string, string> = {};
+      setCoupon({
+        ...response,
+        description: response.description || "",
+        start_date: formattedStartDate,
+        end_date: formattedEndDate,
+        max_uses: response.max_uses || 0,
+        min_order_amount: response.min_order_amount || 0,
+        max_discount_amount: response.max_discount_amount || 0,
+        discount_type: response.discount_type || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching coupon:", error);
+    }
+  }, [id]);
 
-        // Validate code
-        if (!coupon.code || coupon.code.trim() === '') {
+  const validate = async (name?: string, value?: any): Promise<boolean> => {
+    let isValid = true;
+    let newErrors: Record<string, string> = {};
+
+    // Nếu có name và value, chỉ validate một trường
+    if (name && value !== undefined) {
+      switch (name) {
+        case 'code':
+          if (!value || value.trim() === '') {
             newErrors.code = 'Mã không được để trống';
             isValid = false;
-        } else if (coupon.code.length < 3) {
+          } else if (value.length < 3) {
             newErrors.code = 'Mã phải có ít nhất 3 ký tự';
             isValid = false;
-        }
-
-        // Validate name
-        if (!coupon.name || coupon.name.trim() === '') {
+          }  
+          const exists = await checkCouponCodeExists(value);
+          console.log(exists);
+         
+          
+          if (exists) {
+              newErrors.code = 'Mã này đã tồn tại trong hệ thống';
+              isValid = false;
+          }
+          break;
+        case 'name':
+          if (!value || value.trim() === '') {
             newErrors.name = 'Tên không được để trống';
             isValid = false;
-        }
-
-        // Validate discount_value
-        if (coupon.discount_value <= 0) {
+          }
+          break;
+        case 'discount_value':
+          if (value <= 0) {
             newErrors.discount_value = 'Giá trị giảm giá phải lớn hơn 0';
             isValid = false;
-        } else if (coupon.discount_type === 'percentage' && coupon.discount_value > 70)  {
-            newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 70%';
+          } else if (coupon.discount_type === 0 && value > 50) {
+            newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 50%';
             isValid = false;
-        }
-
-        // Validate start_date
-        if (!coupon.start_date) {
+          }
+          break;
+        case 'start_date':
+          if (!value) {
             newErrors.start_date = 'Ngày bắt đầu không được để trống';
             isValid = false;
-        }
-
-        // Validate end_date
-        if (!coupon.end_date) {
+          }
+          break;
+        case 'end_date':
+          if (!value) {
             newErrors.end_date = 'Ngày kết thúc không được để trống';
             isValid = false;
-        } else if (coupon.start_date && new Date(coupon.end_date) <= new Date(coupon.start_date)) {
+          } else if (coupon.start_date && new Date(value) <= new Date(coupon.start_date)) {
             newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
             isValid = false;
-        }
+          }
+          break;
+      }
+    } else {
+      // Validate tất cả các trường
+      if (!coupon.code || coupon.code.trim() === '') {
+        newErrors.code = 'Mã không được để trống';
+        isValid = false;
+      } else if (coupon.code.length < 3) {
+        newErrors.code = 'Mã phải có ít nhất 3 ký tự';
+        isValid = false;
+      }
 
-        setErrors(newErrors);
-        return isValid;
-    };
+      // Kiểm tra mã code tồn tại khi submit
+      const exists = await checkCouponCodeExists(coupon.code);
+      if (exists && coupon.code !== (await getCouponById(Number(id))).code) {
+        newErrors.code = 'Mã này đã tồn tại trong hệ thống';
+        isValid = false;
+      }
+
+      if (!coupon.name || coupon.name.trim() === '') {
+        newErrors.name = 'Tên không được để trống';
+        isValid = false;
+      }
+
+      if (coupon.discount_value <= 0) {
+        newErrors.discount_value = 'Giá trị giảm giá phải lớn hơn 0';
+        isValid = false;
+      } else if (coupon.discount_type === 0 && coupon.discount_value > 50) {
+        newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 50%';
+        isValid = false;
+      }
+
+      if (!coupon.start_date) {
+        newErrors.start_date = 'Ngày bắt đầu không được để trống';
+        isValid = false;
+      }
+
+      if (!coupon.end_date) {
+        newErrors.end_date = 'Ngày kết thúc không được để trống';
+        isValid = false;
+      } else if (coupon.start_date && new Date(coupon.end_date) <= new Date(coupon.start_date)) {
+        newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
+        isValid = false;
+      }
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    validate(name, value);
+    setCoupon({ ...coupon, [name]: value });
+  
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!await validate()) {
+
+        
+      return;
+    }
+
+    try {
+      const couponData = {
+        code: coupon.code,
+        name: coupon.name,
+        description: coupon.description,
+        discount_type: coupon.discount_type,
+        discount_value: Number(coupon.discount_value),
+        min_order_amount: Number(coupon.min_order_amount),
+        max_discount_amount: Number(coupon.max_discount_amount),
+        max_uses: Number(coupon.max_uses),
+        start_date: coupon.start_date,
+        end_date: coupon.end_date,
+        is_active: new Date(coupon.end_date) > new Date() ? 0 :  1
+
+      };
     
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        
-        if (!validateForm()) {
-            return;
-        }
-        
-        try {
-            console.log("Submitting coupon data:", coupon);
-            
-            // Chỉ gửi những trường cần thiết theo kiểu dữ liệu yêu cầu
-            const couponData = {
-                code: coupon.code,
-                name: coupon.name,
-                description: coupon.description,
-                discount_type: coupon.discount_type,
-                discount_value: Number(coupon.discount_value),
-                min_purchase: Number(coupon.min_purchase),
-                max_uses: Number(coupon.max_uses),
-                start_date: coupon.start_date,
-                end_date: coupon.end_date
-            };
-            
-            await updateCoupon(Number(id), couponData);
-            navigate("/coupon");
-            alert("Cập nhật mã giảm giá thành công!");
-        } catch (error) {
-            console.error("Lỗi khi cập nhật mã giảm giá:", error);
-            alert("Tên mã giảm giá đã tồn tại!");
-        }
-    };
-    useEffect(() => {
-        getCoupon();
-    }, [getCoupon]);
-    return (
-        <div>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="code">Mã <span className="text-danger">*</span></label>
-                    <input 
-                        type="text" 
-                        className={`form-control ${errors.code ? 'is-invalid' : ''}`}
-                        id="code" 
-                        name="code" 
-                        value={coupon.code} 
-                        onChange={handleChange}
-                         
-                    />
-                    {errors.code && <div className="invalid-feedback">{errors.code}</div>}
-                </div>
-                <div className="form-group">
-                    <label htmlFor="name">Tên <span className="text-danger">*</span></label>
-                    <input 
-                        type="text" 
-                        className={`form-control ${errors.name ? 'is-invalid' : ''}`}
-                        id="name" 
-                        name="name" 
-                        value={coupon.name} 
-                        onChange={handleChange}
-                         
-                    />
-                    {errors.name && <div className="invalid-feedback">{errors.name}</div>}
-                </div>
-                <div className="form-group">
-                    <label htmlFor="description">Mô tả</label>
-                    <textarea 
-                        className="form-control" 
-                        id="description" 
-                        name="description" 
-                        value={coupon.description} 
-                        onChange={handleChange} 
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="min_purchase">Số tiền tối thiểu</label>
-                    <input 
-                        type="number" 
-                        className="form-control" 
-                        id="min_purchase" 
-                        name="min_purchase" 
-                        value={coupon.min_purchase} 
-                        onChange={handleChange}
-                        min="0" 
-                    />
-                </div>  
-                <div className="form-group">
-                    <label htmlFor="start_date">Ngày bắt đầu <span className="text-danger">*</span></label>
-                    <input 
-                        type="date" 
-                        className={`form-control ${errors.start_date ? 'is-invalid' : ''}`}
-                        id="start_date" 
-                        name="start_date" 
-                        value={coupon.start_date} 
-                        onChange={handleChange}
-                         
-                    />
-                    {errors.start_date && <div className="invalid-feedback">{errors.start_date}</div>}
-                </div>
-                <div className="form-group">
-                    <label htmlFor="end_date">Ngày kết thúc <span className="text-danger">*</span></label>
-                    <input 
-                        type="date" 
-                        className={`form-control ${errors.end_date ? 'is-invalid' : ''}`}
-                        id="end_date" 
-                        name="end_date" 
-                        value={coupon.end_date} 
-                        onChange={handleChange}
-                         
-                    />
-                    {errors.end_date && <div className="invalid-feedback">{errors.end_date}</div>}
-                </div>
-                <div className="form-group">
-                    <label htmlFor="discount_type">Loại giảm giá <span className="text-danger">*</span></label>
-                    <select 
-                        className="form-control" 
-                        id="discount_type" 
-                        name="discount_type" 
-                        value={coupon.discount_type} 
-                        onChange={handleChange}
-                    >
-                        <option value="percentage">Giảm giá theo phần trăm</option>
-                        <option value="fixed">Giảm giá theo số tiền</option>
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label htmlFor="discount_value">Giá trị giảm giá <span className="text-danger">*</span></label>
-                    <input 
-                        type="number" 
-                        className={`form-control ${errors.discount_value ? 'is-invalid' : ''}`}
-                        id="discount_value" 
-                        name="discount_value" 
-                        value={coupon.discount_value} 
-                        onChange={handleChange}
-                        min="0"
-                        step={coupon.discount_type === 'percentage' ? '0.1' : '1000'}
-                    />
-                    {errors.discount_value && <div className="invalid-feedback">{errors.discount_value}</div>}
-                </div>
-                <div className="form-group">
-                    <label htmlFor="max_uses">Số lượt sử dụng tối đa</label>
-                    <input 
-                        type="number" 
-                        className="form-control" 
-                        id="max_uses" 
-                        name="max_uses" 
-                        value={coupon.max_uses} 
-                        onChange={handleChange}
-                        min="0"
-                     
-                    />
-                  
-                </div>
-                
-                <button type="submit" className="btn btn-primary">Cập nhật</button>
-            </form>
+      await updateCoupon(Number(id), couponData);
+      navigate("/coupon");
+      alert("Cập nhật mã giảm giá thành công!");
+    } catch (error) {
+      console.error("Lỗi khi cập nhật mã giảm giá:", error);
+      alert("Có lỗi xảy ra khi cập nhật mã giảm giá!");
+    }
+  };
+  useEffect(() => {
+    getCoupon();
+  }, [getCoupon]);
+  return (
+    <div className="content">
+      <div className="content-header">
+        <div className="container-fluid">
+          <div className="row mb-2">
+            <div className="col-sm-6">
+              <h1>Chỉnh sửa mã giảm giá</h1>
+            </div>
+            <div className="col-sm-6">
+              <ol className="breadcrumb float-sm-right">
+                <li className="breadcrumb-item">
+                  <a href="#">Trang chủ</a>
+                </li>
+                <li className="breadcrumb-item active">Chỉnh sửa mã giảm giá</li>
+              </ol>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <h3 className="card-title">Thông tin mã giảm giá</h3>
+          <div className="card-tools">
+            <button type="button" className="btn btn-tool" data-card-widget="collapse" title="Collapse">
+              <i className="fas fa-minus"></i>
+            </button>
+          </div>
+        </div>
+        <div className="card-body">
+          <form onSubmit={handleSubmit}>
+            <div className="row">
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label htmlFor="code">Mã giảm giá <span className="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    className={`form-control ${errors.code ? "is-invalid" : ""}`}
+                    id="code"
+                    name="code"
+                    value={coupon.code}
+                    onChange={handleChange}
+                    placeholder="Nhập mã giảm giá"
+                  />
+                  {errors.code && <div className="invalid-feedback d-block">{errors.code}</div>}
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label htmlFor="name">Tên mã giảm giá <span className="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    className={`form-control ${errors.name ? "is-invalid" : ""}`}
+                    id="name"
+                    name="name"
+                    value={coupon.name}
+                    onChange={handleChange}
+                    placeholder="Nhập tên mã giảm giá"
+                  />
+                  {errors.name && <div className="invalid-feedback d-block">{errors.name}</div>}
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="description">Mô tả</label>
+              <textarea
+                className="form-control"
+                id="description"
+                name="description"
+                value={coupon.description}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Nhập mô tả về mã giảm giá"
+              />
+            </div>
+
+            <div className="row">
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label htmlFor="min_order_amount">Số tiền đơn hàng tối thiểu</label>
+                  <div className="input-group">
+                    <input
+                      type="number"
+                      className="form-control"
+                      id="min_order_amount"
+                      name="min_order_amount"
+                      value={coupon.min_order_amount}
+                      onChange={handleChange}
+                      min="0"
+                      placeholder="0"
+                    />
+                    <div className="input-group-append">
+                      <span className="input-group-text">VNĐ</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label htmlFor="max_discount_amount">Số tiền giảm tối đa</label>
+                  <div className="input-group">
+                    <input
+                      type="number"
+                      className="form-control"
+                      id="max_discount_amount"
+                      name="max_discount_amount"
+                      value={coupon.max_discount_amount}
+                      onChange={handleChange}
+                      min="0"
+                      placeholder="0"
+                      disabled={coupon.discount_type === 0}
+                    />
+                    <div className="input-group-append">
+                      <span className="input-group-text">VNĐ</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label htmlFor="start_date">Ngày bắt đầu <span className="text-danger">*</span></label>
+                  <input
+                    type="date"
+                    className={`form-control ${errors.start_date ? "is-invalid" : ""}`}
+                    id="start_date"
+                    name="start_date"
+                    value={coupon.start_date}
+                    onChange={handleChange}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                  {errors.start_date && <div className="invalid-feedback d-block">{errors.start_date}</div>}
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label htmlFor="end_date">Ngày kết thúc <span className="text-danger">*</span></label>
+                  <input
+                    type="date"
+                    className={`form-control ${errors.end_date ? "is-invalid" : ""}`}
+                    id="end_date"
+                    name="end_date"
+                    value={coupon.end_date}
+                    onChange={handleChange}
+                    min={coupon.start_date}
+                  />
+                  {errors.end_date && <div className="invalid-feedback d-block">{errors.end_date}</div>}
+                </div>
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>Loại giảm giá</label>
+                  <select
+                    className="form-control"
+                    id="discount_type"
+                    name="discount_type"
+                    value={coupon.discount_type}
+                    onChange={handleChange}
+                  >
+                    {discountTypeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label htmlFor="discount_value">Giá trị giảm giá <span className="text-danger">*</span></label>
+                  <div className="input-group">
+                    <input
+                      type="number"
+                      className={`form-control ${errors.discount_value ? "is-invalid" : ""}`}
+                      id="discount_value"
+                      name="discount_value"
+                      value={coupon.discount_value}
+                      onChange={handleChange}
+                      min="0"
+                      max={coupon.discount_type === 0 ? "50" : undefined}
+                      placeholder="0"
+                      required
+                    />
+                    <div className="input-group-append">
+                      <span className="input-group-text">{coupon.discount_type === 0 ? '%' : 'VNĐ'}</span>
+                    </div>
+                  </div>
+                  {errors.discount_value && <div className="invalid-feedback d-block">{errors.discount_value}</div>}
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="max_uses">Số lần sử dụng tối đa</label>
+              <input
+                type="number"
+                className="form-control"
+                id="max_uses"
+                name="max_uses"
+                value={coupon.max_uses}
+                onChange={handleChange}
+                min="0"
+                placeholder="0"
+              />
+            </div>
+
+            <div className="form-group">
+              <button type="submit" className="btn btn-primary">
+                <i className="fas fa-save mr-1"></i> Cập nhật mã giảm giá
+              </button>
+              <button type="button" className="btn btn-secondary ml-2" onClick={() => navigate('/coupon')}>
+                <i className="fas fa-times mr-1"></i> Hủy
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default EditCoupon;
