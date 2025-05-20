@@ -486,19 +486,18 @@ const OrderDetail = () => {
                 : action}
             </button>
           ))}
-        {/* Nút tiếp tục thanh toán ở gần tổng tiền nếu có vnpay_url và expire_date */}
-        {orderData?.data?.history && orderData.data.history.some(h => h.metadata?.vnpay_url && h.metadata?.expire_date) && (() => {
+        {/* Nút tiếp tục thanh toán chỉ hiển thị khi liên kết còn hạn và chưa thanh toán */}
+        {orderData?.data?.history && (() => {
           const vnpayItem = orderData.data.history.find(h => h.metadata?.vnpay_url && h.metadata?.expire_date);
+          if (!vnpayItem) return null;
           const expired = isVnpayExpired(vnpayItem.metadata.expire_date);
+          // Ẩn nút nếu đã thanh toán thành công (metadata.new_payment_status === 1 ở bất kỳ record nào) hoặc liên kết hết hạn
+          const isPaid = orderData.data.history.some(h => h.metadata?.new_payment_status === 1);
+          if (expired || isPaid) return null;
           return (
             <button
-              className="ml-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow disabled:opacity-60 disabled:cursor-not-allowed"
-              onClick={() => {
-                if (!expired) window.location.href = vnpayItem.metadata.vnpay_url;
-              }}
-              disabled={expired}
-              title={expired ? "Liên kết thanh toán đã hết hạn" : ""}
-              style={expired ? { pointerEvents: "none" } : {}}
+              className="ml-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow"
+              onClick={() => window.location.href = vnpayItem.metadata.vnpay_url}
             >
               Tiếp tục thanh toán
             </button>
