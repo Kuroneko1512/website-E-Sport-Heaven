@@ -195,7 +195,7 @@ const EditCoupon: FC = () => {
         max_uses: Number(coupon.max_uses),
         start_date: coupon.start_date,
         end_date: coupon.end_date,
-        is_active: new Date(coupon.end_date) > new Date() ? 1 :  0
+        is_active: new Date(coupon.end_date) > new Date() ? 0 :  1
 
       };
     
