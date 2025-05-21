@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\User;
 use Mail;
 use App\Mail\User\WarningWishlistItemOutOfStock;
 use Illuminate\Bus\Queueable;
