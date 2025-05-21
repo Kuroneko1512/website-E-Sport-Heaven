@@ -39,12 +39,12 @@ const EditCoupon: FC = () => {
     try {
       const response = await getCouponById(Number(id));
 
-      // Đảm bảo start_date và end_date được định dạng đúng cho input type="date"
+      
       const formattedStartDate = response.start_date
-        ? response.start_date.split(" ")[0]
+        ? new Date(response.start_date).toISOString().slice(0, 16)
         : "";
       const formattedEndDate = response.end_date
-        ? response.end_date.split(" ")[0]
+        ? new Date(response.end_date).toISOString().slice(0, 16)
         : "";
 
       setCoupon({
@@ -168,18 +168,21 @@ const EditCoupon: FC = () => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
+    
+    if (type === 'datetime-local') {
+      setCoupon({ ...coupon, [name]: value });
+    } else {
+      setCoupon({ ...coupon, [name]: value });
+    }
+    
     validate(name, value);
-    setCoupon({ ...coupon, [name]: value });
-  
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!await validate()) {
-
-        
       return;
     }
 
@@ -193,10 +196,9 @@ const EditCoupon: FC = () => {
         min_order_amount: Number(coupon.min_order_amount),
         max_discount_amount: Number(coupon.max_discount_amount),
         max_uses: Number(coupon.max_uses),
-        start_date: coupon.start_date,
-        end_date: coupon.end_date,
-        is_active: new Date(coupon.end_date) > new Date() ? 0 :  1
-
+        start_date: new Date(coupon.start_date).toISOString().slice(0, 19).replace('T', ' '),
+        end_date: new Date(coupon.end_date).toISOString().slice(0, 19).replace('T', ' '),
+        is_active: new Date(coupon.end_date) > new Date() ? 0 : 1
       };
     
       await updateCoupon(Number(id), couponData);
@@ -336,13 +338,13 @@ const EditCoupon: FC = () => {
                 <div className="form-group">
                   <label htmlFor="start_date">Ngày bắt đầu <span className="text-danger">*</span></label>
                   <input
-                    type="date"
+                    type="datetime-local"
                     className={`form-control ${errors.start_date ? "is-invalid" : ""}`}
                     id="start_date"
                     name="start_date"
                     value={coupon.start_date}
                     onChange={handleChange}
-                    min={new Date().toISOString().split('T')[0]}
+                    min={new Date().toISOString().slice(0, 16)}
                   />
                   {errors.start_date && <div className="invalid-feedback d-block">{errors.start_date}</div>}
                 </div>
@@ -351,7 +353,7 @@ const EditCoupon: FC = () => {
                 <div className="form-group">
                   <label htmlFor="end_date">Ngày kết thúc <span className="text-danger">*</span></label>
                   <input
-                    type="date"
+                    type="datetime-local"
                     className={`form-control ${errors.end_date ? "is-invalid" : ""}`}
                     id="end_date"
                     name="end_date"
