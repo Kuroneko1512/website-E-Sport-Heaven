@@ -125,7 +125,7 @@ const ReturnRequestForm = () => {
         // Gửi tất cả ảnh
         fileList.forEach((file) => {
           if (file.originFileObj) {
-            formData.append("image[]", file.originFileObj);
+            formData.append("images[]", file.originFileObj);
           }
         });
         await instanceAxios.post("/api/v1/order/orders-user-return", formData, {
