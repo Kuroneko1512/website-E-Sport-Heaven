@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Helpers\UrlHelper;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\Payment\PaymentController;
+use App\Events\TestEvent;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,4 +34,9 @@ Route::get('/check-env', function () {
 
 Route::get('/test-url-helper', function () {
     dd( UrlHelpers::clientUrl('test'));
+});
+
+Route::get('/test-event', function () {
+    broadcast(new TestEvent("Hi client!"));
+    return "Event broadcasted";
 });

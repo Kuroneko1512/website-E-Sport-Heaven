@@ -53,8 +53,6 @@ const Orders = () => {
         setLoading(true);
         try {
             const response = await getOrders(page, pagination.per_page, 'customer');
-            console.log(response.data);
-            
             setOrders(response.data.data);
             setPagination((prev) => ({
                 ...prev,

@@ -49,6 +49,8 @@ import DetailCoupon from "@pages/Coupon/Detail";
 import { UserList } from "@pages/User/index";
 import CouponUsageComponent from "@pages/Coupon/CouponUsage/index";
 import CouponUsageStore from "@pages/Coupon/CouponUsage/store";
+import DetailReview from "./pages/Review/DetailReview";
+import ReviewList from "./pages/Review/Review";
 const { VITE_NODE_ENV } = import.meta.env;
 
 const App = () => {
@@ -192,6 +194,9 @@ const App = () => {
 
             <Route path="order-return" element={<OrderReturn />} />
             <Route path="order-return/:id" element={<DetailReturnOrder />} />
+
+            <Route path="reviews" element={< ReviewList />} />
+            <Route path="detail-review/:id" element={<DetailReview />} />
           
 
             {/*Route user*/}
