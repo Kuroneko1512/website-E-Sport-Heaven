@@ -14,6 +14,7 @@ use App\Models\ProductVariant;
 use App\Models\OrderUserReturn;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Events\OrderStatusUpdated;
 
 class OrderService extends BaseService
 {
@@ -400,7 +401,7 @@ class OrderService extends BaseService
         }
 
         $this->addOrderHistory($order->id, OrderHistory::ACTION_STATUS_UPDATED, $historyData);
-
+        broadcast(new OrderStatusUpdated());
 
         return [
             'success' => true,
