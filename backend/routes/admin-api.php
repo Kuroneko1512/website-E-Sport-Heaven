@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Admin\V1\AttributeController;
 use App\Http\Controllers\Api\Admin\V1\CategoryController;
 use App\Http\Controllers\Api\Admin\V1\ProductController;
 use App\Http\Controllers\Api\Admin\V1\OrderController;
+use App\Http\Controllers\Api\Admin\V1\ReviewController;
 use App\Http\Controllers\Api\User\UserController;
 
 Route::prefix('v1')->group(function () {
@@ -48,7 +49,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/order/showByCode/{order_code}', [OrderController::class, 'showOrderByCode']);
             Route::put('/order/{id}/status', [OrderController::class, 'updateStatus']);
 
-
+            Route::apiResource('/review', ReviewController::class);
             //Customer routes
 
             //Role and Permission routes
