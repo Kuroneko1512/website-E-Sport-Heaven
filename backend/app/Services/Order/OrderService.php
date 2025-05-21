@@ -305,7 +305,7 @@ class OrderService extends BaseService
         }
     }
 
-    public function getOrderAll($paginate = 10)
+    public function getOrderAll($paginate)
     {
         return $this->model->with([
             'orderItems.product',

@@ -1,14 +1,14 @@
 import { getOrders, Order, Pagination } from "@app/services/Order/Api";
 import FomatVND from "@app/utils/FomatVND";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {  Link } from "react-router-dom";
-import { Pagination as AntPagination } from "antd";
+
 import { ORDER_STATUS, ORDER_STATUS_LABELS, PAYMENT_STATUS, PAYMENT_STATUS_LABELS } from "@app/constants/OrderConstants";
 
 const Orders = () => {
     
 
-    // State lưu thông tin phân trang
+   
     const [pagination, setPagination] = useState<Pagination>({
         current_page: 1,
         last_page: 1,
@@ -19,13 +19,16 @@ const Orders = () => {
         data: [],
     });
 
-    // State lưu danh sách đơn hàng
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(false);
 
     const goToPage = (page: number) => {
         if (page >= 1 && page <= pagination.last_page) {
+         
+            
             setPagination({ ...pagination, current_page: page });
+        
+            
         }
     };
 
@@ -46,30 +49,32 @@ const Orders = () => {
     };
 
     // Hàm lấy dữ liệu đơn hàng từ API
-    const fetchData = async (page = 1) => {
+    const fetchData = useCallback(async (page = 1) => {
         setLoading(true);
         try {
             const response = await getOrders(page, pagination.per_page, 'customer');
-            setOrders(response.data);
+            console.log(response.data);
+            
+            setOrders(response.data.data);
             setPagination((prev) => ({
                 ...prev,
-                current_page: response.current_page || 1,
-                last_page: response.last_page || 1,
-                prev_page_url: response.prev_page_url,
-                next_page_url: response.next_page_url,
-                total: response.total || 0,
-                per_page: response.per_page || 5,
-                data: response.data,
+                current_page: response.data.current_page,
+                last_page: response.data.last_page,
+                prev_page_url: response.data.prev_page_url,
+                next_page_url: response.data.next_page_url,
+                total: response.data.total,
+                per_page: response.data.per_page,
+                data: response.data.data
             }));
         } catch (error) {
             console.error("Lỗi khi lấy dữ liệu:", error);
         }
         setLoading(false);
-    };
+    }, [pagination.per_page]);
 
     useEffect(() => {
-        fetchData();
-    }, [pagination.current_page, pagination.per_page]);
+        fetchData(pagination.current_page);
+    }, [fetchData, pagination.current_page]);
 
     return (
         <section className="content">

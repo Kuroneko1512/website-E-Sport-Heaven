@@ -17,7 +17,7 @@ const Store: FC = () => {
         discount_type: 0,
         min_order_amount: 0,
         max_discount_amount: 0,
-        start_date:new Date().toISOString().split('T')[0],
+        start_date: new Date().toISOString().slice(0, 16),
         end_date: "",
         max_uses: 0,     
         is_active: 0,
@@ -72,8 +72,8 @@ const Store: FC = () => {
                     if (!value) {
                         newErrors.start_date = 'Ngày bắt đầu không được để trống';
                         isValid = false;
-                    } else if (new Date(value) < new Date(new Date().setDate(new Date().getDate() - 1))) {
-                        newErrors.start_date = 'Ngày bắt đầu không thể sớm hơn hôm qua';
+                    } else if (new Date(value) < new Date(new Date().setMinutes(new Date().getMinutes() - 1))) {
+                        newErrors.start_date = 'Ngày bắt đầu không thể trong quá khứ';
                         isValid = false;
                     }
                     break;
@@ -125,7 +125,7 @@ const Store: FC = () => {
             if (!coupon.start_date) {
                 newErrors.start_date = 'Ngày bắt đầu không được để trống';
                 isValid = false;
-            } else if (new Date(coupon.start_date) < new Date(new Date().setDate(new Date().getDate() - 1))) {
+            } else if (new Date(coupon.start_date) < new Date(new Date().setMinutes(new Date().getMinutes() - 1))) {
                 newErrors.start_date = 'Ngày bắt đầu không thể trong quá khứ';
                 isValid = false;
             }
@@ -189,7 +189,8 @@ const Store: FC = () => {
                 is_active: 0,
                
             };
-            
+              
+                
             await createCoupon(apiCoupon);
       
             
@@ -347,13 +348,13 @@ const Store: FC = () => {
                                 <div className="form-group">
                                     <label htmlFor="start_date">Ngày bắt đầu <span className="text-danger">*</span></label>
                                     <input 
-                                        type="date" 
+                                        type="datetime-local" 
                                         className={`form-control ${errors.start_date ? 'is-invalid' : ''}`}
                                         id="start_date" 
                                         name="start_date" 
                                         value={coupon.start_date} 
                                         onChange={handleChange}
-                                        min={new Date().toISOString().split('T')[0]}
+                                        min={new Date().toISOString().slice(0, 16)}
                                     />
                                     {errors.start_date && <div className="invalid-feedback">{errors.start_date}</div>}
                                 </div>
@@ -362,7 +363,7 @@ const Store: FC = () => {
                                 <div className="form-group">
                                     <label htmlFor="end_date">Ngày kết thúc <span className="text-danger">*</span></label>
                                     <input 
-                                        type="date" 
+                                        type="datetime-local" 
                                         className={`form-control ${errors.end_date ? 'is-invalid' : ''}`}
                                         id="end_date" 
                                         name="end_date" 

@@ -26,6 +26,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('orders:auto-complete')->dailyAt('01:00');
         $schedule->command('orders:auto-complete')->everyMinute();
         $schedule->command('orders:cancel-expired')->everyMinute();
+        $schedule->command('coupons:deactivate')->everyMinute();
 
     }
 
