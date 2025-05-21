@@ -40,7 +40,7 @@ class OrderController extends Controller
             // Thanh toán vn pay sẽ xử lý ở PaymentController
             if ($data['payment_method'] === 'vnpay') {
                 $vnpUrl = $this->payment($Order, $request->ip());
-                
+
                 OrderHistory::createHistory(
                     $Order->id,
                     OrderHistory::ACTION_ORDER_UPDATED,
@@ -234,8 +234,8 @@ class OrderController extends Controller
 
             // Lấy các tham số tìm kiếm từ request
             $searchParams = [
-                'order_code' => $request->input('order_code'),
-                'product_name' => $request->input('product_name')
+                'keyword' => $request->input('keyword'),
+                'status_group' => $request->input('status_group')
             ];
 
             // Lấy số lượng kết quả mỗi trang
@@ -244,14 +244,23 @@ class OrderController extends Controller
             // Gọi service để lấy dữ liệu với tham số tìm kiếm và phân trang
             $orders = $this->orderService->getOrdersByUser($user, $searchParams, $perPage);
 
+            // Đếm số lượng đơn hàng theo nhóm status, có tính đến điều kiện tìm kiếm
+            $orderCounts = $this->orderService->countOrdersByStatusGroups(
+                $user->customer->id,
+                $searchParams
+            );
+
             return response()->json([
                 'message' => 'Lấy danh sách đơn hàng thành công',
                 'data' => $orders,
+                'meta' => [
+                    'order_counts' => $orderCounts
+                ],
                 'status' => 200
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => 'Lỗi khi xử lý dữ liệu',
+                'message' => 'Không lấy được danh sách đơn hàng',
                 'error' => $th->getMessage(),
                 'status' => 500
             ], 500);
