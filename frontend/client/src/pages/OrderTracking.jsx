@@ -145,14 +145,6 @@ const OrderTracking = () => {
 
   console.log("orderData", orderData);
 
-  // Hàm định dạng giá tiền
-  const formatPrice = (value) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(value);
-  };
-
   // Hàm tính giá sản phẩm sau khi giảm giá
   const getDiscountedPrice = (item) => {
     // Chuyển đổi giá từ string sang số
@@ -263,11 +255,13 @@ const OrderTracking = () => {
                 <p>
                   {(item.product?.discount_percent > 0 ||
                     item.product_variant?.discount_percent > 0) && (
-                      <span className="line-through text-gray-500 mr-2">
-                        {formatPrice(getDiscountedPrice(item))}
-                      </span>
-                    )}
-                  <strong>{formatPrice(item.subtotal)}</strong>
+
+                    <span className="line-through text-gray-500 mr-2">
+                      {FomatVND(getDiscountedPrice(item))}
+                    </span>
+                  )}
+                  <strong>{FomatVND(item.subtotal)}</strong>
+
                 </p>
               </div>
             </div>
@@ -279,14 +273,14 @@ const OrderTracking = () => {
         <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng tiền hàng: </div>
           <span className="col-span-2">
-            {formatPrice(orderData?.data?.subtotal || 0)}
+            {FomatVND(orderData?.data?.subtotal || 0)}
           </span>
         </div>
 
         <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phí vận chuyển: </div>
           <span className="col-span-2">
-            {formatPrice(orderData?.data?.shipping_fee || 0)}
+            {FomatVND(orderData?.data?.shipping_fee || 0)}
           </span>
         </div>
 
@@ -295,14 +289,14 @@ const OrderTracking = () => {
           <span className="col-span-2">
             {orderData?.data?.order_discount_type === 1
               ? `${orderData?.data?.order_discount_amount}%`
-              : formatPrice(orderData?.data?.order_discount_amount || 0)}
+              : FomatVND(orderData?.data?.order_discount_amount || 0)}
           </span>
         </div>
 
         <div className="border-b pb-4grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng thanh toán: </div>
           <span className="text-2xl font-bold text-red-500 col-span-2">
-            {formatPrice(orderData?.data?.total_amount)}
+            {FomatVND(orderData?.data?.total_amount)}
           </span>
         </div>
         <div className="border border-yellow-300 bg-yellow-100 text-left p-4 gap-6">
@@ -315,7 +309,7 @@ const OrderTracking = () => {
             ) : (
               <div className="text-yellow-600">
                 <i className="fas fa-bell" /> Vui lòng thanh toán{" "}
-                {formatPrice(orderData?.data?.total_amount)} khi nhận hàng.
+                {FomatVND(orderData?.data?.total_amount)} khi nhận hàng.
               </div>
             )}
           </span>
