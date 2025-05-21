@@ -52,7 +52,7 @@ const ProductLaster = ({productData}) => {
             className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col"
           >
             {/* Image section */}
-            <div className="relative aspect-square overflow-hidden">
+            <div className="relative aspect-[9/8] overflow-hidden">
               <img
                 alt={item?.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -80,14 +80,15 @@ const ProductLaster = ({productData}) => {
               to={`/shop/product-detail/${item?.id}`}
               className="flex-1 p-4"
             >
-              <h2 className="text-sm md:text-xl text-center font-medium text-gray-900 line-clamp-2 mb-2">
+              <h2 className="text-sm md:text-2xl font-bold text-center text-gray-900 line-clamp-2 mb-2">
                 {item?.name}
               </h2>
               
               <div className="mt-auto">
                 <div className="flex items-center justify-center gap-2 min-h-[1.5rem]">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-base md:text-lg font-bold text-gray-900">
+
+                  <div className="flex items-center flex-col">
+                    <span className="text-base flex items-center md:text-lg font-bold text-yellow-500 mb-1">
                       {FomatVND(
                         item?.price - (item?.price * item?.discount_percent) / 100 ||
                           item?.variants[0].price - 
@@ -95,14 +96,18 @@ const ProductLaster = ({productData}) => {
                               item?.variants[0].discount_percent) /
                               100
                       )}
+                    {item?.discount_percent > 0 && (
+                      <>
+                        <span className="text-xs font-medium text-white bg-red-500 rounded ml-2 px-1.5 py-0.5">
+                          -{parseFloat(item?.discount_percent)}%
+                        </span>
+                      </>
+                    )}
                     </span>
                     {item?.discount_percent > 0 && (
                       <>
-                        <span className="text-xs md:text-sm text-gray-500 line-through">
+                        <span className="text-xs md:text-base text-gray-500 line-through">
                           {FomatVND(item?.price || item?.variants[0].price)}
-                        </span>
-                        <span className="text-xs font-medium text-white bg-red-500 rounded px-1.5 py-0.5">
-                          -{parseFloat(item?.discount_percent)}%
                         </span>
                       </>
                     )}
