@@ -15,7 +15,7 @@
 
     <div class="order-info">
         <h2 style="margin-top: 0; color: #2c3e50; font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
-            Thông Tin Sản Phẩm{{ $product->name }}
+            Thông Tin Sản Phẩm {{ $wishlist['product_name'] }}
         </h2>
         
         <p>

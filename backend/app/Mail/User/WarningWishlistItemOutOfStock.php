@@ -13,12 +13,14 @@ class WarningWishlistItemOutOfStock extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $wishlist;
+
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($wishlist)
     {
-        //
+        $this->wishlist = $wishlist;
     }
 
     /**

@@ -4,7 +4,6 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use App\Jobs\User;
 
 class Kernel extends ConsoleKernel
 {
@@ -27,7 +26,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('orders:auto-complete')->dailyAt('01:00');
         $schedule->command('orders:auto-complete')->everyMinute();
         $schedule->command('orders:cancel-expired')->everyMinute();
-        $schedule->job(new SendWarningWislistEmail())->everyTenMinutes();
+        $schedule->job(new \App\Jobs\Mail\User\SendWarningWislistEmail())->everyTenMinutes();
     }
 
     /**
