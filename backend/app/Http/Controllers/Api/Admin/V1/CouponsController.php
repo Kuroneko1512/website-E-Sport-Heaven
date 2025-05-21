@@ -18,12 +18,12 @@ class CouponsController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('limit', 10);
-    $page = $request->input('page', 1);
-    $search = $request->input('search', '');
-    
-    $coupons = $this->couponService->getCouponsPaginated($perPage, $page, $search);
-    
-    return response()->json($coupons);
+        $page = $request->input('page', 1);
+        $search = $request->input('search', '');
+
+        $coupons = $this->couponService->getCouponsPaginated($perPage, $page, $search);
+
+        return response()->json($coupons);
     }
 
     public function store(Request $request)
@@ -31,7 +31,7 @@ class CouponsController extends Controller
         try {
             // Parse JSON string thành array
             $data = json_decode($request->getContent(), true);
-            
+
             // Validate data
             $validated = $request->validate([
                 'code' => 'required|string|unique:coupons',
@@ -48,7 +48,7 @@ class CouponsController extends Controller
             ]);
 
             $coupon = $this->couponService->createCoupon($validated);
-            
+
             return response()->json($coupon, 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -59,8 +59,8 @@ class CouponsController extends Controller
     }
 
     public function show(Coupon $coupon)
-    {   
-   
+    {
+
         return response()->json($coupon);
     }
 
@@ -73,26 +73,26 @@ class CouponsController extends Controller
                 'description' => 'nullable|string',
                 'discount_type' => 'required|integer',
                 'discount_value' => 'required|numeric|min:0',
-            'min_order_amount' => 'required|numeric|min:0',
-            'max_discount_amount' => 'required|numeric|min:0',
-            'max_uses' => 'nullable|integer|min:0',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after:start_date',
-        ]);
+                'min_order_amount' => 'required|numeric|min:0',
+                'max_discount_amount' => 'required|numeric|min:0',
+                'max_uses' => 'nullable|integer|min:0',
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after:start_date',
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $coupon = $this->couponService->updateCoupon($coupon->id, $validator->validated());
+
+            return response()->json($coupon);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Có lỗi xảy ra khi cập nhật mã giảm giá',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $coupon = $this->couponService->updateCoupon($coupon->id, $validator->validated());
-
-        return response()->json($coupon);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Có lỗi xảy ra khi cập nhật mã giảm giá',
-            'error' => $e->getMessage()
-        ], 500);
-    }
     }
 
     public function destroy(Coupon $coupon)
@@ -106,11 +106,4 @@ class CouponsController extends Controller
         $exists = $this->couponService->checkCouponCodeExists($code);
         return response()->json(['exists' => $exists]);
     }
-  
 }
-
-
-
-
-
-
