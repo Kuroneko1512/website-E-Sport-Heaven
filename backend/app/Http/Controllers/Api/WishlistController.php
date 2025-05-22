@@ -39,6 +39,29 @@ class WishlistController extends Controller
         }
     }
 
+    // New method to get wishlist status for multiple products
+    public function getByProducts(){
+        try {
+            $productIds = request()->input('product_ids', []);
+            if (!is_array($productIds) || empty($productIds)) {
+                return response()->json([
+                    'status' => 400,
+                    'message' => 'product_ids phải là một mảng không rỗng'
+                ], 400);
+            }
+            $wishlistStatuses = $this->wishlistService->getItemsWishlist(auth()->id(), $productIds);
+            return response()->json([
+                'status' => 200,
+                'data' => $wishlistStatuses,
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => 'Lấy thất bại',
+                'status' => 500
+            ], 500);
+        }
+    }
+
     // Lấy danh sách tất cả Wishlist
     public function index(){
         try {

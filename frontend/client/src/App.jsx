@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useSearchParams } from "react-router-dom";
 import { CSSTransition, SwitchTransition } from "react-transition-group";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import "./App.css";
@@ -51,6 +51,7 @@ import ReturnRequestForm from "./components/elementProfile/ReturnRequestForm";
 function App() {
   const location = useLocation(); // Lấy thông tin location của route hiện tại
   const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // const user = JSON.parse(Cookies.get("user"));
 
@@ -139,7 +140,21 @@ function App() {
               <Route path="info" element={<InfoProfile />} />
               <Route path="password" element={<ChangePassword />} />
               <Route path="settings" element={<Setting />} />
-              <Route path="orders" element={<MyOrder />} />
+              <Route
+                path="orders"
+                element={
+                  <MyOrder
+                    searchParam={searchParams.get("search") || ""}
+                    setSearchParam={value => {
+                      if (value) {
+                        setSearchParams({ search: value });
+                      } else {
+                        setSearchParams({});
+                      }
+                    }}
+                  />
+                }
+              />
               <Route path="orders/:order_code" element={<OrderDetail />} />
               <Route path="notifications" element={<Notification />} />
               <Route path="manage-address" element={<ManageAddress />} />

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Form, message, Modal } from "antd";
 import Cookies from "js-cookie";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import instanceAxios from "../../config/db";
 import { ORDER_STATUS } from "../../constants/OrderConstants";
@@ -14,7 +14,6 @@ import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
 import OrderItem from "./OrderItem";
 import useReviewSubmit from "../../hooks/useReviewSubmit";
 import getActionsForOrder from "../../utils/getActionsForOrder";
-
 
 const calculateSubtotal = (item) => {
   const price =
@@ -31,7 +30,7 @@ const calculateSubtotal = (item) => {
   return discountedPrice * quantity;
 };
 
-const MyOrder = () => {
+const MyOrder = ({ searchParam = "", setSearchParam }) => {
   const nav = useNavigate();
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
@@ -41,6 +40,9 @@ const MyOrder = () => {
   const [form] = Form.useForm();
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  // Thêm state cho input và search thực tế
+  const [inputValue, setInputValue] = useState(searchParam);
+  const [searchTerm, setSearchTerm] = useState(searchParam);
   const user = JSON.parse(Cookies.get("user"));
   const queryClient = useQueryClient();
   const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
@@ -49,7 +51,8 @@ const MyOrder = () => {
     selectedOrder,
     setReviewModalVisible
   );
-  const [returnRequestModalVisible, setReturnRequestModalVisible] = useState(false);
+  const [returnRequestModalVisible, setReturnRequestModalVisible] =
+    useState(false);
 
   // console.log("user", user);
   // Sử dụng hook scroll to top khi currentPage thay đổi
@@ -66,11 +69,13 @@ const MyOrder = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["orders", currentPage],
+    queryKey: ["orders", currentPage, searchTerm],
     queryFn: async () => {
-      const res = await instanceAxios.get(
-        `/api/v1/customer/orders?page=${currentPage}`
-      );
+      let url = `/api/v1/customer/orders?page=${currentPage}`;
+      if (searchTerm.trim()) {
+        url += `&product_name=${encodeURIComponent(searchTerm.trim())}`;
+      }
+      const res = await instanceAxios.get(url);
       return res?.data;
     },
   });
@@ -83,50 +88,52 @@ const MyOrder = () => {
 
   // 1. Dùng useMemo để group orders theo ngày (string)
   const ordersByDate = useMemo(() => {
-  if (!Array.isArray(orders)) {
-    console.error("orders is not an array:", orders);
-    return {};
-  }
-
-  const result = {};
-  const now = new Date();
-  
-  // Tạo các nhóm cố định
-  result["Hôm nay"] = [];
-  result["Hôm qua"] = [];
-  result["Tuần này"] = [];
-  result["Tháng này"] = [];
-  result["Trước đó"] = [];
-  
-  orders.forEach(order => {
-    if (!order?.created_at) return;
-    
-    const orderDate = new Date(order.created_at);
-    const daysDiff = Math.floor((now - orderDate) / (1000 * 60 * 60 * 24));
-    
-    if (daysDiff === 0) {
-      result["Hôm nay"].push(order);
-    } else if (daysDiff === 1) {
-      result["Hôm qua"].push(order);
-    } else if (daysDiff < 7) {
-      result["Tuần này"].push(order);
-    } else if (orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear()) {
-      result["Tháng này"].push(order);
-    } else {
-      result["Trước đó"].push(order);
+    if (!Array.isArray(orders)) {
+      console.error("orders is not an array:", orders);
+      return {};
     }
-  });
-  
-  // Loại bỏ các nhóm trống
-  Object.keys(result).forEach(key => {
-    if (result[key].length === 0) {
-      delete result[key];
-    }
-  });
-  
-  return result;
-}, [orders]);
 
+    const result = {};
+    const now = new Date();
+
+    // Tạo các nhóm cố định
+    result["Hôm nay"] = [];
+    result["Hôm qua"] = [];
+    result["Tuần này"] = [];
+    result["Tháng này"] = [];
+    result["Trước đó"] = [];
+
+    orders.forEach((order) => {
+      if (!order?.created_at) return;
+
+      const orderDate = new Date(order.created_at);
+      const daysDiff = Math.floor((now - orderDate) / (1000 * 60 * 60 * 24));
+
+      if (daysDiff === 0) {
+        result["Hôm nay"].push(order);
+      } else if (daysDiff === 1) {
+        result["Hôm qua"].push(order);
+      } else if (daysDiff < 7) {
+        result["Tuần này"].push(order);
+      } else if (
+        orderDate.getMonth() === now.getMonth() &&
+        orderDate.getFullYear() === now.getFullYear()
+      ) {
+        result["Tháng này"].push(order);
+      } else {
+        result["Trước đó"].push(order);
+      }
+    });
+
+    // Loại bỏ các nhóm trống
+    Object.keys(result).forEach((key) => {
+      if (result[key].length === 0) {
+        delete result[key];
+      }
+    });
+
+    return result;
+  }, [orders]);
 
   // Hiển thị lỗi nếu có
   if (error) {
@@ -237,17 +244,23 @@ const MyOrder = () => {
             title: "Xác nhận hủy đơn hàng",
             content: (
               <div>
-          <p>Bạn có chắc chắn muốn hủy đơn hàng <strong>{order.order_code}</strong>?</p>
-          <div className="bg-yellow-50 p-3 rounded-lg mt-2">
-            <p className="text-yellow-800">
-              Lưu ý: Sau khi hủy, đơn hàng sẽ không thể khôi phục.
-            </p>
-          </div>
+                <p>
+                  Bạn có chắc chắn muốn hủy đơn hàng{" "}
+                  <strong>{order.order_code}</strong>?
+                </p>
+                <div className="bg-yellow-50 p-3 rounded-lg mt-2">
+                  <p className="text-yellow-800">
+                    Lưu ý: Sau khi hủy, đơn hàng sẽ không thể khôi phục.
+                  </p>
+                </div>
               </div>
             ),
             okText: "Xác nhận hủy",
             cancelText: "Không",
-            okButtonProps: { danger: true, loading: cancelOrderMutation.isLoading },
+            okButtonProps: {
+              danger: true,
+              loading: cancelOrderMutation.isLoading,
+            },
             onOk: () => cancelOrderMutation.mutate({ orderId: order.id }),
           });
           break;
@@ -345,6 +358,13 @@ const MyOrder = () => {
     }
   };
 
+  // Khi searchParam trên URL thay đổi (ví dụ: back/forward), đồng bộ lại state
+  // (Chỉ chạy khi searchParam thay đổi)
+  useEffect(() => {
+    setInputValue(searchParam);
+    setSearchTerm(searchParam);
+  }, [searchParam]);
+
   console.log("orders", orders);
 
   return (
@@ -368,8 +388,17 @@ const MyOrder = () => {
           <div className="flex justify-between items-center mb-6">
             <input
               className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg p-2 w-1/2"
-              placeholder="Tìm kiếm theo tên sản phẩm"
+              placeholder="Tìm kiếm theo mã đơn hoặc tên sản phẩm"
               type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setCurrentPage(1);
+                  setSearchTerm(inputValue); // Chỉ cập nhật searchTerm khi nhấn Enter
+                  if (setSearchParam) setSearchParam(inputValue); // Cập nhật URL
+                }
+              }}
             />
           </div>
           <div className="space-y-8">
@@ -380,9 +409,7 @@ const MyOrder = () => {
                   className="border rounded-lg shadow-lg border-gray-200 dark:border-gray-700"
                 >
                   {/* Tiêu đề ngày mua chỉ render 1 lần cho nhóm */}
-                  <h3 className="m-3 text-lg font-semibold">
-                    {dayLabel}
-                  </h3>
+                  <h3 className="m-3 text-lg font-semibold">{dayLabel}</h3>
                   <div>
                     {orders.map((order, idx) => (
                       <div
@@ -423,7 +450,42 @@ const MyOrder = () => {
                             >
                               Chi tiết
                             </Link>
-                            
+                            {/* Nút tiếp tục thanh toán */}
+                            {order?.history &&
+                              (() => {
+                                const vnpayItem = order?.history?.find(
+                                  (h) =>
+                                    h.metadata?.vnpay_url &&
+                                    h.metadata?.expire_date
+                                );
+                                if (!vnpayItem) return null;
+                                const isVnpayExpired = (expireDateStr) => {
+                                  if (!expireDateStr) return true;
+                                  const expire = new Date(
+                                    expireDateStr
+                                  ).getTime();
+                                  const now = Date.now();
+                                  return now > expire;
+                                };
+                                const expired = isVnpayExpired(
+                                  vnpayItem?.metadata?.expire_date
+                                );
+                                const isPaid = order?.history?.some(
+                                  (h) => h.metadata?.new_payment_status === 1
+                                );
+                                if (expired || isPaid) return null;
+                                return (
+                                  <button
+                                    className="ml-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow"
+                                    onClick={() =>
+                                      (window.location.href =
+                                        vnpayItem.metadata.vnpay_url)
+                                    }
+                                  >
+                                    Tiếp tục thanh toán
+                                  </button>
+                                );
+                              })()}
                             {getActionsForOrder(order).map((action, idx) => (
                               <button
                                 key={idx}
@@ -506,8 +568,9 @@ const MyOrder = () => {
                   <strong>Lưu ý quan trọng:</strong>
                 </p>
                 <p className="text-yellow-700 mt-2">
-                  Khi bạn xác nhận đã nhận hàng, bạn sẽ không thể yêu cầu trả hàng cho
-                  đơn hàng này nữa. Nếu bạn gặp vấn đề với sản phẩm, vui lòng liên hệ với chúng tôi.
+                  Khi bạn xác nhận đã nhận hàng, bạn sẽ không thể yêu cầu trả
+                  hàng cho đơn hàng này nữa. Nếu bạn gặp vấn đề với sản phẩm,
+                  vui lòng liên hệ với chúng tôi.
                 </p>
               </div>
             </div>

@@ -14,6 +14,7 @@ import ReviewForm from "../elementProfile/ReviewForm";
 import useReviewSubmit from "../../hooks/useReviewSubmit";
 import getActionsForOrder from "../../utils/getActionsForOrder";
 import { filterHistoryByStatusTo } from "../../utils/filterHistoryByStatusTo";
+import FomatVND from "../../utils/FomatVND";
 
 const OrderHistory = ({ history }) => {
   // Lọc trùng status_to, giữ bản ghi mới nhất
@@ -377,14 +378,6 @@ const OrderDetail = () => {
     }
   };
 
-  // Hàm định dạng giá tiền
-  const formatPrice = (value) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(value);
-  };
-
   // Hàm tính giá sản phẩm sau khi giảm giá
   const getDiscountedPrice = (item) => {
     // Chuyển đổi giá từ string sang số
@@ -486,19 +479,18 @@ const OrderDetail = () => {
                 : action}
             </button>
           ))}
-        {/* Nút tiếp tục thanh toán ở gần tổng tiền nếu có vnpay_url và expire_date */}
-        {orderData?.data?.history && orderData.data.history.some(h => h.metadata?.vnpay_url && h.metadata?.expire_date) && (() => {
+        {/* Nút tiếp tục thanh toán chỉ hiển thị khi liên kết còn hạn và chưa thanh toán */}
+        {orderData?.data?.history && (() => {
           const vnpayItem = orderData.data.history.find(h => h.metadata?.vnpay_url && h.metadata?.expire_date);
+          if (!vnpayItem) return null;
           const expired = isVnpayExpired(vnpayItem.metadata.expire_date);
+          // Ẩn nút nếu đã thanh toán thành công (metadata.new_payment_status === 1 ở bất kỳ record nào) hoặc liên kết hết hạn
+          const isPaid = orderData.data.history.some(h => h.metadata?.new_payment_status === 1);
+          if (expired || isPaid) return null;
           return (
             <button
-              className="ml-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow disabled:opacity-60 disabled:cursor-not-allowed"
-              onClick={() => {
-                if (!expired) window.location.href = vnpayItem.metadata.vnpay_url;
-              }}
-              disabled={expired}
-              title={expired ? "Liên kết thanh toán đã hết hạn" : ""}
-              style={expired ? { pointerEvents: "none" } : {}}
+              className="ml-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow"
+              onClick={() => window.location.href = vnpayItem.metadata.vnpay_url}
             >
               Tiếp tục thanh toán
             </button>
@@ -572,10 +564,10 @@ const OrderDetail = () => {
                   {(item.product?.discount_percent > 0 ||
                     item.product_variant?.discount_percent > 0) && (
                     <span className="line-through text-gray-500 mr-2">
-                      {formatPrice(getDiscountedPrice(item))}
+                      {FomatVND(getDiscountedPrice(item))}
                     </span>
                   )}
-                  <strong>{formatPrice(item.subtotal)}</strong>
+                  <strong>{FomatVND(item.subtotal)}</strong>
                 </p>
               </div>
             </div>
@@ -587,14 +579,14 @@ const OrderDetail = () => {
         <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng tiền hàng: </div>
           <span className="col-span-2">
-            {formatPrice(orderData?.data?.subtotal || 0)}
+            {FomatVND(orderData?.data?.subtotal || 0)}
           </span>
         </div>
 
         <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phí vận chuyển: </div>
           <span className="col-span-2">
-            {formatPrice(orderData?.data?.shipping_fee || 0)}
+            {FomatVND(orderData?.data?.shipping_fee || 0)}
           </span>
         </div>
 
@@ -603,14 +595,14 @@ const OrderDetail = () => {
           <span className="col-span-2">
             {orderData?.data?.order_discount_type === 0
               ? `${orderData?.data?.order_discount_amount}%`
-              : formatPrice(orderData?.data?.order_discount_amount || 0)}
+              : FomatVND(orderData?.data?.order_discount_amount || 0)}
           </span>
         </div>
 
         <div className="border-b pb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng thanh toán: </div>
           <span className="text-2xl font-bold text-red-500 col-span-2">
-            {formatPrice(orderData?.data?.total_amount)}
+            {FomatVND(orderData?.data?.total_amount)}
           </span>
         </div>
         <div className="border border-yellow-300 bg-yellow-100 text-left p-4 gap-6">
@@ -623,7 +615,7 @@ const OrderDetail = () => {
             ) : (
               <div className="text-yellow-600">
                 <i className="fas fa-bell" /> Vui lòng thanh toán{" "}
-                {formatPrice(orderData?.data?.total_amount)} khi nhận hàng.
+                {FomatVND(orderData?.data?.total_amount)} khi nhận hàng.
               </div>
             )}
           </span>
