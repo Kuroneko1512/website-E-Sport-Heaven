@@ -109,7 +109,7 @@ const Orders = () => {
 
   useEffect(() => {
     fetchData(pagination.current_page);
-  }, [ pagination.current_page]);
+  }, [pagination.current_page]);
   window.io = io;
   window.echo = new Echo({
     broadcaster: "socket.io",
@@ -122,7 +122,7 @@ const Orders = () => {
     .subscribed(() => console.log("✅ Đã subscribe channel orders.2"))
     .listen(".order-create", (e) => {
       console.log("✅ Event nhận được:", e);
-fetchData(pagination.current_page);
+      fetchData(pagination.current_page);
     });
 
   return (
