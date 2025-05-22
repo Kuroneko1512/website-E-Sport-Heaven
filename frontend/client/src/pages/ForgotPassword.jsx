@@ -18,7 +18,7 @@ const ForgotPassword = () => {
       // Backend cần triển khai endpoint: POST /api/auth/forgot-password
       // Request body: { email: string }
       // Response: { success: boolean, message?: string }
-      const response = await fetch('/api/auth/forgot-password', {
+      const response = await fetch('/api/v1/customer/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
