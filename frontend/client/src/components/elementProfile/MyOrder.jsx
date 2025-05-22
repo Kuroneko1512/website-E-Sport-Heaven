@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Form, message, Modal } from "antd";
 import Cookies from "js-cookie";
 import { useMemo, useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import instanceAxios from "../../config/db";
 import { ORDER_STATUS } from "../../constants/OrderConstants";
 import useReview from "../../hooks/useReview";
@@ -14,6 +14,16 @@ import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
 import OrderItem from "./OrderItem";
 import useReviewSubmit from "../../hooks/useReviewSubmit";
 import getActionsForOrder from "../../utils/getActionsForOrder";
+
+const ORDER_STATUS_TABS = [
+  { key: "all", label: "Tất cả" },
+  { key: "pending", label: "Chờ xác nhận" },
+  { key: "ready_to_ship", label: "Vận chuyển" },
+  { key: "shipping", label: "Đang giao" },
+  { key: "completed", label: "Hoàn thành" },
+  { key: "cancelled", label: "Đã hủy" },
+  { key: "return_refund", label: "Trả hàng/hoàn tiền" },
+];
 
 const calculateSubtotal = (item) => {
   const price =
@@ -32,6 +42,7 @@ const calculateSubtotal = (item) => {
 
 const MyOrder = ({ searchParam = "", setSearchParam }) => {
   const nav = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -43,6 +54,9 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
   // Thêm state cho input và search thực tế
   const [inputValue, setInputValue] = useState(searchParam);
   const [searchTerm, setSearchTerm] = useState(searchParam);
+  // Lấy trạng thái từ URL (ưu tiên URL, fallback 'all')
+  const urlStatus = searchParams.get("status_group") || "all";
+  const [orderStatus, setOrderStatus] = useState(urlStatus);
   const user = JSON.parse(Cookies.get("user"));
   const queryClient = useQueryClient();
   const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
@@ -69,12 +83,14 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["orders", currentPage, searchTerm],
+    queryKey: ["orders", currentPage, searchTerm, orderStatus],
     queryFn: async () => {
       let url = `/api/v1/customer/orders?page=${currentPage}`;
       if (searchTerm.trim()) {
-        url += `&product_name=${encodeURIComponent(searchTerm.trim())}`;
+        url += `&keyword=${encodeURIComponent(searchTerm.trim())}`;
       }
+      // Luôn truyền status_group, kể cả 'all'
+      url += `&status_group=${orderStatus}`;
       const res = await instanceAxios.get(url);
       return res?.data;
     },
@@ -365,35 +381,61 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
     setSearchTerm(searchParam);
   }, [searchParam]);
 
+  // Khi orderStatus thay đổi, reset về page 1
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [orderStatus]);
+
+  // Khi URL thay đổi (ví dụ reload/back/forward), đồng bộ lại state
+  useEffect(() => {
+    const urlStatus = searchParams.get("status_group") || "all";
+    setOrderStatus(urlStatus);
+  }, [searchParams]);
+
+  const handleTabClick = (key) => {
+    setOrderStatus(key);
+    setCurrentPage(1);
+    setSearchParams(params => {
+      const newParams = new URLSearchParams(params);
+      newParams.set("status_group", key);
+      return newParams;
+    });
+  };
+
   console.log("orders", orders);
 
   return (
     <div className="dark:bg-gray-800 min-h-screen p-6">
-          <div className="flex justify-between items-center mb-3">
-            <div className="px-2 py-1">Tất cả</div>
-            <div className="px-2 py-1">Chờ xác nhận</div>
-            <div className="px-2 py-1">Vận chuyển</div>
-            <div className="px-2 py-1">Đang giao</div>
-            <div className="px-2 py-1">Hoàn thành</div>
-            <div className="px-2 py-1">Đã hủy</div>
-            <div className="px-2 py-1">Trả hàng/hoàn tiền</div>
-          </div>
-          <div className="flex justify-between items-center mb-6">
-            <input
-              className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg p-2 w-1/2"
-              placeholder="Tìm kiếm theo mã đơn hoặc tên sản phẩm"
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setCurrentPage(1);
-                  setSearchTerm(inputValue); // Chỉ cập nhật searchTerm khi nhấn Enter
-                  if (setSearchParam) setSearchParam(inputValue); // Cập nhật URL
-                }
-              }}
-            />
-          </div>
+      <div className="flex justify-between items-center mb-3">
+        {ORDER_STATUS_TABS.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => handleTabClick(tab.key)}
+            className={`px-2 py-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white focus:outline-none transition-colors duration-150
+              ${orderStatus === tab.key ? "border-b-2 border-black dark:border-white font-semibold" : ""}
+            `}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex justify-between items-center mb-6">
+        <input
+          className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg p-2 w-1/2"
+          placeholder="Tìm kiếm theo mã đơn hoặc tên sản phẩm"
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              setCurrentPage(1);
+              setSearchTerm(inputValue); // Chỉ cập nhật searchTerm khi nhấn Enter
+              if (setSearchParam) setSearchParam(inputValue); // Cập nhật URL
+            }
+          }}
+        />
+      </div>
       {isLoading ? (
         <>
           <SkeletonOrder />
