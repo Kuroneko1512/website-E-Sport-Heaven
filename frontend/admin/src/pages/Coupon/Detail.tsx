@@ -93,11 +93,23 @@ const DetailCoupon: FC = () => {
                         <div className="col-md-6">
                             <div className="form-group">
                                 <label>Ngày bắt đầu</label>
-                                <p className="form-control-static">{new Date(coupon.start_date).toLocaleDateString()}</p>
+                                <p className="form-control-static">{new Date(coupon.start_date).toLocaleString('vi-VN', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}</p>
                             </div>
                             <div className="form-group">
                                 <label>Ngày kết thúc</label>
-                                <p className="form-control-static">{new Date(coupon.end_date).toLocaleDateString()}</p>
+                                <p className="form-control-static">{new Date(coupon.end_date).toLocaleString('vi-VN', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}</p>
                             </div>
                             <div className="form-group">
                                 <label>Số lượt sử dụng</label>

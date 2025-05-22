@@ -28,7 +28,7 @@ class OrderController extends Controller
     {
         try {
             // Gọi service để lấy dữ liệu
-            $Product = $this->orderService->getOrderAll();
+            $Product = $this->orderService->getOrderAll(10);
             return response()->json([
                 'status' => 200,
                 'data' => $Product, // Trả về dữ liệu thuộc tính

@@ -368,22 +368,15 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
   console.log("orders", orders);
 
   return (
-    <>
-      {isLoading ? (
-        <>
-          <SkeletonOrder />
-          <SkeletonOrder />
-        </>
-      ) : (
-        <div className="dark:bg-gray-800 min-h-screen p-6">
+    <div className="dark:bg-gray-800 min-h-screen p-6">
           <div className="flex justify-between items-center mb-3">
             <div className="px-2 py-1">Tất cả</div>
-            <div className="px-2 py-1">Chờ thanh toán</div>
-            <div className="px-2 py-1">Đang xử lý/đã xác nhận</div>
+            <div className="px-2 py-1">Chờ xác nhận</div>
+            <div className="px-2 py-1">Vận chuyển</div>
             <div className="px-2 py-1">Đang giao</div>
             <div className="px-2 py-1">Hoàn thành</div>
             <div className="px-2 py-1">Đã hủy</div>
-            <div className="px-2 py-1">Hoàn tiền/trả hàng</div>
+            <div className="px-2 py-1">Trả hàng/hoàn tiền</div>
           </div>
           <div className="flex justify-between items-center mb-6">
             <input
@@ -401,6 +394,13 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
               }}
             />
           </div>
+      {isLoading ? (
+        <>
+          <SkeletonOrder />
+          <SkeletonOrder />
+        </>
+      ) : (
+        <>
           <div className="space-y-8">
             {Object.entries(ordersByDate).length > 0 ? (
               Object.entries(ordersByDate).map(([dayLabel, orders]) => (
@@ -534,95 +534,91 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
               </div>
             )}
           </div>
-
-          {/* Add Confirmation Modal */}
-          <Modal
-            title="Xác nhận đã nhận hàng"
-            open={confirmModalVisible}
-            onCancel={() => setConfirmModalVisible(false)}
-            footer={[
-              <button
-                key="cancel"
-                className="px-4 py-2 border rounded-lg mr-2"
-                onClick={() => setConfirmModalVisible(false)}
-                disabled={confirmReceivedMutation.isLoading}
-              >
-                Hủy
-              </button>,
-              <button
-                key="confirm"
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-                onClick={() => handleAction("confirmReceived", selectedOrder)}
-                disabled={confirmReceivedMutation.isLoading}
-              >
-                {confirmReceivedMutation.isLoading
-                  ? "Đang xử lý..."
-                  : "Xác nhận"}
-              </button>,
-            ]}
-          >
-            <div className="p-4">
-              <p className="mb-4">Bạn có chắc chắn đã nhận được hàng?</p>
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <p className="text-yellow-800">
-                  <strong>Lưu ý quan trọng:</strong>
-                </p>
-                <p className="text-yellow-700 mt-2">
-                  Khi bạn xác nhận đã nhận hàng, bạn sẽ không thể yêu cầu trả
-                  hàng cho đơn hàng này nữa. Nếu bạn gặp vấn đề với sản phẩm,
-                  vui lòng liên hệ với chúng tôi.
-                </p>
-              </div>
-            </div>
-          </Modal>
-          {/* Modal xác nhận yêu cầu trả hàng */}
-          <Modal
-            title="Xác nhận yêu cầu trả hàng"
-            open={returnRequestModalVisible}
-            onCancel={() => setReturnRequestModalVisible(false)}
-            footer={[
-              <button
-                key="cancel"
-                className="px-4 py-2 border rounded-lg mr-2"
-                onClick={() => setReturnRequestModalVisible(false)}
-              >
-                Hủy
-              </button>,
-              <button
-                key="confirm"
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-                onClick={() => {
-                  setReturnRequestModalVisible(false);
-                  if (selectedReturnOrder) {
-                    nav(
-                      `/orders/${selectedReturnOrder.order_code}/return-request`
-                    );
-                  }
-                }}
-              >
-                Xác nhận
-              </button>,
-            ]}
-          >
-            <div className="p-4">
-              <p className="mb-4">
-                Bạn có chắc chắn muốn gửi yêu cầu trả hàng cho đơn{" "}
-                <strong>{selectedReturnOrder?.order_code}</strong>?
-              </p>
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <p className="text-yellow-800">
-                  <strong>Lưu ý:</strong>
-                </p>
-                <p className="text-yellow-700 mt-2">
-                  Sau khi xác nhận, bạn sẽ được chuyển đến form để hoàn tất yêu
-                  cầu trả hàng.
-                </p>
-              </div>
-            </div>
-          </Modal>
-        </div>
+        </>
       )}
-    </>
+
+      {/* Add Confirmation Modal */}
+      <Modal
+        title="Xác nhận đã nhận hàng"
+        open={confirmModalVisible}
+        onCancel={() => setConfirmModalVisible(false)}
+        footer={[
+          <button
+            key="cancel"
+            className="px-4 py-2 border rounded-lg mr-2"
+            onClick={() => setConfirmModalVisible(false)}
+            disabled={confirmReceivedMutation.isLoading}
+          >
+            Hủy
+          </button>,
+          <button
+            key="confirm"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+            onClick={() => handleAction("confirmReceived", selectedOrder)}
+            disabled={confirmReceivedMutation.isLoading}
+          >
+            {confirmReceivedMutation.isLoading ? "Đang xử lý..." : "Xác nhận"}
+          </button>,
+        ]}
+      >
+        <div className="p-4">
+          <p className="mb-4">Bạn có chắc chắn đã nhận được hàng?</p>
+          <div className="bg-yellow-50 p-4 rounded-lg">
+            <p className="text-yellow-800">
+              <strong>Lưu ý quan trọng:</strong>
+            </p>
+            <p className="text-yellow-700 mt-2">
+              Khi bạn xác nhận đã nhận hàng, bạn sẽ không thể yêu cầu trả hàng
+              cho đơn hàng này nữa. Nếu bạn gặp vấn đề với sản phẩm, vui lòng
+              liên hệ với chúng tôi.
+            </p>
+          </div>
+        </div>
+      </Modal>
+      {/* Modal xác nhận yêu cầu trả hàng */}
+      <Modal
+        title="Xác nhận yêu cầu trả hàng"
+        open={returnRequestModalVisible}
+        onCancel={() => setReturnRequestModalVisible(false)}
+        footer={[
+          <button
+            key="cancel"
+            className="px-4 py-2 border rounded-lg mr-2"
+            onClick={() => setReturnRequestModalVisible(false)}
+          >
+            Hủy
+          </button>,
+          <button
+            key="confirm"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+            onClick={() => {
+              setReturnRequestModalVisible(false);
+              if (selectedReturnOrder) {
+                nav(`/orders/${selectedReturnOrder.order_code}/return-request`);
+              }
+            }}
+          >
+            Xác nhận
+          </button>,
+        ]}
+      >
+        <div className="p-4">
+          <p className="mb-4">
+            Bạn có chắc chắn muốn gửi yêu cầu trả hàng cho đơn{" "}
+            <strong>{selectedReturnOrder?.order_code}</strong>?
+          </p>
+          <div className="bg-yellow-50 p-4 rounded-lg">
+            <p className="text-yellow-800">
+              <strong>Lưu ý:</strong>
+            </p>
+            <p className="text-yellow-700 mt-2">
+              Sau khi xác nhận, bạn sẽ được chuyển đến form để hoàn tất yêu cầu
+              trả hàng.
+            </p>
+          </div>
+        </div>
+      </Modal>
+    </div>
   );
 };
 
