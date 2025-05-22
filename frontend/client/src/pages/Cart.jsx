@@ -29,7 +29,25 @@ const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông
     () => JSON.parse(localStorage.getItem("cartItems")) || [],// Lấy dữ liệu giỏ hàng từ localStorage
     []
   );
+useEffect(() => {
+  const handleCartUpdated = (e) => {
+    // Cập nhật trạng thái cartItems khi nhận sự kiện
+    if (e.detail) {
+      setCartItems(e.detail);
+    } else {
+      const updatedCart = JSON.parse(localStorage.getItem("cartItems")) || [];
+      setCartItems(updatedCart);
+    }
+  };
 
+  // Lắng nghe sự kiện cartUpdated
+  window.addEventListener("cartUpdated", handleCartUpdated);
+
+  return () => {
+    // Hủy lắng nghe sự kiện khi component bị unmount
+    window.removeEventListener("cartUpdated", handleCartUpdated);
+  };
+}, []);
   useEffect(() => {
     setCartItems(miniCartData);// Cập nhật trạng thái `cartItems` khi dữ liệu thay đổi
   }, [miniCartData]);
@@ -91,6 +109,7 @@ const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông
           )
         );
         localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));// Lưu lại giỏ hàng vào localStorage
+        window.dispatchEvent(new CustomEvent("cartUpdated", { detail: updatedCartItems })); // Phát sự kiện để đồng bộ
       },
     });
   };
@@ -153,7 +172,7 @@ const [warningCount, setWarningCount] = useState(0); // Đếm số lần thông
   
     setCheckoutItems(selectedCartItems);// Lưu danh sách sản phẩm để thanh toán
     localStorage.setItem("checkoutItems", JSON.stringify(selectedCartItems));// Lưu vào localStorage
-    nav("/newcheckout");// Điều hướng đến trang thanh toán
+    nav("/checkout");// Điều hướng đến trang thanh toán
   };
 
   const columns = [

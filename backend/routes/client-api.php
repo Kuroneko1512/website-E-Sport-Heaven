@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\Auth\v1\CustomerAuthController;
 use App\Http\Controllers\Api\Profile\V1\CustomerProfileController;
 use App\Http\Controllers\Api\Profile\V1\ShippingAddressController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\WishlistController;
+
 
 Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'customer', 'as' => 'customer.'], function () {
@@ -58,6 +60,9 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::apiResource('/review', ReviewController::class);
+            Route::apiResource('/wishlist', WishlistController::class);
+
+            Route::get('/wishlist-product/{id}',[WishlistController::class,'getByProduct']);
         });
 
         //test route

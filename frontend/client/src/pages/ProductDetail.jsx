@@ -62,6 +62,7 @@ const ProductDetail = () => {
       fetchAttributes.mutate();
     }
     setDisplayImage(product?.image || "");
+    
   }, [product]);
 
   // Cập nhật hình ảnh và giá của biến thể đầu tiên nếu có biến thể
@@ -91,6 +92,14 @@ const ProductDetail = () => {
         Object.keys(selectedAttributes).length === attributes.length
     );
   }, [selectedAttributes, attributes]);
+
+  useEffect(() => {
+    instanceAxios
+        .get(`/api/v1/customer/wishlist-product/${id}`)
+        .then((response) => {
+          setFav(response.data.data);
+        })
+  }, []);
 
   // Cập nhật danh sách hợp lệ ngay sau khi người dùng chọn thuộc tính
   const updateValidOptions = (selectedAttrs) => {
@@ -183,6 +192,11 @@ const ProductDetail = () => {
       return newQuantity;
     });
   };
+
+  const handleToggleWishlist = async (favParam) => {
+    setFav(favParam);
+    await instanceAxios.post("/api/v1/customer/wishlist", { product_id: id });
+  }
 
   const handleAddToCart = () => {
     if (product?.variants?.length > 0) {
@@ -525,7 +539,7 @@ const ProductDetail = () => {
                     )}
 
                     <button
-                      onClick={() => setFav(!fav)}
+                      onClick={() => handleToggleWishlist(!fav)}
                       className="border rounded-lg px-3 py-2"
                     >
                       <i
@@ -584,4 +598,3 @@ const ProductDetail = () => {
 
 
 export default ProductDetail;
-
