@@ -2,6 +2,7 @@
 
 namespace App\Services\Order;
 
+use App\Events\OrderCreate;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Order;
@@ -87,7 +88,7 @@ class OrderService extends BaseService
             );
 
             DB::commit();
-
+            broadcast(new OrderCreate());
             return $order;
         } catch (Exception $e) {
             DB::rollBack();
@@ -306,12 +307,22 @@ class OrderService extends BaseService
         }
     }
 
-    public function getOrderAll($paginate = 10)
+    public function getOrderAll($paginate, $search = '')
     {
-        return $this->model->with([
+        $query = $this->model->with([
             'orderItems.product',
             'orderItems.productVariant'
-        ])->orderBy('id', 'desc')->paginate($paginate);
+        ])->orderBy('id', 'desc');
+    
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('order_code', 'like', "%{$search}%")
+                  ->orWhere('customer_name', 'like', "%{$search}%") // nếu có trường này
+                  ->orWhere('customer_phone', 'like', "%{$search}%"); // hoặc các trường phù hợp
+            });
+        }
+    
+        return $query->paginate($paginate);
     }
 
 

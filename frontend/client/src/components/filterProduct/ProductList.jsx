@@ -79,7 +79,7 @@ const ProductList = ({ products }) => {
               <div className="mt-auto">
                 <div className="flex items-center justify-center gap-2 min-h-[1.5rem]">
                   <div className="flex items-center flex-col">
-                    <span className="text-base flex items-center md:text-lg font-bold text-yellow-500 mb-1">
+                    <span className="text-base flex items-center md:text-lg font-bold text-yellow-500 mb-1" style={{ color: "#ff8c00" }}>
                       {FomatVND(
                         item?.price - (item?.price * item?.discount_percent) / 100 ||
                           item?.variants[0].price - 

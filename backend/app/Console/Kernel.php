@@ -27,6 +27,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('orders:auto-complete')->everyMinute();
         $schedule->command('orders:cancel-expired')->everyMinute();
         $schedule->job(new \App\Jobs\Mail\User\SendWarningWislistEmail())->everyTenMinutes();
+        $schedule->command('coupons:deactivate')->everyMinute();
+
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Services\Product;
 
+use App\Events\ProductCreated;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\Order;
@@ -159,6 +160,7 @@ class ProductService extends BaseService
         if ($isVariable) {
             $this->handelVariant($isVariable, $product, $data);
         }
+        broadcast(new ProductCreated());
         return true;
     }
     public function updateProduct($data, $id)

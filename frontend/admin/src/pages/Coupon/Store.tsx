@@ -8,6 +8,19 @@ import { CouponForm, FormErrors } from "./type";
 
 const Store: FC = () => {
     const navigate = useNavigate();
+    
+    // Định dạng cho input datetime-local
+    const formatDatetimeLocal = (dateString: string) => {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
     const [coupon, setCoupon] = useState<CouponForm>({
      
         code: "",
@@ -17,7 +30,7 @@ const Store: FC = () => {
         discount_type: 0,
         min_order_amount: 0,
         max_discount_amount: 0,
-        start_date:new Date().toISOString().split('T')[0],
+        start_date: formatDatetimeLocal(new Date().toString()),
         end_date: "",
         max_uses: 0,     
         is_active: 0,
@@ -25,7 +38,10 @@ const Store: FC = () => {
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [submitted, setSubmitted] = useState(false);
-   
+    const vietnamTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' });
+    console.log('Giờ Việt Nam:', vietnamTime);
+  
+    const vietnamTimeFormatted = formatDatetimeLocal(vietnamTime);
 
     const discountTypeOptions = [
         { value: 0, label: 'Phần trăm' },
@@ -38,25 +54,40 @@ const Store: FC = () => {
 
         // Nếu có name và value, chỉ validate một trường
         if (name && value !== undefined) {
+            console.log(name);
             switch (name) {
+                
+                
                 case 'code':
                     if (!value || value.trim() === '') {
+                        console.log(1);
                         newErrors.code = 'Mã không được để trống';
                         isValid = false;
                     } else if (value.length < 3) {
                         newErrors.code = 'Mã phải có ít nhất 3 ký tự';
                         isValid = false;
+                    } else {
+                        newErrors.code = '';
+                        isValid = true;
+                        const exists = await checkCouponCodeExists(value);
+                  
+                        if (exists) {
+                            newErrors.code = 'Mã này đã tồn tại trong hệ thống';
+                            isValid = false;
+                        } else {
+                            newErrors.code = '';
+                            isValid = true;
+                        }
                     }
-                    const exists = await checkCouponCodeExists(value);
-                    if (exists) {
-                        newErrors.code = 'Mã này đã tồn tại trong hệ thống';
-                        isValid = false;
-                    }
+                  
                     break;
                 case 'name':
                     if (!value || value.trim() === '') {
                         newErrors.name = 'Tên không được để trống';
                         isValid = false;
+                    } else {
+                        newErrors.name = '';
+                        isValid = true;
                     }
                     break;
                 case 'discount_value':
@@ -66,15 +97,21 @@ const Store: FC = () => {
                     } else if (coupon.discount_type === 0 && value > 50) {
                         newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 50%';
                         isValid = false;
+                    } else {
+                        newErrors.discount_value = '';
+                        isValid = true;
                     }
                     break;
                 case 'start_date':
                     if (!value) {
                         newErrors.start_date = 'Ngày bắt đầu không được để trống';
                         isValid = false;
-                    } else if (new Date(value) < new Date(new Date().setDate(new Date().getDate() - 1))) {
-                        newErrors.start_date = 'Ngày bắt đầu không thể sớm hơn hôm qua';
+                    } else if (new Date(value) < new Date(new Date().setMinutes(new Date().getMinutes() - 1))) {
+                        newErrors.start_date = 'Ngày bắt đầu không thể trong quá khứ';
                         isValid = false;
+                    } else {
+                        newErrors.start_date = '';
+                        isValid = true;
                     }
                     break;
                 case 'end_date':
@@ -84,12 +121,18 @@ const Store: FC = () => {
                     } else if (coupon.start_date && new Date(value) <= new Date(coupon.start_date)) {
                         newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
                         isValid = false;
+                    } else {
+                        newErrors.end_date = '';
+                        isValid = true;
                     }
                     break;
                 case 'max_uses':
                     if (value <= 0) {
                         newErrors.max_uses = 'Số lần sử dụng phải lớn hơn 0';
                         isValid = false;
+                    } else {
+                        newErrors.max_uses = '';
+                        isValid = true;
                     }
                     break;
             }
@@ -101,17 +144,26 @@ const Store: FC = () => {
             } else if (coupon.code.length < 3) {
                 newErrors.code = 'Mã phải có ít nhất 3 ký tự';
                 isValid = false;
+            } else {
+                newErrors.code = '';
+                isValid = true;
             }
 
             const exists = await checkCouponCodeExists(coupon.code);
             if (exists) {
                 newErrors.code = 'Mã này đã tồn tại trong hệ thống';
                 isValid = false;
+            } else {
+                newErrors.code = '';
+                isValid = true;
             }
 
             if (!coupon.name || coupon.name.trim() === '') {
                 newErrors.name = 'Tên không được để trống';
                 isValid = false;
+            } else {
+                newErrors.name = '';
+                isValid = true;
             }
 
             if (coupon.discount_value <= 0) {
@@ -120,14 +172,20 @@ const Store: FC = () => {
             } else if (coupon.discount_type === 0 && coupon.discount_value > 50) {
                 newErrors.discount_value = 'Phần trăm giảm giá không được vượt quá 50%';
                 isValid = false;
+            } else {
+                newErrors.discount_value = '';
+                isValid = true;
             }
 
             if (!coupon.start_date) {
                 newErrors.start_date = 'Ngày bắt đầu không được để trống';
                 isValid = false;
-            } else if (new Date(coupon.start_date) < new Date(new Date().setDate(new Date().getDate() - 1))) {
+            } else if (new Date(coupon.start_date) < new Date(new Date().setMinutes(new Date().getMinutes() - 1))) {
                 newErrors.start_date = 'Ngày bắt đầu không thể trong quá khứ';
                 isValid = false;
+            } else {
+                newErrors.start_date = '';
+                isValid = true;
             }
 
             if (!coupon.end_date) {
@@ -136,6 +194,9 @@ const Store: FC = () => {
             } else if (coupon.start_date && new Date(coupon.end_date) <= new Date(coupon.start_date)) {
                 newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
                 isValid = false;
+            } else {
+                newErrors.end_date = '';
+                isValid = true;
             }
         }
 
@@ -150,7 +211,7 @@ const Store: FC = () => {
             const target = e.target as HTMLInputElement;
             setCoupon({ ...coupon, [name]: target.checked });
         } else {
-            setCoupon({ ...coupon, [name]: name === "discount_value" || name === "max_uses" || name === "max_purchase"
+            setCoupon({ ...coupon, [name]: name === "discount_value" || name === "max_uses" 
                 ? Number(value) 
                 : name === "discount_type"
                 ? Number(value)
@@ -189,7 +250,8 @@ const Store: FC = () => {
                 is_active: 0,
                
             };
-            
+              
+                
             await createCoupon(apiCoupon);
       
             
@@ -255,7 +317,7 @@ const Store: FC = () => {
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="form-group">
-                                    <label htmlFor="code">Mã giảm giá <span className="text-danger">*</span></label>
+                                    <label >Mã giảm giá <span className="text-danger">*</span></label>
                                     <input 
                                         type="text" 
                                         className={`form-control ${errors.code ? 'is-invalid' : ''}`}
@@ -286,7 +348,7 @@ const Store: FC = () => {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="description">Mô tả</label>
+                            <label >Mô tả</label>
                             <textarea 
                                 className="form-control" 
                                 id="description" 
@@ -301,7 +363,7 @@ const Store: FC = () => {
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="form-group">
-                                    <label htmlFor="min_order_amount">Số tiền đơn hàng tối thiểu</label>
+                                    <label >Số tiền đơn hàng tối thiểu</label>
                                     <div className="input-group">
                                         <input 
                                             type="number" 
@@ -321,7 +383,7 @@ const Store: FC = () => {
                             </div>
                             <div className="col-md-6">
                                 <div className="form-group">
-                                    <label htmlFor="max_discount_amount">Số tiền giảm tối đa</label>
+                                    <label >Số tiền giảm tối đa</label>
                                     <div className="input-group">
                                         <input 
                                             type="number" 
@@ -345,24 +407,24 @@ const Store: FC = () => {
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="form-group">
-                                    <label htmlFor="start_date">Ngày bắt đầu <span className="text-danger">*</span></label>
+                                    <label >Ngày bắt đầu <span className="text-danger">*</span></label>
                                     <input 
-                                        type="date" 
+                                        type="datetime-local" 
                                         className={`form-control ${errors.start_date ? 'is-invalid' : ''}`}
                                         id="start_date" 
                                         name="start_date" 
                                         value={coupon.start_date} 
                                         onChange={handleChange}
-                                        min={new Date().toISOString().split('T')[0]}
+                                      
                                     />
                                     {errors.start_date && <div className="invalid-feedback">{errors.start_date}</div>}
                                 </div>
                             </div>
                             <div className="col-md-6">
                                 <div className="form-group">
-                                    <label htmlFor="end_date">Ngày kết thúc <span className="text-danger">*</span></label>
+                                    <label >Ngày kết thúc <span className="text-danger">*</span></label>
                                     <input 
-                                        type="date" 
+                                        type="datetime-local" 
                                         className={`form-control ${errors.end_date ? 'is-invalid' : ''}`}
                                         id="end_date" 
                                         name="end_date" 
@@ -395,7 +457,7 @@ const Store: FC = () => {
                             </div>
                             <div className="col-md-6">
                                 <div className="form-group">
-                                    <label htmlFor="discount_value">Giá trị giảm giá <span className="text-danger">*</span></label>
+                                    <label>Giá trị giảm giá <span className="text-danger">*</span></label>
                                     <div className="input-group">
                                         <input 
                                             type="number" 
@@ -419,7 +481,7 @@ const Store: FC = () => {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="max_uses">Số lần sử dụng tối đa</label>
+                            <label >Số lần sử dụng tối đa</label>
                             <input 
                                 type="number" 
                                 className="form-control" 

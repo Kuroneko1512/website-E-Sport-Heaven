@@ -178,8 +178,7 @@ const App = () => {
             <Route path="add-coupon" element={<AddCoupon />} />
             <Route path="edit-coupon/:id" element={<EditCoupon />} />
             <Route path="detail-coupon/:id" element={<DetailCoupon />} />
-            <Route path="CouponUsage" element={<CouponUsageComponent />} />
-            <Route path="CouponUsage/create" element={<CouponUsageStore />} />
+          
             {/*Route blog*/}
             <Route path="blog" element={<Blog />} />
             <Route path="add-blog" element={<DetailBlog />} />

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\locationImport;
+namespace App\Services\LocationImport;
 
 use App\Jobs\Import\ImportProvincesJob;
 use App\Jobs\Import\ImportDistrictsJob;

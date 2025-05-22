@@ -88,9 +88,10 @@ export const updateOrderStatus = async (id: number, status: number): Promise<Ord
   };
 
 // Hàm gọi API lấy danh sách orders với phân trang
-export const getOrders = async (page: number = 1, limit: number = 5, account_type: string = ''): Promise<Pagination> => {
+export const getOrders = async (page: number = 1, limit: number = 5, account_type: string = '',search= ''): Promise<Pagination> => {
   try {
-    const response = await api.get<Pagination>(`${API_ENDPOINTS.ORDER.BASE}?page=${page}&limit=${limit}&account_type=${account_type}`);
+    const response = await api.get<Pagination>(`${API_ENDPOINTS.ORDER.BASE}?page=${page}&limit=${limit}&account_type=${account_type}&search=${search}`);
+ 
     return response.data;
   } catch (error) {
     console.error("Error fetching orders:", error);

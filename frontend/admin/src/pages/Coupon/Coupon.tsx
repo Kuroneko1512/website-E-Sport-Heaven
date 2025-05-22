@@ -120,26 +120,12 @@ const Coupon: FC = () => {
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
     };
 
-    const getDateStatus = (startDate: string | null, endDate: string | null) => {
-        if (!startDate || !endDate) return "";
-        
-        const now = new Date(new Date().toISOString().split('T')[0]);
-        const start = new Date(startDate.split(' ')[0]);
-        const end = new Date(endDate.split(' ')[0]);
-        
-        const dateRange = `${formatDate(start)} đến ${formatDate(end)}`;
-        
-        if (now < start) {
-            return `Chưa sẵn sàng (${dateRange})`;
-        } else if (now >= start && now <= end) {
-            return `Sẵn sàng (${dateRange})`;
-        } else {
-            return `Không hoạt động (${dateRange})`;
-        }
-    };
+  
 
     useEffect(() => {
         fetchCoupons();
@@ -214,7 +200,8 @@ const Coupon: FC = () => {
                                         <th>Mã</th>
                                         <th>Tên</th>
                                         <th>Loại</th>
-                                        <th>Hạn sử dụng</th>
+                                        <th>Ngày bắt đầu</th>
+                                        <th>Ngày kết thúc</th>
                                         <th>Trạng thái</th>
                                         <th>Số lượt sử dụng</th>
                                         <th className="text-center">Thao tác</th>
@@ -227,7 +214,8 @@ const Coupon: FC = () => {
                                                 <td>{coupon.code}</td>
                                                 <td>{coupon.name}</td>
                                                 <td>{coupon.discount_type === 0 ? 'Phần trăm' : 'Giá tiền'}</td>
-                                                <td>{getDateStatus(coupon.start_date, coupon.end_date)}</td>
+                                                <td>{formatDate(new Date(coupon.start_date))}</td>
+                                                <td>{coupon.end_date ? formatDate(new Date(coupon.end_date)) : ''}</td>
                                                 <td>
                                                     <span className={`tag ${coupon.is_active === 0 ? "tag-success" : "tag-danger"}`}>
                                                         {coupon.is_active === 0 ? "Hoạt động" : "Ngừng"}

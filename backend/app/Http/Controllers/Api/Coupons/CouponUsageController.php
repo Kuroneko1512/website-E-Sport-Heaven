@@ -16,7 +16,7 @@ class CouponUsageController extends Controller
     }
     public function index()
     {
-        $couponUsages = CouponUsage::with(['user', 'coupon'])->get();
+        $couponUsages = $this->couponUsageServices->getCouponUsage();
         return response()->json([
             'status' => 'success',
             'data' => $couponUsages
@@ -25,7 +25,7 @@ class CouponUsageController extends Controller
 
     public function show($id)
     {
-        $couponUsage = CouponUsage::with(['user', 'coupon'])->findOrFail($id);
+        $couponUsage = $this->couponUsageServices->getCouponUsageById($id);
         return response()->json([
             'status' => 'success',
             'data' => $couponUsage
