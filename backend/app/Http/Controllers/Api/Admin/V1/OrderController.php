@@ -24,11 +24,13 @@ class OrderController extends Controller
         $this->orderService = $orderService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $panigation = $request -> input('pagination', 10);
+        $search = $request -> input('search', '');
         try {
             // Gọi service để lấy dữ liệu
-            $Product = $this->orderService->getOrderAll(10);
+            $Product = $this->orderService->getOrderAll($panigation, $search);
             return response()->json([
                 'status' => 200,
                 'data' => $Product, // Trả về dữ liệu thuộc tính

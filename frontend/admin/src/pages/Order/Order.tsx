@@ -5,6 +5,16 @@ import {  Link } from "react-router-dom";
 
 import { ORDER_STATUS, ORDER_STATUS_LABELS, PAYMENT_STATUS, PAYMENT_STATUS_LABELS } from "@app/constants/OrderConstants";
 
+interface ApiResponse {
+    data: Order[];
+    current_page: number;
+    last_page: number;
+    prev_page_url: string | null;
+    next_page_url: string | null;
+    total: number;
+    per_page: number;
+}
+
 const Orders = () => {
     
 
@@ -21,15 +31,26 @@ const Orders = () => {
 
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState<string>("");
 
     const goToPage = (page: number) => {
         if (page >= 1 && page <= pagination.last_page) {
-         
-            
             setPagination({ ...pagination, current_page: page });
-        
-            
         }
+    };
+
+    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        setPagination(prev => ({ ...prev, current_page: 1 }));
+    };
+
+    const handleClearSearch = () => {
+        setSearchTerm('');
+        setPagination(prev => ({ ...prev, current_page: 1 }));
     };
 
     const renderPageNumbers = () => {
@@ -48,27 +69,29 @@ const Orders = () => {
         return pageNumbers;
     };
 
-    // Hàm lấy dữ liệu đơn hàng từ API
     const fetchData = useCallback(async (page = 1) => {
         setLoading(true);
         try {
-            const response = await getOrders(page, pagination.per_page, 'customer');
-            setOrders(response.data.data);
+            const response = await getOrders(page, pagination.per_page,'customer', searchTerm);
+            const apiResponse = response as unknown as ApiResponse;
+            setOrders(apiResponse.data.data);
+            console.log(apiResponse.data);
+            
             setPagination((prev) => ({
                 ...prev,
-                current_page: response.data.current_page,
-                last_page: response.data.last_page,
-                prev_page_url: response.data.prev_page_url,
-                next_page_url: response.data.next_page_url,
-                total: response.data.total,
-                per_page: response.data.per_page,
-                data: response.data.data
+                current_page: apiResponse.data.current_page,
+                last_page: apiResponse.data.last_page,
+                prev_page_url: apiResponse.data.prev_page_url,
+                next_page_url: apiResponse.data.next_page_url,
+                total: apiResponse.data.total,
+                per_page: apiResponse.data.per_page,
+                data: apiResponse.data.data
             }));
         } catch (error) {
             console.error("Lỗi khi lấy dữ liệu:", error);
         }
         setLoading(false);
-    }, [pagination.per_page]);
+    }, [pagination.per_page, searchTerm]);
 
     useEffect(() => {
         fetchData(pagination.current_page);
@@ -91,6 +114,32 @@ const Orders = () => {
                             </ol>
                         </div>
                     </div>
+                    <form onSubmit={handleSearch} className="d-flex">
+                        <div className="input-group">
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Tìm kiếm theo mã, tên hoặc mô tả..."
+                                value={searchTerm}
+                                onChange={handleSearchInputChange}
+                                aria-label="Tìm kiếm"
+                            />
+                            <div className="input-group-append">
+                                <button type="submit" className="btn btn-primary">
+                                    <i className="fas fa-search me-1"></i> Tìm kiếm
+                                </button>
+                                {searchTerm && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary ms-2"
+                                        onClick={handleClearSearch}
+                                    >
+                                        <i className="fas fa-times me-1"></i> Xóa
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
 
