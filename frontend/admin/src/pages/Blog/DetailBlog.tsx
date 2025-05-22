@@ -415,7 +415,7 @@ const DetailBlog = () => {
                 Ngày xuất bản <span className="text-danger">*</span>
               </label>
               <input
-                type="date"
+                type="datetime-local"
                 className="form-control"
                 value={formData.publish_date || ""}
                 onChange={(e) =>
