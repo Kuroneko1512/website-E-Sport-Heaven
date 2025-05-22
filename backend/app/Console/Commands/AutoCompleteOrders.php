@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
+use App\Events\OrderStatusUpdated;
 use Illuminate\Support\Facades\Log;
 use App\Services\Order\OrderService;
 
@@ -62,6 +63,9 @@ class AutoCompleteOrders extends Command
 
             $this->info("Đang tìm các đơn hàng đã giao quá {$displayTime} {$unitLabel} để tự động hoàn thành...");
             $count = $orderService->autoCompleteDeliveredOrders($time, $unit);
+            if ($count > 0) {
+                broadcast(new OrderStatusUpdated());
+            }
             $this->info("Đã cập nhật {$count} đơn hàng sang trạng thái hoàn thành.");
 
             // Ghi log để có thể theo dõi khi chạy schedule

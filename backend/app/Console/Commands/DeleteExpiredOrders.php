@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
+use App\Events\OrderStatusUpdated;
 use Illuminate\Support\Facades\Log;
 use App\Services\Order\OrderService;
 
@@ -41,6 +42,7 @@ class DeleteExpiredOrders extends Command
                 $this->info("Found and cancelled {$count} expired orders.");
 
                 if ($count > 0) {
+                    broadcast(new OrderStatusUpdated());
                     $this->table(
                         ['Order Code', 'Customer Name', 'Payment Expired At'],
                         array_map(function ($order) {
