@@ -2,6 +2,7 @@
 
 namespace App\Services\Order;
 
+use App\Events\OrderCreate;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Order;
@@ -87,7 +88,7 @@ class OrderService extends BaseService
             );
 
             DB::commit();
-
+            broadcast(new OrderCreate());
             return $order;
         } catch (Exception $e) {
             DB::rollBack();
