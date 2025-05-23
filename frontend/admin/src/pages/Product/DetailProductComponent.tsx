@@ -110,17 +110,16 @@ const DetailProductComponent = () => {
           </p>
         </div>
         <div className="col-md-4">
-          x
           <img
             src={image || NoImage}
             alt={product?.name}
-            className="w-100 rounded"
-            style={{ maxHeight: "300px" }}
+            className="rounded"
+            style={{ maxHeight: "400px" }}
           />
-          <p>
+          <p className="mt-3">
             <strong>Danh mục:</strong>{" "}
             {
-              categories.find((category) => category.id === product.category_id)
+              categories.find((category) => category.id === product?.category_id)
                 ?.name
             }
           </p>
