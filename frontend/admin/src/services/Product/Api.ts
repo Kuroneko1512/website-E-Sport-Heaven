@@ -1,4 +1,3 @@
-
 // src/api/productApi.ts
 import Product from "@app/pages/Product/Product";
 // import axios from "axios";
@@ -182,10 +181,19 @@ export const updateProduct = async (id: number, product: api4): Promise<api4> =>
 
 
 // Lấy danh sách sản phẩm
-export const getProducts = async (page: number = 1, limit: number = 5): Promise<Pagination> => {
+export const getProducts = async (page: number = 1, per_page: number = 15, search_name: string = ''): Promise<Pagination> => {
   try {
-    // const response = await axios.get<Pagination>(`${API_URL}?page=${page}&limit=${limit}`);
-    const response = await api.get<Pagination>(`${API_ENDPOINTS.PRODUCT.GET_ALL}?page=${page}&limit=${limit}`);
+    // Xây dựng query string với các tham số
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('per_page', per_page.toString());
+
+    if (search_name) {
+      params.append('search_name', search_name);
+    }
+
+    // Gọi API với các tham số
+    const response = await api.get<Pagination>(`${API_ENDPOINTS.PRODUCT.GET_ALL}?${params.toString()}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching products:", error);
