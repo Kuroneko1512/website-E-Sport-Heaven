@@ -18,14 +18,32 @@ class ProductService extends BaseService
     {
         parent::__construct($product);
     }
-    public function getProductAll($paginate = 10)
+
+    /**
+     * Lấy danh sách tất cả sản phẩm với phân trang và tìm kiếm
+     *
+     * @param int $paginate Số sản phẩm mỗi trang
+     * @param string $searchName Tìm kiếm theo tên sản phẩm
+     * @return \Illuminate\Pagination\LengthAwarePaginator
+     */
+    public function getProductAll($paginate = 15, $searchName = '')
     {
-        return $this->model->with([
+        $query = $this->model->with([
             'variants.productAttributes.attributeValue:id,value',
-        ])
-            ->orderBy('created_at', 'DESC') // Sắp xếp theo thời gian mới nhất
-            ->paginate($paginate);
+        ]);
+
+        // Lọc sản phẩm có trạng thái active
+        $query->where('status', 'active');
+
+        // Tìm kiếm theo tên sản phẩm
+        if (!empty($searchName)) {
+            $query->where('name', 'LIKE', "%{$searchName}%");
+        }
+
+        return $query->orderBy('created_at', 'DESC') // Sắp xếp theo thời gian mới nhất
+        ->paginate($paginate);
     }
+
     public function getProductFiterAll($filters = [], $paginate = 12)
     {
         // Sắp xếp theo thời gian mới nhất
@@ -43,23 +61,23 @@ class ProductService extends BaseService
     if (!empty($filters['min_price']) || !empty($filters['max_price'])) {
         $min = $filters['min_price'];
         $max = $filters['max_price'] ?? PHP_INT_MAX;
-        
+
         $query->where(function($q) use ($min, $max) {
             // Sản phẩm đơn giản (simple)
             $q->where('product_type', 'simple')
-              ->whereRaw('CASE 
-                WHEN discount_percent IS NOT NULL AND 
-                     (discount_start IS NULL OR discount_start <= NOW()) AND 
+              ->whereRaw('CASE
+                WHEN discount_percent IS NOT NULL AND
+                     (discount_start IS NULL OR discount_start <= NOW()) AND
                      (discount_end IS NULL OR discount_end >= NOW())
                 THEN price * (1 - discount_percent/100)
                 ELSE price
               END BETWEEN ? AND ?', [$min, $max]);
-            
+
             // Sản phẩm biến thể (variable)
             $q->orWhereHas('variants', function($variantQuery) use ($min, $max) {
-                $variantQuery->whereRaw('CASE 
-                  WHEN discount_percent IS NOT NULL AND 
-                       (discount_start IS NULL OR discount_start <= NOW()) AND 
+                $variantQuery->whereRaw('CASE
+                  WHEN discount_percent IS NOT NULL AND
+                       (discount_start IS NULL OR discount_start <= NOW()) AND
                        (discount_end IS NULL OR discount_end >= NOW())
                   THEN price * (1 - discount_percent/100)
                   ELSE price
@@ -99,7 +117,7 @@ class ProductService extends BaseService
         $products = $this->model->with([
                 'category',
                 'variants.productAttributes.attributeValue',
-          
+
         ])->findOrFail($id);
         return $products;
     }
@@ -280,14 +298,14 @@ class ProductService extends BaseService
         ->select('order_items.product_id', DB::raw('SUM(order_items.quantity) AS total_quantity'))
         ->orderByDesc('total_quantity')
         ->limit($limit)
-        ->pluck('order_items.product_id');    
-        
+        ->pluck('order_items.product_id');
+
         $products = Product::with([
             // Giống đoạn bạn đang dùng:
             'variants.productAttributes.attributeValue:id,value'
         ])
             ->whereIn('id', $topProductIds)                         // Chỉ các SP bán chạy
-            ->orderByRaw('FIELD(id,' . $topProductIds->implode(',') . ')') // Giữ đúng thứ tự “bán chạy nhất”  
+            ->orderByRaw('FIELD(id,' . $topProductIds->implode(',') . ')') // Giữ đúng thứ tự “bán chạy nhất”
             ->get();
         return $products;
     }
@@ -299,7 +317,7 @@ class ProductService extends BaseService
             ->orderBy('created_at', 'DESC')
             ->latest() // Sắp xếp theo thời gian mới nhất
             ->paginate($paginate);
-    
+
     }
     private function handelVariant($isVariable, $product, $data)
     {

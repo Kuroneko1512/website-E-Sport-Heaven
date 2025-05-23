@@ -19,20 +19,26 @@ class ProductController extends Controller
     {
         $this->productService = $productService;
     }
-    public function index()
+
+    public function index(Request $request)
     {
         try {
-            // Gọi service để lấy dữ liệu
-            $Product = $this->productService->getProductAll();
+            // Lấy các tham số từ request
+            $perPage = $request->input('per_page', 15); // Mặc định 15 sản phẩm/trang
+            $searchName = $request->input('search_name', ''); // Tìm kiếm theo tên
+
+            // Gọi service để lấy dữ liệu với các tham số tìm kiếm
+            $Product = $this->productService->getProductAll($perPage, $searchName);
+
             return response()->json([
                 'status' => 200,
-                'data' => $Product, // Trả về dữ liệu thuộc tính
+                'data' => $Product, // Trả về dữ liệu sản phẩm
             ], 200);
         } catch (\Throwable $th) {
             // Trường hợp có lỗi xảy ra khi lấy dữ liệu
             return response()->json([
-                'errnor' => 'lấy thất bại',
-                'mess' => $th,
+                'error' => 'Lấy dữ liệu thất bại',
+                'message' => $th->getMessage(),
                 'status' => 500
             ], 500); // Trả về mã lỗi 500 (Internal Server Error)
         }
@@ -50,7 +56,7 @@ class ProductController extends Controller
             // Validate và lấy dữ liệu từ request
             $data = $request->validated();
             //tạo sp
-      
+
             $product = $this->productService->createProduct($data);
 
             DB::commit();
@@ -90,15 +96,15 @@ class ProductController extends Controller
             ], 500);
         }
     }
-    public function getProductByIdEdit(string $id)
-    {
-        $product = $this->productService->getProductById($id);
-        return response()->json([
-            'message' => 'lấy thành công', // Thông báo thành công
-            'data' => $product, // Dữ liệu thuộc tính chi tiết  
-            'status' => 200 // Trả về mã trạng thái 200 (OK)
-        ], 200);
-    }
+    // public function getProductByIdEdit(string $id)
+    // {
+    //     $product = $this->productService->getProductById($id);
+    //     return response()->json([
+    //         'message' => 'lấy thành công', // Thông báo thành công
+    //         'data' => $product, // Dữ liệu thuộc tính chi tiết
+    //         'status' => 200 // Trả về mã trạng thái 200 (OK)
+    //     ], 200);
+    // }
 
     /**
      * Update the specified resource in storage.
