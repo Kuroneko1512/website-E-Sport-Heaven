@@ -100,11 +100,15 @@ const useAddressData = () => {
   return { provinces, districts, wards, loadDistricts, loadWards };
 };
 
-// Hàm chuẩn hóa ngày giờ về dạng ISO để so sánh an toàn
+// Hàm chuyển đổi chuỗi ngày giờ về định dạng ngày giờ Việt Nam
 function parseDate(str) {
   if (!str) return null;
   // Nếu đã có 'T' thì giữ nguyên, nếu chưa thì thay ' ' bằng 'T'
-  return new Date(str.includes('T') ? str : str.replace(' ', 'T'));
+  // Sau đó chuyển về giờ Việt Nam (UTC+7)
+  let date = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
+  // Nếu date là invalid thì trả về null
+  if (isNaN(date.getTime())) return null;
+  return date;
 }
 
 // Hàm kiểm tra tính hợp lệ của mã giảm giá
@@ -112,6 +116,8 @@ const isCouponValid = (coupon, subtotal) => {
   console.log("coupon", coupon, "subtotal", subtotal);
   const now = new Date();
   console.log("now", now);
+  console.log("start_date", parseDate(coupon?.start_date));
+  console.log("end_date", parseDate(coupon?.end_date));
   return (
     coupon?.is_active === 0 &&
     parseDate(coupon?.start_date) <= now &&
