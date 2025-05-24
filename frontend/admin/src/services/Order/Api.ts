@@ -17,7 +17,8 @@ export interface Order {
   status: number;
   customer_id: number;
   created_at: string;
-  payment_status: number;
+  payment_status: number
+  payment_method: string;
 }
 interface OrderResponse {
     message: string;
