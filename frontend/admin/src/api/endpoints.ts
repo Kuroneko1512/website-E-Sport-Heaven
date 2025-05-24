@@ -9,6 +9,14 @@ export const API_ENDPOINTS = {
         UPDATE_PROFILE: "v1/admin/update-profile",
         LOGOUT: "/v1/admin/logout",
     },
+    CATEGORY: {
+        BASE: "v1/admin/category",
+        GET_ALL: "v1/admin/category",
+        GET_ALL_NO_PAGINATION: "v1/admin/category-all",
+        CREATE: "v1/admin/category",
+        UPDATE: "v1/admin/category",
+        DELETE: "v1/admin/category",
+    },
     PRODUCT: {
         BASE: "v1/admin/product",
         GET_ALL: "v1/admin/product",
