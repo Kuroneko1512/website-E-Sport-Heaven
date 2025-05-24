@@ -35,6 +35,7 @@ Route::prefix('v1')->group(function () {
 
             //Product routes
             Route::apiResource('/product', ProductController::class);
+            Route::patch('/product/{id}/status', [ProductController::class, 'updateStatus']);
 
             //Attributes routes
             Route::apiResource('/attribute', AttributeController::class);
