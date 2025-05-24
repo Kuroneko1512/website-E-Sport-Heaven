@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useEffect, useState } from "react"; 
 import { Link } from "react-router-dom";
 import FomatVND from "../../utils/FomatVND";
 import Cookies from "js-cookie";
@@ -41,12 +41,12 @@ const ProductBestseller = ({productDataB}) => {
     await instanceAxios.post("/api/v1/customer/wishlist", { product_id: productId });
   };
 
-  console.log("productDataBB", productDataBB);
+  console.log("productDataBB", productDataB);
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">Sản phẩm bán chạy</h1>
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 md:gap-6">
-        {productDataBB?.map((item) => (
+        {productDataB?.map((item) => (
           <div
             key={item?.id}
             className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col"
@@ -88,7 +88,7 @@ const ProductBestseller = ({productDataB}) => {
                 <div className="flex items-center justify-center gap-2 min-h-[1.5rem]">
 
                   <div className="flex items-center flex-col">
-                    <span className="text-base flex items-center md:text-lg font-bold text-yellow-500 mb-1">
+                    <span className="text-base flex items-center md:text-lg font-bold mb-1" style={{ color: "#ff8c00" }}>
                       {FomatVND(
                         item?.price - (item?.price * item?.discount_percent) / 100 ||
                           item?.variants[0].price - 

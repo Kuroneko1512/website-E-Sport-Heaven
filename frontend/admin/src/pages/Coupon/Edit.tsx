@@ -215,13 +215,20 @@ const EditCoupon: FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
-    
-    if (type === 'datetime-local') {
-      setCoupon({ ...coupon, [name]: value });
-    } else {
-      setCoupon({ ...coupon, [name]: value });
+
+    // Nếu thay đổi loại giảm giá, cập nhật max_discount_amount về 0 nếu là "Giá tiền"
+    if (name === "discount_type") {
+      const discountType = Number(value);
+      setCoupon({
+        ...coupon,
+        discount_type: discountType,
+        max_discount_amount: discountType === 1 ? 0 : coupon.max_discount_amount,
+      });
+      validate(name, value);
+      return;
     }
-    
+
+    setCoupon({ ...coupon, [name]: value });
     validate(name, value);
   };
 
@@ -365,11 +372,11 @@ const EditCoupon: FC = () => {
                       className="form-control"
                       id="max_discount_amount"
                       name="max_discount_amount"
-                      value={coupon.max_discount_amount}
+                      value={coupon.discount_type === 1 ? 0 : coupon.max_discount_amount}
                       onChange={handleChange}
                       min="0"
                       placeholder="0"
-                      disabled={coupon.discount_type === 0}
+                      disabled={coupon.discount_type === 1}
                     />
                     <div className="input-group-append">
                       <span className="input-group-text">VNĐ</span>
