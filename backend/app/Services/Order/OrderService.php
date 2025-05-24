@@ -1045,7 +1045,8 @@ class OrderService extends BaseService
 
             // Từ đã xác nhận (1) có thể chuyển sang đang chuẩn bị hàng (2)
             Order::STATUS_CONFIRMED => [
-                Order::STATUS_PREPARING
+                Order::STATUS_PREPARING,
+                Order::STATUS_CANCELLED
             ],
 
             // Từ đang chuẩn bị hàng (2) chỉ có thể chuyển sang sẵn sàng giao hàng (3)
@@ -1104,6 +1105,11 @@ class OrderService extends BaseService
                 Order::STATUS_CANCELLED
             ],
 
+            // Từ đã xác nhận (1) khách hàng có thể hủy đơn (trong thời gian cho phép)
+            Order::STATUS_CONFIRMED => [
+                Order::STATUS_CANCELLED
+            ],
+            
             // Từ đã giao hàng (5) khách hàng có thể xác nhận hoàn thành hoặc yêu cầu đổi/trả
             Order::STATUS_DELIVERED => [
                 Order::STATUS_COMPLETED,
@@ -1163,7 +1169,7 @@ class OrderService extends BaseService
     private function getOrderHistory($orderId)
     {
         return OrderHistory::where('order_id', $orderId)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
     }
 

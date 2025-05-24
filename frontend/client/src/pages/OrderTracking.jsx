@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import FomatVND from "../utils/FomatVND";
@@ -8,6 +8,8 @@ import ScrollToTop from "../config/ScrollToTop";
 import { filterHistoryByStatusTo } from "../utils/filterHistoryByStatusTo";
 import Echo from "laravel-echo";
 import io from "socket.io-client";
+import useEchoChannel from "../hooks/useEchoChannel"; // Import hook useEchoChannel realtime
+
 
 
 const OrderHistory = ({ history }) => {
@@ -128,20 +130,66 @@ const OrderTracking = () => {
       return res.data;
     },
   });
-  window.io = io;
-  window.echo = new Echo({
-    broadcaster: 'socket.io',
-    host: '127.0.0.1:6001',
-    transports: ['websocket'],
-    forceTLS: false,
 
-  });
-  window.echo.channel('orders.1')
-    .subscribed(() => console.log('✅ Đã subscribe channel orders.1'))
-    .listen('.order-status-updated', (e) => {
-      console.log('✅ Event nhận được:', e);
-      refetch();
-    });
+  // Sử dụng hook useEchoChannel để lắng nghe cập nhật đơn hàng
+  // Tham số 1: Tên kênh - 'orders.1' là kênh chung cho tất cả đơn hàng
+  // Tham số 2: Tên sự kiện - '.order-status-updated' là sự kiện khi trạng thái đơn hàng được cập nhật
+  // Tham số 3: Callback xử lý khi nhận được sự kiện - ở đây là gọi refetch() để tải lại dữ liệu đơn hàng
+  // Sử dụng useCallback để tạo callback function mà vẫn giữ được tham chiếu ổn định
+  const handleOrderUpdate = useCallback((event) => {
+    console.log('✅ Nhận được cập nhật trạng thái đơn hàng:', event);
+    refetch();
+  }, [refetch]);
+
+  // Sử dụng hook useEchoChannel đã sửa
+  const { connected, error: echoError, socketId, isSubscribed } = useEchoChannel(
+    'orders.1',
+    '.order-status-updated',
+    handleOrderUpdate
+  );
+
+  // realtime old
+  // window.io = io;
+  // window.echo = new Echo({
+  //   broadcaster: 'socket.io',
+  //   host: '127.0.0.1:6001',
+  //   transports: ['polling', 'websocket'], // Thêm polling làm phương thức dự phòng
+  //   forceTLS: false,
+  //   enabledTransports: ['ws', 'wss', 'polling'],
+  // });
+
+  // window.echo.channel('orders.1')
+  //   .subscribed(() => console.log('✅ Đã subscribe channel orders.1'))
+  //   .error((error) => console.error('❌ Channel orders.1 lỗi:', error))
+  //   .listen('.order-status-updated', (e) => {
+  //     console.log('✅ Event nhận được:', e);
+  //     refetch();
+  //   });
+
+  // const socket = window.echo.connector.socket;
+
+  // // Thêm debug
+  // socket.on('connect', () => {
+  //   console.log('✅ Kết nối thành công đến Echo Server', socket.id);
+  // });
+
+  // socket.on('connect_error', (error) => {
+  //   console.error('❌ Lỗi kết nối:', error.message);
+  //   // Thêm thông tin chi tiết về lỗi
+  //   console.error('Chi tiết:', {
+  //     type: error.type,
+  //     description: error.description
+  //   });
+  // });
+
+  // socket.on('disconnect', (reason) => {
+  //   console.log('❌ Đã ngắt kết nối từ Echo Server', reason);
+  // });
+
+  // // Thêm một số sự kiện debug khác
+  // socket.on('reconnect_attempt', (attempt) => {
+  //   console.log(`⚠️ Đang thử kết nối lại lần ${attempt}`);
+  // });
 
 
   console.log("orderData", orderData);
@@ -257,10 +305,10 @@ const OrderTracking = () => {
                   {(item.product?.discount_percent > 0 ||
                     item.product_variant?.discount_percent > 0) && (
 
-                    <span className="line-through text-gray-500 mr-2">
-                      {FomatVND(getDiscountedPrice(item))}
-                    </span>
-                  )}
+                      <span className="line-through text-gray-500 mr-2">
+                        {FomatVND(getDiscountedPrice(item))}
+                      </span>
+                    )}
                   <strong>{FomatVND(item.subtotal)}</strong>
 
                 </p>

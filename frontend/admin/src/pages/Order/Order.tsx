@@ -6,11 +6,17 @@ import { Link } from "react-router-dom";
 import {
   ORDER_STATUS,
   ORDER_STATUS_LABELS,
+  ORDER_STATUS_STYLES,
   PAYMENT_STATUS,
   PAYMENT_STATUS_LABELS,
+  PAYMENT_STATUS_STYLES,
+  PAYMENT_METHOD_LABELS,
+  PAYMENT_METHOD_STYLES
 } from "@app/constants/OrderConstants";
 import Echo from "laravel-echo";
 import io from "socket.io-client";
+import useEchoChannel from "@app/hooks/useEchoChannel";
+
 interface ApiResponse {
   data: Order[];
   current_page: number;
@@ -28,7 +34,7 @@ const Orders = () => {
     prev_page_url: null,
     next_page_url: null,
     total: 0,
-    per_page: 5,
+    per_page: 10,
     data: [],
   });
 
@@ -49,6 +55,7 @@ const Orders = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPagination((prev) => ({ ...prev, current_page: 1 }));
+    fetchData(1);
   };
 
   const handleClearSearch = () => {
@@ -110,20 +117,34 @@ const Orders = () => {
   useEffect(() => {
     fetchData(pagination.current_page);
   }, [pagination.current_page]);
-  window.io = io;
-  window.echo = new Echo({
-    broadcaster: "socket.io",
-    host: "127.0.0.1:6001",
-    transports: ["websocket"],
-    forceTLS: false,
-  });
-  window.echo
-    .channel("order.2")
-    .subscribed(() => console.log("✅ Đã subscribe channel orders.2"))
-    .listen(".order-create", (e) => {
-      console.log("✅ Event nhận được:", e);
-      fetchData(pagination.current_page);
-    });
+
+  // realtime
+  const handleOrderCreate = useCallback((event: any) => {
+    console.log("✅ Event nhận được:", event);
+    fetchData(pagination.current_page);
+  }, [fetchData, pagination.current_page]);
+
+  // Sử dụng hook useEchoChannel
+  useEchoChannel(
+    'order.2',  // Tên kênh
+    '.order-create',  // Tên sự kiện
+    handleOrderCreate  // Callback function
+  );
+  // realtime lỗi
+  // window.io = io;
+  // window.echo = new Echo({
+  //   broadcaster: "socket.io",
+  //   host: "127.0.0.1:6001",
+  //   transports: ["websocket"],
+  //   forceTLS: false,
+  // });
+  // window.echo
+  //   .channel("order.2")
+  //   .subscribed(() => console.log("✅ Đã subscribe channel orders.2"))
+  //   .listen(".order-create", (e) => {
+  //     console.log("✅ Event nhận được:", e);
+  //     fetchData(pagination.current_page);
+  //   });
 
   return (
     <section className="content">
@@ -209,6 +230,7 @@ const Orders = () => {
                   <th>Mã Đơn hàng</th>
                   <th>Tổng Tiền</th>
                   <th>Ngày đặt hàng</th>
+                  <th>Kiểu Thanh Toán</th>
                   <th>Trạng Thái Thanh Toán</th>
                   <th className="text-center">Trạng thái Đơn</th>
                 </tr>
@@ -227,16 +249,24 @@ const Orders = () => {
                     <td>
                       {new Date(order.created_at).toLocaleDateString("vi-VI")}
                     </td>
+                    <td className="">
+                      <span
+                        className={`badge ${PAYMENT_METHOD_STYLES[order.payment_method] || 'badge-secondary'}`}
+                        style={{ fontSize: '0.8rem', padding: '4px 8px' }}
+                      >
+                        {PAYMENT_METHOD_LABELS[order.payment_method] || order.payment_method}
+                      </span>
+                    </td>
                     <td>
                       <span
-                        className={`badge ${order.payment_status === PAYMENT_STATUS.PAID ? "badge-success" : "badge-warning"}`}
+                        className={`badge ${PAYMENT_STATUS_STYLES[order.payment_status]}`}
                       >
                         {PAYMENT_STATUS_LABELS[order.payment_status]}
                       </span>
                     </td>
-                    <td className="project-state">
+                    <td className="project-state text-center">
                       <span
-                        className={`badge ${order.status === ORDER_STATUS.COMPLETED ? "badge-success" : "badge-warning"}`}
+                        className={`badge ${ORDER_STATUS_STYLES[order.status]}`}
                       >
                         {ORDER_STATUS_LABELS[order.status]}
                       </span>

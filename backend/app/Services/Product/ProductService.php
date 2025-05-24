@@ -19,14 +19,29 @@ class ProductService extends BaseService
     {
         parent::__construct($product);
     }
-    public function getProductAll($paginate = 10)
+
+    /**
+     * Lấy danh sách tất cả sản phẩm với phân trang và tìm kiếm
+     *
+     * @param int $paginate Số sản phẩm mỗi trang
+     * @param string $searchName Tìm kiếm theo tên sản phẩm
+     * @return \Illuminate\Pagination\LengthAwarePaginator
+     */
+    public function getProductAll($paginate = 15, $searchName = '')
     {
-        return $this->model->with([
+        $query = $this->model->with([
             'variants.productAttributes.attributeValue:id,value',
-        ])
-            ->orderBy('created_at', 'DESC') // Sắp xếp theo thời gian mới nhất
-            ->paginate($paginate);
+        ]);
+
+        // Tìm kiếm theo tên sản phẩm
+        if (!empty($searchName)) {
+            $query->where('name', 'LIKE', "%{$searchName}%");
+        }
+
+        return $query->orderBy('created_at', 'DESC') // Sắp xếp theo thời gian mới nhất
+        ->paginate($paginate);
     }
+
     public function getProductFiterAll($filters = [], $paginate = 12)
     {
         // Sắp xếp theo thời gian mới nhất
@@ -97,9 +112,8 @@ class ProductService extends BaseService
     public function getProductById($id)
     {
         $products = $this->model->with([
-            'category',
-            'variants.productAttributes.attributeValue',
-
+                'category',
+                'variants.productAttributes.attributeValue',
         ])->findOrFail($id);
         return $products;
     }
@@ -163,6 +177,14 @@ class ProductService extends BaseService
         broadcast(new ProductCreated());
         return true;
     }
+
+    /**
+     * Cập nhật thông tin sản phẩm
+     *
+     * @param array $data Dữ liệu cập nhật
+     * @param int $id ID của sản phẩm
+     * @return \App\Models\Product
+     */
     public function updateProduct($data, $id)
     {
         $isVariable = $data['product_type'] === 'variable';
@@ -177,7 +199,7 @@ class ProductService extends BaseService
             'discount_end' => $data['discount_end'] ?? null,
             'description' => $data['description'] ?? null,
             'product_type' => $data['product_type'],
-            'status' => 'active',
+            'status' => $data['status'] ?? $product->status,
             'category_id' => $data['category_id'] ?? null
         ]);
 
@@ -263,6 +285,33 @@ class ProductService extends BaseService
         broadcast(new ProductUpdate());
         return $product->fresh();
     }
+
+    /**
+     * Cập nhật trạng thái sản phẩm
+     *
+     * @param int $id ID của sản phẩm
+     * @param string $status Trạng thái mới ('active' hoặc 'inactive')
+     * @return \App\Models\Product
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public function updateProductStatus($id, $status)
+    {
+        // Kiểm tra trạng thái hợp lệ
+        if (!in_array($status, ['active', 'inactive'])) {
+            throw new \InvalidArgumentException("Trạng thái không hợp lệ. Chỉ chấp nhận 'active' hoặc 'inactive'.");
+        }
+
+        // Tìm sản phẩm theo ID
+        $product = $this->model->findOrFail($id);
+
+        // Cập nhật trạng thái
+        $product->update([
+            'status' => $status
+        ]);
+
+        return $product->fresh();
+    }
+
     public function getProductRandom($limit = 4)
     {
         return $this->model->with([
@@ -287,7 +336,7 @@ class ProductService extends BaseService
             'variants.productAttributes.attributeValue:id,value'
         ])
             ->whereIn('id', $topProductIds)                         // Chỉ các SP bán chạy
-            ->orderByRaw('FIELD(id,' . $topProductIds->implode(',') . ')') // Giữ đúng thứ tự “bán chạy nhất”  
+            ->orderByRaw('FIELD(id,' . $topProductIds->implode(',') . ')') // Giữ đúng thứ tự “bán chạy nhất”
             ->get();
         return $products;
     }
