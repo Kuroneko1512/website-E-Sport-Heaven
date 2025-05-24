@@ -5,10 +5,19 @@ import {
     Pagination,
     api4,
 } from "@app/services/Product/Api";
-import { Pagination as AntPagination, Input, Button, Space, Select, Badge } from "antd";
+import { Pagination as AntPagination, Input, Button, Space, Select, Badge, Tag, Tooltip } from "antd";
 import { useEffect, useState } from "react";
 import FomatVND from "@app/utils/FomatVND";
-import { SearchOutlined } from '@ant-design/icons';
+import {
+    SearchOutlined,
+    EyeOutlined,
+    EditOutlined,
+    DeleteOutlined,
+    StopOutlined,
+    PlayCircleOutlined,
+    TagsOutlined,
+    TagOutlined
+} from '@ant-design/icons';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -59,6 +68,33 @@ const Product = () => {
         } catch (error) {
             console.error("Lỗi khi xóa sản phẩm:", error);
             alert("Xóa sản phẩm thất bại!");
+        }
+    };
+
+    const handleToggleStatus = async (id: number, currentStatus: string) => {
+        try {
+            // Xác nhận trước khi thay đổi trạng thái
+            const message = currentStatus === "active"
+                ? "Bạn có chắc muốn ngừng bán sản phẩm này?"
+                : "Bạn có chắc muốn kích hoạt lại sản phẩm này?";
+
+            if (!window.confirm(message)) return;
+
+            // Gọi API để thay đổi trạng thái (bạn cần thêm API này)
+            // await updateProductStatus(id, currentStatus === "active" ? "inactive" : "active");
+
+            // Cập nhật lại danh sách sản phẩm
+            setProducts(products.map(product =>
+                product.id === id
+                    ? { ...product, status: currentStatus === "active" ? "inactive" : "active" }
+                    : product
+            ));
+
+            // Hiển thị thông báo thành công
+            alert(`Đã ${currentStatus === "active" ? "ngừng bán" : "kích hoạt"} sản phẩm thành công!`);
+        } catch (error) {
+            console.error("Lỗi khi thay đổi trạng thái sản phẩm:", error);
+            alert("Thay đổi trạng thái sản phẩm thất bại!");
         }
     };
 
@@ -211,9 +247,12 @@ const Product = () => {
                                                 )}
                                             </td>
                                             <td>
-                                                {product.product_type === "variable"
-                                                    ? "Biến thể"
-                                                    : "Đơn giản"}
+                                                <Tag
+                                                    icon={product.product_type === "variable" ? <TagsOutlined /> : <TagOutlined />}
+                                                    color={product.product_type === "variable" ? "blue" : "green"}
+                                                >
+                                                    {product.product_type === "variable" ? "Biến thể" : "Đơn giản"}
+                                                </Tag>
                                             </td>
                                             <td>
                                                 <span
@@ -232,24 +271,41 @@ const Product = () => {
                                             </td>
                                             <td>{product.variants.length > 0 ? product.variants[0].stock || 0 : product.stock || 0}</td>
                                             <td>
-                                                <button
-                                                    className="btn btn-warning btn-sm me-2"
-                                                    onClick={() => navigate(`detail/${product.id}`)}
-                                                >
-                                                    Chi tiết
-                                                </button>
-                                                <button
-                                                    className="btn btn-primary btn-sm"
-                                                    onClick={() => navigate(`/edit-product/${product.id}`)}
-                                                >
-                                                    Chỉnh sửa
-                                                </button>
-                                                <button
-                                                    className="btn btn-danger btn-sm mx-2"
-                                                    onClick={() => product.id && handleDeleteProduct(product.id)}
-                                                >
-                                                    Xóa
-                                                </button>
+                                                <Space>
+                                                    <Tooltip title="Chi tiết">
+                                                        <Button
+                                                            type="text"
+                                                            icon={<EyeOutlined />}
+                                                            onClick={() => navigate(`detail/${product.id}`)}
+                                                        />
+                                                    </Tooltip>
+
+                                                    <Tooltip title="Chỉnh sửa">
+                                                        <Button
+                                                            type="text"
+                                                            icon={<EditOutlined />}
+                                                            onClick={() => navigate(`/edit-product/${product.id}`)}
+                                                        />
+                                                    </Tooltip>
+
+                                                    <Tooltip title={product.status === "active" ? "Ngừng bán" : "Kích hoạt"}>
+                                                        <Button
+                                                            type="text"
+                                                            icon={product.status === "active" ? <StopOutlined /> : <PlayCircleOutlined />}
+                                                            onClick={() => handleToggleStatus(product.id!, product.status)}
+                                                            danger={product.status === "active"}
+                                                        />
+                                                    </Tooltip>
+
+                                                    <Tooltip title="Xóa">
+                                                        <Button
+                                                            type="text"
+                                                            danger
+                                                            icon={<DeleteOutlined />}
+                                                            onClick={() => product.id && handleDeleteProduct(product.id)}
+                                                        />
+                                                    </Tooltip>
+                                                </Space>
                                             </td>
                                         </tr>
                                     ))
