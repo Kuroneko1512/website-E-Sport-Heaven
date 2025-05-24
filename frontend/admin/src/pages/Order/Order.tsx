@@ -15,6 +15,8 @@ import {
 } from "@app/constants/OrderConstants";
 import Echo from "laravel-echo";
 import io from "socket.io-client";
+import useEchoChannel from "@app/hooks/useEchoChannel";
+
 interface ApiResponse {
   data: Order[];
   current_page: number;
@@ -32,7 +34,7 @@ const Orders = () => {
     prev_page_url: null,
     next_page_url: null,
     total: 0,
-    per_page: 5,
+    per_page: 10,
     data: [],
   });
 
@@ -53,6 +55,7 @@ const Orders = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPagination((prev) => ({ ...prev, current_page: 1 }));
+    fetchData(1);
   };
 
   const handleClearSearch = () => {
@@ -114,20 +117,34 @@ const Orders = () => {
   useEffect(() => {
     fetchData(pagination.current_page);
   }, [pagination.current_page]);
-  window.io = io;
-  window.echo = new Echo({
-    broadcaster: "socket.io",
-    host: "127.0.0.1:6001",
-    transports: ["websocket"],
-    forceTLS: false,
-  });
-  window.echo
-    .channel("order.2")
-    .subscribed(() => console.log("✅ Đã subscribe channel orders.2"))
-    .listen(".order-create", (e) => {
-      console.log("✅ Event nhận được:", e);
-      fetchData(pagination.current_page);
-    });
+
+  // realtime
+  const handleOrderCreate = useCallback((event: any) => {
+    console.log("✅ Event nhận được:", event);
+    fetchData(pagination.current_page);
+  }, [fetchData, pagination.current_page]);
+
+  // Sử dụng hook useEchoChannel
+  useEchoChannel(
+    'order.2',  // Tên kênh
+    '.order-create',  // Tên sự kiện
+    handleOrderCreate  // Callback function
+  );
+  // realtime lỗi
+  // window.io = io;
+  // window.echo = new Echo({
+  //   broadcaster: "socket.io",
+  //   host: "127.0.0.1:6001",
+  //   transports: ["websocket"],
+  //   forceTLS: false,
+  // });
+  // window.echo
+  //   .channel("order.2")
+  //   .subscribed(() => console.log("✅ Đã subscribe channel orders.2"))
+  //   .listen(".order-create", (e) => {
+  //     console.log("✅ Event nhận được:", e);
+  //     fetchData(pagination.current_page);
+  //   });
 
   return (
     <section className="content">
