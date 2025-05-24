@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import FomatVND from "../utils/FomatVND";
@@ -6,6 +6,11 @@ import { ORDER_STATUS_LABELS, ORDER_STATUS } from "../constants/OrderConstants";
 import instanceAxios from "../config/db";
 import ScrollToTop from "../config/ScrollToTop";
 import { filterHistoryByStatusTo } from "../utils/filterHistoryByStatusTo";
+import Echo from "laravel-echo";
+import io from "socket.io-client";
+import useEchoChannel from "../hooks/useEchoChannel"; // Import hook useEchoChannel realtime
+
+
 
 const OrderHistory = ({ history }) => {
   // Lọc trùng status_to, giữ bản ghi mới nhất
@@ -115,6 +120,7 @@ const OrderTracking = () => {
     data: orderData,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["order", order_code],
     queryFn: async () => {
@@ -125,15 +131,68 @@ const OrderTracking = () => {
     },
   });
 
-  console.log("orderData", orderData);
+  // Sử dụng hook useEchoChannel để lắng nghe cập nhật đơn hàng
+  // Tham số 1: Tên kênh - 'orders.1' là kênh chung cho tất cả đơn hàng
+  // Tham số 2: Tên sự kiện - '.order-status-updated' là sự kiện khi trạng thái đơn hàng được cập nhật
+  // Tham số 3: Callback xử lý khi nhận được sự kiện - ở đây là gọi refetch() để tải lại dữ liệu đơn hàng
+  // Sử dụng useCallback để tạo callback function mà vẫn giữ được tham chiếu ổn định
+  const handleOrderUpdate = useCallback((event) => {
+    console.log('✅ Nhận được cập nhật trạng thái đơn hàng:', event);
+    refetch();
+  }, [refetch]);
 
-  // Hàm định dạng giá tiền
-  const formatPrice = (value) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(value);
-  };
+  // Sử dụng hook useEchoChannel đã sửa
+  const { connected, error: echoError, socketId, isSubscribed } = useEchoChannel(
+    'orders.1',
+    '.order-status-updated',
+    handleOrderUpdate
+  );
+
+  // realtime old
+  // window.io = io;
+  // window.echo = new Echo({
+  //   broadcaster: 'socket.io',
+  //   host: '127.0.0.1:6001',
+  //   transports: ['polling', 'websocket'], // Thêm polling làm phương thức dự phòng
+  //   forceTLS: false,
+  //   enabledTransports: ['ws', 'wss', 'polling'],
+  // });
+
+  // window.echo.channel('orders.1')
+  //   .subscribed(() => console.log('✅ Đã subscribe channel orders.1'))
+  //   .error((error) => console.error('❌ Channel orders.1 lỗi:', error))
+  //   .listen('.order-status-updated', (e) => {
+  //     console.log('✅ Event nhận được:', e);
+  //     refetch();
+  //   });
+
+  // const socket = window.echo.connector.socket;
+
+  // // Thêm debug
+  // socket.on('connect', () => {
+  //   console.log('✅ Kết nối thành công đến Echo Server', socket.id);
+  // });
+
+  // socket.on('connect_error', (error) => {
+  //   console.error('❌ Lỗi kết nối:', error.message);
+  //   // Thêm thông tin chi tiết về lỗi
+  //   console.error('Chi tiết:', {
+  //     type: error.type,
+  //     description: error.description
+  //   });
+  // });
+
+  // socket.on('disconnect', (reason) => {
+  //   console.log('❌ Đã ngắt kết nối từ Echo Server', reason);
+  // });
+
+  // // Thêm một số sự kiện debug khác
+  // socket.on('reconnect_attempt', (attempt) => {
+  //   console.log(`⚠️ Đang thử kết nối lại lần ${attempt}`);
+  // });
+
+
+  console.log("orderData", orderData);
 
   // Hàm tính giá sản phẩm sau khi giảm giá
   const getDiscountedPrice = (item) => {
@@ -173,9 +232,8 @@ const OrderTracking = () => {
         <span className="text-lg">
           Mã đơn hàng: <strong>{order_code}</strong> |
           <span
-            className={`ml-2 px-3 py-1 rounded text-base ${
-              statusStyles[orderData?.data?.status]
-            }`}
+            className={`ml-2 px-3 py-1 rounded text-base ${statusStyles[orderData?.data?.status]
+              }`}
           >
             {ORDER_STATUS_LABELS[orderData?.data?.status]}
           </span>
@@ -226,9 +284,8 @@ const OrderTracking = () => {
             >
               <div className="flex items-center space-x-4">
                 <img
-                  src={`http://127.0.0.1:8000/storage/${
-                    item.product_variant?.image || item.product.image
-                  }`}
+                  src={`http://127.0.0.1:8000/storage/${item.product_variant?.image || item.product.image
+                    }`}
                   alt={item.product.name}
                   className="w-16 h-16 object-cover rounded"
                   loading="lazy"
@@ -247,11 +304,13 @@ const OrderTracking = () => {
                 <p>
                   {(item.product?.discount_percent > 0 ||
                     item.product_variant?.discount_percent > 0) && (
-                    <span className="line-through text-gray-500 mr-2">
-                      {formatPrice(getDiscountedPrice(item))}
-                    </span>
-                  )}
-                  <strong>{formatPrice(item.subtotal)}</strong>
+
+                      <span className="line-through text-gray-500 mr-2">
+                        {FomatVND(getDiscountedPrice(item))}
+                      </span>
+                    )}
+                  <strong>{FomatVND(item.subtotal)}</strong>
+
                 </p>
               </div>
             </div>
@@ -263,14 +322,14 @@ const OrderTracking = () => {
         <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng tiền hàng: </div>
           <span className="col-span-2">
-            {formatPrice(orderData?.data?.subtotal || 0)}
+            {FomatVND(orderData?.data?.subtotal || 0)}
           </span>
         </div>
 
         <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phí vận chuyển: </div>
           <span className="col-span-2">
-            {formatPrice(orderData?.data?.shipping_fee || 0)}
+            {FomatVND(orderData?.data?.shipping_fee || 0)}
           </span>
         </div>
 
@@ -279,14 +338,14 @@ const OrderTracking = () => {
           <span className="col-span-2">
             {orderData?.data?.order_discount_type === 1
               ? `${orderData?.data?.order_discount_amount}%`
-              : formatPrice(orderData?.data?.order_discount_amount || 0)}
+              : FomatVND(orderData?.data?.order_discount_amount || 0)}
           </span>
         </div>
 
         <div className="border-b pb-4grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng thanh toán: </div>
           <span className="text-2xl font-bold text-red-500 col-span-2">
-            {formatPrice(orderData?.data?.total_amount)}
+            {FomatVND(orderData?.data?.total_amount)}
           </span>
         </div>
         <div className="border border-yellow-300 bg-yellow-100 text-left p-4 gap-6">
@@ -299,7 +358,7 @@ const OrderTracking = () => {
             ) : (
               <div className="text-yellow-600">
                 <i className="fas fa-bell" /> Vui lòng thanh toán{" "}
-                {formatPrice(orderData?.data?.total_amount)} khi nhận hàng.
+                {FomatVND(orderData?.data?.total_amount)} khi nhận hàng.
               </div>
             )}
           </span>

@@ -2,6 +2,7 @@
 
 namespace App\Services\Order;
 
+use App\Events\OrderCreate;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Order;
@@ -14,6 +15,7 @@ use App\Models\ProductVariant;
 use App\Models\OrderUserReturn;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Events\OrderStatusUpdated;
 
 class OrderService extends BaseService
 {
@@ -86,7 +88,7 @@ class OrderService extends BaseService
             );
 
             DB::commit();
-
+            broadcast(new OrderCreate());
             return $order;
         } catch (Exception $e) {
             DB::rollBack();
@@ -305,12 +307,22 @@ class OrderService extends BaseService
         }
     }
 
-    public function getOrderAll($paginate = 10)
+    public function getOrderAll($paginate, $search = '')
     {
-        return $this->model->with([
+        $query = $this->model->with([
             'orderItems.product',
             'orderItems.productVariant'
-        ])->orderBy('id', 'desc')->paginate($paginate);
+        ])->orderBy('id', 'desc');
+    
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('order_code', 'like', "%{$search}%")
+                  ->orWhere('customer_name', 'like', "%{$search}%") // nếu có trường này
+                  ->orWhere('customer_phone', 'like', "%{$search}%"); // hoặc các trường phù hợp
+            });
+        }
+    
+        return $query->paginate($paginate);
     }
 
 
@@ -400,7 +412,7 @@ class OrderService extends BaseService
         }
 
         $this->addOrderHistory($order->id, OrderHistory::ACTION_STATUS_UPDATED, $historyData);
-
+        broadcast(new OrderStatusUpdated());
 
         return [
             'success' => true,
@@ -832,21 +844,124 @@ class OrderService extends BaseService
         ])
             ->where('customer_id', $customerId);
 
-        // Tìm kiếm theo mã đơn hàng
-        if (!empty($searchParams['order_code'])) {
-            $query->where('order_code', 'like', '%' . $searchParams['order_code'] . '%');
+        // Tìm kiếm theo từ khoá (có thể là mã đơn hàng hoặc tên sản phẩm)
+        if (!empty($searchParams['keyword'])) {
+            $keyword = $searchParams['keyword'];
+
+            // Tìm theo mã đơn hàng
+            $ordersByCode = $this->model->where('customer_id', $customerId)
+                ->where('order_code', 'like', '%' . $keyword . '%')
+                ->pluck('id');
+
+            // Tìm theo tên sản phẩm
+            $ordersByProduct = $this->model->where('customer_id', $customerId)
+                ->whereHas('orderItems.product', function ($q) use ($keyword) {
+                    $q->where('name', 'like', '%' . $keyword . '%');
+                })
+                ->pluck('id');
+
+            // Kết hợp kết quả
+            $allOrderIds = $ordersByCode->merge($ordersByProduct)->unique();
+
+            if ($allOrderIds->isNotEmpty()) {
+                $query->whereIn('id', $allOrderIds);
+            } else {
+                // Nếu không tìm thấy kết quả nào, trả về kết quả rỗng
+                $query->where('id', 0);
+            }
         }
 
-        // Tìm kiếm theo tên sản phẩm
-        if (!empty($searchParams['product_name'])) {
-            $productName = $searchParams['product_name'];
-            $query->whereHas('orderItems.product', function ($q) use ($productName) {
-                $q->where('name', 'like', '%' . $productName . '%');
-            });
+
+        // Lọc theo nhóm status
+        if (!empty($searchParams['status_group'])) {
+            $statusGroup = $searchParams['status_group'];
+
+            // Nếu là nhóm status đã định nghĩa
+            if (isset(Order::$statusGroups[$statusGroup])) {
+                $groupStatusValues  = Order::$statusGroups[$statusGroup];
+
+                // Nếu statuses không phải null (trường hợp 'all')
+                if ($groupStatusValues  !== null) {
+                    $query->whereIn('status', $groupStatusValues);
+                }
+            }
         }
 
         // Sắp xếp theo thời gian tạo, mới nhất lên đầu
         return $query->orderBy('created_at', 'desc')->paginate($perPage);
+    }
+
+    /**
+     * Đếm số lượng đơn hàng theo nhóm status, có tính đến điều kiện tìm kiếm
+     *
+     * @param int $customerId ID của khách hàng
+     * @param array $searchParams Các tham số tìm kiếm
+     * @return array
+     */
+    public function countOrdersByStatusGroups($customerId, $searchParams = [])
+    {
+        $result = [];
+
+        // Lấy danh sách ID đơn hàng phù hợp với điều kiện tìm kiếm
+        $filteredOrderIds = null;
+
+        // Nếu có từ khóa tìm kiếm, lọc các đơn hàng phù hợp
+        if (!empty($searchParams['keyword'])) {
+            $keyword = $searchParams['keyword'];
+
+            // Tìm theo mã đơn hàng
+            $ordersByCode = $this->model->where('customer_id', $customerId)
+                ->where('order_code', 'like', '%' . $keyword . '%')
+                ->pluck('id');
+
+            // Tìm theo tên sản phẩm
+            $ordersByProduct = $this->model->where('customer_id', $customerId)
+                ->whereHas('orderItems.product', function ($q) use ($keyword) {
+                    $q->where('name', 'like', '%' . $keyword . '%');
+                })
+                ->pluck('id');
+
+            // Kết hợp kết quả
+            $filteredOrderIds = $ordersByCode->merge($ordersByProduct)->unique()->toArray();
+
+            // Nếu không có kết quả nào, trả về tất cả 0
+            if (empty($filteredOrderIds)) {
+                foreach (Order::$statusGroups as $groupName => $statuses) {
+                    $result[$groupName] = 0;
+                }
+                return $result;
+            }
+        }
+
+        // Đếm tổng số đơn hàng (có tính đến điều kiện tìm kiếm)
+        $baseQuery = $this->model->where('customer_id', $customerId);
+
+        // Nếu có danh sách ID đã lọc, chỉ đếm những đơn hàng trong danh sách đó
+        if ($filteredOrderIds !== null) {
+            $baseQuery->whereIn('id', $filteredOrderIds);
+        }
+
+        $result['all'] = $baseQuery->count();
+
+        // Đếm theo từng nhóm status
+        foreach (Order::$statusGroups as $groupName => $statuses) {
+            if ($groupName === 'all') continue; // Bỏ qua nhóm 'all' vì đã đếm ở trên
+
+            $query = $this->model->where('customer_id', $customerId);
+
+            // Nếu có danh sách ID đã lọc, chỉ đếm những đơn hàng trong danh sách đó
+            if ($filteredOrderIds !== null) {
+                $query->whereIn('id', $filteredOrderIds);
+            }
+
+            if ($statuses === null) {
+                $result[$groupName] = $result['all'];
+            } else {
+                $result[$groupName] = $query->whereIn('status', $statuses)->count();
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -930,7 +1045,8 @@ class OrderService extends BaseService
 
             // Từ đã xác nhận (1) có thể chuyển sang đang chuẩn bị hàng (2)
             Order::STATUS_CONFIRMED => [
-                Order::STATUS_PREPARING
+                Order::STATUS_PREPARING,
+                Order::STATUS_CANCELLED
             ],
 
             // Từ đang chuẩn bị hàng (2) chỉ có thể chuyển sang sẵn sàng giao hàng (3)
@@ -989,6 +1105,11 @@ class OrderService extends BaseService
                 Order::STATUS_CANCELLED
             ],
 
+            // Từ đã xác nhận (1) khách hàng có thể hủy đơn (trong thời gian cho phép)
+            Order::STATUS_CONFIRMED => [
+                Order::STATUS_CANCELLED
+            ],
+            
             // Từ đã giao hàng (5) khách hàng có thể xác nhận hoàn thành hoặc yêu cầu đổi/trả
             Order::STATUS_DELIVERED => [
                 Order::STATUS_COMPLETED,
@@ -1048,7 +1169,7 @@ class OrderService extends BaseService
     private function getOrderHistory($orderId)
     {
         return OrderHistory::where('order_id', $orderId)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
     }
 

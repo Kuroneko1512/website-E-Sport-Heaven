@@ -110,6 +110,33 @@ class Order extends Model
         self::RETURN_STATUS_REJECTED => 'Từ chối'
     ];
 
+    // Định nghĩa các nhóm status
+    public static $statusGroups = [
+        'all' => null, // Tất cả status
+        'pending' => [self::STATUS_PENDING, self::STATUS_CONFIRMED, self::STATUS_PREPARING], // Chờ xác nhận (0,1,2)
+        'ready_to_ship' => [self::STATUS_READY_TO_SHIP], // Vận chuyển (3)
+        'shipping' => [self::STATUS_SHIPPING, self::STATUS_DELIVERED], // Đang giao (4,5)
+        'completed' => [self::STATUS_COMPLETED], // Hoàn thành (6)
+        'cancelled' => [self::STATUS_CANCELLED], // Đã hủy (10)
+        'return_refund' => [
+            self::STATUS_RETURN_REQUESTED,
+            self::STATUS_RETURN_PROCESSING,
+            self::STATUS_RETURN_COMPLETED,
+            self::STATUS_RETURN_REJECTED
+        ], // Trả hàng/hoàn tiền (7,8,9,14)
+    ];
+
+    // Tên hiển thị cho các nhóm status
+    public static $statusGroupLabels = [
+        'all' => 'Tất cả',
+        'pending' => 'Chờ xác nhận',
+        'ready_to_ship' => 'Vận chuyển',
+        'shipping' => 'Đang giao',
+        'completed' => 'Hoàn thành',
+        'cancelled' => 'Đã hủy',
+        'return_refund' => 'Trả hàng/hoàn tiền',
+    ];
+    
     protected $fillable = [
         'customer_id',
         'customer_name',

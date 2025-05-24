@@ -17,6 +17,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::post('/register', [CustomerAuthController::class, 'register'])->name('register');
+        Route::post('/forgot-password', [CustomerAuthController::class, 'sendResetLinkEmail'])->name('sendResetLinkEmail');
 
         Route::post('/login', [CustomerAuthController::class, 'login'])->name('login');
         Route::post('refresh', [CustomerAuthController::class, 'refresh'])->name('refresh');
@@ -63,6 +64,7 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('/wishlist', WishlistController::class);
 
             Route::get('/wishlist-product/{id}',[WishlistController::class,'getByProduct']);
+            Route::post('/wishlist-products', [WishlistController::class, 'getByProducts']);
         });
 
         //test route

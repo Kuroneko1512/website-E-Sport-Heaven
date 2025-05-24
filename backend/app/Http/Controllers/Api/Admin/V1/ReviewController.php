@@ -21,24 +21,6 @@ class ReviewController extends Controller
     }
 
     // Lấy danh sách tất cả Đánh giá
-    public function getByProduct($id){
-        try {
-             // Gọi service để lấy dữ liệu
-            $reviews = $this->reviewService->getByProduct($id);
-            return response()->json([
-                'status' => 200,
-                'data' => $reviews, // Trả về dữ liệu Đánh giá
-            ],200);
-        } catch (\Throwable $th) {
-             // Trường hợp có lỗi xảy ra khi lấy dữ liệu
-            return response()->json([
-                'errnor' => 'lấy thất bại',
-                'status'=>200
-            ],500); // Trả về mã lỗi 500 (Internal Server Error)
-        }
-    }
-
-    // Lấy danh sách tất cả Đánh giá
     public function index(){
         try {
              // Gọi service để lấy dữ liệu
