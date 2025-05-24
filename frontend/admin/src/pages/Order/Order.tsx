@@ -6,8 +6,12 @@ import { Link } from "react-router-dom";
 import {
   ORDER_STATUS,
   ORDER_STATUS_LABELS,
+  ORDER_STATUS_STYLES,
   PAYMENT_STATUS,
   PAYMENT_STATUS_LABELS,
+  PAYMENT_STATUS_STYLES,
+  PAYMENT_METHOD_LABELS,
+  PAYMENT_METHOD_STYLES
 } from "@app/constants/OrderConstants";
 import Echo from "laravel-echo";
 import io from "socket.io-client";
@@ -209,6 +213,7 @@ const Orders = () => {
                   <th>Mã Đơn hàng</th>
                   <th>Tổng Tiền</th>
                   <th>Ngày đặt hàng</th>
+                  <th>Kiểu Thanh Toán</th>
                   <th>Trạng Thái Thanh Toán</th>
                   <th className="text-center">Trạng thái Đơn</th>
                 </tr>
@@ -227,16 +232,24 @@ const Orders = () => {
                     <td>
                       {new Date(order.created_at).toLocaleDateString("vi-VI")}
                     </td>
+                    <td className="">
+                      <span
+                        className={`badge ${PAYMENT_METHOD_STYLES[order.payment_method] || 'badge-secondary'}`}
+                        style={{ fontSize: '0.8rem', padding: '4px 8px' }}
+                      >
+                        {PAYMENT_METHOD_LABELS[order.payment_method] || order.payment_method}
+                      </span>
+                    </td>
                     <td>
                       <span
-                        className={`badge ${order.payment_status === PAYMENT_STATUS.PAID ? "badge-success" : "badge-warning"}`}
+                        className={`badge ${PAYMENT_STATUS_STYLES[order.payment_status]}`}
                       >
                         {PAYMENT_STATUS_LABELS[order.payment_status]}
                       </span>
                     </td>
-                    <td className="project-state">
+                    <td className="project-state text-center">
                       <span
-                        className={`badge ${order.status === ORDER_STATUS.COMPLETED ? "badge-success" : "badge-warning"}`}
+                        className={`badge ${ORDER_STATUS_STYLES[order.status]}`}
                       >
                         {ORDER_STATUS_LABELS[order.status]}
                       </span>
