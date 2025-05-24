@@ -18,6 +18,9 @@ interface OrderItem {
   id: number;
   quantity: number;
   price: number;
+  product_image?: string;
+  product_name?: string;
+  product_sku?: string;
   product?: {
     name: string;
     image?: string;
@@ -198,7 +201,7 @@ const DetailOrder: React.FC = () => {
             }
             onClick={nextStatus}  // ĐỔI: handleNextStatus → nextStatus
           >
-            {nextStatusLabel ? `${nextStatusLabel}` : "Không thể chuyển trạng thái"}
+            {nextStatusLabel ? `Chuyển sang : ${nextStatusLabel}` : "Không thể chuyển trạng thái"}
           </button>
 
           {/* Nút huỷ đơn */}
@@ -223,9 +226,9 @@ const DetailOrder: React.FC = () => {
                 <tr>
                   <th>Hình ảnh</th>
                   <th>Sản phẩm</th>
-                  <th>Biến thể</th>
+                  <th>SKU</th>
                   <th>Số lượng</th>
-                  <th>Giá</th>
+                  <th>Đơn Giá</th>
                 </tr>
               </thead>
               <tbody>
