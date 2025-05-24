@@ -9,6 +9,14 @@ export const API_ENDPOINTS = {
         UPDATE_PROFILE: "v1/admin/update-profile",
         LOGOUT: "/v1/admin/logout",
     },
+    CATEGORY: {
+        BASE: "v1/admin/category",
+        GET_ALL: "v1/admin/category",
+        GET_ALL_NO_PAGINATION: "v1/admin/category-all",
+        CREATE: "v1/admin/category",
+        UPDATE: "v1/admin/category",
+        DELETE: "v1/admin/category",
+    },
     PRODUCT: {
         BASE: "v1/admin/product",
         GET_ALL: "v1/admin/product",
@@ -16,6 +24,7 @@ export const API_ENDPOINTS = {
         CREATE: "v1/admin/product",
         UPDATE: "v1/admin/product",
         DELETE: "v1/admin/product",
+        UPDATE_STATUS: "v1/admin/product",
     },
     ORDER: {
         BASE: "v1/admin/order",
@@ -35,5 +44,12 @@ export const API_ENDPOINTS = {
         UPDATE: (id: number) => `v1/admin/blog-categories/${id}`,
         DELETE: (id: number) => `v1/admin/blog-categories/${id}`,
         DETAIL: (id: number) => `v1/admin/blog-categories/${id}`,
+    },
+    REVIEW: {
+        LIST: "v1/admin/review",
+        CREATE: "v1/admin/review",
+        UPDATE: (id: number) => `v1/admin/review/${id}`,
+        DELETE: (id: number) => `v1/admin/review/${id}`,
+        DETAIL: (id: number) => `v1/admin/review/${id}`,
     },
 };

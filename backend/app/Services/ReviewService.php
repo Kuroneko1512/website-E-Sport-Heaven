@@ -11,7 +11,10 @@ class ReviewService extends BaseService {
     }
     
     public function getReviews($paginate = 10){
-        return $this->getAll($paginate);
+        return Review::join('users', 'users.id', '=', 'reviews.user_id')
+             ->join('products', 'products.id', '=', 'reviews.product_id')
+             ->select('users.id', 'users.name as user_name', 'products.name as product_name', 'reviews.*')
+             ->paginate($paginate);
     }
 
     public function getByProduct($id){

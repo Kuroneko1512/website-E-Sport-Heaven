@@ -55,6 +55,11 @@ export const MENU: IMenuItem[] = [
     path: '/order-return',
   },
   {
+    name: 'Đánh giá',
+    icon: 'fas fa-ticket-alt nav-icon',
+    path: '/reviews',
+  },
+  {
     name: 'Mã giảm giá',
     icon: 'fas fa-tags nav-icon', // Mã giảm giá -> thẻ/tag là biểu tượng hợp lý
     path: '/Coupon',

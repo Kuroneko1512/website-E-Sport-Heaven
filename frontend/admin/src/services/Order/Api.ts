@@ -17,12 +17,13 @@ export interface Order {
   status: number;
   customer_id: number;
   created_at: string;
-  payment_status: number;
+  payment_status: number
+  payment_method: string;
 }
 interface OrderResponse {
-    message: string;
-    data?: any;
-  }
+  message: string;
+  data?: any;
+}
 
 // Interface định nghĩa dữ liệu trả về từ API, bao gồm thông tin phân trang
 export interface Pagination {
@@ -78,19 +79,20 @@ export const getOrderById = async (id: string | number) => {
 // };
 
 export const updateOrderStatus = async (id: number, status: number): Promise<OrderResponse> => {
-    try {
-      const response = await api.put<OrderResponse>(`${API_ENDPOINTS.ORDER.BASE}/${id}/status`, { status });
-      return response.data;
-    } catch (error) {
-      console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
-      throw error;
-    }
-  };
+  try {
+    const response = await api.put<OrderResponse>(`${API_ENDPOINTS.ORDER.BASE}/${id}/status`, { status });
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+    throw error;
+  }
+};
 
 // Hàm gọi API lấy danh sách orders với phân trang
-export const getOrders = async (page: number = 1, limit: number = 5): Promise<Pagination> => {
+export const getOrders = async (page: number = 1, limit: number = 5, account_type: string = '', search: string = ''): Promise<Pagination> => {
   try {
-    const response = await api.get<Pagination>(`${API_ENDPOINTS.ORDER.BASE}?page=${page}&limit=${limit}`);
+    const response = await api.get<Pagination>(`${API_ENDPOINTS.ORDER.BASE}?page=${page}&limit=${limit}&account_type=${account_type}&search=${search}`);
+
     return response.data;
   } catch (error) {
     console.error("Error fetching orders:", error);

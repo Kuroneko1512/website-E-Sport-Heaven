@@ -9,13 +9,13 @@ import { useQuery } from "@tanstack/react-query";
 import instanceAxios from "../config/db";
 import SkeletonLoadingHome from "../components/loadingSkeleton/SkeletonLoadingHome";
 import SkeletonBestseller from "../components/loadingSkeleton/SkeletonBestseller";
-
+import ProductLaster from "../components/main/ProductLaster";
 
 const Home = () => {
   const { data: productData, isLoading: productLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const res = await instanceAxios.get(`/api/v1/product`);
+      const res = await instanceAxios.get(`/api/v1/product/new`);
       return res?.data?.data?.data;
     },
   });
@@ -30,6 +30,17 @@ const Home = () => {
     },
   });
 
+  const { data: productDataBestseller, isLoading: productLoadingBestseller } =
+    useQuery({
+      queryKey: ["productsBestseller"],
+      queryFn: async () => {
+        const res = await instanceAxios.get(`/api/v1/product/best-selling`);
+        return res?.data?.data;
+      },
+    });
+
+    console.log("productDataBestseller", productDataBestseller);
+
   return (
     <div className="bg-gray-50 dark:bg-gray-800 min-h-screen text-black dark:text-white">
       {/* Content */}
@@ -39,21 +50,43 @@ const Home = () => {
 
         {/* Category Slider */}
         {categoriesLoading ? (
-          <SkeletonLoadingHome />
+          <>
+            <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">
+              Danh mục sản phẩm
+            </h1>
+            <SkeletonLoadingHome />
+          </>
         ) : (
           <CategorySlider categories={categories?.slice(0, 8)} />
         )}
 
         {/* Product Bestseller */}
-        {productLoading ? (
-          <SkeletonBestseller/>
+        {productLoadingBestseller ? (
+          <>
+            <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">
+              Sản phẩm bán chạy
+            </h1>
+            <SkeletonBestseller />
+          </>
         ) : (
-          <ProductBestseller productData={productData?.slice(0, 8)} />
+          <ProductBestseller productDataB={productDataBestseller} />
+        )}
+
+        {/* Product New */}
+        {productLoading ? (
+          <>
+            <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">
+              Sản phẩm mới
+            </h1>
+            <SkeletonBestseller />
+          </>
+        ) : (
+          <ProductLaster productData={productData} />
         )}
 
         {/* Deals of the Month */}
         <DealsOfTheMonth />
-
+        
         {/* Customer Say */}
         <CustomerSay />
       </div>

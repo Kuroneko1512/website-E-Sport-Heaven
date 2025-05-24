@@ -1,11 +1,6 @@
 // src/api/attributeApi.ts
-import axios from 'axios';
-
-const API_URL = 'http://127.0.0.1:8000/api/v1/category';
-
-
-
-
+import { api } from '@app/api/adminApi';
+import { API_ENDPOINTS } from '@app/api/endpoints';
 
 // Interface định nghĩa dữ liệu của một attribute
 export interface Category {
@@ -20,7 +15,7 @@ export interface Category {
 
 export const createCategory = async (attribute: FormData): Promise<Category> => {
   try {
-    const response = await axios.post<Category>(API_URL, attribute, {
+    const response = await api.post<Category>(API_ENDPOINTS.CATEGORY.CREATE, attribute, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -32,7 +27,7 @@ export const createCategory = async (attribute: FormData): Promise<Category> => 
   }
 };
 export const getCategory = async () => {
-  return await axios.get(`${API_URL}`);
+  return await api.get(API_ENDPOINTS.CATEGORY.GET_ALL);
 };
 // Hàm cập nhật một thuộc tính dựa vào ID
 export const updateCategory = async (
@@ -41,8 +36,8 @@ export const updateCategory = async (
 ): Promise<Category> => {
   try {
     // Gửi yêu cầu cập nhật dữ liệu lên API bằng phương thức PUT
-    const response = await axios.put<Category>(
-      `${API_URL}/${id}`, // URL API endpoint có chứa ID của thuộc tính cần cập nhật
+    const response = await api.put<Category>(
+      `${API_ENDPOINTS.CATEGORY.UPDATE}/${id}`, // URL API endpoint có chứa ID của thuộc tính cần cập nhật
       attribute, // Dữ liệu thuộc tính cần gửi
       {
         headers: {
@@ -68,10 +63,23 @@ export const updateCategory = async (
 export const deleteCategory = async (id: number): Promise<void> => {
   try {
     // console.log(`Sending DELETE request to: ${API_URL}/attributes/${id}`);
-    await axios.delete(`${API_URL}/${id}`);
+    await api.delete(`${API_ENDPOINTS.CATEGORY.DELETE}/${id}`);
     console.log(`Deleted attribute with id: ${id}`);
   } catch (error) {
     console.error("Error deleting attribute:", error);
+    throw error;
+  }
+};
+
+
+export const getAllCategories = async () => {
+  try {
+    // Sử dụng api instance và endpoint đã khai báo
+    const response = await api.get(API_ENDPOINTS.CATEGORY.GET_ALL_NO_PAGINATION);
+    console.log("API getAllCategories response:", response);
+    return response;
+  } catch (error) {
+    console.error('Error fetching all categories:', error);
     throw error;
   }
 };

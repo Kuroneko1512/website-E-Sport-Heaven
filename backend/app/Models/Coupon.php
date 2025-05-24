@@ -13,11 +13,9 @@ class Coupon extends Model
         'description',
         'discount_type',
         'discount_value',
-        'min_purchase',
+        'min_order_amount',
+        'max_discount_amount',
         'max_uses',
-        'used_count',
-        'max_uses_per_user',
-        'user_usage',
         'is_active',
         'start_date',
         'end_date',
@@ -26,6 +24,6 @@ class Coupon extends Model
     use HasFactory;
     public function usages()
     {
-        return $this->hasMany(CouponUsage::class);
+        return $this->hasMany(CouponUsage::class, 'coupon_id', 'id');
     }
 }

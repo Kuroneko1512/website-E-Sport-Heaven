@@ -1,188 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import instanceAxios from "../../config/db";
-import FomatVND from "../../utils/FomatVND";
-import { FomatTime } from "../../utils/FomatTime";
-import { Link, useNavigate } from "react-router-dom";
-import { message, Modal, Form } from "antd";
-import ReviewForm from "./ReviewForm";
-import useReview from "../../hooks/useReview";
-import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
+import { Form, message, Modal } from "antd";
 import Cookies from "js-cookie";
-import {
-  ORDER_STATUS_LABELS,
-  ORDER_STATUS,
-  PAYMENT_STATUS_LABELS,
-  PAYMENT_STATUS,
-} from "../../constants/OrderConstants";
-import Pagination from "../filterProduct/Pagination";
+import { useMemo, useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import instanceAxios from "../../config/db";
+import { ORDER_STATUS } from "../../constants/OrderConstants";
+import useReview from "../../hooks/useReview";
 import useScrollToTop from "../../hooks/useScrollToTop";
+import { FomatTime } from "../../utils/FomatTime";
+import FomatVND from "../../utils/FomatVND";
+import Pagination from "../filterProduct/Pagination";
+import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
+import OrderItem from "./OrderItem";
+import useReviewSubmit from "../../hooks/useReviewSubmit";
+import getActionsForOrder from "../../utils/getActionsForOrder";
 
-const OrderItem = ({
-  order_items,
-  customer_name,
-  status,
-  shipping_address,
-  order_code,
-  reviewModalVisible,
-  setReviewModalVisible,
-  selectedProduct,
-  handleReviewSubmit,
-  form,
-  selectedOrder,
-  currentProductIndex,
-  setCurrentProductIndex,
-  reviewedProducts,
-}) => {
-  const totalAmount = order_items.reduce((total, item) => {
-    return total + calculateSubtotal(item);
-  }, 0);
-
-  // console.log("order_code", status);
-  const statusStyles = {
-    [ORDER_STATUS.PENDING]:
-      "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
-    [ORDER_STATUS.CONFIRMED]:
-      "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-400",
-    [ORDER_STATUS.PREPARING]:
-      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    [ORDER_STATUS.READY_TO_SHIP]:
-      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    [ORDER_STATUS.SHIPPING]:
-      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-    [ORDER_STATUS.DELIVERED]:
-      "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
-    [ORDER_STATUS.COMPLETED]:
-      "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
-    [ORDER_STATUS.RETURN_REQUESTED]:
-      "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
-    [ORDER_STATUS.RETURN_PROCESSING]:
-      "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300",
-    [ORDER_STATUS.RETURNED_COMPLETED]:
-      "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
-    [ORDER_STATUS.RETURN_REJECTED]:
-      "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300",
-    [ORDER_STATUS.CANCELLED]:
-      "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
-  };
-
-  return (
-    <>
-      <Modal
-        title="Đánh giá sản phẩm"
-        open={reviewModalVisible}
-        onCancel={() => {
-          setReviewModalVisible(false);
-          form.resetFields();
-        }}
-        footer={[
-          <button
-            key="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-            onClick={() => handleReviewSubmit(form.getFieldsValue())}
-          >
-            Đăng đánh giá
-          </button>,
-        ]}
-        width={800}
-      >
-        <div className="max-h-[500px] overflow-y-auto">
-          {selectedOrder?.order_items?.map((item, index) => (
-            <div key={index} className="mb-6 border-b pb-4">
-              <div className="flex items-start pb-4">
-                <img
-                  alt="Product Image"
-                  className="h-24 w-24 rounded-md mr-4"
-                  src={`http://127.0.0.1:8000/storage/${
-                    item?.product?.image || item?.product_variant?.image
-                  }`}
-                />
-                <div>
-                  <p className="font-bold text-lg">{item?.product?.name}</p>
-                  {item?.product_variant?.product_attributes?.length > 0 && (
-                    <p className="text-gray-600">
-                      {item?.product_variant?.product_attributes.map(
-                        (attr, index) => (
-                          <span key={index}>
-                            {attr?.attribute?.name}:{" "}
-                            {attr.attribute_value?.value}{" "}
-                          </span>
-                        )
-                      )}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <ReviewForm namePrefix={`product_${index}`} form={form} />
-            </div>
-          ))}
-        </div>
-      </Modal>
-      <h3 className="bg-white flex justify-between border-b border-gray-200 items-center dark:bg-gray-800 pb-3">
-        <div className="flex flex-col gap-2">
-          <span>
-            Mã đơn hàng: <strong>{order_code}</strong>
-          </span>
-          <span className="text-sm">{customer_name}</span>
-          <span className="text-sm">
-            {shipping_address.substring(0, 60)}...
-          </span>
-        </div>
-        <span className={`px-2 py-1 rounded text-base ${statusStyles[status]}`}>
-          {ORDER_STATUS_LABELS[status]}
-        </span>
-      </h3>
-
-      <div className="bg-white dark:bg-gray-800 flex gap-4 items-start border-b border-gray-200 dark:border-gray-700 pb-3">
-        <div className="flex-1 grid grid-cols-3 gap-4">
-          {order_items?.map((item, index) => (
-            <div
-              key={index}
-              className="col-span-3 flex items-center justify-between  space-y-3 pb-3"
-            >
-              <div className="flex items-center space-x-4">
-                <img
-                  alt="Product Image"
-                  className="h-16 w-16 rounded-md"
-                  src={`http://127.0.0.1:8000/storage/${
-                    item?.product?.image || item?.product_variant?.image
-                  }`}
-                />
-                <div>
-                  <p className="font-bold text-gray-900 dark:text-gray-200">
-                    {item?.product?.name}
-                  </p>
-                  {/* Attributes */}
-                  {item?.product_variant?.product_attributes?.length > 0 && (
-                    <p className="text-gray-600 dark:text-gray-400">
-                      {item?.product_variant?.product_attributes.map(
-                        (attr, index) => (
-                          <span key={index}>
-                            {attr?.attribute?.name}:{" "}
-                            {attr.attribute_value?.value}{" "}
-                          </span>
-                        )
-                      )}
-                    </p>
-                  )}
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Số lượng: {item?.quantity}
-                  </p>
-                </div>
-              </div>
-              <span className="text-right">
-                <p className="font-bold text-lg text-gray-900 dark:text-gray-200">
-                  {/* {FomatVND(calculate(item))} */}
-                  {FomatVND(item?.price)}
-                </p>
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </>
-  );
-};
+const ORDER_STATUS_TABS = [
+  { key: "all", label: "Tất cả" },
+  { key: "pending", label: "Chờ xác nhận" },
+  { key: "ready_to_ship", label: "Vận chuyển" },
+  { key: "shipping", label: "Đang giao" },
+  { key: "completed", label: "Hoàn thành" },
+  { key: "cancelled", label: "Đã hủy" },
+  { key: "return_refund", label: "Trả hàng/hoàn tiền" },
+];
 
 const calculateSubtotal = (item) => {
   const price =
@@ -198,21 +39,10 @@ const calculateSubtotal = (item) => {
 
   return discountedPrice * quantity;
 };
-const calculate = (item) => {
-  const price =
-    Number(item?.product?.price || item?.product_variant?.price) || 0;
-  const discountPercent =
-    Number(
-      item?.product?.discount_percent || item?.product_variant?.discount_percent
-    ) || 0;
 
-  // Calculate discounted price
-  const discountedPrice = price - (price * discountPercent) / 100;
-
-  return discountedPrice;
-};
-const MyOrder = () => {
+const MyOrder = ({ searchParam = "", setSearchParam }) => {
   const nav = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -221,8 +51,22 @@ const MyOrder = () => {
   const [form] = Form.useForm();
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  // Thêm state cho input và search thực tế
+  const [inputValue, setInputValue] = useState(searchParam);
+  const [searchTerm, setSearchTerm] = useState(searchParam);
+  // Lấy trạng thái từ URL (ưu tiên URL, fallback 'all')
+  const urlStatus = searchParams.get("status_group") || "all";
+  const [orderStatus, setOrderStatus] = useState(urlStatus);
   const user = JSON.parse(Cookies.get("user"));
   const queryClient = useQueryClient();
+  const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
+  const { handleReviewSubmit } = useReviewSubmit(
+    form,
+    selectedOrder,
+    setReviewModalVisible
+  );
+  const [returnRequestModalVisible, setReturnRequestModalVisible] =
+    useState(false);
 
   // console.log("user", user);
   // Sử dụng hook scroll to top khi currentPage thay đổi
@@ -234,71 +78,25 @@ const MyOrder = () => {
     selectedProduct?.product_id || selectedProduct?.product_variant?.product_id
   );
 
-  const handleReviewSubmit = async () => {
-    try {
-      // Validate all forms first
-      const values = form.getFieldsValue();
-      const errors = [];
-
-      selectedOrder.order_items.forEach((item, index) => {
-        if (!values[`product_${index}_rating`]) {
-          errors.push(`Vui lòng đánh giá sản phẩm ${item.product?.name}`);
-        }
-        if (!values[`product_${index}_comment`]) {
-          errors.push(
-            `Vui lòng nhập đánh giá cho sản phẩm ${item.product?.name}`
-          );
-        }
-      });
-
-      if (errors.length > 0) {
-        message.error(errors.join("\n"));
-        return;
-      }
-
-      // Submit all reviews
-      const user = JSON.parse(Cookies.get("user"));
-      const reviewPromises = selectedOrder.order_items.map((item, index) => {
-        const productId = item.product_id || item.product_variant?.product_id;
-        const reviewData = {
-          images: user.avatar,
-          title: user.name,
-          rating: values[`product_${index}_rating`],
-          comment: values[`product_${index}_comment`],
-        };
-        return instanceAxios.post(`/api/v1/customer/review`, {
-          product_id: productId,
-          ...reviewData,
-        });
-      });
-
-      message.loading("Đang gửi đánh giá...", 0);
-      await Promise.all(reviewPromises);
-      message.destroy();
-      message.success("Đã gửi đánh giá thành công");
-      form.resetFields();
-      setReviewModalVisible(false);
-    } catch (error) {
-      message.destroy();
-      message.error("Có lỗi xảy ra khi gửi đánh giá");
-      console.error(error);
-    }
-  };
   const {
     data: apiResponse,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["orders", currentPage],
+    queryKey: ["orders", currentPage, searchTerm, orderStatus],
     queryFn: async () => {
-      const res = await instanceAxios.get(
-        `/api/v1/customer/orders?page=${currentPage}`
-      );
+      let url = `/api/v1/customer/orders?page=${currentPage}`;
+      if (searchTerm.trim()) {
+        url += `&keyword=${encodeURIComponent(searchTerm.trim())}`;
+      }
+      // Luôn truyền status_group, kể cả 'all'
+      url += `&status_group=${orderStatus}`;
+      const res = await instanceAxios.get(url);
       return res?.data;
     },
   });
 
-  console.log("orderData", apiResponse);
+  // console.log("orderData", apiResponse);
 
   // Truy cập đúng mảng đơn hàng từ cấu trúc phản hồi API
   const orders = apiResponse?.data?.data || [];
@@ -306,18 +104,51 @@ const MyOrder = () => {
 
   // 1. Dùng useMemo để group orders theo ngày (string)
   const ordersByDate = useMemo(() => {
-    // Kiểm tra xem orders có phải là mảng không
     if (!Array.isArray(orders)) {
       console.error("orders is not an array:", orders);
-      return {}; // Trả về object rỗng nếu không phải mảng
+      return {};
     }
-    return orders.reduce((groups, order) => {
-      // FomatTime trả về chuỗi như "Hôm nay", "Hôm qua", hoặc "DD/MM/YYYY"
-      const day = FomatTime(order.created_at);
-      if (!groups[day]) groups[day] = [];
-      groups[day].push(order);
-      return groups;
-    }, {});
+
+    const result = {};
+    const now = new Date();
+
+    // Tạo các nhóm cố định
+    result["Hôm nay"] = [];
+    result["Hôm qua"] = [];
+    result["Tuần này"] = [];
+    result["Tháng này"] = [];
+    result["Trước đó"] = [];
+
+    orders.forEach((order) => {
+      if (!order?.created_at) return;
+
+      const orderDate = new Date(order.created_at);
+      const daysDiff = Math.floor((now - orderDate) / (1000 * 60 * 60 * 24));
+
+      if (daysDiff === 0) {
+        result["Hôm nay"].push(order);
+      } else if (daysDiff === 1) {
+        result["Hôm qua"].push(order);
+      } else if (daysDiff < 7) {
+        result["Tuần này"].push(order);
+      } else if (
+        orderDate.getMonth() === now.getMonth() &&
+        orderDate.getFullYear() === now.getFullYear()
+      ) {
+        result["Tháng này"].push(order);
+      } else {
+        result["Trước đó"].push(order);
+      }
+    });
+
+    // Loại bỏ các nhóm trống
+    Object.keys(result).forEach((key) => {
+      if (result[key].length === 0) {
+        delete result[key];
+      }
+    });
+
+    return result;
   }, [orders]);
 
   // Hiển thị lỗi nếu có
@@ -330,10 +161,13 @@ const MyOrder = () => {
   // Mutation cho hủy đơn hàng
   const cancelOrderMutation = useMutation({
     mutationFn: async ({ orderId }) => {
-      const response = await instanceAxios.put(`/api/v1/order/${orderId}/status`, {
-        status: ORDER_STATUS.CANCELLED,
-        customer_id: user.customerId,
-      });
+      const response = await instanceAxios.put(
+        `/api/v1/order/${orderId}/status`,
+        {
+          status: ORDER_STATUS.CANCELLED,
+          customer_id: user.customerId,
+        }
+      );
       return response.data;
     },
     onSuccess: (data) => {
@@ -346,19 +180,20 @@ const MyOrder = () => {
       }
     },
     onError: (error) => {
-      message.error(
-        error.response?.data?.message || "Không thể hủy đơn hàng"
-      );
+      message.error(error.response?.data?.message || "Không thể hủy đơn hàng");
     },
   });
 
   // Mutation cho xác nhận nhận hàng
   const confirmReceivedMutation = useMutation({
     mutationFn: async ({ orderId }) => {
-      const response = await instanceAxios.put(`/api/v1/order/${orderId}/status`, {
-        status: ORDER_STATUS.COMPLETED,
-        customer_id: user.customerId,
-      });
+      const response = await instanceAxios.put(
+        `/api/v1/order/${orderId}/status`,
+        {
+          status: ORDER_STATUS.COMPLETED,
+          customer_id: user.customerId,
+        }
+      );
       return response.data;
     },
     onSuccess: (data) => {
@@ -380,10 +215,13 @@ const MyOrder = () => {
   // Mutation cho yêu cầu trả hàng
   const requestReturnMutation = useMutation({
     mutationFn: async ({ orderId }) => {
-      const response = await instanceAxios.put(`/api/v1/order/${orderId}/status`, {
-        status: ORDER_STATUS.RETURN_REQUESTED,
-        customer_id: user.customerId,
-      });
+      const response = await instanceAxios.put(
+        `/api/v1/order/${orderId}/status`,
+        {
+          status: ORDER_STATUS.RETURN_REQUESTED,
+          customer_id: user.customerId,
+        }
+      );
       return response.data;
     },
     onSuccess: (data) => {
@@ -400,56 +238,6 @@ const MyOrder = () => {
       );
     },
   });
-
-  const getActionsForOrder = (order) => {
-    const actions = [];
-
-    // Actions for PENDING orders
-    if (order.status === ORDER_STATUS.PENDING) {
-      actions.push("hủy");
-    }
-
-    // Actions for DELIVERED orders
-    if (order.status === ORDER_STATUS.DELIVERED) {
-      actions.push("Đã nhận hàng");
-    }
-
-    // Actions for COMPLETED orders
-    if (order.status === ORDER_STATUS.COMPLETED) {
-      actions.push("đánh giá", "mua lại");
-
-      // Check if within 7 days for return request
-      const completedDate = new Date(order.updated_at);
-      const now = new Date();
-      const diffInDays = (now - completedDate) / (1000 * 60 * 60 * 24);
-
-      if (diffInDays <= 7) {
-        actions.push("yêu cầu trả hàng");
-      }
-    }
-
-    // Actions for CANCELLED orders
-    if (order.status === ORDER_STATUS.CANCELLED) {
-      actions.push("mua lại");
-    }
-
-    // Actions for RETURN_PROCESSING orders
-    if (order.status === ORDER_STATUS.RETURN_PROCESSING) {
-      actions.push("xem trạng thái trả hàng");
-    }
-
-    // Actions for RETURNED_COMPLETED orders
-    if (order.status === ORDER_STATUS.RETURNED_COMPLETED) {
-      actions.push("mua lại");
-    }
-
-    // Actions for RETURN_REJECTED orders
-    if (order.status === ORDER_STATUS.RETURN_REJECTED) {
-      actions.push("mua lại");
-    }
-
-    return actions;
-  };
 
   const handleAction = async (action, order) => {
     // console.log("order", order);
@@ -468,7 +256,29 @@ const MyOrder = () => {
           break;
 
         case "hủy":
-          cancelOrderMutation.mutate({ orderId: order.id });
+          Modal.confirm({
+            title: "Xác nhận hủy đơn hàng",
+            content: (
+              <div>
+                <p>
+                  Bạn có chắc chắn muốn hủy đơn hàng{" "}
+                  <strong>{order.order_code}</strong>?
+                </p>
+                <div className="bg-yellow-50 p-3 rounded-lg mt-2">
+                  <p className="text-yellow-800">
+                    Lưu ý: Sau khi hủy, đơn hàng sẽ không thể khôi phục.
+                  </p>
+                </div>
+              </div>
+            ),
+            okText: "Xác nhận hủy",
+            cancelText: "Không",
+            okButtonProps: {
+              danger: true,
+              loading: cancelOrderMutation.isLoading,
+            },
+            onOk: () => cancelOrderMutation.mutate({ orderId: order.id }),
+          });
           break;
 
         case "mua lại":
@@ -536,10 +346,10 @@ const MyOrder = () => {
           confirmReceivedMutation.mutate({ orderId: order.id });
           break;
 
-
-          // Ấn yêu cầu trả hàng, chuyển sang màn hình gửi form yêu cầu trả hàng, khi nào điền xong for và ấn submit thì mới chuyển trạng thái.
-        case "Yêu cầu trả hàng":
-          requestReturnMutation.mutate({ orderId: order.id });
+        // Ấn yêu cầu trả hàng, chuyển sang màn hình gửi form yêu cầu trả hàng, khi nào điền xong for và ấn submit thì mới chuyển trạng thái.
+        case "yêu cầu trả hàng":
+          setSelectedReturnOrder(order);
+          setReturnRequestModalVisible(true);
           break;
 
         case "xem trạng thái trả hàng":
@@ -564,31 +374,75 @@ const MyOrder = () => {
     }
   };
 
+  // Khi searchParam trên URL thay đổi (ví dụ: back/forward), đồng bộ lại state
+  // (Chỉ chạy khi searchParam thay đổi)
+  useEffect(() => {
+    setInputValue(searchParam);
+    setSearchTerm(searchParam);
+  }, [searchParam]);
+
+  // Khi orderStatus thay đổi, reset về page 1
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [orderStatus]);
+
+  // Khi URL thay đổi (ví dụ reload/back/forward), đồng bộ lại state
+  useEffect(() => {
+    const urlStatus = searchParams.get("status_group") || "all";
+    setOrderStatus(urlStatus);
+  }, [searchParams]);
+
+  const handleTabClick = (key) => {
+    setOrderStatus(key);
+    setCurrentPage(1);
+    setSearchParams(params => {
+      const newParams = new URLSearchParams(params);
+      newParams.set("status_group", key);
+      return newParams;
+    });
+  };
+
+  console.log("orders", orders);
+
   return (
-    <>
+    <div className="dark:bg-gray-800 min-h-screen p-6">
+      <div className="flex justify-between items-center mb-3">
+        {ORDER_STATUS_TABS.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => handleTabClick(tab.key)}
+            className={`px-2 py-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white focus:outline-none transition-colors duration-150
+              ${orderStatus === tab.key ? "border-b-2 border-black dark:border-white font-semibold" : ""}
+            `}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex justify-between items-center mb-6">
+        <input
+          className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg p-2 w-1/2"
+          placeholder="Tìm kiếm theo mã đơn hoặc tên sản phẩm"
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              setCurrentPage(1);
+              setSearchTerm(inputValue); // Chỉ cập nhật searchTerm khi nhấn Enter
+              if (setSearchParam) setSearchParam(inputValue); // Cập nhật URL
+            }
+          }}
+        />
+      </div>
       {isLoading ? (
         <>
           <SkeletonOrder />
           <SkeletonOrder />
         </>
       ) : (
-        <div className="dark:bg-gray-800 min-h-screen p-6">
-          <div className="flex justify-between items-center mb-3">
-            <div className="px-2 py-1">Tất cả</div>
-            <div className="px-2 py-1">Chờ thanh toán</div>
-            <div className="px-2 py-1">Đang xử lý/đã xác nhận</div>
-            <div className="px-2 py-1">Đang giao</div>
-            <div className="px-2 py-1">Hoàn thành</div>
-            <div className="px-2 py-1">Đã hủy</div>
-            <div className="px-2 py-1">Hoàn tiền/trả hàng</div>
-          </div>
-          <div className="flex justify-between items-center mb-6">
-            <input
-              className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg p-2 w-1/2"
-              placeholder="Tìm kiếm theo tên sản phẩm"
-              type="text"
-            />
-          </div>
+        <>
           <div className="space-y-8">
             {Object.entries(ordersByDate).length > 0 ? (
               Object.entries(ordersByDate).map(([dayLabel, orders]) => (
@@ -597,9 +451,7 @@ const MyOrder = () => {
                   className="border rounded-lg shadow-lg border-gray-200 dark:border-gray-700"
                 >
                   {/* Tiêu đề ngày mua chỉ render 1 lần cho nhóm */}
-                  <h3 className="m-3 text-lg font-semibold">
-                    Ngày mua: {dayLabel}
-                  </h3>
+                  <h3 className="m-3 text-lg font-semibold">{dayLabel}</h3>
                   <div>
                     {orders.map((order, idx) => (
                       <div
@@ -610,6 +462,7 @@ const MyOrder = () => {
                         <OrderItem
                           order_items={order.order_items}
                           status={order.status}
+                          payment_status={order.payment_status}
                           shipping_address={order.shipping_address}
                           customer_name={order.customer_name}
                           order_code={order.order_code}
@@ -629,13 +482,6 @@ const MyOrder = () => {
                           <div className="self-end">
                             <span className="mr-2 font-medium">Tổng tiền:</span>
                             <span className="font-bold">
-                              {/* {FomatVND(
-                                (order?.order_items || []).reduce(
-                                  (total, item) =>
-                                    total + calculateSubtotal(item),
-                                  0
-                                )
-                              )} */}
                               {FomatVND(order?.subtotal)}
                             </span>
                           </div>
@@ -646,7 +492,42 @@ const MyOrder = () => {
                             >
                               Chi tiết
                             </Link>
-
+                            {/* Nút tiếp tục thanh toán */}
+                            {order?.history &&
+                              (() => {
+                                const vnpayItem = order?.history?.find(
+                                  (h) =>
+                                    h.metadata?.vnpay_url &&
+                                    h.metadata?.expire_date
+                                );
+                                if (!vnpayItem) return null;
+                                const isVnpayExpired = (expireDateStr) => {
+                                  if (!expireDateStr) return true;
+                                  const expire = new Date(
+                                    expireDateStr
+                                  ).getTime();
+                                  const now = Date.now();
+                                  return now > expire;
+                                };
+                                const expired = isVnpayExpired(
+                                  vnpayItem?.metadata?.expire_date
+                                );
+                                const isPaid = order?.history?.some(
+                                  (h) => h.metadata?.new_payment_status === 1
+                                );
+                                if (expired || isPaid) return null;
+                                return (
+                                  <button
+                                    className="ml-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow"
+                                    onClick={() =>
+                                      (window.location.href =
+                                        vnpayItem.metadata.vnpay_url)
+                                    }
+                                  >
+                                    Tiếp tục thanh toán
+                                  </button>
+                                );
+                              })()}
                             {getActionsForOrder(order).map((action, idx) => (
                               <button
                                 key={idx}
@@ -695,48 +576,91 @@ const MyOrder = () => {
               </div>
             )}
           </div>
-
-          {/* Add Confirmation Modal */}
-          <Modal
-            title="Xác nhận đã nhận hàng"
-            open={confirmModalVisible}
-            onCancel={() => setConfirmModalVisible(false)}
-            footer={[
-              <button
-                key="cancel"
-                className="px-4 py-2 border rounded-lg mr-2"
-                onClick={() => setConfirmModalVisible(false)}
-                disabled={confirmReceivedMutation.isLoading}
-              >
-                Hủy
-              </button>,
-              <button
-                key="confirm"
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-                onClick={() => handleAction("confirmReceived", selectedOrder)}
-                disabled={confirmReceivedMutation.isLoading}
-              >
-                {confirmReceivedMutation.isLoading ? "Đang xử lý..." : "Xác nhận"}
-              </button>,
-            ]}
-          >
-            <div className="p-4">
-              <p className="mb-4">Bạn có chắc chắn đã nhận được hàng?</p>
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <p className="text-yellow-800">
-                  <strong>Lưu ý quan trọng:</strong>
-                </p>
-                <p className="text-yellow-700 mt-2">
-                  Bạn có thể yêu cầu hoàn trả hàng trong vòng 7 ngày kể từ ngày
-                  nhận hàng. Sau thời gian này, chúng tôi sẽ không thể xử lý yêu
-                  cầu hoàn trả của bạn.
-                </p>
-              </div>
-            </div>
-          </Modal>
-        </div>
+        </>
       )}
-    </>
+
+      {/* Add Confirmation Modal */}
+      <Modal
+        title="Xác nhận đã nhận hàng"
+        open={confirmModalVisible}
+        onCancel={() => setConfirmModalVisible(false)}
+        footer={[
+          <button
+            key="cancel"
+            className="px-4 py-2 border rounded-lg mr-2"
+            onClick={() => setConfirmModalVisible(false)}
+            disabled={confirmReceivedMutation.isLoading}
+          >
+            Hủy
+          </button>,
+          <button
+            key="confirm"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+            onClick={() => handleAction("confirmReceived", selectedOrder)}
+            disabled={confirmReceivedMutation.isLoading}
+          >
+            {confirmReceivedMutation.isLoading ? "Đang xử lý..." : "Xác nhận"}
+          </button>,
+        ]}
+      >
+        <div className="p-4">
+          <p className="mb-4">Bạn có chắc chắn đã nhận được hàng?</p>
+          <div className="bg-yellow-50 p-4 rounded-lg">
+            <p className="text-yellow-800">
+              <strong>Lưu ý quan trọng:</strong>
+            </p>
+            <p className="text-yellow-700 mt-2">
+              Khi bạn xác nhận đã nhận hàng, bạn sẽ không thể yêu cầu trả hàng
+              cho đơn hàng này nữa. Nếu bạn gặp vấn đề với sản phẩm, vui lòng
+              liên hệ với chúng tôi.
+            </p>
+          </div>
+        </div>
+      </Modal>
+      {/* Modal xác nhận yêu cầu trả hàng */}
+      <Modal
+        title="Xác nhận yêu cầu trả hàng"
+        open={returnRequestModalVisible}
+        onCancel={() => setReturnRequestModalVisible(false)}
+        footer={[
+          <button
+            key="cancel"
+            className="px-4 py-2 border rounded-lg mr-2"
+            onClick={() => setReturnRequestModalVisible(false)}
+          >
+            Hủy
+          </button>,
+          <button
+            key="confirm"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+            onClick={() => {
+              setReturnRequestModalVisible(false);
+              if (selectedReturnOrder) {
+                nav(`/orders/${selectedReturnOrder.order_code}/return-request`);
+              }
+            }}
+          >
+            Xác nhận
+          </button>,
+        ]}
+      >
+        <div className="p-4">
+          <p className="mb-4">
+            Bạn có chắc chắn muốn gửi yêu cầu trả hàng cho đơn{" "}
+            <strong>{selectedReturnOrder?.order_code}</strong>?
+          </p>
+          <div className="bg-yellow-50 p-4 rounded-lg">
+            <p className="text-yellow-800">
+              <strong>Lưu ý:</strong>
+            </p>
+            <p className="text-yellow-700 mt-2">
+              Sau khi xác nhận, bạn sẽ được chuyển đến form để hoàn tất yêu cầu
+              trả hàng.
+            </p>
+          </div>
+        </div>
+      </Modal>
+    </div>
   );
 };
 

@@ -24,11 +24,13 @@ class OrderController extends Controller
         $this->orderService = $orderService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $paginate = $request -> input('paginate', 15);
+        $search = $request -> input('search', '');
         try {
             // Gọi service để lấy dữ liệu
-            $Product = $this->orderService->getOrderAll();
+            $Product = $this->orderService->getOrderAll($paginate, $search);
             return response()->json([
                 'status' => 200,
                 'data' => $Product, // Trả về dữ liệu thuộc tính
@@ -36,7 +38,7 @@ class OrderController extends Controller
         } catch (\Throwable $th) {
             // Trường hợp có lỗi xảy ra khi lấy dữ liệu
             return response()->json([
-                'errnor' => 'lấy thất bại',
+                'error' => 'lấy thất bại',
                 'mess' => $th,
                 'status' => 500
             ], 500); // Trả về mã lỗi 500 (Internal Server Error)
@@ -116,7 +118,7 @@ class OrderController extends Controller
         try {
             // Gọi service để lấy thông tin chi tiết đơn hàng
             $order = $this->orderService->getOrderByCode($orderCode);
-            Log::info($order);
+            // Log::info('Show order : ' . json_encode($order));
 
             return response()->json([
                 'message' => 'Order details retrieved successfully',
@@ -141,7 +143,7 @@ class OrderController extends Controller
         try {
             // Gọi service để lấy thông tin chi tiết thuộc tính
             $order = $this->orderService->getOrderReturn();
-            Log::info($order);
+            Log::info('Order return request : ' . json_encode($order));
 
             return response()->json([
                 'message' => 'lấy thành công', // Thông báo thành công
@@ -196,7 +198,7 @@ class OrderController extends Controller
         try {
             // Gọi service để lấy thông tin chi tiết thuộc tính
             $order = $this->orderService->getOrderUserReturn($id);
-            Log::info($order);
+            Log::info('Order return  : ' . json_encode($order));
 
             return response()->json([
                 'message' => 'lấy thành công', // Thông báo thành công

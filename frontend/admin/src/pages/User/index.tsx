@@ -66,7 +66,7 @@ export const UserList = () => {
                             <td>{user.account_type}</td>
                             <td>{!user.is_active ? "Không hoạt động" : "Hoạt động"}</td>
                             <td>
-                                {!user.is_active ? 
+                                {user.is_active ?
                                 <button className="btn btn-danger" onClick={() => handleLockAccount(user.id)}>Khóa tài khoản</button>
                                  : 
                                 <button className="btn btn-success" onClick={() => handleUnlockAccount(user.id)} >Mở khóa tài khoản</button>}

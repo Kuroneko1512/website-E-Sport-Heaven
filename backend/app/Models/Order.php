@@ -110,6 +110,33 @@ class Order extends Model
         self::RETURN_STATUS_REJECTED => 'Từ chối'
     ];
 
+    // Định nghĩa các nhóm status
+    public static $statusGroups = [
+        'all' => null, // Tất cả status
+        'pending' => [self::STATUS_PENDING, self::STATUS_CONFIRMED, self::STATUS_PREPARING], // Chờ xác nhận (0,1,2)
+        'ready_to_ship' => [self::STATUS_READY_TO_SHIP], // Vận chuyển (3)
+        'shipping' => [self::STATUS_SHIPPING, self::STATUS_DELIVERED], // Đang giao (4,5)
+        'completed' => [self::STATUS_COMPLETED], // Hoàn thành (6)
+        'cancelled' => [self::STATUS_CANCELLED], // Đã hủy (10)
+        'return_refund' => [
+            self::STATUS_RETURN_REQUESTED,
+            self::STATUS_RETURN_PROCESSING,
+            self::STATUS_RETURN_COMPLETED,
+            self::STATUS_RETURN_REJECTED
+        ], // Trả hàng/hoàn tiền (7,8,9,14)
+    ];
+
+    // Tên hiển thị cho các nhóm status
+    public static $statusGroupLabels = [
+        'all' => 'Tất cả',
+        'pending' => 'Chờ xác nhận',
+        'ready_to_ship' => 'Vận chuyển',
+        'shipping' => 'Đang giao',
+        'completed' => 'Hoàn thành',
+        'cancelled' => 'Đã hủy',
+        'return_refund' => 'Trả hàng/hoàn tiền',
+    ];
+    
     protected $fillable = [
         'customer_id',
         'customer_name',
@@ -127,6 +154,7 @@ class Order extends Model
         'payment_method',
         'payment_transaction_id',
         'paid_at',
+        'payment_expire_at',
         'shipping_method',
         'shipping_fee',
         'tracking_number',
@@ -157,18 +185,19 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'total_amount' => 'decimal:2',
-        'subtotal' => 'decimal:2',
-        'tax_amount' => 'decimal:2',
-        'shipping_fee' => 'decimal:2',
-        'order_discount_value' => 'decimal:2',
-        'order_discount_amount' => 'decimal:2',
-        'shipping_discount_value' => 'decimal:2',
-        'shipping_discount_amount' => 'decimal:2',
-        'refunded_amount' => 'decimal:2',
+        'total_amount' => 'decimal:0',
+        'subtotal' => 'decimal:0',
+        'tax_amount' => 'decimal:0',
+        'shipping_fee' => 'decimal:0',
+        'order_discount_value' => 'decimal:0',
+        'order_discount_amount' => 'decimal:0',
+        'shipping_discount_value' => 'decimal:0',
+        'shipping_discount_amount' => 'decimal:0',
+        'refunded_amount' => 'decimal:0',
         'is_store_pickup' => 'boolean',
         'has_return_request' => 'boolean',
         'paid_at' => 'datetime',
+        'payment_expire_at' => 'datetime',
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',
         'cancelled_at' => 'datetime',
@@ -288,7 +317,7 @@ class Order extends Model
     {
         return $this->hasMany(OrderReturn::class);
     }
-       public function userReturns()
+    public function userReturns()
     {
         return $this->hasMany(OrderUserReturn::class);
     }

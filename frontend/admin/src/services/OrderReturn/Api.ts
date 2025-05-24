@@ -4,23 +4,39 @@ import { API_ENDPOINTS } from "@app/api/endpoints";
 
 // Interface định nghĩa dữ liệu của một Order
 export interface Order {
-  id?: number;
+  id: number;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
   shipping_address: string;
   order_code: string;
   total_amount: number;
-  status: number;
-  customer_id: number;
   created_at: string;
-  payment_status: number;
+  status: number;
 }
+
 interface OrderResponse {
     message: string;
-    data?: any;
+    data: any;
   }
-
+export interface UserReturn {
+  id: number;
+  order_id: number;
+  order_item_id: number | null;
+  reason: number;
+  description: string;
+  image: string;
+  video: string | null;
+  refund_bank_account: string;
+  refund_bank_name: string;
+  refund_bank_customer_name: string;
+  refund_amount: string;
+  refunded_at: string | null;
+  status: number;
+  created_at: string;
+  updated_at: string;
+  order: Order;
+}
 
 export interface Pagination {
   current_page: number; // Trang hiện tại
@@ -29,7 +45,7 @@ export interface Pagination {
   next_page_url: string | null; // Link trang tiếp theo (null nếu không có)
   total: number; // Tổng số records
   per_page: number; // Số records trên mỗi trang
-  data: Order[]; // Mảng dữ liệu orders
+  data: UserReturn[]; // Mảng dữ liệu orders
 }
 
 

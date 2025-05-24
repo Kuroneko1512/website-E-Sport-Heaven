@@ -42,7 +42,7 @@ const Navbar = () => {
       to={to}
       className={`${
         match(location.pathname) ? "border-b-2 border-black" : ""
-      } text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white py-2 md:py-0 block md:inline-block`}
+      } text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white py-2 md:py-0 block md:inline-block md:text-lg`}
       onClick={() => setIsDrawerVisible(false)}
     >
       {label}
@@ -67,7 +67,7 @@ const Navbar = () => {
           {navItems}
           <button
             onClick={showModal}
-            className={`${location.pathname.includes("transaction-history") ? "border-b-2 border-black" : ""} text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white py-2 md:py-0 block md:inline-block focus:outline-none`}
+            className={`${location.pathname.includes("transaction-history") ? "border-b-2 border-black" : ""} text-gray-700 md:text-lg dark:text-gray-300 hover:text-black dark:hover:text-white py-2 md:py-0 block md:inline-block focus:outline-none`}
           >
             Đơn hàng giao dịch
           </button>

@@ -1,14 +1,22 @@
-import React from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import FomatVND from "../utils/FomatVND";
-import { ORDER_STATUS_LABELS ,ORDER_STATUS } from "../constants/OrderConstants";
+import { ORDER_STATUS_LABELS, ORDER_STATUS } from "../constants/OrderConstants";
 import instanceAxios from "../config/db";
 import ScrollToTop from "../config/ScrollToTop";
+import { filterHistoryByStatusTo } from "../utils/filterHistoryByStatusTo";
+import Echo from "laravel-echo";
+import io from "socket.io-client";
+import useEchoChannel from "../hooks/useEchoChannel"; // Import hook useEchoChannel realtime
+
+
 
 const OrderHistory = ({ history }) => {
-  // Sort history by created_at descending
-  const sortedHistory = [...history].sort(
+  // Lọc trùng status_to, giữ bản ghi mới nhất
+  const filteredHistory = filterHistoryByStatusTo(history);
+  // Sort lại theo created_at giảm dần (đã được filter giữ bản mới nhất)
+  const sortedHistory = [...filteredHistory].sort(
     (a, b) => new Date(b.created_at) - new Date(a.created_at)
   );
 
@@ -112,6 +120,7 @@ const OrderTracking = () => {
     data: orderData,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["order", order_code],
     queryFn: async () => {
@@ -122,78 +131,76 @@ const OrderTracking = () => {
     },
   });
 
+  // Sử dụng hook useEchoChannel để lắng nghe cập nhật đơn hàng
+  // Tham số 1: Tên kênh - 'orders.1' là kênh chung cho tất cả đơn hàng
+  // Tham số 2: Tên sự kiện - '.order-status-updated' là sự kiện khi trạng thái đơn hàng được cập nhật
+  // Tham số 3: Callback xử lý khi nhận được sự kiện - ở đây là gọi refetch() để tải lại dữ liệu đơn hàng
+  // Sử dụng useCallback để tạo callback function mà vẫn giữ được tham chiếu ổn định
+  const handleOrderUpdate = useCallback((event) => {
+    console.log('✅ Nhận được cập nhật trạng thái đơn hàng:', event);
+    refetch();
+  }, [refetch]);
+
+  // Sử dụng hook useEchoChannel đã sửa
+  const { connected, error: echoError, socketId, isSubscribed } = useEchoChannel(
+    'orders.1',
+    '.order-status-updated',
+    handleOrderUpdate
+  );
+
+  // realtime old
+  // window.io = io;
+  // window.echo = new Echo({
+  //   broadcaster: 'socket.io',
+  //   host: '127.0.0.1:6001',
+  //   transports: ['polling', 'websocket'], // Thêm polling làm phương thức dự phòng
+  //   forceTLS: false,
+  //   enabledTransports: ['ws', 'wss', 'polling'],
+  // });
+
+  // window.echo.channel('orders.1')
+  //   .subscribed(() => console.log('✅ Đã subscribe channel orders.1'))
+  //   .error((error) => console.error('❌ Channel orders.1 lỗi:', error))
+  //   .listen('.order-status-updated', (e) => {
+  //     console.log('✅ Event nhận được:', e);
+  //     refetch();
+  //   });
+
+  // const socket = window.echo.connector.socket;
+
+  // // Thêm debug
+  // socket.on('connect', () => {
+  //   console.log('✅ Kết nối thành công đến Echo Server', socket.id);
+  // });
+
+  // socket.on('connect_error', (error) => {
+  //   console.error('❌ Lỗi kết nối:', error.message);
+  //   // Thêm thông tin chi tiết về lỗi
+  //   console.error('Chi tiết:', {
+  //     type: error.type,
+  //     description: error.description
+  //   });
+  // });
+
+  // socket.on('disconnect', (reason) => {
+  //   console.log('❌ Đã ngắt kết nối từ Echo Server', reason);
+  // });
+
+  // // Thêm một số sự kiện debug khác
+  // socket.on('reconnect_attempt', (attempt) => {
+  //   console.log(`⚠️ Đang thử kết nối lại lần ${attempt}`);
+  // });
+
+
   console.log("orderData", orderData);
-
-  // Hàm định dạng giá tiền
-  const formatPrice = (value) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(value);
-  };
-
-  // Hàm định dạng ngày giờ
-  const formatDateTime = (iso) => {
-    const date = new Date(iso);
-    return date.toLocaleString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   // Hàm tính giá sản phẩm sau khi giảm giá
   const getDiscountedPrice = (item) => {
     // Chuyển đổi giá từ string sang số
-    const basePrice = parseFloat(item.price);
-    let discountPercent = 0;
+    const basePrice = parseFloat(item.original_price);
 
-    // Ưu tiên dùng discount của sản phẩm nếu có
-    if (item.product && item.product.discount_percent != null) {
-      discountPercent = parseFloat(item.product.discount_percent);
-    } else if (
-      item.product_variant &&
-      item.product_variant.discount_percent != null
-    ) {
-      discountPercent = parseFloat(item.product_variant.discount_percent);
-    }
     // Tính giá đã giảm
-    return basePrice * (1 - discountPercent / 100);
-  };
-
-  // Hàm tính tổng giá tiền của đơn hàng (cộng giá đã giảm của từng mặt hàng nhân với số lượng)
-  const calculateTotalAmount = () => {
-    if (!orderData || !orderData.data || !orderData.data.order_items) {
-      return 0;
-    }
-    return orderData.data.order_items.reduce((acc, item) => {
-      const discountedPrice = getDiscountedPrice(item);
-      const quantity = parseInt(item.quantity, 10) || 0;
-      return acc + discountedPrice * quantity;
-    }, 0);
-  };
-
-  // Hàm tính tổng thanh toán cuối cùng
-  const calculateFinalTotal = () => {
-    const subtotal = calculateTotalAmount();
-    const shippingFee = orderData?.data?.shipping_fee || 0;
-
-    // Tính giảm giá
-    let discountAmount = 0;
-    if (orderData?.data?.order_discount_type === 1) {
-      // Giảm giá theo phần trăm
-      discountAmount = Number(
-        subtotal * (Number(orderData?.data?.order_discount_amount) / 100)
-      );
-    } else {
-      // Giảm giá theo giá trị cố định
-      discountAmount = Number(orderData?.data?.order_discount_amount) || 0;
-    }
-
-    // Tổng thanh toán = Tổng tiền hàng + Phí vận chuyển - Giảm giá
-    return subtotal + Number(shippingFee) - discountAmount;
+    return basePrice * item.quantity;
   };
 
   // console.log("calculateFinalTotal", calculateFinalTotal());
@@ -217,10 +224,6 @@ const OrderTracking = () => {
     );
   }
 
-  // Tính tổng giá tiền theo logic đã cập nhật
-  const computedTotalAmount = calculateTotalAmount();
-  const finalTotal = calculateFinalTotal();
-
   return (
     <div className="bg-white text-gray-800 p-6 max-w-4xl mx-auto mt-10">
       <ScrollToTop />
@@ -229,16 +232,15 @@ const OrderTracking = () => {
         <span className="text-lg">
           Mã đơn hàng: <strong>{order_code}</strong> |
           <span
-            className={`ml-2 px-3 py-1 rounded text-base ${
-              statusStyles[orderData?.data?.status]
-            }`}
+            className={`ml-2 px-3 py-1 rounded text-base ${statusStyles[orderData?.data?.status]
+              }`}
           >
             {ORDER_STATUS_LABELS[orderData?.data?.status]}
           </span>
         </span>
       </header>
 
-      <section className="grid grid-cols-5 gap-6 mb-8 border-b">
+      <section className="grid grid-cols-4 gap-6 mb-8 border-b">
         <div className="p-4 grid col-span-2">
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -258,7 +260,7 @@ const OrderTracking = () => {
             </p>
           </div>
         </div>
-        <div className="p-4 grid col-span-3">
+        <div className="p-4 grid col-span-2">
           {/* <h2 className="text-xl font-semibold text-gray-900 mb-2">
             Lịch sử đơn hàng
           </h2> */}
@@ -282,9 +284,8 @@ const OrderTracking = () => {
             >
               <div className="flex items-center space-x-4">
                 <img
-                  src={`http://127.0.0.1:8000/storage/${
-                    item.product_variant?.image || item.product.image
-                  }`}
+                  src={`http://127.0.0.1:8000/storage/${item.product_variant?.image || item.product.image
+                    }`}
                   alt={item.product.name}
                   className="w-16 h-16 object-cover rounded"
                   loading="lazy"
@@ -294,21 +295,22 @@ const OrderTracking = () => {
                   <p className="text-sm text-gray-600">
                     SKU: {item.product_variant?.sku || item.product.sku}
                   </p>
+                  <p>
+                    Số lượng: <strong>{item.quantity}</strong>
+                  </p>
                 </div>
               </div>
               <div className="text-right">
                 <p>
-                  Số lượng: <strong>{item.quantity}</strong>
-                </p>
-                <p>
-                  Giá: <strong>{formatPrice(item.price)}</strong>
                   {(item.product?.discount_percent > 0 ||
                     item.product_variant?.discount_percent > 0) && (
-                    <span className="line-through text-gray-500 mr-2">
-                      {" "}
-                      {formatPrice(item.original_price)}
-                    </span>
-                  )}
+
+                      <span className="line-through text-gray-500 mr-2">
+                        {FomatVND(getDiscountedPrice(item))}
+                      </span>
+                    )}
+                  <strong>{FomatVND(item.subtotal)}</strong>
+
                 </p>
               </div>
             </div>
@@ -317,37 +319,51 @@ const OrderTracking = () => {
       </section>
 
       <section className="mb-8 text-right">
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng tiền hàng: </div>
           <span className="col-span-2">
-            {formatPrice(orderData?.data?.subtotal || 0)}
+            {FomatVND(orderData?.data?.subtotal || 0)}
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phí vận chuyển: </div>
           <span className="col-span-2">
-            {formatPrice(orderData?.data?.shipping_fee || 0)}
+            {FomatVND(orderData?.data?.shipping_fee || 0)}
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Giảm giá: </div>
           <span className="col-span-2">
             {orderData?.data?.order_discount_type === 1
               ? `${orderData?.data?.order_discount_amount}%`
-              : formatPrice(orderData?.data?.order_discount_amount || 0)}
+              : FomatVND(orderData?.data?.order_discount_amount || 0)}
           </span>
         </div>
 
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border-b pb-4grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Tổng thanh toán: </div>
           <span className="text-2xl font-bold text-red-500 col-span-2">
-            {formatPrice(orderData?.data?.total_amount)}
+            {FomatVND(orderData?.data?.total_amount)}
           </span>
         </div>
-
-        <div className="border-b pb-4 mb-4 grid grid-cols-6 gap-6">
+        <div className="border border-yellow-300 bg-yellow-100 text-left p-4 gap-6">
+          <span className="">
+            {orderData?.data?.payment_status === 1 ? (
+              <div className="text-yellow-600">
+                <i className="fas fa-bell" /> Đã thanh toán. Vui kiểm tra lại
+                thông tin đơn hàng.
+              </div>
+            ) : (
+              <div className="text-yellow-600">
+                <i className="fas fa-bell" /> Vui lòng thanh toán{" "}
+                {FomatVND(orderData?.data?.total_amount)} khi nhận hàng.
+              </div>
+            )}
+          </span>
+        </div>
+        <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Phương thức thanh toán: </div>
           <span className="col-span-2">
             {orderData?.data?.payment_method === "cod"
