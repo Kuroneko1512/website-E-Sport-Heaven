@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Typography } from 'antd';
 import { LeftOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie';
+import instanceAxios from "../config/db";
 
 const { Title, Paragraph } = Typography;
 
@@ -18,13 +19,7 @@ const ForgotPassword = () => {
       // Backend cần triển khai endpoint: POST /api/auth/forgot-password
       // Request body: { email: string }
       // Response: { success: boolean, message?: string }
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: values.email }),
-      });
+      const response =  await instanceAxios.post(`/api/v1/customer/forgot-password`, { email: values.email });
 
       const data = await response.json();
       if (!response.ok || !data.success) {
