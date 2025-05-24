@@ -395,7 +395,21 @@ const Store = () => {
               ))}
             </select>
             {errors.category_id && <div className="invalid-feedback">{errors.category_id}</div>}
-            
+
+            {/* Thêm select box cho trạng thái sản phẩm ở đây */}
+            <div className="form-group mt-3">
+              <label>Trạng thái sản phẩm:</label>
+              <select
+                  name="status"
+                  className="form-control"
+                  value={product.status}
+                  onChange={handleChange}
+              >
+                <option value="active">Đang bán</option>
+                <option value="inactive">Ngừng bán</option>
+              </select>
+            </div>
+
             <button type="submit" className="btn btn-primary my-3">
               {isEdit ? "Update" : "Create"}
             </button>
