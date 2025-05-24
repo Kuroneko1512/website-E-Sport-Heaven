@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Product\V1;
 
+use App\Events\ProductUpdate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\ProductStoreRequest;
 use App\Http\Requests\Product\ProductUpdateRequest;
@@ -138,7 +139,7 @@ class ProductController extends Controller
                     'status' => 404
                 ], 404);
             }
-
+            
             DB::commit();
             // Trả về phản hồi thành công với thông tin sản phẩm đã được cập nhật
             return response()->json([
