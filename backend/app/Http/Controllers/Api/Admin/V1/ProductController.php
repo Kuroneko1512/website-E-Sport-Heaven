@@ -169,6 +169,50 @@ class ProductController extends Controller
             ], 500); // Trả về mã lỗi 500 (Internal Server Error)
         }
     }
+
+    /**
+     * Cập nhật trạng thái sản phẩm
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            // Validate dữ liệu đầu vào
+            $request->validate([
+                'status' => 'required|in:active,inactive',
+            ]);
+
+            // Gọi service để cập nhật trạng thái
+            $product = $this->productService->updateProductStatus($id, $request->status);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Cập nhật trạng thái sản phẩm thành công',
+                'data' => $product,
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy sản phẩm',
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Lỗi khi cập nhật trạng thái sản phẩm',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function searchProducts(Request $request)
     {
 

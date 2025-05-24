@@ -32,9 +32,6 @@ class ProductService extends BaseService
             'variants.productAttributes.attributeValue:id,value',
         ]);
 
-        // Lọc sản phẩm có trạng thái active
-        $query->where('status', 'active');
-
         // Tìm kiếm theo tên sản phẩm
         if (!empty($searchName)) {
             $query->where('name', 'LIKE', "%{$searchName}%");
@@ -181,6 +178,14 @@ class ProductService extends BaseService
         broadcast(new ProductCreated());
         return true;
     }
+
+    /**
+     * Cập nhật thông tin sản phẩm
+     *
+     * @param array $data Dữ liệu cập nhật
+     * @param int $id ID của sản phẩm
+     * @return \App\Models\Product
+     */
     public function updateProduct($data, $id)
     {
         $isVariable = $data['product_type'] === 'variable';
@@ -195,7 +200,7 @@ class ProductService extends BaseService
             'discount_end' => $data['discount_end'] ?? null,
             'description' => $data['description'] ?? null,
             'product_type' => $data['product_type'],
-            'status' => 'active',
+            'status' => $data['status'] ?? $product->status,
             'category_id' => $data['category_id'] ?? null
         ]);
 
@@ -281,6 +286,33 @@ class ProductService extends BaseService
 
         return $product->fresh();
     }
+
+    /**
+     * Cập nhật trạng thái sản phẩm
+     *
+     * @param int $id ID của sản phẩm
+     * @param string $status Trạng thái mới ('active' hoặc 'inactive')
+     * @return \App\Models\Product
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public function updateProductStatus($id, $status)
+    {
+        // Kiểm tra trạng thái hợp lệ
+        if (!in_array($status, ['active', 'inactive'])) {
+            throw new \InvalidArgumentException("Trạng thái không hợp lệ. Chỉ chấp nhận 'active' hoặc 'inactive'.");
+        }
+
+        // Tìm sản phẩm theo ID
+        $product = $this->model->findOrFail($id);
+
+        // Cập nhật trạng thái
+        $product->update([
+            'status' => $status
+        ]);
+
+        return $product->fresh();
+    }
+
     public function getProductRandom($limit = 4)
     {
         return $this->model->with([
