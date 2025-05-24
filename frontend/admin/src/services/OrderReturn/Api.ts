@@ -12,6 +12,7 @@ export interface Order {
   order_code: string;
   total_amount: number;
   created_at: string;
+  status: number;
 }
 
 interface OrderResponse {
