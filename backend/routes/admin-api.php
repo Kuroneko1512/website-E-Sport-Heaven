@@ -39,8 +39,11 @@ Route::prefix('v1')->group(function () {
 
             //Attributes routes
             Route::apiResource('/attribute', AttributeController::class);
+
             //Category routes
             Route::apiResource('/category', CategoryController::class);
+            Route::get('/category-all', [CategoryController::class, 'getAllCategories']);
+
             //Order routes
             Route::get('/order/{id}/order-user-return', [OrderController::class, 'getOrderUserReturn']);
             Route::get('/order/order-return', [OrderController::class, 'getOrdersWithReturnRequests']);
