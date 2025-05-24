@@ -5,7 +5,7 @@ import {
     Pagination,
     api4,
 } from "@app/services/Product/Api";
-import { Pagination as AntPagination, Input, Button, Space, Select, Badge, Tag, Tooltip } from "antd";
+import { Pagination as AntPagination, Input, Button, Space, Select, Tag, Tooltip } from "antd";
 import { useEffect, useState } from "react";
 import FomatVND from "@app/utils/FomatVND";
 import {

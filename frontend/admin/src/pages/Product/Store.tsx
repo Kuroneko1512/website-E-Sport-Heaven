@@ -344,7 +344,7 @@ const Store = () => {
                             to={item}
                             className={`text-black mx-4`}
                             style={
-                              item != "Attribute" &&
+                              item !== "Attribute" &&
                               product.selected_attributes.length === 0
                                 ? { display: "none" }
                                 : {}
