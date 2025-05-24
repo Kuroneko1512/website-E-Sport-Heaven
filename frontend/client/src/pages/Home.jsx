@@ -61,7 +61,7 @@ const Home = () => {
         )}
 
         {/* Product Bestseller */}
-        {/* {productLoadingBestseller ? (
+        {productLoadingBestseller ? (
           <>
             <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">
               Sản phẩm bán chạy
@@ -70,7 +70,7 @@ const Home = () => {
           </>
         ) : (
           <ProductBestseller productDataB={productDataBestseller} />
-        )} */}
+        )}
 
         {/* Product New */}
         {productLoading ? (

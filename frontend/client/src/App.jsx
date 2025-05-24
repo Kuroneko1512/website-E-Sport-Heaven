@@ -120,6 +120,7 @@ function App() {
         <Route path="/auth/google-callback" element={<GoogleAuthCallback />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/password/reset/:token" element={<ForgotPassword />} />
         <Route path="/otp-enter" element={<OtpVerification />} />
         <Route path="/" element={<Layout />}>
           <Route path="home" element={<Navigate to={"/"} />} />

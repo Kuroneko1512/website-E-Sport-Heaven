@@ -17,6 +17,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::post('/register', [CustomerAuthController::class, 'register'])->name('register');
+        Route::post('/forgot-password', [CustomerAuthController::class, 'sendResetLinkEmail'])->name('sendResetLinkEmail');
 
         Route::post('/login', [CustomerAuthController::class, 'login'])->name('login');
         Route::post('refresh', [CustomerAuthController::class, 'refresh'])->name('refresh');
