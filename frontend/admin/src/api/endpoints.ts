@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
         CREATE: "v1/admin/product",
         UPDATE: "v1/admin/product",
         DELETE: "v1/admin/product",
+        UPDATE_STATUS: "v1/admin/product",
     },
     ORDER: {
         BASE: "v1/admin/order",

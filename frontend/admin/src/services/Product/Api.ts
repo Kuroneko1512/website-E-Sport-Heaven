@@ -226,3 +226,14 @@ export const deleteProduct = async (id: number): Promise<void> => {
     throw error;
   }
 };
+
+// Cập nhật trạng thái sản phẩm
+export const updateProductStatus = async (id: number, status: string): Promise<void> => {
+  try {
+    await api.patch(`${API_ENDPOINTS.PRODUCT.UPDATE_STATUS}/${id}/status`, { status });
+    console.log(`Đã cập nhật trạng thái sản phẩm có ID: ${id} thành ${status}`);
+  } catch (error) {
+    console.error("Lỗi khi cập nhật trạng thái sản phẩm:", error);
+    throw error;
+  }
+};
