@@ -571,7 +571,7 @@ const NewCheckout = () => {
       const orderData = {
         ...order,
         amount: grandTotal,
-        payment_method: payment_method,
+        payment_method: paymentMethod,
         shipping_fee: shippingFee || 0,
         coupon_id: selectedCoupon?.id || null,
         order_coupon_code: selectedCoupon?.code || null,
@@ -582,34 +582,36 @@ const NewCheckout = () => {
             : 1
           : null,
         order_discount_value: selectedCoupon
-          ? Number(selectedCoupon.discount_value)
+          ? selectedCoupon.discount_type === 0
+            ? calculateDiscount(selectedCoupon, calculateSubtotal)
+            : Number(selectedCoupon.discount_value)
           : null,
       };
-      // console.log("orderData", orderData);
-      const orderResponse = await createOrderMutation.mutateAsync(orderData);
+      console.log("orderData", orderData);
+      // const orderResponse = await createOrderMutation.mutateAsync(orderData);
 
-      if (orderResponse.success && selectedCoupon) {
-        const currentCoupon = validateCouponQuery.data;
-        const subtotal = cartItems.reduce(
-          (total, item) =>
-            total +
-            (item.price - (item.price * item.discount) / 100) * item.quantity,
-          0
-        );
+      // if (orderResponse.success && selectedCoupon) {
+      //   const currentCoupon = validateCouponQuery.data;
+      //   const subtotal = cartItems.reduce(
+      //     (total, item) =>
+      //       total +
+      //       (item.price - (item.price * item.discount) / 100) * item.quantity,
+      //     0
+      //   );
 
-        if (!isCouponValid(currentCoupon, subtotal)) {
-          await deleteOrderMutation.mutateAsync(orderResponse.data.id);
-          setSelectedCoupon(null);
-          setDiscountCode("");
-          setSubmit(false);
-          return;
-        }
+      //   if (!isCouponValid(currentCoupon, subtotal)) {
+      //     await deleteOrderMutation.mutateAsync(orderResponse.data.id);
+      //     setSelectedCoupon(null);
+      //     setDiscountCode("");
+      //     setSubmit(false);
+      //     return;
+      //   }
 
-        await updateCouponMutation.mutateAsync({
-          couponId: selectedCoupon.id,
-          usedCount: currentCoupon.used_count + 1,
-        });
-      }
+      //   await updateCouponMutation.mutateAsync({
+      //     couponId: selectedCoupon.id,
+      //     usedCount: currentCoupon.used_count + 1,
+      //   });
+      // }
 
       if (paymentMethod === "vnpay" && orderResponse.vnpUrl) {
         window.location.href = orderResponse.vnpUrl;
