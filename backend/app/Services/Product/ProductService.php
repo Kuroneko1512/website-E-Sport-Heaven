@@ -222,12 +222,12 @@ class ProductService extends BaseService
         if ($isVariable) {
             // Xóa variant nếu có yêu cầu xóa
             if (isset($data['delete_variant_id']) && is_array($data['delete_variant_id'])) {
-                Log::info('🟢 Backend - Bắt đầu xóa variants:', [$data['delete_variant_id']]);
+                // Log::info('🟢 Backend - Bắt đầu xóa variants:', [$data['delete_variant_id']]);
                 foreach ($data['delete_variant_id'] as $variantId) {
-                    Log::info('🟢 Backend - Đang xóa variant ID:', [$variantId]);
+                    // Log::info('🟢 Backend - Đang xóa variant ID:', [$variantId]);
                     $variant = $product->variants()->find($variantId);
                     if ($variant) {
-                        Log::info('🟢 Backend - Tìm thấy variant, đang xóa...');
+                        // Log::info('🟢 Backend - Tìm thấy variant, đang xóa...');
                         // Xóa các product attributes của variant trước
                         $variant->productAttributes()->delete();
                         // Sau đó xóa variant
@@ -254,12 +254,25 @@ class ProductService extends BaseService
                         // Cập nhật biến thể nếu đã tồn tại
                         $variant = $product->variants()->find($variantData['id']);
                         if ($variant) {
+                            $variantImage = $variant->image; // Giữ ảnh cũ
+                            if (isset($variantData['image'])) {
+                                // Kiểm tra xem image có phải là UploadedFile không
+                                if ($variantData['image'] instanceof \Illuminate\Http\UploadedFile) {
+                                    // Nếu là file upload mới, thì store
+                                    $variantImage = $variantData['image']->store('variants', 'public');
+                                } elseif (is_string($variantData['image']) && !empty($variantData['image'])) {
+                                    // Nếu là string (đường dẫn ảnh cũ), giữ nguyên
+                                    $variantImage = $variantData['image'];
+                                }
+                                // Nếu không phải cả hai, giữ ảnh cũ (không làm gì)
+                            }
                             $variant->update([
                                 'price' => $variantData['price'],
                                 'stock' => $variantData['stock'],
                                 'discount_percent' => $variantData['discount_percent'] ?? null,
                                 'discount_start' => $variantData['discount_start'] ?? null,
                                 'discount_end' => $variantData['discount_end'] ?? null,
+                                'image' => $variantImage,
                             ]);
 
                             // Cập nhật thuộc tính của biến thể
@@ -278,6 +291,10 @@ class ProductService extends BaseService
                             }
                         }
                     } else {
+                        $variantImage = null;
+                        if (isset($variantData['image'])) {
+                            $variantImage = $variantData['image']->store('variants', 'public');
+                        }
                         // Tạo mới biến thể nếu không có ID
                         $variant = $product->variants()->create([
                             'sku' => $variantData['sku'] ?? $this->generateSKU($data['name'], $variantData['attributes']),
@@ -286,6 +303,7 @@ class ProductService extends BaseService
                             'discount_percent' => $variantData['discount_percent'] ?? null,
                             'discount_start' => $variantData['discount_start'] ?? null,
                             'discount_end' => $variantData['discount_end'] ?? null,
+                            'image' => $variantImage,
                         ]);
 
                         // Thêm thuộc tính cho biến thể mới
