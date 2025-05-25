@@ -3,6 +3,7 @@ import {
     getProducts,
     deleteProduct,
     Pagination,
+    updateProductStatus,
     api4,
 } from "@app/services/Product/Api";
 import { Pagination as AntPagination, Input, Button, Space, Select, Tag, Tooltip } from "antd";
@@ -81,7 +82,7 @@ const Product = () => {
             if (!window.confirm(message)) return;
 
             // Gọi API để thay đổi trạng thái (bạn cần thêm API này)
-            // await updateProductStatus(id, currentStatus === "active" ? "inactive" : "active");
+            await updateProductStatus(id, currentStatus === "active" ? "inactive" : "active");
 
             // Cập nhật lại danh sách sản phẩm
             setProducts(products.map(product =>
