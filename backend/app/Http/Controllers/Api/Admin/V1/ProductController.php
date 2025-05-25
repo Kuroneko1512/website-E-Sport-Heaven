@@ -114,9 +114,9 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
-            Log::info('Request data:', [$request->all()]);
+            // Log::info('Request data:', [$request->all()]);
             $data = $request->validated();
-            Log::info('Data after validation:', [$data]);
+            // Log::info('Data after validation:', [$data]);
             // return response()->json($data['variants']);
 
             // Cập nhật thông tin sản phẩm
