@@ -445,7 +445,7 @@ const Store = () => {
               </div>
 
               <button type="submit" className="btn btn-primary my-3">
-                {isEdit ? "Update" : "Create"}
+                {isEdit ? "Cập nhật" : "Thêm mới"}
               </button>
             </div>
           </div>

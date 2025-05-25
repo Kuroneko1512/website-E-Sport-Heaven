@@ -129,12 +129,12 @@ const TableComponent = ({
       <div className="card-header">
         <h3 className="card-title">Danh mục sản phẩm</h3>
         <div className="card-tools">
-          <button 
+          {/* <button 
             className="btn btn-primary btn-sm"
             onClick={() => setEditingCategory(null)}
           >
             <i className="fas fa-plus"></i> Thêm mới
-          </button>
+          </button> */}
         </div>
       </div>
 
