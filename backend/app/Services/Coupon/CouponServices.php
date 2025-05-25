@@ -33,7 +33,8 @@ class CouponServices
 
     public function getCouponsPaginated($perPage = 10, $page = 1, $search = '')
     {
-        $query = Coupon::orderBy('id', 'desc')->with('usages');
+        $query = Coupon::orderBy('id', 'desc');
+        // ->with('usages');
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
                 $q->where('code', 'like', "%{$search}%")

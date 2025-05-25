@@ -3,7 +3,9 @@ import {
     getProducts,
     deleteProduct,
     Pagination,
+    updateProductStatus,
     api4,
+    updateProductStatus,
 } from "@app/services/Product/Api";
 import { Pagination as AntPagination, Input, Button, Space, Select, Tag, Tooltip } from "antd";
 import { useEffect, useState } from "react";
@@ -42,7 +44,12 @@ const Product = () => {
         per_page: 15, // Mặc định là 15 sản phẩm/trang
         data: [],
     });
-
+    // Hàm tính giá bán sau khi giảm giá
+    const calculateSalePrice = (price: number, discountPercent: string | undefined) => {
+        if (!discountPercent || discountPercent === "0") return price;
+        const discount = parseFloat(discountPercent) / 100;
+        return price - (price * discount);
+    };
     const [products, setProducts] = useState<api4[]>([]);
     const [isDelete, setIsDelete] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -81,7 +88,7 @@ const Product = () => {
             if (!window.confirm(message)) return;
 
             // Gọi API để thay đổi trạng thái (bạn cần thêm API này)
-            // await updateProductStatus(id, currentStatus === "active" ? "inactive" : "active");
+            await updateProductStatus(id, currentStatus === "active" ? "inactive" : "active");
 
             // Cập nhật lại danh sách sản phẩm
             setProducts(products.map(product =>
@@ -228,7 +235,8 @@ const Product = () => {
                                 <tr>
                                     <th>ID</th>
                                     <th>Tên</th>
-                                    <th>Giá</th>
+                                    <th>Giá gốc</th>
+                                    <th>Giá bán</th>
                                     <th>Loại</th>
                                     <th>Trạng thái</th>
                                     <th>Số lượng</th>
@@ -237,81 +245,98 @@ const Product = () => {
                             </thead>
                             <tbody>
                                 {products.length > 0 ? (
-                                    products.map((product) => (
-                                        <tr key={product.id}>
-                                            <td>{product.id}</td>
-                                            <td>{product.name}</td>
-                                            <td>
-                                                {FomatVND(
-                                                    product.variants.length > 0 ? product.variants[0].price || 0 : product.price || 0
-                                                )}
-                                            </td>
-                                            <td>
-                                                <Tag
-                                                    icon={product.product_type === "variable" ? <TagsOutlined /> : <TagOutlined />}
-                                                    color={product.product_type === "variable" ? "blue" : "green"}
-                                                >
-                                                    {product.product_type === "variable" ? "Biến thể" : "Đơn giản"}
-                                                </Tag>
-                                            </td>
-                                            <td>
-                                                <span
-                                                    className="badge"
-                                                    style={{
-                                                        backgroundColor: product.status === "active" ? "#52c41a" : "#f5222d",
-                                                        color: "white",
-                                                        padding: "5px 10px",
-                                                        borderRadius: "12px",
-                                                        fontSize: "12px",
-                                                        fontWeight: "normal"
-                                                    }}
-                                                >
-                                                    {product.status === "active" ? "Đang bán" : "Ngừng bán"}
-                                                </span>
-                                            </td>
-                                            <td>{product.variants.length > 0 ? product.variants[0].stock || 0 : product.stock || 0}</td>
-                                            <td>
-                                                <Space>
-                                                    <Tooltip title="Chi tiết">
-                                                        <Button
-                                                            type="text"
-                                                            icon={<EyeOutlined />}
-                                                            onClick={() => navigate(`detail/${product.id}`)}
-                                                        />
-                                                    </Tooltip>
+                                    products.map((product) => {
+                                        // Lấy giá và discount_percent từ sản phẩm hoặc variant đầu tiên
+                                        const originalPrice = product.variants.length > 0
+                                            ? product.variants[0].price || 0
+                                            : product.price || 0;
+                                        const discountPercent = product.variants.length > 0
+                                            ? product.variants[0].discount_percent
+                                            : product.discount_percent;
+                                        const salePrice = calculateSalePrice(originalPrice, discountPercent);
 
-                                                    <Tooltip title="Chỉnh sửa">
-                                                        <Button
-                                                            type="text"
-                                                            icon={<EditOutlined />}
-                                                            onClick={() => navigate(`/edit-product/${product.id}`)}
-                                                        />
-                                                    </Tooltip>
+                                        return (
+                                            <tr key={product.id}>
+                                                <td>{product.id}</td>
+                                                <td>{product.name}</td>
+                                                <td>{FomatVND(originalPrice)}</td>
+                                                <td>
+                                                    <div>
+                                                        {FomatVND(salePrice)}
+                                                        {discountPercent && discountPercent !== "0" && (
+                                                            <span className="badge bg-danger ms-1">
+                                                                -{discountPercent}%
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <Tag
+                                                        icon={product.product_type === "variable" ? <TagsOutlined /> : <TagOutlined />}
+                                                        color={product.product_type === "variable" ? "blue" : "green"}
+                                                    >
+                                                        {product.product_type === "variable" ? "Biến thể" : "Đơn giản"}
+                                                    </Tag>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        className="badge"
+                                                        style={{
+                                                            backgroundColor: product.status === "active" ? "#52c41a" : "#f5222d",
+                                                            color: "white",
+                                                            padding: "5px 10px",
+                                                            borderRadius: "12px",
+                                                            fontSize: "12px",
+                                                            fontWeight: "normal"
+                                                        }}
+                                                    >
+                                                        {product.status === "active" ? "Đang bán" : "Ngừng bán"}
+                                                    </span>
+                                                </td>
+                                                <td>{product.variants.length > 0 ? product.variants[0].stock || 0 : product.stock || 0}</td>
+                                                <td>
+                                                    <Space>
+                                                        <Tooltip title="Chi tiết">
+                                                            <Button
+                                                                type="text"
+                                                                icon={<EyeOutlined />}
+                                                                onClick={() => navigate(`detail/${product.id}`)}
+                                                            />
+                                                        </Tooltip>
 
-                                                    <Tooltip title={product.status === "active" ? "Ngừng bán" : "Kích hoạt"}>
-                                                        <Button
-                                                            type="text"
-                                                            icon={product.status === "active" ? <StopOutlined /> : <PlayCircleOutlined />}
-                                                            onClick={() => handleToggleStatus(product.id!, product.status)}
-                                                            danger={product.status === "active"}
-                                                        />
-                                                    </Tooltip>
+                                                        <Tooltip title="Chỉnh sửa">
+                                                            <Button
+                                                                type="text"
+                                                                icon={<EditOutlined />}
+                                                                onClick={() => navigate(`/edit-product/${product.id}`)}
+                                                            />
+                                                        </Tooltip>
 
-                                                    <Tooltip title="Xóa">
-                                                        <Button
-                                                            type="text"
-                                                            danger
-                                                            icon={<DeleteOutlined />}
-                                                            onClick={() => product.id && handleDeleteProduct(product.id)}
-                                                        />
-                                                    </Tooltip>
-                                                </Space>
-                                            </td>
-                                        </tr>
-                                    ))
+                                                        <Tooltip title={product.status === "active" ? "Ngừng bán" : "Kích hoạt"}>
+                                                            <Button
+                                                                type="text"
+                                                                icon={product.status === "active" ? <StopOutlined /> : <PlayCircleOutlined />}
+                                                                onClick={() => handleToggleStatus(product.id!, product.status)}
+                                                                danger={product.status === "active"}
+                                                            />
+                                                        </Tooltip>
+
+                                                        <Tooltip title="Xóa">
+                                                            <Button
+                                                                type="text"
+                                                                danger
+                                                                icon={<DeleteOutlined />}
+                                                                onClick={() => product.id && handleDeleteProduct(product.id)}
+                                                            />
+                                                        </Tooltip>
+                                                    </Space>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
                                 ) : (
                                     <tr>
-                                        <td colSpan={7} className="text-center">
+                                        <td colSpan={8} className="text-center">
                                             Không có sản phẩm nào
                                         </td>
                                     </tr>
