@@ -19,11 +19,7 @@ export const MENU: IMenuItem[] = [
     icon: 'fas fa-tachometer-alt nav-icon', // Bảng điều khiển -> biểu tượng dashboard
     path: '/',
   },
-  {
-    name: i18n.t('menusidebar.label.blank'),
-    icon: 'fas fa-wrench nav-icon', // Tạm giữ nguyên vì không rõ nội dung cụ thể
-    path: '/blank',
-  },
+
   {
     name: 'Sản phẩm',
     icon: 'fas fa-box-open nav-icon', // Sản phẩm -> hộp mở, phù hợp cho product
@@ -50,8 +46,8 @@ export const MENU: IMenuItem[] = [
     path: '/Order',
   },
   {
-    name: 'hoàn hàng',
-    icon: 'fas fa-shopping-cart nav-icon', // Đơn hàng -> giỏ hàng
+    name: 'Hoàn hàng',
+    icon: 'fas fa-undo nav-icon', // Đơn hàng -> giỏ hàng
     path: '/order-return',
   },
   {

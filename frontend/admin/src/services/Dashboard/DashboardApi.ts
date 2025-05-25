@@ -86,21 +86,23 @@ export interface DashboardApiResponse {
 // Hàm gọi API lấy dữ liệu dashboard analytics
 export const getDashboardAnalytics = async (
   fromDate?: string,
-  toDate?: string
+  toDate?: string,
+  topProductsLimit?: number
 ): Promise<DashboardApiResponse> => {
   try {
     let url = API_ENDPOINTS.DASHBOARD.ANALYTICS;
-    console.log(url);
     // Thêm query parameters nếu có
     const params = new URLSearchParams();
     if (fromDate) params.append('from_date', fromDate);
     if (toDate) params.append('to_date', toDate);
+    if (topProductsLimit) params.append('top_products_limit', topProductsLimit.toString());
     
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
 
     const response = await api.get<DashboardApiResponse>(url);
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching dashboard analytics:", error);

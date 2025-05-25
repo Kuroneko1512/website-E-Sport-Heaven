@@ -10,6 +10,7 @@ import {
   faDollarSign,
   faUsers,
   faShoppingCart,
+  faFilter,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -34,6 +35,18 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Filter states
+  const [fromDate, setFromDate] = useState<string>('');
+  const [toDate, setToDate] = useState<string>('');
+  const [topProductsLimit, setTopProductsLimit] = useState<number>(5);
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+
+  // Hàm format ngày cho input date
+  const formatDateForInput = (date: Date) => {
+    return date.toISOString().split('T')[0];
+  };
+
 
   // Hàm format tiền tệ VND
   const formatCurrency = (amount: number) => {
@@ -49,12 +62,17 @@ const Dashboard = () => {
   };
 
   // Hàm fetch dữ liệu dashboard từ API
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (customFromDate?: string, customToDate?: string, customLimit?: number) => {
     try {
       setLoading(true);
       setError(null);
       
-      const result = await getDashboardAnalytics();
+      const params: any = {};
+      if (customFromDate || fromDate) params.from_date = customFromDate || fromDate;
+      if (customToDate || toDate) params.to_date = customToDate || toDate;
+      if (customLimit || topProductsLimit) params.top_products_limit = customLimit || topProductsLimit;
+      
+      const result = await getDashboardAnalytics(params.from_date, params.to_date, params.top_products_limit);
       
       if (result.success) {
         setDashboardData(result.data);
@@ -69,9 +87,70 @@ const Dashboard = () => {
     }
   };
 
+  // Hàm xử lý apply filter
+  const handleApplyFilter = () => {
+    fetchDashboardData(fromDate, toDate, topProductsLimit);
+  };
+
+  // Hàm reset filter
+  const handleResetFilter = () => {
+    const today = new Date();
+    const weekAgo = new Date(today);
+    weekAgo.setDate(today.getDate() - 7);
+    
+    const newToDate = formatDateForInput(today);
+    const newFromDate = formatDateForInput(weekAgo);
+    const newLimit = 5;
+    
+    setToDate(newToDate);
+    setFromDate(newFromDate);
+    setTopProductsLimit(newLimit);
+    
+    fetchDashboardData(newFromDate, newToDate, newLimit);
+  };
+
+    // Khởi tạo ngày mặc định (7 ngày gần nhất)
   useEffect(() => {
-    fetchDashboardData();
+    const today = new Date();
+    const weekAgo = new Date(today);
+    weekAgo.setDate(today.getDate() - 7);
+    
+    setToDate(formatDateForInput(today));
+    setFromDate(formatDateForInput(weekAgo));
+      if (today && weekAgo) {
+      fetchDashboardData( formatDateForInput(weekAgo), formatDateForInput(today), 5);
+    }
   }, []);
+
+  
+  // Hàm chia tên sản phẩm thành nhiều dòng
+  const splitProductName = (name: string, maxLength: number = 12) => {
+    if (name.length <= maxLength) return [name];
+    
+    const words = name.split(' ');
+    const lines = [];
+    let currentLine = '';
+    
+    for (const word of words) {
+      if ((currentLine + word).length <= maxLength) {
+        currentLine += (currentLine ? ' ' : '') + word;
+      } else {
+        if (currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          lines.push(word.substring(0, maxLength));
+          currentLine = '';
+        }
+      }
+    }
+    
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+    
+    return lines.slice(0, 2);
+  };
 
   if (loading) {
     return (
@@ -93,7 +172,7 @@ const Dashboard = () => {
         <div className="alert alert-danger" role="alert">
           <h4 className="alert-heading">Lỗi!</h4>
           <p>{error}</p>
-          <button className="btn btn-outline-danger" onClick={fetchDashboardData}>
+          <button className="btn btn-outline-danger" onClick={() => fetchDashboardData()}>
             Thử lại
           </button>
         </div>
@@ -188,22 +267,25 @@ const Dashboard = () => {
   };
 
   // Chuẩn bị dữ liệu cho biểu đồ sản phẩm bán chạy
- // Chuẩn bị dữ liệu cho biểu đồ sản phẩm bán chạy
   const topProductsData = {
-    labels: dashboardData.top_products.slice(0, 5).map(product => {
-      const name = product.product_name;
-      return name.length > 15 ? name.substring(0, 15) + '...' : name;
+    labels: dashboardData.top_products.slice(0, topProductsLimit).map(product => {
+      return splitProductName(product.product_name);
     }),
     datasets: [
       {
         label: 'Số lượng bán',
-        data: dashboardData.top_products.slice(0, 5).map(product => product.total_sold),
+        data: dashboardData.top_products.slice(0, topProductsLimit).map(product => product.total_sold),
         backgroundColor: [
           'rgba(255, 99, 132, 0.8)',
           'rgba(54, 162, 235, 0.8)',
           'rgba(255, 205, 86, 0.8)',
           'rgba(75, 192, 192, 0.8)',
           'rgba(153, 102, 255, 0.8)',
+          'rgba(255, 159, 64, 0.8)',
+          'rgba(199, 199, 199, 0.8)',
+          'rgba(83, 102, 255, 0.8)',
+          'rgba(255, 99, 255, 0.8)',
+          'rgba(99, 255, 132, 0.8)',
         ],
         borderColor: [
           'rgba(255, 99, 132, 1)',
@@ -211,11 +293,17 @@ const Dashboard = () => {
           'rgba(255, 205, 86, 1)',
           'rgba(75, 192, 192, 1)',
           'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)',
+          'rgba(199, 199, 199, 1)',
+          'rgba(83, 102, 255, 1)',
+          'rgba(255, 99, 255, 1)',
+          'rgba(99, 255, 132, 1)',
         ],
         borderWidth: 1,
       },
     ],
   };
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -232,7 +320,6 @@ const Dashboard = () => {
             return `${context.dataset.label}: ${formatNumber(context.parsed.y)}`;
           },
           title: function(context: any) {
-            // Hiển thị tên đầy đủ trong tooltip
             const index = context[0].dataIndex;
             return dashboardData.top_products[index]?.product_name || context[0].label;
           }
@@ -242,7 +329,7 @@ const Dashboard = () => {
     scales: {
       x: {
         ticks: {
-          maxRotation: 0, // Không xoay label
+          maxRotation: 0,
           minRotation: 0,
           font: {
             size: 10
@@ -259,7 +346,6 @@ const Dashboard = () => {
       }
     }
   };
-
 
   const pieChartOptions = {
     responsive: true,
@@ -284,6 +370,8 @@ const Dashboard = () => {
 
       <section className="content">
         <div className="container-fluid">
+        
+
           {/* Thống kê tổng quan */}
           <div className="row">
             <div className="col-lg-3 col-6">
@@ -404,7 +492,7 @@ const Dashboard = () => {
               />
             </div>
           </div>
-
+          
           {/* Biểu đồ */}
           <div className="row">
             {/* Biểu đồ doanh thu theo thời gian */}
@@ -451,13 +539,129 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-
+        {/* Filter Section */}
+          <div className="row mb-3">
+            <div className="col-12">
+              <div className="card">
+                <div className="card-header">
+                  <h3 className="card-title">
+                    <FontAwesomeIcon icon={faFilter} className="mr-2" />
+                    Bộ lọc dữ liệu
+                  </h3>
+                  <div className="card-tools">
+                    <button 
+                      type="button" 
+                      className="btn btn-tool" 
+                      onClick={() => setShowFilters(!showFilters)}
+                    >
+                      <i className={`fas ${showFilters ? 'fa-minus' : 'fa-plus'}`}></i>
+                    </button>
+                  </div>
+                </div>
+                {showFilters && (
+                  <div className="card-body">
+                    <div className="row">
+                      <div className="col-md-3">
+                        <div className="form-group">
+                          <label htmlFor="fromDate">Từ ngày:</label>
+                          <input
+                            type="date"
+                            id="fromDate"
+                            className="form-control"
+                            value={fromDate}
+                            onChange={(e) => setFromDate(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div className="col-md-3">
+                        <div className="form-group">
+                          <label htmlFor="toDate">Đến ngày:</label>
+                          <input
+                            type="date"
+                            id="toDate"
+                            className="form-control"
+                            value={toDate}
+                            onChange={(e) => setToDate(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div className="col-md-3">
+                        <div className="form-group">
+                          <label htmlFor="topProductsLimit">Số sản phẩm top:</label>
+                          <select
+                            id="topProductsLimit"
+                            className="form-control"
+                            value={topProductsLimit}
+                            onChange={(e) => setTopProductsLimit(Number(e.target.value))}
+                          >
+                            <option value={5}>Top 5</option>
+                            <option value={10}>Top 10</option>
+                            <option value={15}>Top 15</option>
+                            <option value={20}>Top 20</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="col-md-3">
+                        <div className="form-group">
+                          <label>&nbsp;</label>
+                          <div className="d-flex">
+                            <button
+                              type="button"
+                              className="btn btn-primary mr-2"
+                              onClick={handleApplyFilter}
+                              disabled={loading}
+                            >
+                              {loading ? (
+                                <>
+                                  <i className="fas fa-spinner fa-spin mr-1"></i>
+                                  Đang tải...
+                                </>
+                              ) : (
+                                <>
+                                  <i className="fas fa-search mr-1"></i>
+                                  Áp dụng
+                                </>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              onClick={handleResetFilter}
+                              disabled={loading}
+                            >
+                              <i className="fas fa-undo mr-1"></i>
+                              Reset
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-12">
+                        <div className="text-muted">
+                          <i className="fas fa-info-circle mr-1"></i>
+                          Dữ liệu hiển thị từ {fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} 
+                          {' '}đến {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'}
+                          {' '}| Hiển thị top {topProductsLimit} sản phẩm bán chạy
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
           <div className="row">
             {/* Biểu đồ số đơn hàng */}
             <div className="col-lg-6">
               <div className="card card-warning">
                 <div className="card-header">
-                  <h3 className="card-title">Số đơn hàng theo thời gian</h3>
+                  <h3 className="card-title">
+                    Số đơn hàng theo thời gian
+                    <small className="ml-2 text-muted">
+                      ({fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} - {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'})
+                    </small>
+                  </h3>
                   <div className="card-tools">
                     <button type="button" className="btn btn-tool" data-card-widget="collapse">
                       <i className="fas fa-minus"></i>
@@ -475,11 +679,16 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Biểu đồ sản phẩm bán chạy */}
+                  {/* Biểu đồ sản phẩm bán chạy */}
             <div className="col-lg-6">
               <div className="card card-info">
                 <div className="card-header">
-                  <h3 className="card-title">Top 5 sản phẩm bán chạy</h3>
+                  <h3 className="card-title">
+                    Top {topProductsLimit} sản phẩm bán chạy
+                    <small className="ml-2 text-muted">
+                      ({fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} - {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'})
+                    </small>
+                  </h3>
                   <div className="card-tools">
                     <button type="button" className="btn btn-tool" data-card-widget="collapse">
                       <i className="fas fa-minus"></i>
@@ -499,12 +708,16 @@ const Dashboard = () => {
           </div>
 
           {/* Bảng sản phẩm bán chạy chi tiết */}
-        
-            <div className="row">
+          <div className="row">
             <div className="col-12">
               <div className="card">
                 <div className="card-header">
-                  <h3 className="card-title">Chi tiết sản phẩm bán chạy</h3>
+                  <h3 className="card-title">
+                    Chi tiết top {topProductsLimit} sản phẩm bán chạy
+                    <small className="ml-2 text-muted">
+                      ({fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} - {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'})
+                    </small>
+                  </h3>
                 </div>
                 <div className="card-body table-responsive p-0">
                   <table className="table table-hover text-nowrap">
@@ -520,9 +733,11 @@ const Dashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {dashboardData.top_products.map((product, index) => (
+                      {dashboardData.top_products.slice(0, topProductsLimit).map((product, index) => (
                         <tr key={product.product_id}>
-                          <td>{index + 1}</td>
+                          <td>
+                            <span className="badge badge-secondary">{index + 1}</span>
+                          </td>
                           <td>
                             <div 
                               style={{ 
@@ -584,40 +799,75 @@ const Dashboard = () => {
                           </td>
                         </tr>
                       ))}
+                      {dashboardData.top_products.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="text-center text-muted py-4">
+                            <i className="fas fa-inbox fa-2x mb-2"></i>
+                            <br />
+                            Không có dữ liệu sản phẩm trong khoảng thời gian này
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
+                {dashboardData.top_products.length > 0 && (
+                  <div className="card-footer">
+                    <small className="text-muted">
+                      <i className="fas fa-info-circle mr-1"></i>
+                      Hiển thị {Math.min(topProductsLimit, dashboardData.top_products.length)} trong tổng số {dashboardData.top_products.length} sản phẩm
+                    </small>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-          
 
-                {/* So sánh kỳ hiện tại vs kỳ trước */}
+          {/* So sánh kỳ hiện tại vs kỳ trước */}
           <div className="row">
             <div className="col-12">
               <div className="card">
                 <div className="card-header">
-                  <h3 className="card-title">So sánh hiệu suất</h3>
+                  <h3 className="card-title">
+                    So sánh hiệu suất
+                    <small className="ml-2 text-muted">
+                      So với cùng kỳ trước đó
+                    </small>
+                  </h3>
                 </div>
                 <div className="card-body">
                   <div className="row">
                     <div className="col-md-6">
-                      <h5>Kỳ hiện tại</h5>
+                      <h5>
+                        Kỳ hiện tại 
+                        <small className="text-muted ml-2">
+                          ({fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} - {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'})
+                        </small>
+                      </h5>
                       <ul className="list-group">
                         <li className="list-group-item d-flex justify-content-between align-items-center">
-                          Doanh thu
+                          <span>
+                            <i className="fas fa-dollar-sign text-success mr-2"></i>
+                            Doanh thu
+                          </span>
                           <span className="badge badge-primary badge-pill">
                             {formatCurrency(dashboardData.revenue_comparison.current_period.revenue)}
                           </span>
                         </li>
                         <li className="list-group-item d-flex justify-content-between align-items-center">
-                          Số đơn hàng
+                          <span>
+                            <i className="fas fa-shopping-cart text-info mr-2"></i>
+                            Số đơn hàng
+                          </span>
                           <span className="badge badge-primary badge-pill">
                             {formatNumber(dashboardData.revenue_comparison.current_period.orders)}
                           </span>
                         </li>
                         <li className="list-group-item d-flex justify-content-between align-items-center">
-                          Giá trị đơn hàng trung bình
+                          <span>
+                            <i className="fas fa-chart-line text-warning mr-2"></i>
+                            Giá trị đơn hàng trung bình
+                          </span>
                           <span className="badge badge-primary badge-pill">
                             {formatCurrency(dashboardData.revenue_comparison.current_period.avg_order_value)}
                           </span>
@@ -625,22 +875,36 @@ const Dashboard = () => {
                       </ul>
                     </div>
                     <div className="col-md-6">
-                      <h5>Kỳ trước</h5>
+                      <h5>
+                        Kỳ trước
+                        <small className="text-muted ml-2">
+                          (Cùng khoảng thời gian kỳ trước)
+                        </small>
+                      </h5>
                       <ul className="list-group">
                         <li className="list-group-item d-flex justify-content-between align-items-center">
-                          Doanh thu
+                          <span>
+                            <i className="fas fa-dollar-sign text-success mr-2"></i>
+                            Doanh thu
+                          </span>
                           <span className="badge badge-secondary badge-pill">
                             {formatCurrency(dashboardData.revenue_comparison.previous_period.revenue)}
                           </span>
                         </li>
                         <li className="list-group-item d-flex justify-content-between align-items-center">
-                          Số đơn hàng
+                          <span>
+                            <i className="fas fa-shopping-cart text-info mr-2"></i>
+                            Số đơn hàng
+                          </span>
                           <span className="badge badge-secondary badge-pill">
                             {formatNumber(dashboardData.revenue_comparison.previous_period.orders)}
                           </span>
                         </li>
                         <li className="list-group-item d-flex justify-content-between align-items-center">
-                          Giá trị đơn hàng trung bình
+                          <span>
+                            <i className="fas fa-chart-line text-warning mr-2"></i>
+                            Giá trị đơn hàng trung bình
+                          </span>
                           <span className="badge badge-secondary badge-pill">
                             {formatCurrency(dashboardData.revenue_comparison.previous_period.avg_order_value)}
                           </span>
@@ -649,33 +913,46 @@ const Dashboard = () => {
                     </div>
                   </div>
                   
-                  <div className="row mt-3">
+                  <div className="row mt-4">
                     <div className="col-12">
-                      <h5>Tỷ lệ tăng trưởng</h5>
+                      <h5>
+                        <i className="fas fa-chart-bar mr-2"></i>
+                        Tỷ lệ tăng trưởng
+                      </h5>
                       <div className="progress-group">
                         <span className="float-right">
-                          <b>{dashboardData.revenue_comparison.growth.revenue_growth}%</b>
+                          <b className={dashboardData.revenue_comparison.growth.revenue_growth >= 0 ? 'text-success' : 'text-danger'}>
+                            {dashboardData.revenue_comparison.growth.revenue_growth >= 0 ? '+' : ''}{dashboardData.revenue_comparison.growth.revenue_growth}%
+                          </b>
                         </span>
-                        <span>Doanh thu</span>
+                        <span>
+                          <i className="fas fa-dollar-sign mr-1"></i>
+                          Doanh thu
+                        </span>
                         <div className="progress progress-sm">
                           <div 
                             className={`progress-bar ${dashboardData.revenue_comparison.growth.revenue_growth >= 0 ? 'bg-success' : 'bg-danger'}`}
                             style={{ 
-                              width: `${Math.abs(dashboardData.revenue_comparison.growth.revenue_growth)}%` 
+                              width: `${Math.min(Math.abs(dashboardData.revenue_comparison.growth.revenue_growth), 100)}%` 
                             }}
                           ></div>
                         </div>
                       </div>
                       <div className="progress-group">
                         <span className="float-right">
-                          <b>{dashboardData.revenue_comparison.growth.orders_growth}%</b>
+                          <b className={dashboardData.revenue_comparison.growth.orders_growth >= 0 ? 'text-success' : 'text-danger'}>
+                            {dashboardData.revenue_comparison.growth.orders_growth >= 0 ? '+' : ''}{dashboardData.revenue_comparison.growth.orders_growth}%
+                          </b>
                         </span>
-                        <span>Đơn hàng</span>
+                        <span>
+                          <i className="fas fa-shopping-cart mr-1"></i>
+                          Đơn hàng
+                        </span>
                         <div className="progress progress-sm">
                           <div 
                             className={`progress-bar ${dashboardData.revenue_comparison.growth.orders_growth >= 0 ? 'bg-success' : 'bg-danger'}`}
                             style={{ 
-                              width: `${Math.abs(dashboardData.revenue_comparison.growth.orders_growth)}%` 
+                              width: `${Math.min(Math.abs(dashboardData.revenue_comparison.growth.orders_growth), 100)}%` 
                             }}
                           ></div>
                         </div>
@@ -693,4 +970,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
