@@ -83,8 +83,11 @@ Route::prefix('v1')->group(function () {
 
             // Analytics routes
             Route::prefix('analytics')->name('analytics.')->group(function () {
-                // Dashboard tổng hợp - CHỈ 1 API duy nhất
+                // Dashboard tổng hợp - có params
                 Route::get('/dashboard', [AnalyticsController::class, 'dashboard'])->name('dashboard');
+
+                // Dashboard nhanh từ pre-calculated data - THÊM DÒNG NÀY
+                Route::get('/dashboard-fast', [AnalyticsController::class, 'dashboardFast'])->name('dashboard.fast');
             });
             //end
         });
