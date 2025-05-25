@@ -15,6 +15,8 @@ use App\Http\Controllers\Api\User\UserController;
 use App\Http\Controllers\Api\Admin\V1\ProductController as ProductControllerAdmin;
 use App\Http\Controllers\Api\Admin\V1\CouponUsageController as CouponUsageControllerAdmin       ;
 use App\Http\Controllers\Api\Admin\V1\CouponsController as CouponsControllerAdmin;
+use App\Http\Controllers\Api\ReviewController;
+
 Route::prefix('v1')->group(callback: function () {
     // Attribute API Routes
     Route::apiResource('/attribute', AttributeController::class);
@@ -67,4 +69,8 @@ Route::prefix('v1')->group(callback: function () {
     Route::apiResource('/coupon', CouponsControllerAdmin::class);
     Route::apiResource('/coupon-usage', CouponUsageControllerAdmin::class);
     Route::get('/coupon/check-code/{code}', [CouponsControllerAdmin::class, 'checkCouponCodeExists']);
+
+    // Review API Route
+    Route::get('/review', [ReviewController::class, 'index']);
+
 }); 
