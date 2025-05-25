@@ -1,11 +1,23 @@
 import { useEffect, useState, FC } from 'react';
-import { getCouponUsage, CouponUsage, deleteCouponUsage } from '@app/services/Coupon/CouponUsage/ApiCouponUsage';
-import { Button } from 'antd';
-
+import { getCouponUsage, CouponUsage, deleteCouponUsage ,updateAmountCouponUsage} from '@app/services/Coupon/CouponUsage/ApiCouponUsage';
+import {getCouponById} from"@app/services/Coupon/ApiCoupon";
+import { Button, Modal, Input, message } from 'antd';
 import { useNavigate, Link } from 'react-router-dom';
 
+interface Coupon {
+    id: number;
+    name: string;
+    code: string;
+    discount_type: number;
+    max_uses : number;
+}
+
 interface CouponUsageResponse {
-    data: CouponUsage[];
+    data: {
+        data: {
+            data: CouponUsage[];
+        };
+    };
     current_page: number;
     last_page: number;
     total: number;
@@ -16,6 +28,10 @@ const CouponUsageComponent: FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [editingUsage, setEditingUsage] = useState<CouponUsage | null>(null);
+    const [newAmount, setNewAmount] = useState<number>(0);
+    const [coupon, setCoupon] = useState<Coupon | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -47,6 +63,42 @@ const CouponUsageComponent: FC = () => {
         } catch (error) {
             console.error('Error deleting coupon usage:', error);
             alert('Xóa thất bại');
+        }
+    };
+
+    const handleEdit = async (usage: CouponUsage) => {
+        setEditingUsage(usage);
+        setNewAmount(usage.amount);
+        setIsEditModalVisible(true);
+        
+        try {
+            const response = await getCouponById(usage.coupon_id);
+           
+            
+            setCoupon(response);
+        } catch (error) {
+            console.error('Error fetching coupon:', error);
+            message.error('Không thể lấy thông tin mã giảm giá');
+        }
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editingUsage || !coupon) return;
+        
+        if (newAmount > coupon.max_uses) {
+            message.error('Số lần sử dụng không được lớn hơn số lượng còn lại');
+            return;
+        }
+        
+        try {
+            await updateAmountCouponUsage(editingUsage.id, newAmount);
+            message.success('Cập nhật thành công');
+            setIsEditModalVisible(false);
+            setCoupon(null);
+            fetchCouponUsage(); // Refresh lại dữ liệu
+        } catch (error) {
+            console.error('Error updating coupon usage:', error);
+            message.error('Cập nhật thất bại');
         }
     };
 
@@ -138,6 +190,12 @@ const CouponUsageComponent: FC = () => {
                                                 <td className="text-center">
                                                     <div className="d-flex justify-content-center gap-1">
                                                         <button
+                                                            className="btn btn-sm btn-primary me-1"
+                                                            onClick={() => handleEdit(usage)}
+                                                        >
+                                                            Sửa
+                                                        </button>
+                                                        <button
                                                             className="btn btn-sm btn-danger"
                                                             onClick={() => handleDelete(usage.id)}
                                                         >
@@ -156,6 +214,39 @@ const CouponUsageComponent: FC = () => {
                                     )}
                                 </tbody>
                             </table>
+
+                            {/* Modal chỉnh sửa amount */}
+                            <Modal
+                                title="Chỉnh sửa số lần sử dụng"
+                                open={isEditModalVisible}
+                                onOk={handleSaveEdit}
+                                onCancel={() => {
+                                    setIsEditModalVisible(false);
+                                    setCoupon(null);
+                                }}
+                                okText="Lưu"
+                                cancelText="Hủy"
+                            >
+                                {coupon && (
+                                    <div className="mb-3">
+                                        <h5>Thông tin mã giảm giá</h5>
+                                        <p><strong>Tên mã:</strong> {coupon.name}</p>
+                                        <p><strong>Mã code:</strong> {coupon.code}</p>
+                                        <p><strong>Loại giảm giá:</strong> {coupon.discount_type === 0 ? 'Phần trăm' : 'Cố định'}</p>
+                                        <p><strong>Số lượng còn lại: </strong>{coupon.max_uses}</p>
+                                    </div>
+                                )}
+                                <div className="form-group">
+                                    <label>Số lần sử dụng:</label>
+                                    <Input
+                                        type="number"
+                                        name='amount'
+                                        value={newAmount}
+                                        onChange={(e) => setNewAmount(Number(e.target.value))}
+                                        min={0}
+                                    />
+                                </div>
+                            </Modal>
 
                             <div className="d-flex justify-content-between align-items-center p-3 border-top">
                                 <div className="pagination">

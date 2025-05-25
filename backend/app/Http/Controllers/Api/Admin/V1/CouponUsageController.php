@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Services\Coupon\CouponUsageServices;
 
 use App\Http\Requests\Coupon\CouponRequests;
+use Illuminate\Http\Request;
+
 class CouponUsageController extends Controller
 {
     protected $couponUsage;
@@ -43,6 +45,19 @@ class CouponUsageController extends Controller
             [
                 'data' => $couponUsage,
                 'message' => 'Xóa dữ liệu thành công',
+            ],
+            200
+        );
+    }
+    public function updateAmount($id, Request $request)
+    {
+        $couponUsage = $this->couponUsage->updateCouponUsage($id, $request->amount);
+
+
+        return response()->json(
+            [
+                'data' => $couponUsage,
+                'message' => 'Cập nhật số lần sử dụng thành công',
             ],
             200
         );
