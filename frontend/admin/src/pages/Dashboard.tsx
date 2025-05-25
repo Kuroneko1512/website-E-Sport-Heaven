@@ -484,7 +484,8 @@ const Dashboard = () => {
           </div>
 
           {/* Bảng sản phẩm bán chạy chi tiết */}
-          <div className="row">
+        
+            <div className="row">
             <div className="col-12">
               <div className="card">
                 <div className="card-header">
@@ -495,9 +496,9 @@ const Dashboard = () => {
                     <thead>
                       <tr>
                         <th>STT</th>
-                        <th>Tên sản phẩm</th>
-                        <th>SKU</th>
-                        <th>Danh mục</th>
+                        <th style={{ width: '250px' }}>Tên sản phẩm</th>
+                        <th style={{ width: '120px' }}>SKU</th>
+                        <th style={{ width: '150px' }}>Danh mục</th>
                         <th>Số lượng bán</th>
                         <th>Doanh thu</th>
                         <th>Số đơn hàng</th>
@@ -508,14 +509,55 @@ const Dashboard = () => {
                         <tr key={product.product_id}>
                           <td>{index + 1}</td>
                           <td>
-                            <div style={{ maxWidth: '300px' }}>
-                              {product.product_name}
+                            <div 
+                              style={{ 
+                                maxWidth: '250px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}
+                              title={product.product_name}
+                            >
+                              {product.product_name.length > 35 
+                                ? product.product_name.substring(0, 35) + '...' 
+                                : product.product_name
+                              }
                             </div>
                           </td>
                           <td>
-                            <span className="badge badge-info">{product.product_sku}</span>
+                            <span 
+                              className="badge badge-info"
+                              style={{
+                                maxWidth: '100px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                display: 'inline-block'
+                              }}
+                              title={product.product_sku}
+                            >
+                              {product.product_sku.length > 12 
+                                ? product.product_sku.substring(0, 12) + '...' 
+                                : product.product_sku
+                              }
+                            </span>
                           </td>
-                          <td>{product.category_name}</td>
+                          <td>
+                            <div 
+                              style={{ 
+                                maxWidth: '150px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}
+                              title={product.category_name}
+                            >
+                              {product.category_name.length > 20 
+                                ? product.category_name.substring(0, 20) + '...' 
+                                : product.category_name
+                              }
+                            </div>
+                          </td>
                           <td>
                             <span className="badge badge-success">{formatNumber(product.total_sold)}</span>
                           </td>
@@ -533,6 +575,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+          
 
                 {/* So sánh kỳ hiện tại vs kỳ trước */}
           <div className="row">
