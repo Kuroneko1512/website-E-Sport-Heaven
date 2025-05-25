@@ -31,7 +31,7 @@ class ProductStoreRequest extends FormRequest
             'selected_attributes' => 'required_if:product_type,variable|array',
             // 'sku'              => ['required', 'string', Rule::unique('products', 'sku')],
             'description'      => ['nullable', 'string'],
-            'image'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:10240'],
+            'image'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg,webp', 'max:10240'],
             'product_type'     => ['required', 'in:simple,variable'],
             'status'           => ['nullable', 'in:active,inactive'],
             'category_id'      => ['required', 'exists:categories,id'],
@@ -132,7 +132,7 @@ class ProductStoreRequest extends FormRequest
             'variants.*.image' => [
                 'nullable',
                 'image',
-                'mimes:jpeg,png,jpg,gif,svg',
+                'mimes:jpeg,png,jpg,gif,svg,webp',
                 'max:5120' // Giới hạn 5MB
             ],
         ];
@@ -146,7 +146,7 @@ class ProductStoreRequest extends FormRequest
             'price.numeric' => 'Giá phải là một số hợp lệ.',
             'price.between' => 'Giá phải nằm trong khoảng từ 0 đến 99999999.99.',
             'image.image' => 'Hình ảnh phải là một file ảnh.',
-            'image.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif, svg.',
+            'image.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif, svg, webp.',
             'image.max' => 'Hình ảnh không được vượt quá 10MB.',
             'category_id.exists' => 'Danh mục không tồn tại.',
             'variants.required_if' => 'Biến thể sản phẩm là bắt buộc khi loại sản phẩm là variable.',

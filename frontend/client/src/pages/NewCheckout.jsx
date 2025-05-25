@@ -571,7 +571,7 @@ const NewCheckout = () => {
       const orderData = {
         ...order,
         amount: grandTotal,
-        payment_method: payment_method,
+        payment_method: paymentMethod,
         shipping_fee: shippingFee || 0,
         coupon_id: selectedCoupon?.id || null,
         order_coupon_code: selectedCoupon?.code || null,
@@ -582,10 +582,12 @@ const NewCheckout = () => {
             : 1
           : null,
         order_discount_value: selectedCoupon
-          ? Number(selectedCoupon.discount_value)
+          ? selectedCoupon.discount_type === 0
+            ? calculateDiscount(selectedCoupon, calculateSubtotal)
+            : Number(selectedCoupon.discount_value)
           : null,
       };
-      // console.log("orderData", orderData);
+      console.log("orderData", orderData);
       const orderResponse = await createOrderMutation.mutateAsync(orderData);
 
       if (orderResponse.success && selectedCoupon) {

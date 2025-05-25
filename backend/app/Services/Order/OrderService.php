@@ -2,26 +2,29 @@
 
 namespace App\Services\Order;
 
-use App\Events\OrderCreate;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\OrderItem;
+use App\Events\OrderCreate;
 use Illuminate\Support\Str;
 use App\Models\OrderHistory;
 use App\Services\BaseService;
 use App\Models\ProductVariant;
 use App\Models\OrderUserReturn;
+use App\Events\OrderStatusUpdated;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Events\OrderStatusUpdated;
+use App\Services\Analytics\AnalyticsService;
 
 class OrderService extends BaseService
 {
+    protected $analyticsService;
     public function __construct(Order $order)
     {
         parent::__construct($order);
+        $this->analyticsService = app(AnalyticsService::class);
     }
 
     /**
@@ -88,6 +91,10 @@ class OrderService extends BaseService
             );
 
             DB::commit();
+
+            // ✅ THÊM: Clear cache khi có đơn mới
+            $this->analyticsService->clearDashboardCache();
+
             broadcast(new OrderCreate());
             return $order;
         } catch (Exception $e) {
@@ -312,16 +319,16 @@ class OrderService extends BaseService
         $query = $this->model->with([
             'orderItems.product',
             'orderItems.productVariant'
-        ])->orderBy('id', 'desc');
-    
+        ])->orderBy('created_at', 'desc');
+
         if (!empty($search)) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('order_code', 'like', "%{$search}%")
-                  ->orWhere('customer_name', 'like', "%{$search}%") // nếu có trường này
-                  ->orWhere('customer_phone', 'like', "%{$search}%"); // hoặc các trường phù hợp
+                    ->orWhere('customer_name', 'like', "%{$search}%") // nếu có trường này
+                    ->orWhere('customer_phone', 'like', "%{$search}%"); // hoặc các trường phù hợp
             });
         }
-    
+
         return $query->paginate($paginate);
     }
 
@@ -412,6 +419,10 @@ class OrderService extends BaseService
         }
 
         $this->addOrderHistory($order->id, OrderHistory::ACTION_STATUS_UPDATED, $historyData);
+        
+        // ✅ THÊM: Clear cache khi cập nhật status
+        $this->analyticsService->clearDashboardCache();
+
         broadcast(new OrderStatusUpdated());
 
         return [
@@ -671,7 +682,7 @@ class OrderService extends BaseService
 
     /**
      * Lấy đơn hàng theo mã order_code
-     * 
+     *
      * @param string $orderCode Mã đơn hàng
      * @return Order|null
      */
@@ -1109,7 +1120,7 @@ class OrderService extends BaseService
             Order::STATUS_CONFIRMED => [
                 Order::STATUS_CANCELLED
             ],
-            
+
             // Từ đã giao hàng (5) khách hàng có thể xác nhận hoàn thành hoặc yêu cầu đổi/trả
             Order::STATUS_DELIVERED => [
                 Order::STATUS_COMPLETED,
@@ -1175,7 +1186,7 @@ class OrderService extends BaseService
 
     /**
      * Tự động chuyển trạng thái đơn hàng từ DELIVERED sang COMPLETED sau một khoảng thời gian
-     * 
+     *
      * @param int|null $time Thời gian sau khi giao hàng để tự động chuyển sang hoàn thành
      * @param string $unit Đơn vị thời gian (minutes, hours, days)
      * @return int Số đơn hàng đã được cập nhật
@@ -1235,7 +1246,7 @@ class OrderService extends BaseService
 
     /**
      * Hủy các đơn hàng đã hết hạn thanh toán
-     * 
+     *
      * @return array Thông tin về số lượng đơn hàng đã hủy
      */
     public function cancelExpiredOrders()

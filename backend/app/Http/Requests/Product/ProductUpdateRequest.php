@@ -39,7 +39,8 @@ class ProductUpdateRequest extends FormRequest
             'discount_percent' => ['nullable', 'numeric', 'between:0,100'],
             'discount_start'   => ['nullable', 'date', 'before_or_equal:discount_end'],
             'discount_end'     => ['nullable', 'date', 'after_or_equal:discount_start'],
-
+            'delete_variant_id' => ['nullable', 'array'],
+            'delete_variant_id.*' => ['integer', 'exists:product_variants,id'],
             // Kiểm tra biến thể (variants)
             'variants' => [
                 'nullable',
@@ -91,11 +92,11 @@ class ProductUpdateRequest extends FormRequest
                         $currentId = $variants[$variantIndex]['id'] ?? null;
                         $otherId = $variant['id'] ?? null;
 
-                       
+
                         if ($index != $variantIndex && $combinationKey && $currentId !== $otherId) {
                             if (in_array($combinationKey, $variantCombinations)) {
                                 return $fail("Biến thể với tổ hợp thuộc tính này đã tồn tại.");
-                            }   
+                            }
                         }
 
                         $variantCombinations[] = $combinationKey;
@@ -121,7 +122,7 @@ class ProductUpdateRequest extends FormRequest
             'price.numeric' => 'Giá phải là một số hợp lệ.',
             'price.between' => 'Giá phải nằm trong khoảng từ 0 đến 99999999.99.',
             'image.image' => 'Hình ảnh phải là một file ảnh.',
-            'image.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif, svg.',
+            'image.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif, svg, webp.',
             'image.max' => 'Hình ảnh không được vượt quá 10MB.',
             'category_id.exists' => 'Danh mục không tồn tại.',
             'variants.required_if' => 'Biến thể sản phẩm là bắt buộc khi loại sản phẩm là variable.',
@@ -129,6 +130,10 @@ class ProductUpdateRequest extends FormRequest
             'variants.*.attributes.*.attribute_id.exists' => 'Thuộc tính không tồn tại.',
             'variants.*.attributes.*.attribute_value_id.exists' => 'Giá trị thuộc tính không tồn tại.',
             'variants.*.attributes.*.attribute_value_id' => 'Giá trị thuộc tính phải hợp lệ.',
+
+            'delete_variant_id.array' => 'Danh sách ID biến thể cần xóa phải là một mảng.',
+            'delete_variant_id.*.integer' => 'ID biến thể phải là số nguyên.',
+            'delete_variant_id.*.exists' => 'Biến thể không tồn tại trong hệ thống.',
         ];
     }
 }

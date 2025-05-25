@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Form, message, Modal } from "antd";
 import Cookies from "js-cookie";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import instanceAxios from "../../config/db";
 import { ORDER_STATUS } from "../../constants/OrderConstants";
@@ -14,6 +14,7 @@ import SkeletonOrder from "../loadingSkeleton/SkeletonOrder";
 import OrderItem from "./OrderItem";
 import useReviewSubmit from "../../hooks/useReviewSubmit";
 import getActionsForOrder from "../../utils/getActionsForOrder";
+import useEchoChannel from "../../hooks/useEchoChannel";
 
 const ORDER_STATUS_TABS = [
   { key: "all", label: "Tất cả" },
@@ -67,6 +68,21 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
   );
   const [returnRequestModalVisible, setReturnRequestModalVisible] =
     useState(false);
+
+  // Handler cho real-time updates
+  const handleOrderUpdate = useCallback((event) => {
+    console.log('✅ MyOrder: Nhận được cập nhật trạng thái đơn hàng:', event);
+
+    // Invalidate và refetch data
+    queryClient.invalidateQueries(["orders"]);
+  }, [queryClient]);
+
+  // Sử dụng hook useEchoChannel để lắng nghe real-time updates
+  const { connected, error: echoError, socketId, isSubscribed } = useEchoChannel(
+    'orders.1',
+    '.order-status-updated',
+    handleOrderUpdate
+  );
 
   // console.log("user", user);
   // Sử dụng hook scroll to top khi currentPage thay đổi
@@ -174,7 +190,8 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
       console.log("data", data);
       if (data?.message === "Order status updated successfully") {
         message.success("Đã hủy đơn hàng thành công");
-        queryClient.invalidateQueries(["orders", currentPage]);
+        // queryClient.invalidateQueries(["orders", currentPage]);
+        queryClient.invalidateQueries(["orders"]);
       } else {
         throw new Error(data?.message || "Không thể hủy đơn hàng");
       }
@@ -200,7 +217,8 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
       if (data?.message) {
         message.success("Đã xác nhận nhận hàng thành công");
         setConfirmModalVisible(false);
-        queryClient.invalidateQueries(["orders", currentPage]);
+        // queryClient.invalidateQueries(["orders", currentPage]);
+        queryClient.invalidateQueries(["orders"]);
       } else {
         throw new Error(data?.message || "Không thể xác nhận nhận hàng");
       }
@@ -227,7 +245,8 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
     onSuccess: (data) => {
       if (data?.message) {
         message.success("Đã gửi yêu cầu trả hàng");
-        queryClient.invalidateQueries(["orders", currentPage]);
+        // queryClient.invalidateQueries(["orders", currentPage]);
+        queryClient.invalidateQueries(["orders"]);
       } else {
         throw new Error(data?.message || "Không thể gửi yêu cầu trả hàng");
       }
@@ -319,7 +338,7 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
                     ) || {},
                   discount: Number(
                     item.product.discount_percent ||
-                      item.product_variant.discount_percent
+                    item.product_variant.discount_percent
                   ),
                 });
               }
@@ -520,8 +539,8 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
                                   <button
                                     className="ml-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow"
                                     onClick={() =>
-                                      (window.location.href =
-                                        vnpayItem.metadata.vnpay_url)
+                                    (window.location.href =
+                                      vnpayItem.metadata.vnpay_url)
                                     }
                                   >
                                     Tiếp tục thanh toán
@@ -540,15 +559,15 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
                                 }
                               >
                                 {cancelOrderMutation.isLoading &&
-                                action === "hủy"
+                                  action === "hủy"
                                   ? "Đang xử lý..."
                                   : confirmReceivedMutation.isLoading &&
                                     action === "confirmReceived"
-                                  ? "Đang xử lý..."
-                                  : requestReturnMutation.isLoading &&
-                                    action === "yêu cầu trả hàng"
-                                  ? "Đang xử lý..."
-                                  : action}
+                                    ? "Đang xử lý..."
+                                    : requestReturnMutation.isLoading &&
+                                      action === "yêu cầu trả hàng"
+                                      ? "Đang xử lý..."
+                                      : action}
                               </button>
                             ))}
                           </div>

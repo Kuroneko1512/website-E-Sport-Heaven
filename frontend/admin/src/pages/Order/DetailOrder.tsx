@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { getOrderById, updateOrderStatus } from "@app/services/Order/Api";
 import {
@@ -11,6 +11,9 @@ import {
   PAYMENT_METHOD_LABELS,
   PAYMENT_METHOD_STYLES
 } from "@app/constants/OrderConstants";
+
+import { debounce } from 'lodash';
+import useEchoChannel from "@app/hooks/useEchoChannel";
 
 // Định nghĩa kiểu dữ liệu cho đơn hàng
 
@@ -86,9 +89,10 @@ const DetailOrder: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isManualUpdate, setIsManualUpdate] = useState<boolean>(false);
   const currentStatusIndex = order ? statusList.indexOf(order.status) : -1;
-  const nextStatusLabel = (currentStatusIndex >= 0 && currentStatusIndex < statusList.length - 1) 
-    ? ORDER_STATUS_LABELS[statusList[currentStatusIndex + 1]] 
+  const nextStatusLabel = (currentStatusIndex >= 0 && currentStatusIndex < statusList.length - 1)
+    ? ORDER_STATUS_LABELS[statusList[currentStatusIndex + 1]]
     : "";
 
   const fetchData = async () => {
@@ -102,6 +106,35 @@ const DetailOrder: React.FC = () => {
     setLoading(false);
   };
 
+  // Debounced version của fetchData để tránh gọi API quá nhiều lần
+  const debouncedFetchData = useCallback(
+    debounce(() => {
+      if (!isManualUpdate) {
+        console.log('🔄 Real-time: Đang cập nhật dữ liệu đơn hàng...');
+        fetchData();
+      }
+    }, 500),
+    [isManualUpdate]
+  );
+
+  // Handler cho real-time updates
+  const handleOrderUpdate = useCallback((event) => {
+    console.log('✅ Nhận được cập nhật trạng thái đơn hàng:', event);
+
+    if (!isManualUpdate) {
+      debouncedFetchData();
+    } else {
+      console.log('⏸️ Bỏ qua cập nhật real-time do đang thực hiện cập nhật thủ công');
+    }
+  }, [debouncedFetchData, isManualUpdate]);
+
+  // Sử dụng hook useEchoChannel
+  const { connected, error: echoError, socketId, isSubscribed } = useEchoChannel(
+    'orders.1',
+    '.order-status-updated',
+    handleOrderUpdate
+  );
+
   useEffect(() => {
     fetchData();
   }, [id]);
@@ -114,13 +147,24 @@ const DetailOrder: React.FC = () => {
     const currentIndex = statusList.indexOf(order.status);
     if (currentIndex < statusList.length - 1) {
       const newStatus = statusList[currentIndex + 1];
+
+      // THÊM: Đặt flag để ngăn real-time update
+      setIsManualUpdate(true);
+
       try {
         await updateOrderStatus(Number(id), newStatus);
-        // Sau khi cập nhật thành công, gọi lại API để lấy dữ liệu mới nhất
+        console.log('✅ Cập nhật thủ công thành công');
+
         const updatedOrderResponse = await getOrderById(Number(id));
         setOrder(updatedOrderResponse.data.data);
       } catch (error) {
         console.error("Lỗi khi cập nhật trạng thái:", error);
+      } finally {
+        // THÊM: Reset flag sau 2 giây
+        setTimeout(() => {
+          setIsManualUpdate(false);
+          console.log('🔄 Đã bật lại real-time updates');
+        }, 2000);
       }
     }
   };
@@ -129,11 +173,22 @@ const DetailOrder: React.FC = () => {
     if (!order) return;
     const confirmCancel = window.confirm("Bạn có chắc muốn huỷ đơn hàng này?");
     if (!confirmCancel) return;
+
+    // THÊM: Đặt flag để ngăn real-time update
+    setIsManualUpdate(true);
+
     try {
-      await updateOrderStatus(Number(id), ORDER_STATUS.CANCELLED); // Truyền giá trị số 10
+      await updateOrderStatus(Number(id), ORDER_STATUS.CANCELLED);
+      console.log('✅ Hủy đơn hàng thành công');
       setOrder({ ...order, status: ORDER_STATUS.CANCELLED });
     } catch (error) {
       console.error("Lỗi khi cập nhật trạng thái:", error);
+    } finally {
+      // THÊM: Reset flag sau 2 giây
+      setTimeout(() => {
+        setIsManualUpdate(false);
+        console.log('🔄 Đã bật lại real-time updates');
+      }, 2000);
     }
   };
 
@@ -197,21 +252,26 @@ const DetailOrder: React.FC = () => {
               order.status === ORDER_STATUS.COMPLETED ||
               order.status === ORDER_STATUS.CANCELLED ||
               currentStatusIndex >= statusList.length - 1 ||
-              !nextStatusLabel
+              !nextStatusLabel ||
+              isManualUpdate // THÊM: Disable khi đang cập nhật thủ công
             }
-            onClick={nextStatus}  // ĐỔI: handleNextStatus → nextStatus
+            onClick={nextStatus}
           >
-            {nextStatusLabel ? `Chuyển sang : ${nextStatusLabel}` : "Không thể chuyển trạng thái"}
+            {isManualUpdate ? "Đang cập nhật..." :
+              nextStatusLabel ? `Chuyển sang : ${nextStatusLabel}` : "Không thể chuyển trạng thái"}
           </button>
 
           {/* Nút huỷ đơn */}
           <button
             type="button"
             className="btn btn-danger"
-            disabled={order.status >= ORDER_STATUS.READY_TO_SHIP}
-            onClick={failDelivery}  // ĐỔI: handleCancelOrder → failDelivery
+            disabled={
+              order.status >= ORDER_STATUS.READY_TO_SHIP ||
+              isManualUpdate // THÊM: Disable khi đang cập nhật thủ công
+            }
+            onClick={failDelivery}
           >
-            Huỷ đơn
+            {isManualUpdate ? "Đang cập nhật..." : "Huỷ đơn"}
           </button>
         </div>
 

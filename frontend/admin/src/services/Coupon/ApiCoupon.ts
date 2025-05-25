@@ -61,7 +61,7 @@ export const createCoupon = async (couponData: Omit<Coupon, 'id' | 'created_at' 
 };
 
 
-export const updateCoupon = async (couponId: number, couponData: Partial<Omit<Coupon, 'id' | 'created_at' | 'updated_at' | 'is_active'>>) => {  
+export const updateCoupon = async (couponId: number, couponData: Partial<Omit<Coupon, 'id' | 'created_at' | 'updated_at'>>) => {  
   try {
     const response = await axios.put(`${API_URL}/${couponId}`, couponData);
     return response.data;
