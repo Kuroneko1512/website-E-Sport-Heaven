@@ -69,6 +69,7 @@ export interface Order {
   customer_email: string;
   customer_phone: string;
   shipping_address: string;
+  shipping_fee: string;
   order_code: string;
   total_amount: string;
   subtotal: string;

@@ -59,8 +59,22 @@ class BlogService extends BaseService
             }
             // Lọc theo ngày kết thúc, xử lý timezone
             if ($request->filled('end_date')) {
-                Log::info('end_date'.$request->input('end_date'));
-                $query->whereDate('publish_date', '<=', $request->input('end_date'));
+                try {
+                    // Parse ISO date string từ client (UTC)
+                    $endDate = \Carbon\Carbon::parse($request->input('end_date'));
+            
+                    Log::info('Parsed end_date (UTC): ' . $endDate->toDateTimeString());
+            
+                    // Nếu muốn so sánh theo timezone nội bộ (ví dụ: Asia/Ho_Chi_Minh)
+                    $endDate->setTimezone('Asia/Ho_Chi_Minh');
+            
+                    Log::info('end_date chuyển sang Asia/Ho_Chi_Minh: ' . $endDate->toDateTimeString());
+            
+                    // So sánh chính xác datetime
+                    $query->where('publish_date', '<=', $endDate);
+                } catch (\Exception $e) {
+                    Log::error('Lỗi khi parse end_date: ' . $e->getMessage());
+                }
             }
 
             // Sắp xếp kết quả

@@ -100,16 +100,46 @@ const useAddressData = () => {
   return { provinces, districts, wards, loadDistricts, loadWards };
 };
 
+// Hàm chuyển đổi chuỗi ngày giờ về định dạng ngày giờ Việt Nam
+function parseDate(str) {
+  if (!str) return null;
+  // Nếu đã có 'T' thì giữ nguyên, nếu chưa thì thay ' ' bằng 'T'
+  // Sau đó chuyển về giờ Việt Nam (UTC+7)
+  let date = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
+  // Nếu date là invalid thì trả về null
+  if (isNaN(date.getTime())) return null;
+  return date;
+}
+
 // Hàm kiểm tra tính hợp lệ của mã giảm giá
 const isCouponValid = (coupon, subtotal) => {
+  console.log("coupon", coupon, "subtotal", subtotal);
   const now = new Date();
+  console.log("now", now);
+  console.log("start_date", parseDate(coupon?.start_date));
+  console.log("end_date", parseDate(coupon?.end_date));
   return (
-    coupon.is_active &&
-    new Date(coupon.start_date) <= now &&
-    new Date(coupon.end_date) >= now &&
-    coupon.used_count < coupon.max_uses &&
-    subtotal >= coupon.min_purchase
+    coupon?.is_active === 0 &&
+    parseDate(coupon?.start_date) <= now &&
+    parseDate(coupon?.end_date) >= now &&
+    // (coupon?.max_uses === null || coupon?.used_count < coupon?.max_uses) &&
+    Number(subtotal) >= Number(coupon?.min_order_amount)
   );
+};
+
+const calculateDiscount = (coupon, subtotal) => {
+  if (!coupon) return 0;
+  let discount = 0;
+  if (coupon.discount_type === 0) {
+    discount = subtotal * (Number(coupon.discount_value) / 100);
+    if (Number(coupon.max_discount_amount) > 0 && discount > Number(coupon.max_discount_amount)) {
+      discount = Number(coupon.max_discount_amount);
+    }
+  } else {
+    discount = Number(coupon.discount_value);
+  }
+  // Không cho giảm vượt quá tổng tiền hàng
+  return Math.min(discount, subtotal);
 };
 
 const NewCheckout = () => {
@@ -382,67 +412,55 @@ const NewCheckout = () => {
     queryKey: ["coupons"],
     queryFn: async () => {
       const response = await instanceAxios.get("api/v1/coupon");
-      return response.data;
+      return response?.data?.data;
     },
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 
+  console.log("couponsData", couponsData);
+
   // Calculate subtotal without coupon discount
   const calculateSubtotal = useMemo(() => {
-    return cartItems.reduce(
+    const subtotal = cartItems.reduce(
       (total, item) =>
         total +
         (item.price - (item.price * item.discount) / 100) * item.quantity,
       0
     );
+    return subtotal;
   }, [cartItems]);
-
-  // console.log("calculateSubtotal", calculateSubtotal);
+  
+  console.log("calculateSubtotal", calculateSubtotal);
 
   // Process coupons data when it changes
   useEffect(() => {
-    if (couponsData?.data) {
-      const validCoupons = couponsData.data.filter((coupon) =>
+    if (Array.isArray(couponsData)) {
+      const validCoupons = couponsData?.filter((coupon) =>
         isCouponValid(coupon, calculateSubtotal)
       );
+      console.log("validCoupons", validCoupons);
       setAvailableCoupons(validCoupons);
+      // console.log("availableCoupons", validCoupons);
 
-      if (selectedCoupon) {
-        const isStillValid = validCoupons.some(
-          (c) => c.id === selectedCoupon.id
-        );
-        if (!isStillValid) {
-          setSelectedCoupon(null);
-          setDiscountCode("");
-          // message.warning("Mã giảm giá đã chọn không còn khả dụng!");
-        }
+      // Nếu coupon đang chọn không còn hợp lệ thì reset
+      if (selectedCoupon && !validCoupons.some(c => c.id === selectedCoupon.id)) {
+        setSelectedCoupon(null);
+        setDiscountCode("");
       }
     }
   }, [couponsData, calculateSubtotal, selectedCoupon]);
 
-  // Handle error state
   useEffect(() => {
-    if (isError) {
-      message.error(
-        "Không thể tải danh sách mã giảm giá. Vui lòng thử lại sau."
-      );
-    }
-  }, [isError]);
-
-  // console.log("couponsData", couponsData);
+    console.log("selectedCoupon", selectedCoupon);
+  }, [selectedCoupon]);
 
   // Calculate grand total with useMemo
   const grandTotal = useMemo(() => {
-    let discount = 0;
-    if (selectedCoupon) {
-      if (selectedCoupon.discount_type === "percentage") {
-        discount = (calculateSubtotal * selectedCoupon.discount_value) / 100;
-      } else {
-        discount = selectedCoupon.discount_value;
-      }
-    }
+    const discount = calculateDiscount(selectedCoupon, calculateSubtotal);
+    // console.log("discount", discount);
     const total = calculateSubtotal + (shippingFee || 0) - discount;
-    return Math.floor(total); // Lấy phần nguyên trước dấu thập phân
+    // console.log("grandTotal", total);
+    return Math.floor(total);
   }, [calculateSubtotal, shippingFee, selectedCoupon]);
 
   useEffect(() => {
@@ -559,39 +577,41 @@ const NewCheckout = () => {
         order_coupon_code: selectedCoupon?.code || null,
         order_coupon_name: selectedCoupon?.name || null,
         order_discount_type: selectedCoupon
-          ? selectedCoupon.discount_type === "percentage"
+          ? selectedCoupon.discount_type === 0
             ? 0
             : 1
           : null,
         order_discount_value: selectedCoupon
-          ? Number(selectedCoupon.discount_value)
+          ? selectedCoupon.discount_type === 0
+            ? calculateDiscount(selectedCoupon, calculateSubtotal)
+            : Number(selectedCoupon.discount_value)
           : null,
       };
-      // console.log("orderData", orderData);
-      const orderResponse = await createOrderMutation.mutateAsync(orderData);
+      console.log("orderData", orderData);
+      // const orderResponse = await createOrderMutation.mutateAsync(orderData);
 
-      if (orderResponse.success && selectedCoupon) {
-        const currentCoupon = validateCouponQuery.data;
-        const subtotal = cartItems.reduce(
-          (total, item) =>
-            total +
-            (item.price - (item.price * item.discount) / 100) * item.quantity,
-          0
-        );
+      // if (orderResponse.success && selectedCoupon) {
+      //   const currentCoupon = validateCouponQuery.data;
+      //   const subtotal = cartItems.reduce(
+      //     (total, item) =>
+      //       total +
+      //       (item.price - (item.price * item.discount) / 100) * item.quantity,
+      //     0
+      //   );
 
-        if (!isCouponValid(currentCoupon, subtotal)) {
-          await deleteOrderMutation.mutateAsync(orderResponse.data.id);
-          setSelectedCoupon(null);
-          setDiscountCode("");
-          setSubmit(false);
-          return;
-        }
+      //   if (!isCouponValid(currentCoupon, subtotal)) {
+      //     await deleteOrderMutation.mutateAsync(orderResponse.data.id);
+      //     setSelectedCoupon(null);
+      //     setDiscountCode("");
+      //     setSubmit(false);
+      //     return;
+      //   }
 
-        await updateCouponMutation.mutateAsync({
-          couponId: selectedCoupon.id,
-          usedCount: currentCoupon.used_count + 1,
-        });
-      }
+      //   await updateCouponMutation.mutateAsync({
+      //     couponId: selectedCoupon.id,
+      //     usedCount: currentCoupon.used_count + 1,
+      //   });
+      // }
 
       if (paymentMethod === "vnpay" && orderResponse.vnpUrl) {
         window.location.href = orderResponse.vnpUrl;
@@ -617,9 +637,6 @@ const NewCheckout = () => {
     }
   };
 
-  console.log("order", order);
-  // console.log("grandTotal", grandTotal);
-  // console.log("dataform", dataform);
   return (
     <div className="p-6 bg-white">
       <Title level={2}>Thanh toán</Title>
@@ -858,7 +875,7 @@ const NewCheckout = () => {
                             {coupon.code.toUpperCase()}
                           </Text>
                           <div className="text-sm mt-1">
-                            {coupon.discount_type === "percentage"
+                            {coupon.discount_type === 0
                               ? `Giảm ${coupon.discount_value}%`
                               : `Giảm ${FomatVND(coupon.discount_value)}`}
                           </div>

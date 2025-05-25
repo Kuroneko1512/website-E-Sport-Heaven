@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Auth\v1;
 use App\Http\Controllers\Controller;
 use App\Services\Auth\CustomerAuthService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Validator;
 
 class CustomerAuthController extends Controller
 {
@@ -108,4 +110,48 @@ class CustomerAuthController extends Controller
             $result['code']
         );
     }
+
+    public function sendResetLinkEmail(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return response()->json(['message' => 'Password reset link sent to your email.']);
+        }
+
+        return response()->json(['message' => 'Unable to send reset link.'], 500);
+    }
+
+    public function showResetForm(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return response()->json(['message' => 'Password reset link sent to your email.']);
+        }
+
+        return response()->json(['message' => 'Unable to send reset link.'], 500);
+    }
+    
 }

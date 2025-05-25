@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace App\Services\Category;
 
 use App\Models\Category;
@@ -13,5 +13,7 @@ class CategoryService extends BaseService {
         return $this->model->withCount(['products', 'subcategories'])->paginate(15);
     }
 
-   
+    public function getAllCategories(){
+        return $this->model->withCount(['products', 'subcategories'])->get();
+    }
 }

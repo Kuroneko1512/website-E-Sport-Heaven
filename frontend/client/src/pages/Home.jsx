@@ -39,7 +39,13 @@ const Home = () => {
       },
     });
 
-    console.log("productDataBestseller", productDataBestseller);
+    const { data: productDataReview, isLoading: productLoadingReview } = useQuery({
+    queryKey: ["reviews"],
+    queryFn: async () => {
+      const res = await instanceAxios.get(`/api/v1/review`);
+      return res?.data?.data?.data;
+    },
+  });
 
   return (
     <div className="bg-gray-50 dark:bg-gray-800 min-h-screen text-black dark:text-white">
@@ -61,7 +67,7 @@ const Home = () => {
         )}
 
         {/* Product Bestseller */}
-        {/* {productLoadingBestseller ? (
+        {productLoadingBestseller ? (
           <>
             <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">
               Sản phẩm bán chạy
@@ -70,7 +76,7 @@ const Home = () => {
           </>
         ) : (
           <ProductBestseller productDataB={productDataBestseller} />
-        )} */}
+        )}
 
         {/* Product New */}
         {productLoading ? (
@@ -88,7 +94,17 @@ const Home = () => {
         <DealsOfTheMonth />
         
         {/* Customer Say */}
-        <CustomerSay />
+        {productLoadingReview ? (
+          <>
+            <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">
+              Khách hàng của chúng tôi nói gì?
+            </h1>
+            <SkeletonLoadingHome />
+          </>
+        ) : (
+          <CustomerSay reviews={productDataReview?.slice(0, 8)} />
+        )}
+        {/* <CustomerSay /> */}
       </div>
 
       <TopFooter />

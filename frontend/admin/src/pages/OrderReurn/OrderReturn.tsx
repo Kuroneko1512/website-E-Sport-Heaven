@@ -2,7 +2,14 @@ import { getOrders, UserReturn, Pagination } from "@app/services/OrderReturn/Api
 import FomatVND from "@app/utils/FomatVND";
 import { FC, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ORDER_STATUS, ORDER_STATUS_LABELS, PAYMENT_STATUS, PAYMENT_STATUS_LABELS } from "@app/constants/OrderConstants";
+import {
+    ORDER_STATUS,
+    ORDER_STATUS_LABELS,
+    ORDER_STATUS_STYLES,
+    PAYMENT_STATUS,
+    PAYMENT_STATUS_LABELS
+} from "@app/constants/OrderConstants";
+
 const OrderReturn: FC = () => {
     const navigate = useNavigate();
 
@@ -27,6 +34,8 @@ const OrderReturn: FC = () => {
         try {
             const response = await getOrders(page, pagination.per_page);
             console.log("API Response:", response);
+            // console.log("Response data:", response.data);
+            // console.log("Response data.data:", response.data.data);
 
             setOrders(response.data.data ); // Gán danh sách orders
             setPagination(response); // Cập nhật thông tin phân trang
@@ -39,7 +48,9 @@ const OrderReturn: FC = () => {
     useEffect(() => {
         fetchData();
     }, []);
-
+    // Log để debug
+    // console.log("Orders state:", orders);
+    // console.log("Pagination state:", pagination);
     return (
         <section className="content">
             <div className="content-header">
@@ -63,7 +74,6 @@ const OrderReturn: FC = () => {
             <div className="card">
                 <div className="card-header">
                     <h3 className="card-title">Đơn hàng</h3>
-
                 </div>
 
                 <div className="card-body p-0">
@@ -85,24 +95,20 @@ const OrderReturn: FC = () => {
                                     <td>{userReturn.order.order_code}</td>
                                     <td>{Number(userReturn.order.total_amount).toLocaleString()}₫</td>
                                     <td>{new Date(userReturn.created_at).toLocaleDateString()}</td>
-                                     <td className="project-state">
-                                            <span className={`badge ${ userReturn.status === ORDER_STATUS.COMPLETED ? "badge-success" : "badge-warning"}`}>
-                                                {ORDER_STATUS_LABELS[userReturn.status]}
-                                            </span>
-                                        </td>
-                                    <td >
+                                    <td className="project-state">
+                                        <span className={`badge ${ORDER_STATUS_STYLES[userReturn.order.status]}`}>
+                                            {ORDER_STATUS_LABELS[userReturn.order.status]}
+                                        </span>
+                                    </td>
+                                    <td>
                                         <Link className="btn btn-primary btn-sm" to={`/order-return/${userReturn.order.id}`}>
                                             <i className="fas fa-folder"></i> Xem
                                         </Link>
                                     </td>
-
                                 </tr>
                             ))}
-
                         </tbody>
-
                     </table>
-
                 </div>
             </div>
         </section>

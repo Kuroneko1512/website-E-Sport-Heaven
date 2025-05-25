@@ -394,7 +394,7 @@ const Store: FC = () => {
                                             onChange={handleChange}
                                             min="0"
                                             placeholder="0"
-                                            disabled={coupon.discount_type === 0}
+                                            disabled={coupon.discount_type === 1} // Chỉ disable khi chọn "Giá tiền"
                                         />
                                         <div className="input-group-append">
                                             <span className="input-group-text">VNĐ</span>

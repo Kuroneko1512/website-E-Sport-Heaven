@@ -114,6 +114,7 @@ const ReviewList = () => {
                 <th>ID</th>
                 <th>Tiêu đề</th>
                 <th>Sản phẩm</th>
+                <th>Đánh giá</th>
                 <th>User</th>
                 <th>Thao Tác</th>
               </tr>
@@ -128,12 +129,6 @@ const ReviewList = () => {
                     <td><StarRating rating={review.rating} /></td>
                     <td>{review.user_name}</td>
                     <td>
-                      <Link
-                        to={`/review/${review.id}`}
-                        className="btn btn-warning btn-sm mr-2"
-                      >
-                        <i className="fas fa-edit"></i> Sửa
-                      </Link>
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => handleDelete(review.id)}

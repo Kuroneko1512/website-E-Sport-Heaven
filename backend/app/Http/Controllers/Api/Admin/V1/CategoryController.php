@@ -8,10 +8,11 @@ use App\Services\Category\CategoryService;
 use App\Http\Requests\Category\CategoryStoreRequest;
 use App\Http\Requests\Category\CategoryUpdateRequest;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
-    
+
     protected $categoryService;
     // Constructor để khởi tạo service
     public function __construct(CategoryService $categoryService)
@@ -36,9 +37,26 @@ class CategoryController extends Controller
         }
     }
 
+    public function getAllCategories(){
+        try {
+            // Gọi service để lấy tất cả danh mục
+            $categories = $this->categoryService->getAllCategories();
+            return response()->json([
+                'status' => 200,
+                'data' => $categories,
+            ],200);
+        } catch (\Throwable $th) {
+            Log::error($th);
+            return response()->json([
+                'error' => 'Lấy danh mục thất bại',
+                'status' => 500
+            ],500);
+        }
+    }
+
     public function store(CategoryStoreRequest $request)
     {
-       
+
         try {
              // Validate và lấy dữ liệu từ request
             $data = $request->validated();
@@ -84,7 +102,7 @@ class CategoryController extends Controller
     }
     public function destroy($id)
     {
-       
+
         try {
             // Gọi service để xóa Danh mục
             $atr = $this->categoryService->delete($id);
@@ -104,7 +122,7 @@ class CategoryController extends Controller
     }
     public function show($id)
     {
-       
+
         try {
                  // Gọi service để lấy thông tin chi tiết Danh mục
             $atr = $this->categoryService->show($id);

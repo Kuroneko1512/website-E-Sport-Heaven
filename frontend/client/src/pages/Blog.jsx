@@ -71,7 +71,7 @@ const Blog = () => {
         keyword: searchTerm,
         category_id: categoryId,
         page: currentPage,
-        end_date: new Date().toISOString().slice(0, 10),
+        end_date: new Date().toISOString(),//.slice(0, 10),
       });
       setPosts(response.data);
       setPagination({

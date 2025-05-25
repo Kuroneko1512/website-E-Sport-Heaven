@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Blog;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator as ValidationValidator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -31,7 +32,11 @@ class BlogUpdateRequest extends FormRequest
             'content' => 'required|string',
             'category_id' => 'required|exists:blog_categories,id',
             'slug' => 'nullable|string|max:255',
-            'publish_date' => 'nullable|date',
+            'publish_date' => [
+                'nullable',
+                'date',
+                'after_or_equal:' . Carbon::now('Asia/Ho_Chi_Minh')->toDateTimeString(),
+            ],
             'is_featured' => 'nullable|boolean',
             'thumbnail' => 'nullable',
         ]; 
@@ -56,6 +61,7 @@ class BlogUpdateRequest extends FormRequest
             'slug.string' => 'Slug phải là chuỗi.',
             'slug.max' => 'Slug không được vượt quá 255 ký tự.',
             'publish_date.date' => 'Ngày xuất bản phải là định dạng ngày.',
+            'publish_date.after_or_equal' => 'Ngày xuất bản phải sau thời điểm hiện tại.',
             'is_featured.boolean' => 'Trường nổi bật phải là boolean.'
         ];
     }
