@@ -125,6 +125,14 @@ export const updateProduct = async (id: number, product: api4): Promise<api4> =>
     formData.append("category_id", String(product.category_id));
     formData.append("stock", String(product.stock));
 
+    // 🟢 XỬ LÝ delete_variant_id - THÊM ĐOẠN NÀY
+    if (product.delete_variant_id && product.delete_variant_id.length > 0) {
+      console.log("🟢 Frontend - Đang gửi delete_variant_id:", product.delete_variant_id);
+      product.delete_variant_id.forEach((variantId) => {
+        formData.append("delete_variant_id[]", String(variantId));
+      });
+    }
+
     // 🟢 Truyền mảng trực tiếp thay vì JSON chuỗi
     if (Array.isArray(product.selected_attributes)) {
       product.selected_attributes.forEach((attr) => {
@@ -158,9 +166,9 @@ export const updateProduct = async (id: number, product: api4): Promise<api4> =>
     }
     formData.append("_method", "PUT");
     // Log dữ liệu trước khi gửi lên API
-    for (let pair of formData.entries()) {
-      console.log(`${pair[0]}:`, pair[1]);
-    }
+    // for (let pair of formData.entries()) {
+    //   console.log(`${pair[0]}:`, pair[1]);
+    // }
 
     // 🟢 Gửi API
     // const response = await axios.post<api4>(`${API_URL}/${id}`, formData, {

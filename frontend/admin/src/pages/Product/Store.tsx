@@ -284,17 +284,23 @@ const Store = () => {
     console.log(variantId);
 
     try {
-      // Xóa variant ở database
-      await updateProduct(Number(id), {
+      const deleteData = {
         ...product,
         delete_variant_id: [variantId]
-      });
+      };
+
+      console.log("🔵 Frontend - Data gửi lên:", deleteData);
+
+      // Xóa variant ở database
+      await updateProduct(Number(id),deleteData);
 
       // Cập nhật state sau khi xóa thành công
       setProduct(prev => ({
         ...prev,
         variants: prev.variants.filter(variant => variant.id !== variantId)
       }));
+      console.log("Xóa biến thể thành công!");
+      // alert("Xóa biến thể thành công!");
     } catch (error) {
       console.error("Lỗi khi xóa variant:", error);
       alert("Có lỗi xảy ra khi xóa variant!");
