@@ -77,4 +77,14 @@ export const deleteCouponUsage = async (id: number): Promise<{ data: CouponUsage
         console.error('Error deleting coupon usage:', error);
         throw error;
     }
+
+};
+export const updateAmountCouponUsage = async (id: number, amount: number): Promise<{data: CouponUsage}> => {
+   try {
+    const response = await axios.put(`${API_URL}/${id}/amount`, { amount });
+    return response;
+   } catch(error) {
+    console.error('Error updating coupon usage:', error);
+    throw error;
+   }
 };

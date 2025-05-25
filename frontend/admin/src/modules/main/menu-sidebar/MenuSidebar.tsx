@@ -61,8 +61,13 @@ export const MENU: IMenuItem[] = [
   },
   {
     name: 'Mã giảm giá',
-    icon: 'fas fa-tags nav-icon', // Mã giảm giá -> thẻ/tag là biểu tượng hợp lý
+    icon: 'fas fa-tags nav-icon', 
     path: '/Coupon',
+  },
+  {
+    name: 'Mã giảm giá cho người dùng',
+    icon: 'fas fa-user-tag nav-icon', 
+    path: '/coupon-usage',
   },
   {
     name: "Bài viết",

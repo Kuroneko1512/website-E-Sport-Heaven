@@ -74,6 +74,31 @@ class CouponUsageServices extends BaseService
     {
         return $this->couponUsage->findOrFail($id)->delete();
     }
+
+    public function updateCouponUsage($id, $amount)
+    {
+        $couponUsage = $this->couponUsage->findOrFail($id);
+  
+        $coupon = Coupon::findOrFail($couponUsage->coupon_id);
+
+        // Kiểm tra nếu số lượng mới vượt quá số lượng còn lại
+        if ($amount > $coupon->max_uses) {
+            throw new \Exception('Số lần sử dụng không được vượt quá số lượng còn lại');
+        }
+       
+        
+        $newMaxUses = $coupon->max_uses - $amount;
+
+        // Kiểm tra nếu số lượt sử dụng mới âm
+        if ($newMaxUses < 0) {
+            throw new \Exception('Số lượt sử dụng không đủ');
+        }
+
+        $coupon->update(['max_uses' => $newMaxUses]);
+        $couponUsage->update(['amount' => $amount]);
+        
+        return $couponUsage;
+    }
 }
 
 

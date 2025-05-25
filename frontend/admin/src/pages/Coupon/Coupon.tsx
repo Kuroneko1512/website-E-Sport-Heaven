@@ -15,6 +15,7 @@ interface CouponDisplay {
     start_date: string;
     end_date: string;
     max_uses: number;
+    user_id : number;
 }
 
 const Coupon: FC = () => {
