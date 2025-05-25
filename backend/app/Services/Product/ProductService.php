@@ -11,6 +11,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\BaseService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ProductService extends BaseService
@@ -39,7 +40,7 @@ class ProductService extends BaseService
         }
 
         return $query->orderBy('created_at', 'DESC') // Sắp xếp theo thời gian mới nhất
-        ->paginate($paginate);
+            ->paginate($paginate);
     }
 
     public function getProductFiterAll($filters = [], $paginate = 12)
@@ -63,9 +64,9 @@ class ProductService extends BaseService
             $query->where(function ($q) use ($min, $max) {
                 // Sản phẩm đơn giản (simple)
                 $q->where('product_type', 'simple')
-                    ->whereRaw('CASE 
-                WHEN discount_percent IS NOT NULL AND 
-                     (discount_start IS NULL OR discount_start <= NOW()) AND 
+                    ->whereRaw('CASE
+                WHEN discount_percent IS NOT NULL AND
+                     (discount_start IS NULL OR discount_start <= NOW()) AND
                      (discount_end IS NULL OR discount_end >= NOW())
                 THEN price * (1 - discount_percent/100)
                 ELSE price
@@ -73,9 +74,9 @@ class ProductService extends BaseService
 
                 // Sản phẩm biến thể (variable)
                 $q->orWhereHas('variants', function ($variantQuery) use ($min, $max) {
-                    $variantQuery->whereRaw('CASE 
-                  WHEN discount_percent IS NOT NULL AND 
-                       (discount_start IS NULL OR discount_start <= NOW()) AND 
+                    $variantQuery->whereRaw('CASE
+                  WHEN discount_percent IS NOT NULL AND
+                       (discount_start IS NULL OR discount_start <= NOW()) AND
                        (discount_end IS NULL OR discount_end >= NOW())
                   THEN price * (1 - discount_percent/100)
                   ELSE price
@@ -112,8 +113,8 @@ class ProductService extends BaseService
     public function getProductById($id)
     {
         $products = $this->model->with([
-                'category',
-                'variants.productAttributes.attributeValue',
+            'category',
+            'variants.productAttributes.attributeValue',
         ])->findOrFail($id);
         return $products;
     }
@@ -187,6 +188,16 @@ class ProductService extends BaseService
      */
     public function updateProduct($data, $id)
     {
+        Log::info('🔵 Backend - Dữ liệu nhận được:', [$data]);
+        Log::info('🔵 Backend - Product ID:', [$id]);
+        // ✅ KIỂM TRA delete_variant_id
+        if (isset($data['delete_variant_id'])) {
+            Log::info('🔵 Backend - delete_variant_id có tồn tại: ' . json_encode($data['delete_variant_id']));
+        } else {
+            Log::info('🔵 Backend - delete_variant_id KHÔNG tồn tại trong request');
+        }
+
+
         $isVariable = $data['product_type'] === 'variable';
         // Cập nhật sản phẩm
         $product = $this->model->findOrFail($id);
@@ -211,15 +222,23 @@ class ProductService extends BaseService
         if ($isVariable) {
             // Xóa variant nếu có yêu cầu xóa
             if (isset($data['delete_variant_id']) && is_array($data['delete_variant_id'])) {
+                Log::info('🟢 Backend - Bắt đầu xóa variants:', [$data['delete_variant_id']]);
                 foreach ($data['delete_variant_id'] as $variantId) {
+                    Log::info('🟢 Backend - Đang xóa variant ID:', [$variantId]);
                     $variant = $product->variants()->find($variantId);
                     if ($variant) {
+                        Log::info('🟢 Backend - Tìm thấy variant, đang xóa...');
                         // Xóa các product attributes của variant trước
                         $variant->productAttributes()->delete();
                         // Sau đó xóa variant
                         $variant->delete();
+                        Log::info('🟢 Backend - Đã xóa variant thành công');
+                    } else {
+                        Log::warning('⚠️ Backend - Không tìm thấy variant ID:', [$variantId]);
                     }
                 }
+            } else {
+                Log::info('🔵 Backend - Không có delete_variant_id hoặc không phải array');
             }
 
             // Nếu không có variants trong request, xóa tất cả variants hiện có
