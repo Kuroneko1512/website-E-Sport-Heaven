@@ -44,8 +44,8 @@ const SmallBox = ({
       </div>
       {iconContent}
       <Link to={navigateTo} className="small-box-footer">
-        <span className="mr-2">{t('main.label.moreInfo')}</span>
-        <i className="fa fa-arrow-circle-right" />
+        {/* <span className="mr-2">{t('main.label.moreInfo')}</span>
+        <i className="fa fa-arrow-circle-right" /> */}
       </Link>
 
       {loading && (

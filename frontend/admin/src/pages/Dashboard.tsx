@@ -9,6 +9,22 @@ import {
   faChartPie,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+    PointElement, 
+  LineElement,  
+  ArcElement,   
+} from 'chart.js';
+import { Bar, Line, Pie } from 'react-chartjs-2';
+
+// Phải đăng ký các thành phần cần thiết
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement, ArcElement); 
 
 const Dashboard = () => {
   return (
@@ -24,6 +40,7 @@ const Dashboard = () => {
                 text="150"
                 navigateTo="#"
                 variant="info"
+             
                 icon={{
                   content: (
                     <FontAwesomeIcon
@@ -180,6 +197,118 @@ const Dashboard = () => {
               />
             </div>
           </div>
+
+        </div>
+         <div className="container-fluid">
+         <div className="row">
+                 <div className="col-lg-8 col-6">
+                       <Bar data={{
+                    labels: ['a', 'b', 'c'],
+                    datasets: [
+                      {
+                        label: 'Dataset 1',
+                        data: [1, 2, 3],
+                        backgroundColor: 'red',
+                        borderColor: 'red',
+                        borderWidth: 1,
+                      }
+                    ],
+
+                  }}
+                  >
+
+                  </Bar>
+                 </div>
+         </div>
+        </div>
+
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-lg-8 col-6">
+              <div className="card card-primary">
+                <div className="card-header">
+                  <h3 className="card-title">Area Chart</h3>
+
+                  <div className="card-tools">
+                    <button type="button" className="btn btn-tool" data-card-widget="collapse">
+                      <i className="fas fa-minus"></i>
+                    </button>
+                    <button type="button" className="btn btn-tool" data-card-widget="remove">
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <div className="card-body">
+                  <Bar data={{
+                    labels: ['a', 'b', 'c'],
+                    datasets: [
+                      {
+                        label: 'Dataset 1',
+                        data: [1, 2, 3],
+                        backgroundColor: 'red',
+                        borderColor: 'red',
+                        borderWidth: 1,
+                      }
+                    ],
+
+                  }}
+
+                  >
+
+                  </Bar>
+                </div>
+
+              </div>
+
+            </div>
+            <div className="col-lg-4 col-6">
+          <div className="card card-primary">
+                <div className="card-header">
+                  <h3 className="card-title">Area Chart</h3>
+
+                  <div className="card-tools">
+                    <button type="button" className="btn btn-tool" data-card-widget="collapse">
+                      <i className="fas fa-minus"></i>
+                    </button>
+                    <button type="button" className="btn btn-tool" data-card-widget="remove">
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <div className="card-body">
+                  <Pie data={{
+                    labels: ['a', 'b', 'c'],
+                    datasets: [
+                      {
+                        label: 'Dataset 1',
+                        data: [1, 2, 3],
+                        backgroundColor: 'red',
+                        borderColor: 'red',
+                        borderWidth: 1,
+                      },
+                      {
+                        label: 'Dataset 2',
+                        data: [3, 2, 1],
+                        backgroundColor: 'rgba(54,162,235,0.2)',
+                        borderColor: 'rgb(73, 94, 108)',
+                        borderWidth: 1,
+                      },
+                    ],
+
+                  }}
+
+                  >
+
+                  </Pie>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+
+
         </div>
       </section>
     </div>
