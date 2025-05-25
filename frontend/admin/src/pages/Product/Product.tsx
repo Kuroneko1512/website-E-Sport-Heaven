@@ -5,7 +5,6 @@ import {
     Pagination,
     updateProductStatus,
     api4,
-    updateProductStatus,
 } from "@app/services/Product/Api";
 import { Pagination as AntPagination, Input, Button, Space, Select, Tag, Tooltip } from "antd";
 import { useEffect, useState } from "react";
