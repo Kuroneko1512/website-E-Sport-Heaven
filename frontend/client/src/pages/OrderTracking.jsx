@@ -339,9 +339,7 @@ const OrderTracking = () => {
         <div className="border-b pb-4 mb-4 grid grid-cols-6 p-4 gap-6">
           <div className="col-span-4">Giảm giá: </div>
           <span className="col-span-2">
-            {orderData?.data?.order_discount_type === 1
-              ? `${orderData?.data?.order_discount_amount}%`
-              : FomatVND(orderData?.data?.order_discount_amount || 0)}
+            {FomatVND(orderData?.data?.order_discount_amount || 0)}
           </span>
         </div>
 
