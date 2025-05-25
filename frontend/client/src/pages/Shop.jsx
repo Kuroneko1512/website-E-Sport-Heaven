@@ -1,5 +1,5 @@
-import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState, useCallback } from "react";
 import { FaBoxOpen } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import FilterSidebar from "../components/filterProduct/FilterSidebar";
@@ -8,10 +8,12 @@ import ProductList from "../components/filterProduct/ProductList";
 import instanceAxios from "../config/db";
 import SkeletonLoading from "../components/loadingSkeleton/SkeletonLoading";
 import ScrollToTop from "../config/ScrollToTop";
+import useEchoChannel from "../hooks/useEchoChannel";
 
 export default function Shop() {
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const searchParams = new URLSearchParams(location.search);
   const searchQuery = searchParams.get("search") || "";
 
@@ -46,6 +48,37 @@ export default function Shop() {
 
   const [add, setAdd] = useState({});
   // const [products, setProducts] = useState([]);
+  // Handler cho real-time product create
+  const handleProductCreate = useCallback((event) => {
+    console.log('✅ Shop: Nhận được sản phẩm mới:', event);
+
+    // Invalidate queries để refetch data
+    queryClient.invalidateQueries(["products"]);
+    queryClient.invalidateQueries(["categories"]);
+  }, [queryClient]);
+
+  // Handler cho real-time product update
+  const handleProductUpdate = useCallback((event) => {
+    console.log('✅ Shop: Nhận được cập nhật sản phẩm:', event);
+
+    // Invalidate queries để refetch data
+    queryClient.invalidateQueries(["products"]);
+    queryClient.invalidateQueries(["categories"]);
+  }, [queryClient]);
+
+  // Sử dụng hook useEchoChannel cho product create
+  const { connected: connectedCreate } = useEchoChannel(
+    'Product.1',
+    '.product-create',
+    handleProductCreate
+  );
+
+  // Sử dụng hook useEchoChannel cho product update
+  const { connected: connectedUpdate } = useEchoChannel(
+    'Product.2',
+    '.product-update',
+    handleProductUpdate
+  );
 
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page")) || 1);
 
@@ -57,7 +90,7 @@ export default function Shop() {
 
   const [
     { data: categories, isLoading: isCategoriesLoading },
-    { data: attributes, isLoading: isAttributesLoading }, 
+    { data: attributes, isLoading: isAttributesLoading },
     { data: products, isLoading: isProductsLoading }
   ] = useQueries({
     queries: [
@@ -107,7 +140,7 @@ export default function Shop() {
     ]
   });
 
-  const isInitialLoad = isCategoriesLoading || isAttributesLoading ;
+  const isInitialLoad = isCategoriesLoading || isAttributesLoading;
 
   useEffect(() => {
     const fetchDynamicPriceRange = async () => {
@@ -208,7 +241,7 @@ export default function Shop() {
   // Sync filters với URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    
+
     // Giữ lại search query nếu có
     if (searchQuery) {
       params.set('search', searchQuery);
