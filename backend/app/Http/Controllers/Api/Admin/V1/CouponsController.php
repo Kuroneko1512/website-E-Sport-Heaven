@@ -78,13 +78,14 @@ class CouponsController extends Controller
                 'max_uses' => 'nullable|integer|min:0',
                 'start_date' => 'nullable|date',
                 'end_date' => 'nullable|date|after:start_date',
+                
             ]);
 
             if ($validator->fails()) {
                 return response()->json(['errors' => $validator->errors()], 422);
             }
 
-            $coupon = $this->couponService->updateCoupon($coupon->id, $validator->validated());
+            $coupon = $this->couponService->updateCoupon($coupon->id, $request->all());
 
             return response()->json($coupon);
         } catch (\Exception $e) {
