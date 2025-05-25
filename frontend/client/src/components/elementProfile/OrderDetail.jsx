@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { message, Modal, Form } from "antd";
 import Cookies from "js-cookie";
@@ -15,6 +15,7 @@ import useReviewSubmit from "../../hooks/useReviewSubmit";
 import getActionsForOrder from "../../utils/getActionsForOrder";
 import { filterHistoryByStatusTo } from "../../utils/filterHistoryByStatusTo";
 import FomatVND from "../../utils/FomatVND";
+import useEchoChannel from "../../hooks/useEchoChannel";
 
 const OrderHistory = ({ history }) => {
   // Lọc trùng status_to, giữ bản ghi mới nhất
@@ -118,6 +119,20 @@ const OrderDetail = () => {
   const [returnRequestModalVisible, setReturnRequestModalVisible] =
     useState(false);
   const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
+  // Handler cho real-time updates
+  const handleOrderUpdate = useCallback((event) => {
+    console.log('✅ OrderDetail: Nhận được cập nhật trạng thái đơn hàng:', event);
+
+    // Invalidate và refetch data
+    queryClient.invalidateQueries(["order", order_code]);
+  }, [queryClient, order_code]);
+
+  // Sử dụng hook useEchoChannel để lắng nghe real-time updates
+  const { connected, error: echoError, socketId, isSubscribed } = useEchoChannel(
+    'orders.1',
+    '.order-status-updated',
+    handleOrderUpdate
+  );
 
   const statusStyles = {
     [ORDER_STATUS.PENDING]:
@@ -150,6 +165,7 @@ const OrderDetail = () => {
     data: orderData,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["order", order_code],
     queryFn: async () => {
@@ -178,7 +194,8 @@ const OrderDetail = () => {
       console.log("data", data);
       if (data?.message === "Order status updated successfully") {
         message.success("Đã hủy đơn hàng thành công");
-        queryClient.invalidateQueries(["orders", currentPage]);
+        // queryClient.invalidateQueries(["orders", currentPage]);
+        queryClient.invalidateQueries(["order", order_code]);
       } else {
         throw new Error(data?.message || "Không thể hủy đơn hàng");
       }
@@ -204,7 +221,8 @@ const OrderDetail = () => {
       if (data?.message) {
         message.success("Đã xác nhận nhận hàng thành công");
         setConfirmModalVisible(false);
-        queryClient.invalidateQueries(["orders", currentPage]);
+        // queryClient.invalidateQueries(["orders", currentPage]);
+        queryClient.invalidateQueries(["order", order_code]);
       } else {
         throw new Error(data?.message || "Không thể xác nhận nhận hàng");
       }
@@ -231,7 +249,8 @@ const OrderDetail = () => {
     onSuccess: (data) => {
       if (data?.message) {
         message.success("Đã gửi yêu cầu trả hàng");
-        queryClient.invalidateQueries(["orders", currentPage]);
+        // queryClient.invalidateQueries(["orders", currentPage]);
+        queryClient.invalidateQueries(["order", order_code]);
       } else {
         throw new Error(data?.message || "Không thể gửi yêu cầu trả hàng");
       }
@@ -323,7 +342,7 @@ const OrderDetail = () => {
                     ) || {},
                   discount: Number(
                     item.product.discount_percent ||
-                      item.product_variant.discount_percent
+                    item.product_variant.discount_percent
                   ),
                 });
               }
@@ -440,9 +459,8 @@ const OrderDetail = () => {
         <span className="text-lg">
           Mã đơn hàng: <strong>{order_code}</strong> |
           <span
-            className={`ml-2 px-3 py-1 rounded text-base ${
-              statusStyles[orderData?.data?.status]
-            }`}
+            className={`ml-2 px-3 py-1 rounded text-base ${statusStyles[orderData?.data?.status]
+              }`}
           >
             {ORDER_STATUS_LABELS[orderData?.data?.status]}
           </span>
@@ -472,11 +490,11 @@ const OrderDetail = () => {
                 ? "Đang xử lý..."
                 : confirmReceivedMutation.isLoading &&
                   action === "confirmReceived"
-                ? "Đang xử lý..."
-                : requestReturnMutation.isLoading &&
-                  action === "yêu cầu trả hàng"
-                ? "Đang xử lý..."
-                : action}
+                  ? "Đang xử lý..."
+                  : requestReturnMutation.isLoading &&
+                    action === "yêu cầu trả hàng"
+                    ? "Đang xử lý..."
+                    : action}
             </button>
           ))}
         {/* Nút tiếp tục thanh toán chỉ hiển thị khi liên kết còn hạn và chưa thanh toán */}
@@ -542,9 +560,8 @@ const OrderDetail = () => {
             >
               <div className="flex items-center space-x-4">
                 <img
-                  src={`http://127.0.0.1:8000/storage/${
-                    item.product_variant?.image || item.product.image
-                  }`}
+                  src={`http://127.0.0.1:8000/storage/${item.product_variant?.image || item.product.image
+                    }`}
                   alt={item.product.name}
                   className="w-16 h-16 object-cover rounded"
                   loading="lazy"
@@ -563,10 +580,10 @@ const OrderDetail = () => {
                 <p>
                   {(item.product?.discount_percent > 0 ||
                     item.product_variant?.discount_percent > 0) && (
-                    <span className="line-through text-gray-500 mr-2">
-                      {FomatVND(getDiscountedPrice(item))}
-                    </span>
-                  )}
+                      <span className="line-through text-gray-500 mr-2">
+                        {FomatVND(getDiscountedPrice(item))}
+                      </span>
+                    )}
                   <strong>{FomatVND(item.subtotal)}</strong>
                 </p>
               </div>
@@ -655,9 +672,8 @@ const OrderDetail = () => {
                 <img
                   alt="Product Image"
                   className="h-24 w-24 rounded-md mr-4"
-                  src={`http://127.0.0.1:8000/storage/${
-                    item?.product?.image || item?.product_variant?.image
-                  }`}
+                  src={`http://127.0.0.1:8000/storage/${item?.product?.image || item?.product_variant?.image
+                    }`}
                 />
                 <div>
                   <p className="font-bold text-lg">{item?.product?.name}</p>
