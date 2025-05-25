@@ -238,7 +238,6 @@ const EditCoupon: FC = () => {
     if (!await validate()) {
       return;
     }
-
     try {
       const couponData = {
         code: coupon.code,
@@ -252,8 +251,10 @@ const EditCoupon: FC = () => {
         start_date: coupon.start_date,
         end_date: coupon.end_date,
         is_active: new Date(coupon.end_date) > new Date() ? 0 : 1
+
       };
-   
+      
+     
       await updateCoupon(Number(id), couponData);
       navigate("/coupon");
       alert("Cập nhật mã giảm giá thành công!");

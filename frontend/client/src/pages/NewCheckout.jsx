@@ -588,30 +588,30 @@ const NewCheckout = () => {
           : null,
       };
       console.log("orderData", orderData);
-      // const orderResponse = await createOrderMutation.mutateAsync(orderData);
+      const orderResponse = await createOrderMutation.mutateAsync(orderData);
 
-      // if (orderResponse.success && selectedCoupon) {
-      //   const currentCoupon = validateCouponQuery.data;
-      //   const subtotal = cartItems.reduce(
-      //     (total, item) =>
-      //       total +
-      //       (item.price - (item.price * item.discount) / 100) * item.quantity,
-      //     0
-      //   );
+      if (orderResponse.success && selectedCoupon) {
+        const currentCoupon = validateCouponQuery.data;
+        const subtotal = cartItems.reduce(
+          (total, item) =>
+            total +
+            (item.price - (item.price * item.discount) / 100) * item.quantity,
+          0
+        );
 
-      //   if (!isCouponValid(currentCoupon, subtotal)) {
-      //     await deleteOrderMutation.mutateAsync(orderResponse.data.id);
-      //     setSelectedCoupon(null);
-      //     setDiscountCode("");
-      //     setSubmit(false);
-      //     return;
-      //   }
+        if (!isCouponValid(currentCoupon, subtotal)) {
+          await deleteOrderMutation.mutateAsync(orderResponse.data.id);
+          setSelectedCoupon(null);
+          setDiscountCode("");
+          setSubmit(false);
+          return;
+        }
 
-      //   await updateCouponMutation.mutateAsync({
-      //     couponId: selectedCoupon.id,
-      //     usedCount: currentCoupon.used_count + 1,
-      //   });
-      // }
+        await updateCouponMutation.mutateAsync({
+          couponId: selectedCoupon.id,
+          usedCount: currentCoupon.used_count + 1,
+        });
+      }
 
       if (paymentMethod === "vnpay" && orderResponse.vnpUrl) {
         window.location.href = orderResponse.vnpUrl;

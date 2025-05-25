@@ -71,7 +71,7 @@ class Order extends Model
         self::STATUS_RETURN_TO_SHOP => 'Hoàn về cửa hàng',
         self::STATUS_IN_STORE_ACTIVE => 'Đơn tại cửa hàng (đang trong thời gian đổi trả)',
         self::STATUS_IN_STORE_COMPLETED => 'Đơn tại cửa hàng (hết thời gian đổi trả)',
-        self::STATUS_RETURN_REJECTED => 'Đã trên chối yêu cầu đổi/trả',
+        self::STATUS_RETURN_REJECTED => 'Đã từ chối yêu cầu đổi/trả',
     ];
 
     // Nhãn hiển thị cho các trạng thái vận chuyển
@@ -136,7 +136,7 @@ class Order extends Model
         'cancelled' => 'Đã hủy',
         'return_refund' => 'Trả hàng/hoàn tiền',
     ];
-    
+
     protected $fillable = [
         'customer_id',
         'customer_name',
@@ -244,7 +244,7 @@ class Order extends Model
 
     /**
      * Kiểm tra xem đơn hàng có thể hủy không
-     * 
+     *
      * @return bool
      */
     public function canCancel()
@@ -278,7 +278,7 @@ class Order extends Model
 
     /**
      * Tính tổng số lượng sản phẩm trong đơn hàng
-     * 
+     *
      * @return int
      */
     public function getTotalQuantityAttribute()

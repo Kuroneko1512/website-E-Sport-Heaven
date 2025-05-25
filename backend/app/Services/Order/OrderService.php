@@ -2,26 +2,29 @@
 
 namespace App\Services\Order;
 
-use App\Events\OrderCreate;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\OrderItem;
+use App\Events\OrderCreate;
 use Illuminate\Support\Str;
 use App\Models\OrderHistory;
 use App\Services\BaseService;
 use App\Models\ProductVariant;
 use App\Models\OrderUserReturn;
+use App\Events\OrderStatusUpdated;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Events\OrderStatusUpdated;
+use App\Services\Analytics\AnalyticsService;
 
 class OrderService extends BaseService
 {
+    protected $analyticsService;
     public function __construct(Order $order)
     {
         parent::__construct($order);
+        $this->analyticsService = app(AnalyticsService::class);
     }
 
     /**
@@ -88,6 +91,10 @@ class OrderService extends BaseService
             );
 
             DB::commit();
+
+            // ✅ THÊM: Clear cache khi có đơn mới
+            $this->analyticsService->clearDashboardCache();
+
             broadcast(new OrderCreate());
             return $order;
         } catch (Exception $e) {
@@ -315,10 +322,10 @@ class OrderService extends BaseService
         ])->orderBy('created_at', 'desc');
 
         if (!empty($search)) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('order_code', 'like', "%{$search}%")
-                  ->orWhere('customer_name', 'like', "%{$search}%") // nếu có trường này
-                  ->orWhere('customer_phone', 'like', "%{$search}%"); // hoặc các trường phù hợp
+                    ->orWhere('customer_name', 'like', "%{$search}%") // nếu có trường này
+                    ->orWhere('customer_phone', 'like', "%{$search}%"); // hoặc các trường phù hợp
             });
         }
 
@@ -412,6 +419,10 @@ class OrderService extends BaseService
         }
 
         $this->addOrderHistory($order->id, OrderHistory::ACTION_STATUS_UPDATED, $historyData);
+        
+        // ✅ THÊM: Clear cache khi cập nhật status
+        $this->analyticsService->clearDashboardCache();
+
         broadcast(new OrderStatusUpdated());
 
         return [
