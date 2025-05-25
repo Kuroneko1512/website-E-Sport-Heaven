@@ -188,10 +188,11 @@ const Dashboard = () => {
   };
 
   // Chuẩn bị dữ liệu cho biểu đồ sản phẩm bán chạy
+ // Chuẩn bị dữ liệu cho biểu đồ sản phẩm bán chạy
   const topProductsData = {
     labels: dashboardData.top_products.slice(0, 5).map(product => {
       const name = product.product_name;
-      return name.length > 25 ? name.substring(0, 25) + '...' : name;
+      return name.length > 15 ? name.substring(0, 15) + '...' : name;
     }),
     datasets: [
       {
@@ -215,7 +216,6 @@ const Dashboard = () => {
       },
     ],
   };
-
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -230,11 +230,25 @@ const Dashboard = () => {
               return `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`;
             }
             return `${context.dataset.label}: ${formatNumber(context.parsed.y)}`;
+          },
+          title: function(context: any) {
+            // Hiển thị tên đầy đủ trong tooltip
+            const index = context[0].dataIndex;
+            return dashboardData.top_products[index]?.product_name || context[0].label;
           }
         }
       }
     },
     scales: {
+      x: {
+        ticks: {
+          maxRotation: 0, // Không xoay label
+          minRotation: 0,
+          font: {
+            size: 10
+          }
+        }
+      },
       y: {
         beginAtZero: true,
         ticks: {
@@ -245,6 +259,7 @@ const Dashboard = () => {
       }
     }
   };
+
 
   const pieChartOptions = {
     responsive: true,
@@ -324,7 +339,7 @@ const Dashboard = () => {
                 title="Giá trị đơn hàng TB"
                 text={formatCurrency(dashboardData.revenue_comparison.current_period.avg_order_value)}
                 navigateTo="#"
-                variant="danger"
+                variant="success"
                 icon={{
                   content: (
                     <FontAwesomeIcon
