@@ -1,17 +1,18 @@
 <?php
 
-use App\Http\Controllers\Api\Admin\V1\BlogCategoryController;
-use App\Http\Controllers\Api\Admin\V1\BlogController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\Auth\v1\AdminAuthController;
-use App\Http\Controllers\Api\Location\LocationImportController;
-use App\Http\Controllers\Api\Profile\V1\AdminProfileController;
-use App\Http\Controllers\Api\Admin\V1\AttributeController;
-use App\Http\Controllers\Api\Admin\V1\CategoryController;
-use App\Http\Controllers\Api\Admin\V1\ProductController;
+use App\Http\Controllers\Api\User\UserController;
+use App\Http\Controllers\Api\Admin\V1\BlogController;
 use App\Http\Controllers\Api\Admin\V1\OrderController;
 use App\Http\Controllers\Api\Admin\V1\ReviewController;
-use App\Http\Controllers\Api\User\UserController;
+use App\Http\Controllers\Api\Admin\V1\ProductController;
+use App\Http\Controllers\Api\Admin\V1\CategoryController;
+use App\Http\Controllers\Api\Auth\v1\AdminAuthController;
+use App\Http\Controllers\Api\Admin\V1\AttributeController;
+use App\Http\Controllers\Api\Admin\V1\BlogCategoryController;
+use App\Http\Controllers\Api\Analytics\V1\AnalyticsController;
+use App\Http\Controllers\Api\Location\LocationImportController;
+use App\Http\Controllers\Api\Profile\V1\AdminProfileController;
 
 Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
@@ -79,6 +80,13 @@ Route::prefix('v1')->group(function () {
                     ->name('locations.import.from-public')
                 ;
             });
+
+            // Analytics routes
+            Route::prefix('analytics')->name('analytics.')->group(function () {
+                // Dashboard tổng hợp - CHỈ 1 API duy nhất
+                Route::get('/dashboard', [AnalyticsController::class, 'dashboard'])->name('dashboard');
+            });
+            //end
         });
     });
 });
