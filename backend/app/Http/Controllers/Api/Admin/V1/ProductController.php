@@ -9,6 +9,7 @@ use App\Http\Requests\Product\ProductStoreRequest;
 use App\Http\Requests\Product\ProductUpdateRequest;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 
 class ProductController extends Controller
@@ -113,8 +114,9 @@ class ProductController extends Controller
     {
         DB::beginTransaction();
         try {
+            Log::info('Request data:', [$request->all()]);
             $data = $request->validated();
-
+            Log::info('Data after validation:', [$data]);
             // return response()->json($data['variants']);
 
             // Cập nhật thông tin sản phẩm
