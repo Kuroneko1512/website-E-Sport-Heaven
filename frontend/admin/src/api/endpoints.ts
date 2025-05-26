@@ -52,4 +52,7 @@ export const API_ENDPOINTS = {
         DELETE: (id: number) => `v1/admin/review/${id}`,
         DETAIL: (id: number) => `v1/admin/review/${id}`,
     },
+    DASHBOARD: {
+        ANALYTICS: "v1/admin/analytics/dashboard",
+    }
 };

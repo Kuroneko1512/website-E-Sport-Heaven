@@ -7,10 +7,12 @@ const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
 
   // Format tiền tệ VND
   const formatCurrency = (value) => {
+    console.log(value);
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND'
     }).format(value);
+    
   };
 
   const [sectionsOpen, setSectionsOpen] = useState({
@@ -121,8 +123,8 @@ const FilterSidebar = ({ filters, setFilters, availableFilters }) => {
           <Slider
             range
             min={availableFilters?.priceRange?.[0] || 0}
-            max={availableFilters?.priceRange?.[1] || 10000000}
-            step={100000}
+            max={availableFilters?.priceRange?.[1] || 100000000}
+            step={1000000}
             value={localPriceRange}
             onChange={handlePriceChange}
             tooltip={{
