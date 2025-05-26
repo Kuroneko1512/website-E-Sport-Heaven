@@ -30,7 +30,7 @@ const SmallBox = ({
     const iconVariant = icon?.variant || variant;
 
     return (
-      <span className={`icon ${iconVariant ? `bg-${iconVariant}` : ''}`}>
+      <span className={`icon ${iconVariant ? `bg-${iconVariant}` : ''} t-16`}>
         {icon?.content || <i className="far fa-envelope" />}
       </span>
     );
@@ -39,7 +39,7 @@ const SmallBox = ({
   return (
     <div className={`small-box bg-${variant}`}>
       <div className="inner">
-        <h3>{text}</h3>
+        <h4>{text}</h4>
         <p>{title}</p>
       </div>
       {iconContent}

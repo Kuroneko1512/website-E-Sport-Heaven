@@ -11,6 +11,7 @@ import {
   faUsers,
   faShoppingCart,
   faFilter,
+  faMoneyBill,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -52,7 +53,8 @@ const Dashboard = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'VND'
+      currency: 'VND',
+        currencyDisplay: 'code'
     }).format(amount);
   };
 
@@ -494,8 +496,8 @@ const Dashboard = () => {
                 icon={{
                   content: (
                     <FontAwesomeIcon
-                      icon={faDollarSign}
-                      style={{ fontSize: '62px' }}
+                      icon={faMoneyBill}
+                      style={{ fontSize: '40px' }}
                     />
                   ),
                 }}
