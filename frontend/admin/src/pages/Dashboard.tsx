@@ -226,8 +226,8 @@ const Dashboard = () => {
       {
         label: 'Số đơn hàng',
         data: dashboardData.revenue_chart.map(item => item.orders),
-        backgroundColor: 'rgba(255, 99, 132, 0.6)',
-        borderColor: 'rgba(255, 99, 132, 1)',
+        backgroundColor: 'rgba(99, 255, 128, 0.6)',
+        borderColor: 'rgb(99, 255, 154)',
         borderWidth: 1,
       },
     ],
@@ -660,7 +660,7 @@ const Dashboard = () => {
                 <div className="card-header">
                   <h3 className="card-title">
                     Số đơn hàng theo thời gian
-                    <small className="ml-2 text-muted">
+                    <small className="ml-2 text-black">
                       ({fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} - {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'})
                     </small>
                   </h3>
@@ -687,7 +687,7 @@ const Dashboard = () => {
                 <div className="card-header">
                   <h3 className="card-title">
                     Top {topProductsLimit} sản phẩm bán chạy
-                    <small className="ml-2 text-muted">
+                    <small className="ml-2 text-white">
                       ({fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} - {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'})
                     </small>
                   </h3>
