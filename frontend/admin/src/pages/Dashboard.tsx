@@ -249,6 +249,24 @@ const Dashboard = () => {
     return_rejected: 'Từ chối trả'
   };
 
+  const getColor = (status: string) => {
+    const colorMap: { [key: string]: string } = {
+      'pending': '#ffc107',           // vàng - đang chờ xử lý
+      'confirmed': '#17a2b8',         // xanh nhạt - đã xác nhận
+      'preparing': '#fd7e14',         // cam - đang chuẩn bị
+      'ready_to_ship': '#6f42c1',     // tím - sẵn sàng gửi
+      'shipping': '#007bff',          // xanh dương - đang giao
+      'delivered': '#20c997',         // xanh lục nhạt - đã giao
+      'completed': '#28a745',         // xanh lá - hoàn thành
+      'cancelled': '#dc3545',         // đỏ - đã hủy
+      'return_requested': '#ff1493',  // hồng đậm - yêu cầu trả hàng
+      'return_processing': '#6c757d', // xám - đang xử lý trả hàng
+      'return_completed': '#adb5bd',  // xám nhạt - hoàn tất trả hàng
+      'return_rejected': '#6c757d',   // xám đậm - từ chối trả hàng
+    };
+    return colorMap[status] || '#6c757d'; // mặc định màu xám
+  };
+
   const orderStatusData = {
     labels: Object.entries(dashboardData.order_status)
       .filter(([_, value]) => value > 0)
@@ -258,16 +276,14 @@ const Dashboard = () => {
         data: Object.entries(dashboardData.order_status)
           .filter(([_, value]) => value > 0)
           .map(([_, value]) => value),
-        backgroundColor: [
-          '#28a745', '#007bff', '#ffc107', '#17a2b8',
-          '#6c757d', '#343a40', '#dc3545', '#fd7e14',
-          '#20c997', '#6f42c1', '#e83e8c', '#6610f2'
-        ],
+        backgroundColor: Object.entries(dashboardData.order_status)
+          .filter(([_, value]) => value > 0)
+          .map(([key, _]) =>getColor(key)
+          ),
         borderWidth: 1,
       },
     ],
   };
-
   // Chuẩn bị dữ liệu cho biểu đồ sản phẩm bán chạy
   const topProductsData = {
     labels: dashboardData.top_products.slice(0, topProductsLimit).map(product => {
@@ -613,7 +629,7 @@ const Dashboard = () => {
               <div className="card card-primary">
                 <div className="card-header">
                   <h3 className="card-title">Biểu đồ doanh thu theo thời gian</h3>
-                 
+
                 </div>
                 <div className="card-body">
                   <div style={{ height: '400px' }}>
@@ -628,7 +644,7 @@ const Dashboard = () => {
               <div className="card card-success">
                 <div className="card-header">
                   <h3 className="card-title">Trạng thái đơn hàng</h3>
-                 
+
                 </div>
                 <div className="card-body">
                   <div style={{ height: '400px' }}>
@@ -650,7 +666,7 @@ const Dashboard = () => {
                       ({fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} - {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'})
                     </small>
                   </h3>
-               
+
                 </div>
                 <div className="card-body">
                   <div style={{ height: '300px' }}>
@@ -670,7 +686,7 @@ const Dashboard = () => {
                       ({fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} - {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'})
                     </small>
                   </h3>
-                
+
                 </div>
                 <div className="card-body">
                   <div style={{ height: '300px' }}>
