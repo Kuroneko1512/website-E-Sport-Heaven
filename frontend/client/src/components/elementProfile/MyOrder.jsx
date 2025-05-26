@@ -501,7 +501,7 @@ const MyOrder = ({ searchParam = "", setSearchParam }) => {
                           <div className="self-end">
                             <span className="mr-2 font-medium">Tổng tiền:</span>
                             <span className="font-bold">
-                              {FomatVND(order?.subtotal)}
+                              {FomatVND(order?.total_amount)}
                             </span>
                           </div>
                           <div className="flex flex-row-reverse bg-white dark:bg-gray-800">
