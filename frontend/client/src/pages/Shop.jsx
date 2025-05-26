@@ -23,7 +23,7 @@ export default function Shop() {
     attributefilter: JSON.parse(searchParams.get("attributes") || "{}"),
     priceRange: [
       parseInt(searchParams.get("min_price")) || 0,
-      parseInt(searchParams.get("max_price")) || 10000000
+      parseInt(searchParams.get("max_price")) || 100000000
     ],
   });
 
@@ -34,14 +34,14 @@ export default function Shop() {
       attributefilter: JSON.parse(searchParams.get("attributes") || "{}"),
       priceRange: [
         parseInt(searchParams.get("min_price")) || 0,
-        parseInt(searchParams.get("max_price")) || 10000000
+        parseInt(searchParams.get("max_price")) || 100000000
       ],
     };
     setFilters(newFilters);
   }, [location.search]); // Chạy lại khi URL thay đổi
 
   const [dataToFilter, setDataToFilter] = useState({
-    priceRange: [0, 10000000], // Giá trị mặc định
+    priceRange: [0, 100000000], // Giá trị mặc định
     categorys: [], // Sẽ lưu cả id và name của categories
     attributs: []
   });
