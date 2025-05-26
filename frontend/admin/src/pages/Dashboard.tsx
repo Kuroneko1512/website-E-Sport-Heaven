@@ -113,7 +113,7 @@ const Dashboard = () => {
   useEffect(() => {
     const today = new Date();
     const weekAgo = new Date(today);
-    weekAgo.setDate(today.getDate() - 7);
+    weekAgo.setDate(today.getDate() - 30);
     
     setToDate(formatDateForInput(today));
     setFromDate(formatDateForInput(weekAgo));
@@ -370,7 +370,118 @@ const Dashboard = () => {
 
       <section className="content">
         <div className="container-fluid">
-        
+          {/* Filter Section */}
+          <div className="row mb-3">
+            <div className="col-12">
+              <div className="card">
+                <div className="card-header">
+                  <h3 className="card-title">
+                    <FontAwesomeIcon icon={faFilter} className="mr-2" />
+                    Bộ lọc dữ liệu
+                  </h3>
+                  <div className="card-tools">
+                    <button 
+                      type="button" 
+                      className="btn btn-tool" 
+                      onClick={() => setShowFilters(!showFilters)}
+                    >
+                      <i className={`fas ${showFilters ? 'fa-minus' : 'fa-plus'}`}></i>
+                    </button>
+                  </div>
+                </div>
+                {showFilters && (
+                  <div className="card-body">
+                    <div className="row">
+                      <div className="col-md-3">
+                        <div className="form-group">
+                          <label htmlFor="fromDate">Từ ngày:</label>
+                          <input
+                            type="date"
+                            id="fromDate"
+                            className="form-control"
+                            value={fromDate}
+                            onChange={(e) => setFromDate(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div className="col-md-3">
+                        <div className="form-group">
+                          <label htmlFor="toDate">Đến ngày:</label>
+                          <input
+                            type="date"
+                            id="toDate"
+                            className="form-control"
+                            value={toDate}
+                            onChange={(e) => setToDate(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div className="col-md-3">
+                        <div className="form-group">
+                          <label htmlFor="topProductsLimit">Số sản phẩm top:</label>
+                          <select
+                            id="topProductsLimit"
+                            className="form-control"
+                            value={topProductsLimit}
+                            onChange={(e) => setTopProductsLimit(Number(e.target.value))}
+                          >
+                            <option value={5}>Top 5</option>
+                            <option value={10}>Top 10</option>
+                            <option value={15}>Top 15</option>
+                            <option value={20}>Top 20</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="col-md-3">
+                        <div className="form-group">
+                          <label>&nbsp;</label>
+                          <div className="d-flex">
+                            <button
+                              type="button"
+                              className="btn btn-primary mr-2"
+                              onClick={handleApplyFilter}
+                              disabled={loading}
+                            >
+                              {loading ? (
+                                <>
+                                  <i className="fas fa-spinner fa-spin mr-1"></i>
+                                  Đang tải...
+                                </>
+                              ) : (
+                                <>
+                                  <i className="fas fa-search mr-1"></i>
+                                  Áp dụng
+                                </>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              onClick={handleResetFilter}
+                              disabled={loading}
+                            >
+                              <i className="fas fa-undo mr-1"></i>
+                              Reset
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-12">
+                        <div className="text-muted">
+                          <i className="fas fa-info-circle mr-1"></i>
+                          Dữ liệu hiển thị từ {fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} 
+                          {' '}đến {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'}
+                          {' '}| Hiển thị top {topProductsLimit} sản phẩm bán chạy
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Thống kê tổng quan */}
           <div className="row">
@@ -539,118 +650,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        {/* Filter Section */}
-          <div className="row mb-3">
-            <div className="col-12">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="card-title">
-                    <FontAwesomeIcon icon={faFilter} className="mr-2" />
-                    Bộ lọc dữ liệu
-                  </h3>
-                  <div className="card-tools">
-                    <button 
-                      type="button" 
-                      className="btn btn-tool" 
-                      onClick={() => setShowFilters(!showFilters)}
-                    >
-                      <i className={`fas ${showFilters ? 'fa-minus' : 'fa-plus'}`}></i>
-                    </button>
-                  </div>
-                </div>
-                {showFilters && (
-                  <div className="card-body">
-                    <div className="row">
-                      <div className="col-md-3">
-                        <div className="form-group">
-                          <label htmlFor="fromDate">Từ ngày:</label>
-                          <input
-                            type="date"
-                            id="fromDate"
-                            className="form-control"
-                            value={fromDate}
-                            onChange={(e) => setFromDate(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="col-md-3">
-                        <div className="form-group">
-                          <label htmlFor="toDate">Đến ngày:</label>
-                          <input
-                            type="date"
-                            id="toDate"
-                            className="form-control"
-                            value={toDate}
-                            onChange={(e) => setToDate(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="col-md-3">
-                        <div className="form-group">
-                          <label htmlFor="topProductsLimit">Số sản phẩm top:</label>
-                          <select
-                            id="topProductsLimit"
-                            className="form-control"
-                            value={topProductsLimit}
-                            onChange={(e) => setTopProductsLimit(Number(e.target.value))}
-                          >
-                            <option value={5}>Top 5</option>
-                            <option value={10}>Top 10</option>
-                            <option value={15}>Top 15</option>
-                            <option value={20}>Top 20</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="col-md-3">
-                        <div className="form-group">
-                          <label>&nbsp;</label>
-                          <div className="d-flex">
-                            <button
-                              type="button"
-                              className="btn btn-primary mr-2"
-                              onClick={handleApplyFilter}
-                              disabled={loading}
-                            >
-                              {loading ? (
-                                <>
-                                  <i className="fas fa-spinner fa-spin mr-1"></i>
-                                  Đang tải...
-                                </>
-                              ) : (
-                                <>
-                                  <i className="fas fa-search mr-1"></i>
-                                  Áp dụng
-                                </>
-                              )}
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-secondary"
-                              onClick={handleResetFilter}
-                              disabled={loading}
-                            >
-                              <i className="fas fa-undo mr-1"></i>
-                              Reset
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="row">
-                      <div className="col-12">
-                        <div className="text-muted">
-                          <i className="fas fa-info-circle mr-1"></i>
-                          Dữ liệu hiển thị từ {fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} 
-                          {' '}đến {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'}
-                          {' '}| Hiển thị top {topProductsLimit} sản phẩm bán chạy
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+      
           <div className="row">
             {/* Biểu đồ số đơn hàng */}
             <div className="col-lg-6">
