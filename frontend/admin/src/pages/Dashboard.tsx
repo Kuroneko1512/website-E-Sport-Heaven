@@ -22,9 +22,9 @@ import {
   Title,
   Tooltip,
   Legend,
-  PointElement, 
-  LineElement,  
-  ArcElement,   
+  PointElement,
+  LineElement,
+  ArcElement,
 } from 'chart.js';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import { getDashboardAnalytics, DashboardData } from '@app/services/Dashboard/DashboardApi';
@@ -36,7 +36,7 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filter states
   const [fromDate, setFromDate] = useState<string>('');
   const [toDate, setToDate] = useState<string>('');
@@ -54,7 +54,7 @@ const Dashboard = () => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
-        currencyDisplay: 'code'
+      currencyDisplay: 'code'
     }).format(amount);
   };
 
@@ -68,14 +68,14 @@ const Dashboard = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const params: any = {};
       if (customFromDate || fromDate) params.from_date = customFromDate || fromDate;
       if (customToDate || toDate) params.to_date = customToDate || toDate;
       if (customLimit || topProductsLimit) params.top_products_limit = customLimit || topProductsLimit;
-      
+
       const result = await getDashboardAnalytics(params.from_date, params.to_date, params.top_products_limit);
-      
+
       if (result.success) {
         setDashboardData(result.data);
       } else {
@@ -99,40 +99,40 @@ const Dashboard = () => {
     const today = new Date();
     const weekAgo = new Date(today);
     weekAgo.setDate(today.getDate() - 7);
-    
+
     const newToDate = formatDateForInput(today);
     const newFromDate = formatDateForInput(weekAgo);
     const newLimit = 5;
-    
+
     setToDate(newToDate);
     setFromDate(newFromDate);
     setTopProductsLimit(newLimit);
-    
+
     fetchDashboardData(newFromDate, newToDate, newLimit);
   };
 
-    // Khởi tạo ngày mặc định (7 ngày gần nhất)
+  // Khởi tạo ngày mặc định (7 ngày gần nhất)
   useEffect(() => {
     const today = new Date();
     const weekAgo = new Date(today);
     weekAgo.setDate(today.getDate() - 30);
-    
+
     setToDate(formatDateForInput(today));
     setFromDate(formatDateForInput(weekAgo));
-      if (today && weekAgo) {
-      fetchDashboardData( formatDateForInput(weekAgo), formatDateForInput(today), 5);
+    if (today && weekAgo) {
+      fetchDashboardData(formatDateForInput(weekAgo), formatDateForInput(today), 5);
     }
   }, []);
 
-  
+
   // Hàm chia tên sản phẩm thành nhiều dòng
   const splitProductName = (name: string, maxLength: number = 12) => {
     if (name.length <= maxLength) return [name];
-    
+
     const words = name.split(' ');
     const lines = [];
     let currentLine = '';
-    
+
     for (const word of words) {
       if ((currentLine + word).length <= maxLength) {
         currentLine += (currentLine ? ' ' : '') + word;
@@ -146,11 +146,11 @@ const Dashboard = () => {
         }
       }
     }
-    
+
     if (currentLine) {
       lines.push(currentLine);
     }
-    
+
     return lines.slice(0, 2);
   };
 
@@ -195,10 +195,10 @@ const Dashboard = () => {
 
   // Chuẩn bị dữ liệu cho biểu đồ doanh thu theo thời gian
   const revenueChartData = {
-    labels: dashboardData.revenue_chart.map(item => 
-      new Date(item.period).toLocaleDateString('vi-VN', { 
-        month: 'short', 
-        day: 'numeric' 
+    labels: dashboardData.revenue_chart.map(item =>
+      new Date(item.period).toLocaleDateString('vi-VN', {
+        month: 'short',
+        day: 'numeric'
       })
     ),
     datasets: [
@@ -216,18 +216,18 @@ const Dashboard = () => {
 
   // Chuẩn bị dữ liệu cho biểu đồ số đơn hàng
   const ordersChartData = {
-    labels: dashboardData.revenue_chart.map(item => 
-      new Date(item.period).toLocaleDateString('vi-VN', { 
-        month: 'short', 
-        day: 'numeric' 
+    labels: dashboardData.revenue_chart.map(item =>
+      new Date(item.period).toLocaleDateString('vi-VN', {
+        month: 'short',
+        day: 'numeric'
       })
     ),
     datasets: [
       {
         label: 'Số đơn hàng',
         data: dashboardData.revenue_chart.map(item => item.orders),
-        backgroundColor: 'rgba(99, 255, 128, 0.6)',
-        borderColor: 'rgb(99, 255, 154)',
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 1,
       },
     ],
@@ -315,13 +315,13 @@ const Dashboard = () => {
       },
       tooltip: {
         callbacks: {
-          label: function(context: any) {
+          label: function (context: any) {
             if (context.dataset.label === 'Doanh thu (VND)') {
               return `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`;
             }
             return `${context.dataset.label}: ${formatNumber(context.parsed.y)}`;
           },
-          title: function(context: any) {
+          title: function (context: any) {
             const index = context[0].dataIndex;
             return dashboardData.top_products[index]?.product_name || context[0].label;
           }
@@ -341,7 +341,7 @@ const Dashboard = () => {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: function(value: any) {
+          callback: function (value: any) {
             return formatNumber(value);
           }
         }
@@ -358,7 +358,7 @@ const Dashboard = () => {
       },
       tooltip: {
         callbacks: {
-          label: function(context: any) {
+          label: function (context: any) {
             return `${context.label}: ${formatNumber(context.parsed)}`;
           }
         }
@@ -382,9 +382,9 @@ const Dashboard = () => {
                     Bộ lọc dữ liệu
                   </h3>
                   <div className="card-tools">
-                    <button 
-                      type="button" 
-                      className="btn btn-tool" 
+                    <button
+                      type="button"
+                      className="btn btn-tool"
                       onClick={() => setShowFilters(!showFilters)}
                     >
                       <i className={`fas ${showFilters ? 'fa-minus' : 'fa-plus'}`}></i>
@@ -473,7 +473,7 @@ const Dashboard = () => {
                       <div className="col-12">
                         <div className="text-muted">
                           <i className="fas fa-info-circle mr-1"></i>
-                          Dữ liệu hiển thị từ {fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} 
+                          Dữ liệu hiển thị từ {fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'}
                           {' '}đến {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'}
                           {' '}| Hiển thị top {topProductsLimit} sản phẩm bán chạy
                         </div>
@@ -605,7 +605,7 @@ const Dashboard = () => {
               />
             </div>
           </div>
-          
+
           {/* Biểu đồ */}
           <div className="row">
             {/* Biểu đồ doanh thu theo thời gian */}
@@ -613,14 +613,7 @@ const Dashboard = () => {
               <div className="card card-primary">
                 <div className="card-header">
                   <h3 className="card-title">Biểu đồ doanh thu theo thời gian</h3>
-                  <div className="card-tools">
-                    <button type="button" className="btn btn-tool" data-card-widget="collapse">
-                      <i className="fas fa-minus"></i>
-                    </button>
-                    <button type="button" className="btn btn-tool" data-card-widget="remove">
-                      <i className="fas fa-times"></i>
-                    </button>
-                  </div>
+                 
                 </div>
                 <div className="card-body">
                   <div style={{ height: '400px' }}>
@@ -635,14 +628,7 @@ const Dashboard = () => {
               <div className="card card-success">
                 <div className="card-header">
                   <h3 className="card-title">Trạng thái đơn hàng</h3>
-                  <div className="card-tools">
-                    <button type="button" className="btn btn-tool" data-card-widget="collapse">
-                      <i className="fas fa-minus"></i>
-                    </button>
-                    <button type="button" className="btn btn-tool" data-card-widget="remove">
-                      <i className="fas fa-times"></i>
-                    </button>
-                  </div>
+                 
                 </div>
                 <div className="card-body">
                   <div style={{ height: '400px' }}>
@@ -652,7 +638,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-      
+
           <div className="row">
             {/* Biểu đồ số đơn hàng */}
             <div className="col-lg-6">
@@ -660,18 +646,11 @@ const Dashboard = () => {
                 <div className="card-header">
                   <h3 className="card-title">
                     Số đơn hàng theo thời gian
-                    <small className="ml-2 text-black">
+                    <small className="ml-2 text-bl">
                       ({fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} - {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'})
                     </small>
                   </h3>
-                  <div className="card-tools">
-                    <button type="button" className="btn btn-tool" data-card-widget="collapse">
-                      <i className="fas fa-minus"></i>
-                    </button>
-                    <button type="button" className="btn btn-tool" data-card-widget="remove">
-                      <i className="fas fa-times"></i>
-                    </button>
-                  </div>
+               
                 </div>
                 <div className="card-body">
                   <div style={{ height: '300px' }}>
@@ -681,7 +660,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-                  {/* Biểu đồ sản phẩm bán chạy */}
+            {/* Biểu đồ sản phẩm bán chạy */}
             <div className="col-lg-6">
               <div className="card card-info">
                 <div className="card-header">
@@ -691,14 +670,7 @@ const Dashboard = () => {
                       ({fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} - {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'})
                     </small>
                   </h3>
-                  <div className="card-tools">
-                    <button type="button" className="btn btn-tool" data-card-widget="collapse">
-                      <i className="fas fa-minus"></i>
-                    </button>
-                    <button type="button" className="btn btn-tool" data-card-widget="remove">
-                      <i className="fas fa-times"></i>
-                    </button>
-                  </div>
+                
                 </div>
                 <div className="card-body">
                   <div style={{ height: '300px' }}>
@@ -741,8 +713,8 @@ const Dashboard = () => {
                             <span className="badge badge-secondary">{index + 1}</span>
                           </td>
                           <td>
-                            <div 
-                              style={{ 
+                            <div
+                              style={{
                                 maxWidth: '250px',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
@@ -750,14 +722,14 @@ const Dashboard = () => {
                               }}
                               title={product.product_name}
                             >
-                              {product.product_name.length > 35 
-                                ? product.product_name.substring(0, 35) + '...' 
+                              {product.product_name.length > 35
+                                ? product.product_name.substring(0, 35) + '...'
                                 : product.product_name
                               }
                             </div>
                           </td>
                           <td>
-                            <span 
+                            <span
                               className="badge badge-info"
                               style={{
                                 maxWidth: '100px',
@@ -768,15 +740,15 @@ const Dashboard = () => {
                               }}
                               title={product.product_sku}
                             >
-                              {product.product_sku.length > 12 
-                                ? product.product_sku.substring(0, 12) + '...' 
+                              {product.product_sku.length > 12
+                                ? product.product_sku.substring(0, 12) + '...'
                                 : product.product_sku
                               }
                             </span>
                           </td>
                           <td>
-                            <div 
-                              style={{ 
+                            <div
+                              style={{
                                 maxWidth: '150px',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
@@ -784,8 +756,8 @@ const Dashboard = () => {
                               }}
                               title={product.category_name}
                             >
-                              {product.category_name.length > 20 
-                                ? product.category_name.substring(0, 20) + '...' 
+                              {product.category_name.length > 20
+                                ? product.category_name.substring(0, 20) + '...'
                                 : product.category_name
                               }
                             </div>
@@ -841,7 +813,7 @@ const Dashboard = () => {
                   <div className="row">
                     <div className="col-md-6">
                       <h5>
-                        Kỳ hiện tại 
+                        Kỳ hiện tại
                         <small className="text-muted ml-2">
                           ({fromDate ? new Date(fromDate).toLocaleDateString('vi-VN') : 'N/A'} - {toDate ? new Date(toDate).toLocaleDateString('vi-VN') : 'N/A'})
                         </small>
@@ -914,7 +886,7 @@ const Dashboard = () => {
                       </ul>
                     </div>
                   </div>
-                  
+
                   <div className="row mt-4">
                     <div className="col-12">
                       <h5>
@@ -932,10 +904,10 @@ const Dashboard = () => {
                           Doanh thu
                         </span>
                         <div className="progress progress-sm">
-                          <div 
+                          <div
                             className={`progress-bar ${dashboardData.revenue_comparison.growth.revenue_growth >= 0 ? 'bg-success' : 'bg-danger'}`}
-                            style={{ 
-                              width: `${Math.min(Math.abs(dashboardData.revenue_comparison.growth.revenue_growth), 100)}%` 
+                            style={{
+                              width: `${Math.min(Math.abs(dashboardData.revenue_comparison.growth.revenue_growth), 100)}%`
                             }}
                           ></div>
                         </div>
@@ -951,10 +923,10 @@ const Dashboard = () => {
                           Đơn hàng
                         </span>
                         <div className="progress progress-sm">
-                          <div 
+                          <div
                             className={`progress-bar ${dashboardData.revenue_comparison.growth.orders_growth >= 0 ? 'bg-success' : 'bg-danger'}`}
-                            style={{ 
-                              width: `${Math.min(Math.abs(dashboardData.revenue_comparison.growth.orders_growth), 100)}%` 
+                            style={{
+                              width: `${Math.min(Math.abs(dashboardData.revenue_comparison.growth.orders_growth), 100)}%`
                             }}
                           ></div>
                         </div>
