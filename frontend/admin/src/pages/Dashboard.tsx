@@ -171,12 +171,8 @@ const Dashboard = () => {
     return (
       <div className="content">
         <ContentHeader title="Bảng điều khiển" />
-        <div className="alert alert-danger" role="alert">
-          <h4 className="alert-heading">Lỗi!</h4>
-          <p>{error}</p>
-          <button className="btn btn-outline-danger" onClick={() => fetchDashboardData()}>
-            Thử lại
-          </button>
+        <div className="alert alert-warning" role="alert">
+          Không có dữ liệu để hiển thị.
         </div>
       </div>
     );
