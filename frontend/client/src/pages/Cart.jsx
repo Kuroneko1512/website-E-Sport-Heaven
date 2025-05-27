@@ -47,17 +47,33 @@ const Cart = () => {
             const productData = response.data.data;
             const variant = productData.variants && productData.variants[0];
             
-            return console.log("productData", productData, "variant", variant)
-            // return {
-            //   product_id: item.product_id,
-            //   variant_id: item.variant_id,
-            //   stock: variant ? variant.stock : productData.stock,
-            //   price: variant ? variant.price : productData.price,
-            //   discount: variant ? variant.discount_percent : productData.discount_percent,
-            //   inStock: variant 
-            //     ? variant.stock >= item.quantity 
-            //     : productData.stock >= item.quantity
-            // };
+            if (variant) {
+              // Extract attribute values from the variant
+              const attributes = variant.product_attributes
+                ? variant.product_attributes.map(attr => attr.attribute_value?.value || '')
+                : [];
+              
+              return {
+                product_id: item.product_id,
+                variant_id: item.variant_id,
+                stock: variant.stock,
+                price: variant.price,
+                discount: variant.discount_percent || 0,
+                inStock: variant.stock >= item.quantity,
+                thuoc_tinh: attributes
+              };
+            }
+            
+            // Fallback for products without variants
+            return {
+              product_id: item.product_id,
+              variant_id: null,
+              stock: productData.stock || 0,
+              price: productData.price || 0,
+              discount: productData.discount_percent || 0,
+              inStock: (productData.stock || 0) >= item.quantity,
+              thuoc_tinh: []
+            };
           }
         } catch (error) {
           console.error(`Error checking stock for product ${item.product_id}:`, error);
