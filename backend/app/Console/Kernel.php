@@ -21,12 +21,13 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
 
-     
+
 
         // $schedule->command('orders:auto-complete')->dailyAt('01:00');
         $schedule->command('orders:auto-complete')->everyMinute();
         $schedule->command('orders:cancel-expired')->everyMinute();
-        // $schedule->job(new \App\Jobs\Mail\User\SendWarningWislistEmail())->everyTenMinutes();
+//        $schedule->job(new \App\Jobs\Mail\User\SendWarningWislistEmail())->everyTenMinutes();
+        $$schedule->command('wishlist:send-warning-emails')->dailyAt('09:00');
         $schedule->command('coupons:deactivate')->everyMinute();
 
     }
