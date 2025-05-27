@@ -490,8 +490,12 @@ const NewCheckout = () => {
       return response.data;
     },
     onError: (error) => {
+      // Ưu tiên hiển thị thông báo từ backend
       const errorMessage =
-        error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!";
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Có lỗi xảy ra, vui lòng thử lại!";
+
       message.error(errorMessage);
       console.error("Lỗi khi đặt hàng:", error);
       setSubmit(false);
