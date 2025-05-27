@@ -263,9 +263,9 @@ const ProductDetail = () => {
     window.dispatchEvent(event);
   };
 
-  const value_attribute = (name, value) => {
-    console.log(name, value);
-    setChon({ ...chon, [name]: value });
+  const value_attribute = (value) => {
+    console.log(value);
+    setChon([...chon, value]);
   };
 
   // console.log("Chon", chon);
@@ -442,7 +442,7 @@ const ProductDetail = () => {
                                   key={value.id}
                                   onClick={() => {
                                     handleAttributeSelect(attr.id, value.id),
-                                      value_attribute(attr.name, value.value);
+                                      value_attribute(value.value);
                                   }}
                                   className={`px-4 py-2 border rounded transition-all duration-150 ${
                                     isSelected

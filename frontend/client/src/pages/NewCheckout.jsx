@@ -823,15 +823,13 @@ const NewCheckout = () => {
                     description={
                       <>
                         <div>SKU: {item.sku}</div>
-                        {Object.entries(item.thuoc_tinh || {}).map(
-                          ([key, value]) => (
-                            <div key={key}>
-                              <Text type="secondary" style={{ fontSize: 13 }}>
-                                {key}: {value}
-                              </Text>
-                            </div>
-                          )
-                        )}
+                        {item?.thuoc_tinh?.map((value) => (
+                          <div key={value}>
+                            <Text type="secondary" style={{ fontSize: 13 }}>
+                              {value}
+                            </Text>
+                          </div>
+                        ))}
                       </>
                     }
                   />
