@@ -260,7 +260,7 @@ export default function Shop() {
       params.delete('min_price');
     }
 
-    if (filters.priceRange[1] !== 10000000) {
+    if (filters.priceRange[1] !== 100000000) {
       params.set('max_price', filters.priceRange[1]);
     } else {
       params.delete('max_price');

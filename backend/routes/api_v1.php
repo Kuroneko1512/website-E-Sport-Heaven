@@ -41,6 +41,7 @@ Route::prefix('v1')->group(callback: function () {
     Route::get('/product/new', [ProductController::class, 'getProductNew']);
     Route::get('/product/fillter', [ProductController::class, 'getProductFillterAll']);
     Route::get('/product/best-selling', [ProductController::class, 'getBestSellingOrder']);
+    Route::get('/product/{productId}/variant/{variantId?}', [ProductController::class, 'getProductWithVariant']);
     Route::apiResource('/product', ProductController::class);
     Route::get('/product/{id}/Detail', [ProductController::class, 'showForDetails']);
     Route::get('/product/{id}/edit', [ProductControllerAdmin::class, 'getProductByIdEdit']);
