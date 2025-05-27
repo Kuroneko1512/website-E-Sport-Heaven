@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { message, Skeleton } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link, useParams } from "react-router-dom";
 import Description from "../components/elementProduct/Description";
 // import AdditionalInformation from "../components/elementProduct/AdditionalInformation";
@@ -10,6 +10,7 @@ import RelatedProducts from "../components/elementProduct/RelatedProducts";
 import ScrollToTop from "../config/ScrollToTop";
 import FomatVND from "../utils/FomatVND";
 import Cookies from "js-cookie";
+import useEchoChannel from "../hooks/useEchoChannel.js";
 
 const ProductDetail = () => {
   const [isAllAttributesSelected, setIsAllAttributesSelected] = useState(false);
@@ -28,8 +29,10 @@ const ProductDetail = () => {
   const [validOptions, setValidOptions] = useState({});
   const [chon, setChon] = useState([]);
   const [activeTab, setActiveTab] = useState("description");
+  const [previousProductData, setPreviousProductData] = useState(null);
+  const [hasProductChanged, setHasProductChanged] = useState(false);
 
-  const { data: productDetailData, isLoading } = useQuery({
+  const { data: productDetailData, isLoading, refetch } = useQuery({
     queryKey: ["productDetailData", id],
     queryFn: async () => {
       const res = await instanceAxios.get(`/api/v1/product/${id}/Detail`);
@@ -43,6 +46,28 @@ const ProductDetail = () => {
   const variants = product?.variants || [];
   const hasVariants =
     product?.product_type === "variable" && variants.length > 0;
+
+  const handleProductUpdate = useCallback((event) => {
+    // console.log('🔔 Nhận được event:', event);
+
+    // Lưu dữ liệu cũ TRƯỚC KHI refetch
+    if (product) {
+      // console.log('💾 Lưu dữ liệu cũ:', product);
+      setPreviousProductData(product);
+
+      // Delay một chút rồi mới refetch để đảm bảo state được set
+      setTimeout(() => {
+        console.log('🔄 Bắt đầu refetch...');
+        refetch();
+      }, 100);
+    }
+  }, [refetch, product]);
+
+  const { connected, error: echoError } = useEchoChannel(
+      'Product.2',
+      '.product-update',
+      handleProductUpdate
+  );
 
   const fetchAttributes = useMutation({
     mutationFn: async () => {
@@ -263,9 +288,9 @@ const ProductDetail = () => {
     window.dispatchEvent(event);
   };
 
-  const value_attribute = (name, value) => {
-    console.log(name, value);
-    setChon({ ...chon, [name]: value });
+  const value_attribute = (value) => {
+    console.log(value);
+    setChon([...chon, value]);
   };
 
   // console.log("Chon", chon);
@@ -277,6 +302,82 @@ const ProductDetail = () => {
       );
     }
   }, [attributes, selectedAttributes]);
+
+  useEffect(() => {
+    // console.log('🔍 useEffect chạy');
+    // console.log('🔍 previousProductData:', previousProductData);
+    // console.log('🔍 product:', product);
+
+    if (previousProductData && product) {
+      // console.log('✅ Có cả previousProductData và product');
+
+      const changes = [];
+
+      // Tính giá bán thực tế (có tính discount)
+      const calculateFinalPrice = (productData) => {
+        const basePrice = parseFloat(productData.price);
+        const discountPercent = parseFloat(productData.discount?.percent) || 0;
+        return basePrice - (basePrice * discountPercent / 100);
+      };
+
+      const oldFinalPrice = calculateFinalPrice(previousProductData);
+      const newFinalPrice = calculateFinalPrice(product);
+
+      // console.log('🔍 So sánh giá bán thực tế:');
+      // console.log('- Giá bán cũ:', oldFinalPrice);
+      // console.log('- Giá bán mới:', newFinalPrice);
+
+      // So sánh giá bán thực tế
+      if (oldFinalPrice !== newFinalPrice) {
+        // console.log('✅ Giá bán đã thay đổi!');
+        const priceChange = newFinalPrice > oldFinalPrice ? 'tăng' : 'giảm';
+        changes.push(`Giá ${priceChange} từ ${FomatVND(oldFinalPrice)} thành ${FomatVND(newFinalPrice)}`);
+      } else {
+        console.log('❌ Giá bán không thay đổi');
+      }
+
+      // So sánh các thông tin khác
+      if (previousProductData.name !== product.name) {
+        changes.push(`Tên sản phẩm đã thay đổi`);
+      }
+
+      if (previousProductData.status !== product.status) {
+        const statusText = product.status === 'active' ? 'Còn hàng' : 'Hết hàng';
+        changes.push(`Trạng thái: ${statusText}`);
+      }
+
+      if (previousProductData.stock !== product.stock) {
+        changes.push(`Tồn kho: ${product.stock} sản phẩm`);
+      }
+
+      console.log('🔍 Changes array:', changes);
+
+      if (changes.length > 0) {
+        // console.log('✅ Sẽ hiển thị thông báo');
+        message.info({
+          content: (
+              <div>
+                <strong>🔔 Sản phẩm đã được cập nhật:</strong>
+                <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
+                  {changes.map((change, index) => (
+                      <li key={index}>{change}</li>
+                  ))}
+                </ul>
+              </div>
+          ),
+          duration: 5
+        });
+      } else {
+        console.log('❌ Không có thay đổi nào');
+      }
+
+      // Reset previousProductData sau khi đã thông báo
+    } else {
+      console.log('❌ Thiếu previousProductData hoặc product');
+      setPreviousProductData(null);
+    }
+  }, [product, previousProductData]);
+
 
   return (
     <div>
@@ -293,8 +394,8 @@ const ProductDetail = () => {
           <section className="mx-10">
             <main className="container mx-auto py-8 px-4 md:px-0">
               <div className="text-sm text-gray-500 mb-4">
-                <Link to="/home">Trang chủ</Link> &gt;{" "}
-                <Link to="/shop">Cửa hàng</Link> &gt; {product?.name}
+                <Link to="/home">Trang chủ</Link> >{" "}
+                <Link to="/shop">Cửa hàng</Link> > {product?.name}
               </div>
 
               <div className="flex flex-col md:flex-row">
@@ -442,7 +543,7 @@ const ProductDetail = () => {
                                   key={value.id}
                                   onClick={() => {
                                     handleAttributeSelect(attr.id, value.id),
-                                      value_attribute(attr.name, value.value);
+                                      value_attribute(value.value);
                                   }}
                                   className={`px-4 py-2 border rounded transition-all duration-150 ${
                                     isSelected

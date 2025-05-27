@@ -42,7 +42,10 @@ class DeleteExpiredOrders extends Command
                 $this->info("Found and cancelled {$count} expired orders.");
 
                 if ($count > 0) {
-                    broadcast(new OrderStatusUpdated());
+                    foreach ($result['orders'] as $order) {
+                        broadcast(new OrderStatusUpdated($order, 'schedule'));
+                    }
+
                     $this->table(
                         ['Order Code', 'Customer Name', 'Payment Expired At'],
                         array_map(function ($order) {

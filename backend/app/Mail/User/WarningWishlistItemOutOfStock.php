@@ -39,7 +39,7 @@ class WarningWishlistItemOutOfStock extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.emails.warning_wishlist_out_of_stock',
+            view: 'emails.user.warning_wishlist_out_of_stock',
         );
     }
 

@@ -490,8 +490,12 @@ const NewCheckout = () => {
       return response.data;
     },
     onError: (error) => {
+      // Ưu tiên hiển thị thông báo từ backend
       const errorMessage =
-        error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!";
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Có lỗi xảy ra, vui lòng thử lại!";
+
       message.error(errorMessage);
       console.error("Lỗi khi đặt hàng:", error);
       setSubmit(false);
@@ -823,15 +827,13 @@ const NewCheckout = () => {
                     description={
                       <>
                         <div>SKU: {item.sku}</div>
-                        {Object.entries(item.thuoc_tinh || {}).map(
-                          ([key, value]) => (
-                            <div key={key}>
-                              <Text type="secondary" style={{ fontSize: 13 }}>
-                                {key}: {value}
-                              </Text>
-                            </div>
-                          )
-                        )}
+                        {item?.thuoc_tinh?.map((value) => (
+                          <div key={value}>
+                            <Text type="secondary" style={{ fontSize: 13 }}>
+                              {value}
+                            </Text>
+                          </div>
+                        ))}
                       </>
                     }
                   />

@@ -40,10 +40,14 @@ class OrderService extends BaseService
             throw new Exception('Đơn hàng phải có ít nhất một sản phẩm.');
         }
 
-        // Thêm kiểm tra tồn kho ở đây
+        // ✅ KIỂM TRA TỒN KHO VÀ TRẠNG THÁI SẢN PHẨM
         $stockCheck = $this->checkStockAvailability($data['order_items']);
         if ($stockCheck !== true) {
-            throw new Exception('Sô lượng sản phẩm trong kho không đủ');
+            Log::error('Kiểm tra tồn kho thất bại khi tạo đơn hàng.', [
+                'error' => $stockCheck,
+                'order_items' => $data['order_items']
+            ]);
+            throw new Exception($stockCheck); // Trả về thông báo lỗi cụ thể
         }
 
         DB::beginTransaction();
@@ -63,7 +67,6 @@ class OrderService extends BaseService
 
             // Ghi lịch sử đơn hàng
             $historyData = [];
-            // Thêm thông tin trạng thái và ghi chú
             $historyData['status_to'] = $order->status;
             $historyData['notes'] = 'Đơn hàng mới được tạo';
 
@@ -81,7 +84,11 @@ class OrderService extends BaseService
                 $historyData['actor_email'] = $data['customer_email'];
             }
 
-            Log::info('History create', $historyData);
+            Log::info('Tạo đơn hàng thành công', [
+                'order_id' => $order->id,
+                'order_code' => $order->order_code,
+                'total_amount' => $order->total_amount
+            ]);
 
             // Gọi phương thức createHistory
             OrderHistory::createHistory(
@@ -99,6 +106,10 @@ class OrderService extends BaseService
             return $order;
         } catch (Exception $e) {
             DB::rollBack();
+            Log::error('Lỗi khi tạo đơn hàng', [
+                'error' => $e->getMessage(),
+                'data' => $data
+            ]);
             throw $e;
         }
     }
@@ -116,31 +127,80 @@ class OrderService extends BaseService
             $variantId = $item['product_variant_id'] ?? null;
             $quantity = $item['quantity'];
 
+            // Kiểm tra số lượng hợp lệ
+            if ($quantity <= 0) {
+                return "Số lượng sản phẩm phải lớn hơn 0.";
+            }
+
             // Kiểm tra tồn kho
             if ($variantId) {
                 $variant = ProductVariant::find($variantId);
                 if (!$variant) {
-                    Log::error("Biến thể sản phẩm không tồn tại.");
+                    Log::error("Biến thể sản phẩm không tồn tại.", ['variant_id' => $variantId]);
                     return "Biến thể sản phẩm không tồn tại.";
                 }
-                if ($variant->stock < $quantity) {
-                    $product = Product::find($productId);
-                    $productName = $product ? $product->name : 'Sản phẩm';
-                    Log::error("Sản phẩm '{$productName}' (biến thể {$variant->sku}) chỉ còn {$variant->stock} sản phẩm trong kho.");
-                    return "Sản phẩm '{$productName}' (biến thể {$variant->sku}) chỉ còn {$variant->stock} sản phẩm trong kho.";
-                }
-            } else {
+
+                // Lấy thông tin sản phẩm chính
                 $product = Product::find($productId);
                 if (!$product) {
-                    Log::error("Sản phẩm không tồn tại.");
+                    Log::error("Sản phẩm không tồn tại.", ['product_id' => $productId]);
                     return "Sản phẩm không tồn tại.";
                 }
+
+                // Kiểm tra trạng thái sản phẩm chính
+                if ($product->status !== 'active') {
+                    Log::warning("Sản phẩm không còn hoạt động.", [
+                        'product_id' => $productId,
+                        'product_name' => $product->name,
+                        'status' => $product->status
+                    ]);
+                    return "Sản phẩm '{$product->name}' hiện không còn được bán.";
+                }
+
+                // Kiểm tra tồn kho biến thể
+                if ($variant->stock < $quantity) {
+                    Log::error("Không đủ tồn kho cho biến thể.", [
+                        'product_name' => $product->name,
+                        'variant_sku' => $variant->sku,
+                        'requested_quantity' => $quantity,
+                        'available_stock' => $variant->stock
+                    ]);
+                    return "Sản phẩm '{$product->name}' (biến thể {$variant->sku}) chỉ còn {$variant->stock} sản phẩm trong kho.";
+                }
+
+            } else {
+                // Sản phẩm đơn giản (không có biến thể)
+                $product = Product::find($productId);
+                if (!$product) {
+                    Log::error("Sản phẩm không tồn tại.", ['product_id' => $productId]);
+                    return "Sản phẩm không tồn tại.";
+                }
+
+                // Kiểm tra trạng thái sản phẩm
+                if ($product->status !== 'active') {
+                    Log::warning("Sản phẩm không còn hoạt động.", [
+                        'product_id' => $productId,
+                        'product_name' => $product->name,
+                        'status' => $product->status
+                    ]);
+                    return "Sản phẩm '{$product->name}' hiện không còn được bán.";
+                }
+
+                // Kiểm tra tồn kho sản phẩm
                 if ($product->stock < $quantity) {
-                    Log::error("Sản phẩm '{$product->name}' chỉ còn {$product->stock} sản phẩm trong kho.");
+                    Log::error("Không đủ tồn kho cho sản phẩm.", [
+                        'product_name' => $product->name,
+                        'requested_quantity' => $quantity,
+                        'available_stock' => $product->stock
+                    ]);
                     return "Sản phẩm '{$product->name}' chỉ còn {$product->stock} sản phẩm trong kho.";
                 }
             }
         }
+
+        Log::info("Kiểm tra tồn kho thành công cho tất cả sản phẩm.", [
+            'total_items' => count($orderItems)
+        ]);
 
         return true;
     }
@@ -419,11 +479,11 @@ class OrderService extends BaseService
         }
 
         $this->addOrderHistory($order->id, OrderHistory::ACTION_STATUS_UPDATED, $historyData);
-        
+
         // ✅ THÊM: Clear cache khi cập nhật status
         $this->analyticsService->clearDashboardCache();
 
-        broadcast(new OrderStatusUpdated());
+        broadcast(new OrderStatusUpdated($order, $isSystem ? 'schedule' : 'manual'));
 
         return [
             'success' => true,
@@ -1175,7 +1235,7 @@ class OrderService extends BaseService
      * Lấy lịch sử đơn hàng theo ID
      *
      * @param int $orderId ID của đơn hàng
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return 
      */
     private function getOrderHistory($orderId)
     {
@@ -1189,7 +1249,7 @@ class OrderService extends BaseService
      *
      * @param int|null $time Thời gian sau khi giao hàng để tự động chuyển sang hoàn thành
      * @param string $unit Đơn vị thời gian (minutes, hours, days)
-     * @return int Số đơn hàng đã được cập nhật
+     * @return array|int Số đơn hàng đã được cập nhật
      */
     public function autoCompleteDeliveredOrders($time = null, $unit = 'minutes')
     {
@@ -1221,6 +1281,7 @@ class OrderService extends BaseService
             ->get();
 
         $count = 0;
+        $updatedOrders = [];
 
         foreach ($orders as $order) {
             // Cập nhật trạng thái đơn hàng
@@ -1235,13 +1296,18 @@ class OrderService extends BaseService
 
             if ($result['success']) {
                 $count++;
+                $updatedOrders[] = $order->fresh();
                 Log::info("Đơn hàng #{$order->order_code} đã được tự động chuyển sang trạng thái hoàn thành sau {$timeDisplay}");
             } else {
                 Log::error("Không thể tự động cập nhật trạng thái đơn hàng #{$order->order_code}: " . $result['message']);
             }
         }
 
-        return $count;
+        return [
+            'count' => $count,
+            'orders' => $updatedOrders,
+            'timeDisplay' => $timeDisplay
+        ];
     }
 
     /**
@@ -1266,6 +1332,7 @@ class OrderService extends BaseService
 
             $count = $expiredOrders->count();
             $cancelledOrders = [];
+            $cancelledOrderObjects = [];
 
             foreach ($expiredOrders as $order) {
                 // Lưu thông tin đơn hàng vào log trước khi cập nhật trạng thái
@@ -1283,6 +1350,9 @@ class OrderService extends BaseService
                 $order->cancel_reason = 'Hết hạn thanh toán';
                 // $order->cancelled_at = Carbon::now();
                 $order->save();
+
+                // Lưu order object sau khi cập nhật
+                $cancelledOrderObjects[] = $order->fresh();
 
                 // Tạo lịch sử đơn hàng
                 OrderHistory::createHistory(
@@ -1311,7 +1381,8 @@ class OrderService extends BaseService
             return [
                 'success' => true,
                 'count' => $count,
-                'cancelled_orders' => $cancelledOrders
+                'cancelled_orders' => $cancelledOrders,
+                'orders' => $cancelledOrderObjects
             ];
         } catch (Exception $e) {
             DB::rollBack();
@@ -1323,7 +1394,8 @@ class OrderService extends BaseService
                 'success' => false,
                 'message' => $e->getMessage(),
                 'count' => 0,
-                'cancelled_orders' => []
+                'cancelled_orders' => [],
+                'orders' => []
             ];
         }
     }
