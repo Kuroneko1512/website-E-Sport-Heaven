@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { getOrderById, updateOrderStatus } from "@app/services/Order/Api";
 import {
@@ -12,7 +12,7 @@ import {
   PAYMENT_METHOD_STYLES
 } from "@app/constants/OrderConstants";
 
-import { debounce } from 'lodash';
+// import { debounce } from 'lodash'; //
 import useEchoChannel from "@app/hooks/useEchoChannel";
 
 // Định nghĩa kiểu dữ liệu cho đơn hàng
@@ -87,46 +87,86 @@ const FomatVND = (amount: number | string): string => {
 
 const DetailOrder: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const [initialLoading, setInitialLoading] = useState<boolean>(true);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [updateSource, setUpdateSource] = useState<'manual' | 'realtime' | 'schedule' | null>(null);
+  const pendingUpdatesRef = useRef<Set<string>>(new Set());
   const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isManualUpdate, setIsManualUpdate] = useState<boolean>(false);
   const currentStatusIndex = order ? statusList.indexOf(order.status) : -1;
   const nextStatusLabel = (currentStatusIndex >= 0 && currentStatusIndex < statusList.length - 1)
     ? ORDER_STATUS_LABELS[statusList[currentStatusIndex + 1]]
     : "";
 
-  const fetchData = async () => {
-    setLoading(true);
+  const updateOrderState = useCallback((newOrderData: Partial<Order>, source: 'manual' | 'realtime' | 'schedule') => {
+    setOrder(prevOrder => {
+      if (!prevOrder) return prevOrder;
+
+      const hasStatusChange = newOrderData.status !== undefined && newOrderData.status !== prevOrder.status;
+      const hasPaymentChange = newOrderData.payment_status !== undefined && newOrderData.payment_status !== prevOrder.payment_status;
+
+      if (!hasStatusChange && !hasPaymentChange) {
+        return prevOrder;
+      }
+
+      setLastUpdated(new Date());
+      setUpdateSource(source);
+      setTimeout(() => setUpdateSource(null), 5000);
+
+      return { ...prevOrder, ...newOrderData };
+    });
+  }, []);
+
+  const fetchInitialData = async () => {
+    setInitialLoading(true);
     try {
       const response = await getOrderById(Number(id));
       setOrder(response.data.data as Order);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu:", error);
     }
-    setLoading(false);
+    setInitialLoading(false);
   };
 
-  // Debounced version của fetchData để tránh gọi API quá nhiều lần
-  const debouncedFetchData = useCallback(
-    debounce(() => {
-      if (!isManualUpdate) {
-        console.log('🔄 Real-time: Đang cập nhật dữ liệu đơn hàng...');
-        fetchData();
-      }
-    }, 500),
-    [isManualUpdate]
-  );
-
   // Handler cho real-time updates
-  const handleOrderUpdate = useCallback((event) => {
-    console.log('✅ Nhận được cập nhật trạng thái đơn hàng:', event);
+  const handleOrderUpdate = useCallback((event: any) => {
+    console.log('✅ Nhận được real-time event:', event);
 
-    if (!isManualUpdate) {
-      debouncedFetchData();
-    } else {
-      console.log('⏸️ Bỏ qua cập nhật real-time do đang thực hiện cập nhật thủ công');
+    // ✅ Chỉ xử lý event có dữ liệu order
+    const orderData = event.order || event.data || event;
+
+    if (!orderData || !orderData.id) {
+      console.log('⚠️ Event không có dữ liệu order, bỏ qua');
+      return;
     }
-  }, [debouncedFetchData, isManualUpdate]);
+
+    // ✅ Chỉ xử lý nếu là order hiện tại
+    if (orderData.id.toString() !== id?.toString()) {
+      console.log('⚠️ Event không phải cho order hiện tại');
+      return;
+    }
+
+    // ✅ Cập nhật state
+    if (orderData.status !== undefined || orderData.payment_status !== undefined) {
+      const updateKey = `realtime-${orderData.id}-${Date.now()}`;
+
+      if (pendingUpdatesRef.current.has(updateKey)) return;
+      pendingUpdatesRef.current.add(updateKey);
+
+      let source: 'realtime' | 'schedule' = 'realtime';
+      if (event.source === 'schedule') {
+        source = 'schedule';
+      }
+
+      updateOrderState({
+        status: orderData.status,
+        payment_status: orderData.payment_status,
+      }, source);
+
+      setTimeout(() => pendingUpdatesRef.current.delete(updateKey), 2000);
+    }
+
+  }, [updateOrderState, id]);
 
   // Sử dụng hook useEchoChannel
   const { connected, error: echoError, socketId, isSubscribed } = useEchoChannel(
@@ -136,70 +176,84 @@ const DetailOrder: React.FC = () => {
   );
 
   useEffect(() => {
-    fetchData();
+    fetchInitialData();
   }, [id]);
 
   const nextStatus = async () => {
-    if (!order) return;
+    if (!order || isUpdating) return;
+
     const confirmUpdate = window.confirm("Bạn có chắc muốn chuyển sang trạng thái tiếp theo?");
     if (!confirmUpdate) return;
 
     const currentIndex = statusList.indexOf(order.status);
-    if (currentIndex < statusList.length - 1) {
-      const newStatus = statusList[currentIndex + 1];
+    if (currentIndex >= statusList.length - 1) return;
 
-      // THÊM: Đặt flag để ngăn real-time update
-      setIsManualUpdate(true);
+    const newStatus = statusList[currentIndex + 1];
+    const originalStatus = order.status;
 
-      try {
-        await updateOrderStatus(Number(id), newStatus);
-        console.log('✅ Cập nhật thủ công thành công');
+    setIsUpdating(true);
+    updateOrderState({ status: newStatus }, 'manual');
 
-        const updatedOrderResponse = await getOrderById(Number(id));
-        setOrder(updatedOrderResponse.data.data);
-      } catch (error) {
-        console.error("Lỗi khi cập nhật trạng thái:", error);
-      } finally {
-        // THÊM: Reset flag sau 2 giây
-        setTimeout(() => {
-          setIsManualUpdate(false);
-          console.log('🔄 Đã bật lại real-time updates');
-        }, 2000);
-      }
+    try {
+      await updateOrderStatus(Number(id), newStatus);
+      console.log('✅ Cập nhật thành công');
+    } catch (error) {
+      console.error("❌ Lỗi:", error);
+      updateOrderState({ status: originalStatus }, 'manual');
+      alert("Có lỗi xảy ra!");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const failDelivery = async () => {
-    if (!order) return;
+    if (!order || isUpdating) return;
+
     const confirmCancel = window.confirm("Bạn có chắc muốn huỷ đơn hàng này?");
     if (!confirmCancel) return;
 
-    // THÊM: Đặt flag để ngăn real-time update
-    setIsManualUpdate(true);
+    const originalStatus = order.status;
+
+    setIsUpdating(true);
+    updateOrderState({ status: ORDER_STATUS.CANCELLED }, 'manual');
 
     try {
       await updateOrderStatus(Number(id), ORDER_STATUS.CANCELLED);
-      console.log('✅ Hủy đơn hàng thành công');
-      setOrder({ ...order, status: ORDER_STATUS.CANCELLED });
+      console.log('✅ Hủy thành công');
     } catch (error) {
-      console.error("Lỗi khi cập nhật trạng thái:", error);
+      console.error("❌ Lỗi:", error);
+      updateOrderState({ status: originalStatus }, 'manual');
+      alert("Có lỗi xảy ra!");
     } finally {
-      // THÊM: Reset flag sau 2 giây
-      setTimeout(() => {
-        setIsManualUpdate(false);
-        console.log('🔄 Đã bật lại real-time updates');
-      }, 2000);
+      setIsUpdating(false);
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (initialLoading) return <p>Loading...</p>;
   if (!order) return <p>Order not found</p>;
 
   return (
     <section className="content">
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title">Chi tiết đơn hàng</h3>
+          <h3 className="card-title">
+            Chi tiết đơn hàng
+            {isUpdating && (
+                <span className="badge badge-warning ml-2">
+        <i className="fas fa-sync fa-spin"></i> Đang cập nhật...
+      </span>
+            )}
+            {updateSource === 'realtime' && (
+                <span className="badge badge-info ml-2">⚡ Real-time</span>
+            )}
+            {updateSource === 'schedule' && (
+                <span className="badge badge-success ml-2">🤖 Tự động</span>
+            )}
+          </h3>
+          <small className={`text-${connected ? 'success' : 'danger'} ml-3`}>
+            <i className={`fas ${connected ? 'fa-wifi' : 'fa-wifi-slash'}`}></i>
+            {connected ? 'Online' : 'Offline'}
+          </small>
         </div>
         <div className="card-body d-flex flex-wrap">
           {/* Thông tin khách hàng và trạng thái */}
@@ -253,11 +307,11 @@ const DetailOrder: React.FC = () => {
               order.status === ORDER_STATUS.CANCELLED ||
               currentStatusIndex >= statusList.length - 1 ||
               !nextStatusLabel ||
-              isManualUpdate // THÊM: Disable khi đang cập nhật thủ công
+              isUpdating
             }
             onClick={nextStatus}
           >
-            {isManualUpdate ? "Đang cập nhật..." :
+            {isUpdating ? "Đang cập nhật..." :
               nextStatusLabel ? `Chuyển sang : ${nextStatusLabel}` : "Không thể chuyển trạng thái"}
           </button>
 
@@ -267,11 +321,11 @@ const DetailOrder: React.FC = () => {
             className="btn btn-danger"
             disabled={
               order.status >= ORDER_STATUS.READY_TO_SHIP ||
-              isManualUpdate // THÊM: Disable khi đang cập nhật thủ công
+              isUpdating
             }
             onClick={failDelivery}
           >
-            {isManualUpdate ? "Đang cập nhật..." : "Huỷ đơn"}
+            {isUpdating ? "Đang cập nhật..." : "Huỷ đơn"}
           </button>
         </div>
 

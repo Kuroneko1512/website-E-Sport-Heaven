@@ -48,11 +48,11 @@ const ProductDetail = () => {
     product?.product_type === "variable" && variants.length > 0;
 
   const handleProductUpdate = useCallback((event) => {
-    console.log('🔔 Nhận được event:', event);
+    // console.log('🔔 Nhận được event:', event);
 
     // Lưu dữ liệu cũ TRƯỚC KHI refetch
     if (product) {
-      console.log('💾 Lưu dữ liệu cũ:', product);
+      // console.log('💾 Lưu dữ liệu cũ:', product);
       setPreviousProductData(product);
 
       // Delay một chút rồi mới refetch để đảm bảo state được set
@@ -304,12 +304,12 @@ const ProductDetail = () => {
   }, [attributes, selectedAttributes]);
 
   useEffect(() => {
-    console.log('🔍 useEffect chạy');
-    console.log('🔍 previousProductData:', previousProductData);
-    console.log('🔍 product:', product);
+    // console.log('🔍 useEffect chạy');
+    // console.log('🔍 previousProductData:', previousProductData);
+    // console.log('🔍 product:', product);
 
     if (previousProductData && product) {
-      console.log('✅ Có cả previousProductData và product');
+      // console.log('✅ Có cả previousProductData và product');
 
       const changes = [];
 
@@ -323,13 +323,13 @@ const ProductDetail = () => {
       const oldFinalPrice = calculateFinalPrice(previousProductData);
       const newFinalPrice = calculateFinalPrice(product);
 
-      console.log('🔍 So sánh giá bán thực tế:');
-      console.log('- Giá bán cũ:', oldFinalPrice);
-      console.log('- Giá bán mới:', newFinalPrice);
+      // console.log('🔍 So sánh giá bán thực tế:');
+      // console.log('- Giá bán cũ:', oldFinalPrice);
+      // console.log('- Giá bán mới:', newFinalPrice);
 
       // So sánh giá bán thực tế
       if (oldFinalPrice !== newFinalPrice) {
-        console.log('✅ Giá bán đã thay đổi!');
+        // console.log('✅ Giá bán đã thay đổi!');
         const priceChange = newFinalPrice > oldFinalPrice ? 'tăng' : 'giảm';
         changes.push(`Giá ${priceChange} từ ${FomatVND(oldFinalPrice)} thành ${FomatVND(newFinalPrice)}`);
       } else {
@@ -353,7 +353,7 @@ const ProductDetail = () => {
       console.log('🔍 Changes array:', changes);
 
       if (changes.length > 0) {
-        console.log('✅ Sẽ hiển thị thông báo');
+        // console.log('✅ Sẽ hiển thị thông báo');
         message.info({
           content: (
               <div>

@@ -483,7 +483,7 @@ class OrderService extends BaseService
         // ✅ THÊM: Clear cache khi cập nhật status
         $this->analyticsService->clearDashboardCache();
 
-        broadcast(new OrderStatusUpdated());
+        broadcast(new OrderStatusUpdated($order, $isSystem ? 'schedule' : 'manual'));
 
         return [
             'success' => true,
@@ -1235,7 +1235,7 @@ class OrderService extends BaseService
      * Lấy lịch sử đơn hàng theo ID
      *
      * @param int $orderId ID của đơn hàng
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return 
      */
     private function getOrderHistory($orderId)
     {
@@ -1249,7 +1249,7 @@ class OrderService extends BaseService
      *
      * @param int|null $time Thời gian sau khi giao hàng để tự động chuyển sang hoàn thành
      * @param string $unit Đơn vị thời gian (minutes, hours, days)
-     * @return int Số đơn hàng đã được cập nhật
+     * @return array|int Số đơn hàng đã được cập nhật
      */
     public function autoCompleteDeliveredOrders($time = null, $unit = 'minutes')
     {
@@ -1281,6 +1281,7 @@ class OrderService extends BaseService
             ->get();
 
         $count = 0;
+        $updatedOrders = [];
 
         foreach ($orders as $order) {
             // Cập nhật trạng thái đơn hàng
@@ -1295,13 +1296,18 @@ class OrderService extends BaseService
 
             if ($result['success']) {
                 $count++;
+                $updatedOrders[] = $order->fresh();
                 Log::info("Đơn hàng #{$order->order_code} đã được tự động chuyển sang trạng thái hoàn thành sau {$timeDisplay}");
             } else {
                 Log::error("Không thể tự động cập nhật trạng thái đơn hàng #{$order->order_code}: " . $result['message']);
             }
         }
 
-        return $count;
+        return [
+            'count' => $count,
+            'orders' => $updatedOrders,
+            'timeDisplay' => $timeDisplay
+        ];
     }
 
     /**
@@ -1326,6 +1332,7 @@ class OrderService extends BaseService
 
             $count = $expiredOrders->count();
             $cancelledOrders = [];
+            $cancelledOrderObjects = [];
 
             foreach ($expiredOrders as $order) {
                 // Lưu thông tin đơn hàng vào log trước khi cập nhật trạng thái
@@ -1343,6 +1350,9 @@ class OrderService extends BaseService
                 $order->cancel_reason = 'Hết hạn thanh toán';
                 // $order->cancelled_at = Carbon::now();
                 $order->save();
+
+                // Lưu order object sau khi cập nhật
+                $cancelledOrderObjects[] = $order->fresh();
 
                 // Tạo lịch sử đơn hàng
                 OrderHistory::createHistory(
@@ -1371,7 +1381,8 @@ class OrderService extends BaseService
             return [
                 'success' => true,
                 'count' => $count,
-                'cancelled_orders' => $cancelledOrders
+                'cancelled_orders' => $cancelledOrders,
+                'orders' => $cancelledOrderObjects
             ];
         } catch (Exception $e) {
             DB::rollBack();
@@ -1383,7 +1394,8 @@ class OrderService extends BaseService
                 'success' => false,
                 'message' => $e->getMessage(),
                 'count' => 0,
-                'cancelled_orders' => []
+                'cancelled_orders' => [],
+                'orders' => []
             ];
         }
     }
