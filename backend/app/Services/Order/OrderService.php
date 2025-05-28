@@ -435,10 +435,12 @@ class OrderService extends BaseService
         // Xác định vai trò để kiểm tra chuyển trạng thái
         $isAdmin = !is_null($adminId);
         $isCustomer = !is_null($customerId);
+         // ✅ THÊM dòng này:
+        $isGuest = !$isAdmin && !$isCustomer && !$isSystem;
 
         // Check if status transition is valid
-        // Kiểm tra tính hợp lệ của việc chuyển trạng thái
-        if (!$this->isValidStatusTransition($oldStatus, $status, $isAdmin, $isCustomer, $isSystem)) {
+    // Kiểm tra tính hợp lệ của việc chuyển trạng thái
+    if (!$this->isValidStatusTransition($oldStatus, $status, $isAdmin, $isCustomer, $isSystem)) {
             return [
                 'success' => false,
                 'message' => 'Cannot transition from status ' .
@@ -1218,14 +1220,33 @@ class OrderService extends BaseService
             ]
         ];
 
+        $guestValidTransitions = [
+        Order::STATUS_PENDING => [
+            Order::STATUS_CANCELLED
+        ],
+        Order::STATUS_CONFIRMED => [
+            Order::STATUS_CANCELLED
+        ],
+        Order::STATUS_DELIVERED => [
+            Order::STATUS_COMPLETED,
+            Order::STATUS_RETURN_REQUESTED
+        ],
+    ];
+
+    // ✅ THÊM: Xác định guest user
+    $isGuest = !$isAdmin && !$isCustomer && !$isSystem;
+
         // Kiểm tra quyền chuyển trạng thái dựa trên vai trò
-        if ($isAdmin) {
-            return in_array($newStatus, $adminValidTransitions[$oldStatus] ?? []);
-        } elseif ($isCustomer) {
-            return in_array($newStatus, $customerValidTransitions[$oldStatus] ?? []);
-        } elseif ($isSystem) {
-            return in_array($newStatus, $systemValidTransitions[$oldStatus] ?? []);
-        }
+        // Kiểm tra quyền chuyển trạng thái dựa trên vai trò
+    if ($isAdmin) {
+        return in_array($newStatus, $adminValidTransitions[$oldStatus] ?? []);
+    } elseif ($isCustomer) {
+        return in_array($newStatus, $customerValidTransitions[$oldStatus] ?? []);
+    } elseif ($isSystem) {
+        return in_array($newStatus, $systemValidTransitions[$oldStatus] ?? []);
+    } elseif ($isGuest) { // ✅ THÊM
+        return in_array($newStatus, $guestValidTransitions[$oldStatus] ?? []);
+    }
 
         // Mặc định không cho phép chuyển trạng thái nếu không xác định vai trò
         return false;
