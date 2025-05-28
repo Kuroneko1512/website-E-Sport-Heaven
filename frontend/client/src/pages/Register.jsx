@@ -128,7 +128,7 @@ const Register = () => {
           </Form.Item>
 
           <Form.Item
-            label={<span className="text-gray-700">Email / Số điện thoại</span>}
+            label={<span className="text-gray-700">Email</span>}
             name="email"
             rules={[
               {
@@ -147,7 +147,7 @@ const Register = () => {
                     return Promise.resolve();
                   }
                   return Promise.reject(
-                    "Vui lòng nhập đúng định dạng Email hoặc Số điện thoại!"
+                    "Vui lòng nhập đúng định dạng Email!"
                   );
                 },
               },
@@ -155,7 +155,7 @@ const Register = () => {
             className="w-full"
           >
             <Input
-              placeholder="robertfox@example.com hoặc 0987654321"
+              placeholder="robertfox@example.com"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </Form.Item>

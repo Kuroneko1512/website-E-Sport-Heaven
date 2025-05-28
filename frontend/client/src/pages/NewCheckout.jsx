@@ -9,6 +9,7 @@ import {
   Modal,
   Radio,
   Select,
+  Spin,
   Typography,
 } from "antd";
 import axios from "axios";
@@ -105,7 +106,7 @@ function parseDate(str) {
   if (!str) return null;
   // Nếu đã có 'T' thì giữ nguyên, nếu chưa thì thay ' ' bằng 'T'
   // Sau đó chuyển về giờ Việt Nam (UTC+7)
-  let date = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
+  let date = new Date(str.includes("T") ? str : str.replace(" ", "T"));
   // Nếu date là invalid thì trả về null
   if (isNaN(date.getTime())) return null;
   return date;
@@ -132,7 +133,10 @@ const calculateDiscount = (coupon, subtotal) => {
   let discount = 0;
   if (coupon.discount_type === 0) {
     discount = subtotal * (Number(coupon.discount_value) / 100);
-    if (Number(coupon.max_discount_amount) > 0 && discount > Number(coupon.max_discount_amount)) {
+    if (
+      Number(coupon.max_discount_amount) > 0 &&
+      discount > Number(coupon.max_discount_amount)
+    ) {
       discount = Number(coupon.max_discount_amount);
     }
   } else {
@@ -429,7 +433,7 @@ const NewCheckout = () => {
     );
     return subtotal;
   }, [cartItems]);
-  
+
   console.log("calculateSubtotal", calculateSubtotal);
 
   // Process coupons data when it changes
@@ -443,7 +447,10 @@ const NewCheckout = () => {
       // console.log("availableCoupons", validCoupons);
 
       // Nếu coupon đang chọn không còn hợp lệ thì reset
-      if (selectedCoupon && !validCoupons.some(c => c.id === selectedCoupon.id)) {
+      if (
+        selectedCoupon &&
+        !validCoupons.some((c) => c.id === selectedCoupon.id)
+      ) {
         setSelectedCoupon(null);
         setDiscountCode("");
       }
@@ -642,7 +649,18 @@ const NewCheckout = () => {
   };
 
   return (
-    <div className="p-6 bg-white">
+    <div className="p-6 bg-white" style={{ position: "relative" }}>
+      {/* Overlay loading khi submit */}
+      {submit && (
+        <div className="fixed inset-0 w-screen h-screen bg-white/70 backdrop-blur-sm z-[9999] flex items-center justify-center pointer-events-auto transition-colors duration-200">
+          <div className="flex flex-col items-center justify-center">
+            <Spin size="large" />
+            <p className="mt-5 text-gray-700 text-xl font-semibold tracking-wide text-center">
+              Đang xử lý thanh toán...
+            </p>
+          </div>
+        </div>
+      )}
       <Title level={2}>Thanh toán</Title>
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2">

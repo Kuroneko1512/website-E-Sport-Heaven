@@ -126,12 +126,12 @@ const Login = () => {
 
         <Form layout="vertical" onFinish={onFinish} className="space-y-4">
           <Form.Item
-            label={<span className="text-gray-700">Email / Số điện thoại</span>}
+            label={<span className="text-gray-700">Email</span>}
             name="email"
             rules={[
               {
                 required: true,
-                message: "Hãy nhập Email hoặc Số điện thoại của bạn!",
+                message: "Hãy nhập Email của bạn!",
               },
               {
                 validator: (_, value) => {
@@ -145,7 +145,7 @@ const Login = () => {
                     return Promise.resolve();
                   }
                   return Promise.reject(
-                    "Vui lòng nhập đúng định dạng Email hoặc Số điện thoại!"
+                    "Vui lòng nhập đúng định dạng Email!"
                   );
                 },
               },
@@ -153,7 +153,7 @@ const Login = () => {
             className="w-full"
           >
             <Input
-              placeholder="robertfox@example.com hoặc 0987654321"
+              placeholder="robertfox@example.com"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </Form.Item>
