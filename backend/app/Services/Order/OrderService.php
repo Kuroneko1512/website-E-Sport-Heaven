@@ -2,6 +2,7 @@
 
 namespace App\Services\Order;
 
+use App\Models\Coupon;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Order;
@@ -226,9 +227,25 @@ class OrderService extends BaseService
 
         // Tính toán giảm giá đơn hàng
         $orderDiscountAmount = 0;
-        if (!empty($data['order_discount_type']) && !empty($data['order_discount_value'])) {
+        if (isset($data['order_discount_type']) && isset($data['order_discount_value'])) {
             if ($data['order_discount_type'] == Order::DISCOUNT_TYPE_PERCENTAGE) {
-                $orderDiscountAmount = $subtotal * ($data['order_discount_value'] / 100);
+                $calculatedDiscount = $subtotal * ($data['order_discount_value'] / 100);
+                // Kiểm tra giới hạn tối đa
+                $maxDiscountAmount = null;
+
+                if (!empty($data['order_coupon_code'])) {
+                    $coupon = Coupon::where('code', $data['order_coupon_code'])->first();
+                    if ($coupon && $coupon->max_discount_amount > 0) {
+                        $maxDiscountAmount = $coupon->max_discount_amount;
+                    }
+                }
+
+                // Áp dụng giới hạn tối đa
+                if ($maxDiscountAmount && $calculatedDiscount > $maxDiscountAmount) {
+                    $orderDiscountAmount = $maxDiscountAmount;
+                } else {
+                    $orderDiscountAmount = $calculatedDiscount;
+                }
             } else {
                 $orderDiscountAmount = $data['order_discount_value'];
             }
@@ -435,10 +452,12 @@ class OrderService extends BaseService
         // Xác định vai trò để kiểm tra chuyển trạng thái
         $isAdmin = !is_null($adminId);
         $isCustomer = !is_null($customerId);
+         // ✅ THÊM dòng này:
+        $isGuest = !$isAdmin && !$isCustomer && !$isSystem;
 
         // Check if status transition is valid
-        // Kiểm tra tính hợp lệ của việc chuyển trạng thái
-        if (!$this->isValidStatusTransition($oldStatus, $status, $isAdmin, $isCustomer, $isSystem)) {
+    // Kiểm tra tính hợp lệ của việc chuyển trạng thái
+    if (!$this->isValidStatusTransition($oldStatus, $status, $isAdmin, $isCustomer, $isSystem)) {
             return [
                 'success' => false,
                 'message' => 'Cannot transition from status ' .
@@ -1218,14 +1237,33 @@ class OrderService extends BaseService
             ]
         ];
 
+        $guestValidTransitions = [
+        Order::STATUS_PENDING => [
+            Order::STATUS_CANCELLED
+        ],
+        Order::STATUS_CONFIRMED => [
+            Order::STATUS_CANCELLED
+        ],
+        Order::STATUS_DELIVERED => [
+            Order::STATUS_COMPLETED,
+            Order::STATUS_RETURN_REQUESTED
+        ],
+    ];
+
+    // ✅ THÊM: Xác định guest user
+    $isGuest = !$isAdmin && !$isCustomer && !$isSystem;
+
         // Kiểm tra quyền chuyển trạng thái dựa trên vai trò
-        if ($isAdmin) {
-            return in_array($newStatus, $adminValidTransitions[$oldStatus] ?? []);
-        } elseif ($isCustomer) {
-            return in_array($newStatus, $customerValidTransitions[$oldStatus] ?? []);
-        } elseif ($isSystem) {
-            return in_array($newStatus, $systemValidTransitions[$oldStatus] ?? []);
-        }
+        // Kiểm tra quyền chuyển trạng thái dựa trên vai trò
+    if ($isAdmin) {
+        return in_array($newStatus, $adminValidTransitions[$oldStatus] ?? []);
+    } elseif ($isCustomer) {
+        return in_array($newStatus, $customerValidTransitions[$oldStatus] ?? []);
+    } elseif ($isSystem) {
+        return in_array($newStatus, $systemValidTransitions[$oldStatus] ?? []);
+    } elseif ($isGuest) { // ✅ THÊM
+        return in_array($newStatus, $guestValidTransitions[$oldStatus] ?? []);
+    }
 
         // Mặc định không cho phép chuyển trạng thái nếu không xác định vai trò
         return false;
@@ -1235,7 +1273,7 @@ class OrderService extends BaseService
      * Lấy lịch sử đơn hàng theo ID
      *
      * @param int $orderId ID của đơn hàng
-     * @return 
+     * @return
      */
     private function getOrderHistory($orderId)
     {

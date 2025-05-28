@@ -1,9 +1,7 @@
+import React, { useRef, useEffect, useCallback, useState } from "react";
 
-
-import React, { useRef, useEffect, useCallback } from "react";
-
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import FomatVND from "../utils/FomatVND";
 import { ORDER_STATUS_LABELS, ORDER_STATUS } from "../constants/OrderConstants";
 import instanceAxios from "../config/db";
@@ -12,8 +10,8 @@ import { filterHistoryByStatusTo } from "../utils/filterHistoryByStatusTo";
 import Echo from "laravel-echo";
 import io from "socket.io-client";
 import useEchoChannel from "../hooks/useEchoChannel"; // Import hook useEchoChannel realtime
-
-
+import getActionsForOrder2 from "../utils/getActionsForOrder2";
+import { Modal } from "antd";
 
 const OrderHistory = ({ history }) => {
   // Lọc trùng status_to, giữ bản ghi mới nhất
@@ -90,7 +88,13 @@ const OrderHistory = ({ history }) => {
 };
 
 const OrderTracking = () => {
+  const nav = useNavigate();
   const { order_code } = useParams();
+    const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedReturnOrder, setSelectedReturnOrder] = useState(null);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [returnRequestModalVisible, setReturnRequestModalVisible] =
+    useState(false);
 
   const statusStyles = {
     [ORDER_STATUS.PENDING]:
@@ -139,17 +143,21 @@ const OrderTracking = () => {
   // Tham số 2: Tên sự kiện - '.order-status-updated' là sự kiện khi trạng thái đơn hàng được cập nhật
   // Tham số 3: Callback xử lý khi nhận được sự kiện - ở đây là gọi refetch() để tải lại dữ liệu đơn hàng
   // Sử dụng useCallback để tạo callback function mà vẫn giữ được tham chiếu ổn định
-  const handleOrderUpdate = useCallback((event) => {
-    console.log('✅ Nhận được cập nhật trạng thái đơn hàng:', event);
-    refetch();
-  }, [refetch]);
+  const handleOrderUpdate = useCallback(
+    (event) => {
+      console.log("✅ Nhận được cập nhật trạng thái đơn hàng:", event);
+      refetch();
+    },
+    [refetch]
+  );
 
   // Sử dụng hook useEchoChannel đã sửa
-  const { connected, error: echoError, socketId, isSubscribed } = useEchoChannel(
-    'orders.1',
-    '.order-status-updated',
-    handleOrderUpdate
-  );
+  const {
+    connected,
+    error: echoError,
+    socketId,
+    isSubscribed,
+  } = useEchoChannel("orders.1", ".order-status-updated", handleOrderUpdate);
 
   // realtime old
   // window.io = io;
@@ -194,7 +202,6 @@ const OrderTracking = () => {
   //   console.log(`⚠️ Đang thử kết nối lại lần ${attempt}`);
   // });
 
-
   console.log("orderData", orderData);
 
   // Hàm tính giá sản phẩm sau khi giảm giá
@@ -207,6 +214,102 @@ const OrderTracking = () => {
   };
 
   // console.log("calculateFinalTotal", calculateFinalTotal());
+
+  // Mutation cho hủy đơn hàng
+  const cancelOrderMutation = useMutation({
+    mutationFn: async ({ orderId }) => {
+      const response = await instanceAxios.put(
+        `/api/v1/order/${orderId}/status`,
+        {
+          status: ORDER_STATUS.CANCELLED,
+        }
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  // Mutation cho xác nhận nhận hàng
+  const confirmReceivedMutation = useMutation({
+    mutationFn: async ({ orderId }) => {
+      const response = await instanceAxios.put(
+        `/api/v1/order/${orderId}/status`,
+        {
+          status: ORDER_STATUS.COMPLETED,
+        }
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  // Mutation cho yêu cầu trả hàng
+  const requestReturnMutation = useMutation({
+    mutationFn: async ({ orderId }) => {
+      const response = await instanceAxios.put(
+        `/api/v1/order/${orderId}/status`,
+        {
+          status: ORDER_STATUS.RETURN_REQUESTED,
+        }
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  // Xử lý action
+  const handleAction = (action, order) => {
+    if (!order?.id) return;
+    switch (action) {
+      case "hủy":
+        Modal.confirm({
+          title: "Xác nhận hủy đơn hàng",
+          content: (
+            <div>
+              <p>
+                Bạn có chắc chắn muốn hủy đơn hàng{" "}
+                <strong>{order.order_code}</strong>?
+              </p>
+              <div className="bg-yellow-50 p-3 rounded-lg mt-2">
+                <p className="text-yellow-800">
+                  Lưu ý: Sau khi hủy, đơn hàng sẽ không thể khôi phục.
+                </p>
+              </div>
+            </div>
+          ),
+          okText: "Xác nhận hủy",
+          cancelText: "Không",
+          okButtonProps: {
+            danger: true,
+            loading: cancelOrderMutation.isLoading,
+          },
+          onOk: () => cancelOrderMutation.mutate({ orderId: order.id }),
+        });
+        break;
+      case "Đã nhận hàng":
+        setSelectedOrder(order);
+        setConfirmModalVisible(true);
+        break;
+
+      case "confirmReceived":
+        confirmReceivedMutation.mutate({ orderId: order.id });
+        break;
+
+      // Ấn yêu cầu trả hàng, chuyển sang màn hình gửi form yêu cầu trả hàng, khi nào điền xong for và ấn submit thì mới chuyển trạng thái.
+      case "yêu cầu trả hàng":
+        setSelectedReturnOrder(order);
+        setReturnRequestModalVisible(true);
+        break;
+      default:
+        break;
+    }
+  };
 
   if (isLoading) {
     return (
@@ -235,14 +338,40 @@ const OrderTracking = () => {
         <span className="text-lg">
           Mã đơn hàng: <strong>{order_code}</strong> |
           <span
-            className={`ml-2 px-3 py-1 rounded text-base ${statusStyles[orderData?.data?.status]
-              }`}
+            className={`ml-2 px-3 py-1 rounded text-base ${
+              statusStyles[orderData?.data?.status]
+            }`}
           >
             {ORDER_STATUS_LABELS[orderData?.data?.status]}
           </span>
         </span>
       </header>
-
+      {/* Nút sự kiện cho đơn hàng */}
+      {orderData?.data && (
+        <div className="flex justify-end items-center mb-4">
+          {getActionsForOrder2(orderData.data).map((action, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleAction(action, orderData.data)}
+              className="ml-2 px-4 py-2 rounded-lg border bg-black text-white capitalize"
+              disabled={
+                cancelOrderMutation.isLoading ||
+                confirmReceivedMutation.isLoading ||
+                requestReturnMutation.isLoading
+              }
+            >
+              {cancelOrderMutation.isLoading && action === "hủy"
+                ? "Đang xử lý..."
+                : confirmReceivedMutation.isLoading && action === "Đã nhận hàng"
+                ? "Đang xử lý..."
+                : requestReturnMutation.isLoading &&
+                  action === "yêu cầu trả hàng"
+                ? "Đang xử lý..."
+                : action}
+            </button>
+          ))}
+        </div>
+      )}
       <section className="grid grid-cols-4 gap-6 mb-8 border-b">
         <div className="p-4 grid col-span-2">
           <div className="space-y-4">
@@ -287,8 +416,9 @@ const OrderTracking = () => {
             >
               <div className="flex items-center space-x-4">
                 <img
-                  src={`http://127.0.0.1:8000/storage/${item.product_variant?.image || item.product.image
-                    }`}
+                  src={`http://127.0.0.1:8000/storage/${
+                    item.product_variant?.image || item.product.image
+                  }`}
                   alt={item.product.name}
                   className="w-16 h-16 object-cover rounded"
                   loading="lazy"
@@ -307,13 +437,11 @@ const OrderTracking = () => {
                 <p>
                   {(item.product?.discount_percent > 0 ||
                     item.product_variant?.discount_percent > 0) && (
-
-                      <span className="line-through text-gray-500 mr-2">
-                        {FomatVND(getDiscountedPrice(item))}
-                      </span>
-                    )}
+                    <span className="line-through text-gray-500 mr-2">
+                      {FomatVND(getDiscountedPrice(item))}
+                    </span>
+                  )}
                   <strong>{FomatVND(item.subtotal)}</strong>
-
                 </p>
               </div>
             </div>
@@ -373,6 +501,88 @@ const OrderTracking = () => {
           </span>
         </div>
       </section>
+
+      {/* Add Confirmation Modal */}
+      <Modal
+        title="Xác nhận đã nhận hàng"
+        open={confirmModalVisible}
+        onCancel={() => setConfirmModalVisible(false)}
+        footer={[
+          <button
+            key="cancel"
+            className="px-4 py-2 border rounded-lg mr-2"
+            onClick={() => setConfirmModalVisible(false)}
+            disabled={confirmReceivedMutation.isLoading}
+          >
+            Hủy
+          </button>,
+          <button
+            key="confirm"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+            onClick={() => handleAction("confirmReceived", selectedOrder)}
+            disabled={confirmReceivedMutation.isLoading}
+          >
+            {confirmReceivedMutation.isLoading ? "Đang xử lý..." : "Xác nhận"}
+          </button>,
+        ]}
+      >
+        <div className="p-4">
+          <p className="mb-4">Bạn có chắc chắn đã nhận được hàng?</p>
+          <div className="bg-yellow-50 p-4 rounded-lg">
+            <p className="text-yellow-800">
+              <strong>Lưu ý quan trọng:</strong>
+            </p>
+            <p className="text-yellow-700 mt-2">
+              Khi bạn xác nhận đã nhận hàng, bạn sẽ không thể yêu cầu trả hàng
+              cho đơn hàng này nữa. Nếu bạn gặp vấn đề với sản phẩm, vui lòng
+              liên hệ với chúng tôi.
+            </p>
+          </div>
+        </div>
+      </Modal>
+      {/* Modal xác nhận yêu cầu trả hàng */}
+      <Modal
+        title="Xác nhận yêu cầu trả hàng"
+        open={returnRequestModalVisible}
+        onCancel={() => setReturnRequestModalVisible(false)}
+        footer={[
+          <button
+            key="cancel"
+            className="px-4 py-2 border rounded-lg mr-2"
+            onClick={() => setReturnRequestModalVisible(false)}
+          >
+            Hủy
+          </button>,
+          <button
+            key="confirm"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+            onClick={() => {
+              setReturnRequestModalVisible(false);
+              if (selectedReturnOrder) {
+                nav(`/orders/${selectedReturnOrder.order_code}/return-request`);
+              }
+            }}
+          >
+            Xác nhận
+          </button>,
+        ]}
+      >
+        <div className="p-4">
+          <p className="mb-4">
+            Bạn có chắc chắn muốn gửi yêu cầu trả hàng cho đơn{" "}
+            <strong>{selectedReturnOrder?.order_code}</strong>?
+          </p>
+          <div className="bg-yellow-50 p-4 rounded-lg">
+            <p className="text-yellow-800">
+              <strong>Lưu ý:</strong>
+            </p>
+            <p className="text-yellow-700 mt-2">
+              Sau khi xác nhận, bạn sẽ được chuyển đến form để hoàn tất yêu cầu
+              trả hàng.
+            </p>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

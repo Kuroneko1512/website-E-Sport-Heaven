@@ -394,8 +394,8 @@ const ProductDetail = () => {
           <section className="mx-10">
             <main className="container mx-auto py-8 px-4 md:px-0">
               <div className="text-sm text-gray-500 mb-4">
-                <Link to="/home">Trang chủ</Link> >{" "}
-                <Link to="/shop">Cửa hàng</Link> > {product?.name}
+                <Link to="/home">Trang chủ</Link> &gt; {" "}
+                <Link to="/shop">Cửa hàng</Link> &gt; {product?.name}
               </div>
 
               <div className="flex flex-col md:flex-row">
