@@ -592,7 +592,8 @@ const NewCheckout = () => {
             ? 0
             : 1
           : null,
-        order_discount_value: selectedCoupon
+        order_discount_value: selectedCoupon?.discount_value || null,
+        order_discount_amount: selectedCoupon
           ? selectedCoupon.discount_type === 0
             ? calculateDiscount(selectedCoupon, calculateSubtotal)
             : Number(selectedCoupon.discount_value)

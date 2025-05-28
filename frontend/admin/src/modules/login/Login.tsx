@@ -8,7 +8,7 @@ import { setWindowClass } from "@app/utils/helpers";
 import { Checkbox } from "@profabric/react-components";
 import * as Yup from "yup";
 
-import { Form, InputGroup } from "react-bootstrap";
+import { Form, InputGroup, Button as BootstrapButton } from "react-bootstrap";
 import { Button } from "@app/styles/common";
 import { useAppDispatch } from "@app/store/store";
 import { AuthService } from "@app/services/auth.service";
@@ -226,46 +226,53 @@ const Login = () => {
                 </div>
               </div>
               <div className="col-6">
-                <Button
-                  loading={isAuthLoading}
-                  disabled={isFacebookAuthLoading || isGoogleAuthLoading}
-                  onClick={handleSubmit as any}
+                <BootstrapButton
+                    type="submit"
+                  disabled={isAuthLoading || isFacebookAuthLoading || isGoogleAuthLoading}
+                  className="btn btn-primary btn-block"
                 >
-                  Đăng nhập
-                </Button>
+                  {isAuthLoading ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      Đang đăng nhập...
+                    </>
+                  ) : (
+                    "Đăng nhập"
+                  )}
+                </BootstrapButton>
               </div>
             </div>
           </form>
-          <div className="social-auth-links text-center mt-2 mb-3">
-            <Button
-              className="mb-2"
-              onClick={handleFacebookLogin}
-              loading={isFacebookAuthLoading}
-              disabled={true || isAuthLoading || isGoogleAuthLoading}
-            >
-              <i className="fab fa-facebook mr-2" />
-              Đăng nhập với Facebook
-            </Button>
-            <Button
-              variant="danger"
-              onClick={handleGoogleLogin}
-              loading={isGoogleAuthLoading}
-              disabled={isAuthLoading || isFacebookAuthLoading}
-            >
-              <i className="fab fa-google mr-2" />
-              Đăng nhập với Google
-            </Button>
-          </div>
+          {/*<div className="social-auth-links text-center mt-2 mb-3">*/}
+          {/*  <Button*/}
+          {/*    className="mb-2"*/}
+          {/*    onClick={handleFacebookLogin}*/}
+          {/*    loading={isFacebookAuthLoading}*/}
+          {/*    disabled={true || isAuthLoading || isGoogleAuthLoading}*/}
+          {/*  >*/}
+          {/*    <i className="fab fa-facebook mr-2" />*/}
+          {/*    Đăng nhập với Facebook*/}
+          {/*  </Button>*/}
+          {/*  <Button*/}
+          {/*    variant="danger"*/}
+          {/*    onClick={handleGoogleLogin}*/}
+          {/*    loading={isGoogleAuthLoading}*/}
+          {/*    disabled={isAuthLoading || isFacebookAuthLoading}*/}
+          {/*  >*/}
+          {/*    <i className="fab fa-google mr-2" />*/}
+          {/*    Đăng nhập với Google*/}
+          {/*  </Button>*/}
+          {/*</div>*/}
           <p className="mb-1">
             <Link to="/forgot-password">Quên mật khẩu?</Link>
           </p>
-          <p className="mb-0">
-            <Link
-            to="#" 
-            className="text-center">
-              Đăng ký thành viên
-            </Link>
-          </p>
+          {/*<p className="mb-0">*/}
+          {/*  <Link*/}
+          {/*  to="#" */}
+          {/*  className="text-center">*/}
+          {/*    Đăng ký thành viên*/}
+          {/*  </Link>*/}
+          {/*</p>*/}
         </div>
       </div>
     </div>

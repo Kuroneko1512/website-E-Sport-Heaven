@@ -2,6 +2,7 @@
 
 namespace App\Services\Order;
 
+use App\Models\Coupon;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Order;
@@ -226,9 +227,25 @@ class OrderService extends BaseService
 
         // Tính toán giảm giá đơn hàng
         $orderDiscountAmount = 0;
-        if (!empty($data['order_discount_type']) && !empty($data['order_discount_value'])) {
+        if (isset($data['order_discount_type']) && isset($data['order_discount_value'])) {
             if ($data['order_discount_type'] == Order::DISCOUNT_TYPE_PERCENTAGE) {
-                $orderDiscountAmount = $subtotal * ($data['order_discount_value'] / 100);
+                $calculatedDiscount = $subtotal * ($data['order_discount_value'] / 100);
+                // Kiểm tra giới hạn tối đa
+                $maxDiscountAmount = null;
+
+                if (!empty($data['order_coupon_code'])) {
+                    $coupon = Coupon::where('code', $data['order_coupon_code'])->first();
+                    if ($coupon && $coupon->max_discount_amount > 0) {
+                        $maxDiscountAmount = $coupon->max_discount_amount;
+                    }
+                }
+
+                // Áp dụng giới hạn tối đa
+                if ($maxDiscountAmount && $calculatedDiscount > $maxDiscountAmount) {
+                    $orderDiscountAmount = $maxDiscountAmount;
+                } else {
+                    $orderDiscountAmount = $calculatedDiscount;
+                }
             } else {
                 $orderDiscountAmount = $data['order_discount_value'];
             }
@@ -1256,7 +1273,7 @@ class OrderService extends BaseService
      * Lấy lịch sử đơn hàng theo ID
      *
      * @param int $orderId ID của đơn hàng
-     * @return 
+     * @return
      */
     private function getOrderHistory($orderId)
     {
