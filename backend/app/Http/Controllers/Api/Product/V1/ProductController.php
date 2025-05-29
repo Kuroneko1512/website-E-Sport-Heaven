@@ -271,4 +271,59 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Lấy thông tin sản phẩm theo ID và ID biến thể (nếu có)
+     *
+     * @param int $productId
+     * @param int|null $variantId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProductWithVariant($productId, $variantId = null)
+    {
+        try {
+            // Lấy thông tin sản phẩm
+            $product = $this->productService->getProduct($productId);
+            
+            if (!$product) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy sản phẩm',
+                    'status' => 404
+                ], 404);
+            }
+            
+            $responseData = $product->toArray();
+            
+            // Nếu có variant_id, lọc ra variant tương ứng
+            if ($variantId) {
+                $variant = $product->variants->firstWhere('id', $variantId);
+                
+                if (!$variant) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Không tìm thấy biến thể',
+                        'status' => 404
+                    ], 404);
+                }
+                
+                // Chỉ giữ lại variant được yêu cầu
+                $responseData['variants'] = [$variant->toArray()];
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => $responseData,
+                'status' => 200
+            ], 200);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi xử lý yêu cầu',
+                'error' => $e->getMessage(),
+                'status' => 500
+            ], 500);
+        }
+    }
+
 }

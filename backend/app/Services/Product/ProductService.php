@@ -346,6 +346,7 @@ class ProductService extends BaseService
             'status' => $status
         ]);
 
+        broadcast(new ProductUpdate());
         return $product->fresh();
     }
 

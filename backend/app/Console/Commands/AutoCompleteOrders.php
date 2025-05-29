@@ -15,7 +15,7 @@ class AutoCompleteOrders extends Command
      *
      * @var string
      */
-    protected $signature = 'orders:auto-complete 
+    protected $signature = 'orders:auto-complete
                             {--days= : ngày sau khi giao hàng để tự động hoàn thành}
                             {--hours= : giờ sau khi giao hàng để tự động hoàn thành}
                             {--minutes= : phút sau khi giao hàng để tự động hoàn thành}';
@@ -29,7 +29,7 @@ class AutoCompleteOrders extends Command
 
     /**
      * Execute the console command.
-     * 
+     *
      * @param OrderService $orderService
      * @return int
      */
@@ -62,9 +62,11 @@ class AutoCompleteOrders extends Command
             $displayTime = $time ?? config("time.order_auto_complete_{$unit}");
 
             $this->info("Đang tìm các đơn hàng đã giao quá {$displayTime} {$unitLabel} để tự động hoàn thành...");
-            $count = $orderService->autoCompleteDeliveredOrders($time, $unit);
-            if ($count > 0) {
-                broadcast(new OrderStatusUpdated());
+            $result = $orderService->autoCompleteDeliveredOrders($time, $unit);
+            $count = $result['count'];
+            $orders = $result['orders'];
+            foreach ($orders as $order) {
+                broadcast(new OrderStatusUpdated($order, 'schedule'));
             }
             $this->info("Đã cập nhật {$count} đơn hàng sang trạng thái hoàn thành.");
 
